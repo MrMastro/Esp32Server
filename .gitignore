@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+.vscode
+src/build
+build
+src/settingsBakup.h
