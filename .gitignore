@@ -35,3 +35,4 @@ src/build
 build
 src/settingsBakup.h
 src/settings.h
+.pio
