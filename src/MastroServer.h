@@ -16,10 +16,11 @@ public:
     void handleOta();
     String getName();
     String getIp();
+    void setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
 private:
     bool ledIndicatorMode;
     int ledPinIndicator;
-    bool active;
+    bool serverActive;
     bool isActiveIndicatorLed;
     String ip;
     String deviceName;

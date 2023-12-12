@@ -1,6 +1,4 @@
-#include <Arduino.h>
 #include "Main.h"
-#include <WebSerial.h>
 #include "MastroServer.h"
 #include "MastroLed.h"
 
@@ -133,6 +131,13 @@ void println(String msg)
   WebSerial.println(msg);
 }
 
+// Function to handle /text route
+void handleTextRequest(AsyncWebServerRequest *request)
+{
+  String message = "Hello, this is a text for try api!";
+  request->send(200, "text/plain", message);
+}
+
 void setup(void)
 {
   Serial.begin(9600);
@@ -140,6 +145,8 @@ void setup(void)
   activeLed(false, false);
   myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
   myRgbStript.setupLedRgb();
+  // Route handling
+  //myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
 }
 
 void loop(void)

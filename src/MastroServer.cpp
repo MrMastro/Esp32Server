@@ -6,7 +6,7 @@ DNSServer dnsServer;
 
 MastroServer::MastroServer()
 {
-    active = false;
+    serverActive = false;
     isActiveIndicatorLed = false;
     ledIndicatorMode = false;
 }
@@ -78,7 +78,7 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     WebSerial.msgCallback(recvMsg);
     webServer.begin();
     Serial.println("HTTP server started");
-    active = true;
+    serverActive = true;
 }
 
 void MastroServer::initAP(String ssid, String password)
@@ -232,4 +232,9 @@ void MastroServer::setRoutes()
     String html = htmlPage; // Copy the HTML template from htmlCustom.h
     html.replace("%HOST_NAME%", scopeHost);
     request->send(200, "text/html", html); });
+}
+
+void MastroServer::setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
+{
+    webServer.on(uri, method, onRequest);
 }
