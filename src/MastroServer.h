@@ -7,7 +7,7 @@ class MastroServer
 {
 public:
     MastroServer();
-    MastroServer(String mode, String ssid, String password, String deviceName, String devicePassword); // Costruttore
+    MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword); // Costruttore
     void handleOta();
     String getName();
     String getIp();

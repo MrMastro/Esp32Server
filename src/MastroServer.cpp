@@ -18,13 +18,13 @@ MastroServer::MastroServer()
 //mode:
 //Ap= access point
 //WIFI = wirless connect to your wifi
-MastroServer::MastroServer(String mode, String ssid, String password, String deviceName, String devicePassword)
+MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword)
 {
     if(mode == "AP"){
-        initAP("Esp32Led","canecanebau");
+        initAP(ssidAP,passwordAP);
     }else{
         WiFi.mode(WIFI_STA);
-        WiFi.begin(ssid, password);
+        WiFi.begin(ssid, passwordWiFi);
     }
     
     Serial.println("");
@@ -52,7 +52,7 @@ MastroServer::MastroServer(String mode, String ssid, String password, String dev
         Serial.print("IP address string: ");
         Serial.println(ip);
     }else{
-        initAP("Esp32Led","canecanebau");
+        initAP(ssidAP,passwordAP);
     }
     delay(200);
     activeLed(false, false);
