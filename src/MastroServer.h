@@ -1,5 +1,10 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
+#include <ArduinoOTA.h>
+#include <ElegantOTA.h>
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWiFiManager.h>
+#include <WebSerial.h>
 #ifndef MastroServer_h
 #define MastroServer_h
 

@@ -1,11 +1,19 @@
 #include <Arduino.h>
-//change this line for load other settings
-//#include "./profileSettings/settingsDefault.h" //decomment this line for apply default settings
-#include "./profileSettings/mySettings.h" //comment this line for apply default settings
-#include <WebSerial.h>
 #include "Main.h"
+#include <WebSerial.h>
 #include "MastroServer.h"
 #include "MastroLed.h"
+
+// ################################################################################ //
+//                            Manage profile settings                               //
+// ################################################################################ //
+// Decomment the line below for apply default settings                              //                     
+// #include "./profileSettings/settingsDefault.h"                                   //
+// Comment the line below for apply default settings                                //
+#include "./profileSettings/mySettings.h"// <--- Custom settings                    //
+// ################################################################################ //
+//                     End of profile settings management                           //
+// ################################################################################ //
 
 const int ledPin = 2;
 bool isActiveLed = false;

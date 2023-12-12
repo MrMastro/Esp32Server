@@ -1,10 +1,4 @@
-#include <Arduino.h>
 #include "MastroServer.h"
-#include <ArduinoOTA.h>
-#include <ElegantOTA.h>
-#include <ESPAsyncWebServer.h>
-#include <ESPAsyncWiFiManager.h>
-#include "WebSerial.h"
 #include "htmlPages.h"
 
 AsyncWebServer webServer(80);
