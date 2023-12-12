@@ -1,7 +1,7 @@
 #include <Arduino.h>
+#include "./profileSettings/settingsDefault.h" //change this line for load other settings
 #include <WebSerial.h>
 #include "Main.h"
-#include "settings.h"
 #include "MastroServer.h"
 #include "MastroLed.h"
 
