@@ -128,7 +128,7 @@ void setup(void)
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
   activeLed(false, false);
-  myServer = MastroServer("WIFI", ssid, password, deviceName, devicePassword);
+  myServer = MastroServer(wirlessMode, ssid, password, deviceName, devicePassword);
   myRgbStript.setupLedRgb();
 }
 
