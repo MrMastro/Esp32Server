@@ -146,7 +146,8 @@ void setup(void)
   myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
   myRgbStript.setupLedRgb();
   // Route handling
-  //myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
+  delay(50);
+  myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
 }
 
 void loop(void)

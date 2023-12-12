@@ -236,5 +236,6 @@ void MastroServer::setRoutes()
 
 void MastroServer::setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
 {
+    delay(50);
     webServer.on(uri, method, onRequest);
 }
