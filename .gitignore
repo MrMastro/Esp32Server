@@ -36,3 +36,7 @@ build
 src/settingsBakup.h
 src/settings.h
 .pio
+
+#Custom
+/src/profileSettings/*.h
+!/src/profileSettings/settingsDefault.h

@@ -15,4 +15,4 @@ const char* passwordAP = "8GvsfMEC";
 const char* ssid = "MySsid";
 const char* password = "myPass";
 
-//todo update per compilare il bin
+//todo update per compilare il bin.
