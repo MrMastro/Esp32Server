@@ -97,6 +97,31 @@ void MastroServer::initAP(String ssid, String password)
     activeIndicatorLed(true, false);
 }
 
+String MastroServer::getOneElementJsonString(String key, String value)
+{
+    // Create a JSON object
+    DynamicJsonDocument jsonDoc(1024);
+    // Add data to the JSON object
+    jsonDoc[key] = value;
+    // serialaze json
+    String jsonString;
+    serializeJson(jsonDoc, jsonString);
+    //return
+    return jsonString;
+}
+
+String MastroServer::getJsonStringByKeysAndValues(String keys[], String values[], int size)
+{
+    DynamicJsonDocument jsonDoc(1024);
+    for (size_t i = 0; i < size; ++i)
+    {
+        jsonDoc[keys[i]] = values[i];
+    }
+    String jsonString;
+    serializeJson(jsonDoc, jsonString);
+    return jsonString;
+}
+
 void MastroServer::handleOta()
 {
     ArduinoOTA.handle();

@@ -7,6 +7,5 @@
 
 boolean activeLed(bool active, bool toggle);
 void println(String msg);
-void handleTextRequest(AsyncWebServerRequest *request);
 
 #endif  // Main_H

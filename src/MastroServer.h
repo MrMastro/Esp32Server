@@ -4,6 +4,7 @@
 #include <ElegantOTA.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
+#include <ArduinoJson.h>
 #include <WebSerial.h>
 
 #ifndef MastroServer_h
@@ -18,6 +19,8 @@ public:
     String getName();
     String getIp();
     void setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
+    String getOneElementJsonString(String key, String value);
+    String getJsonStringByKeysAndValues(String keys[], String values[], int size);
 private:
     bool ledIndicatorMode;
     int ledPinIndicator;

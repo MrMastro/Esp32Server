@@ -134,8 +134,20 @@ void println(String msg)
 // Function to handle /text route
 void handleTextRequest(AsyncWebServerRequest *request)
 {
-  String message = "Hello, this is a text for try api!";
-  request->send(200, "text/plain", message);
+  String message = myServer.getOneElementJsonString("Status", "OK");
+  request->send(200, "application/json", message);
+}
+
+void handleJsonMultiple(AsyncWebServerRequest *request)
+{
+  // allocate the memory for the document
+  DynamicJsonDocument doc(1024);
+
+  String keys[] = {"uno","due","tre"};
+  String values[] = {"1","ValoreDue","tre"};
+
+  String json = myServer.getJsonStringByKeysAndValues(keys,values,3);
+  request->send(200, "application/json", json);
 }
 
 void setup(void)
@@ -148,6 +160,7 @@ void setup(void)
   // Route handling
   delay(50);
   myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
+  myServer.setCustomApi("/multipleTry", HTTP_GET, handleJsonMultiple);
 }
 
 void loop(void)
