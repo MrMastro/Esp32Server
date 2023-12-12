@@ -19,6 +19,7 @@ private:
     void setRoutes();
     String splitIpHost(String ip);
     void initAP(String ssid, String password);
+    void wait5SecondsLedBlink();
 };
 
 void recvMsg(uint8_t *data, size_t len);

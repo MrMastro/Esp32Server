@@ -15,47 +15,51 @@ MastroServer::MastroServer()
     active = false;
 }
 
-//mode:
-//Ap= access point
-//WIFI = wirless connect to your wifi
+// mode:
+// Ap= access point
+// WIFI = wirless connect to your wifi
 MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword)
 {
-    if(mode == "AP"){
-        initAP(ssidAP,passwordAP);
-    }else{
+    if (mode == "AP")
+    {
+        initAP(ssidAP, passwordAP);
+    }
+    else
+    {
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passwordWiFi);
     }
-    
-    Serial.println("");
+
+    wait5SecondsLedBlink();
 
     // Wait for connection
-    for (int i=0; (WiFi.status() != WL_CONNECTED && mode != "AP") ; i++)
+    for (int i = 0; (WiFi.status() != WL_CONNECTED && mode != "AP"); i++)
     {
         delay(1000);
         Serial.print(".");
         activeLed(true, true);
-        if(i==10){
+        if (i == 10)
+        {
             Serial.println("Scaduti i 10 secondi, mi collego in Access point");
             mode = "AP";
         }
     }
 
-    if(mode !="AP")
+    if (mode != "AP")
     {
         Serial.println("");
         Serial.print("Connected to ");
         Serial.println(ssid);
         Serial.print("IP address: ");
-        Serial.println(WiFi.localIP());
         ip = WiFi.localIP().toString();
-        Serial.print("IP address string: ");
         Serial.println(ip);
-    }else{
-        initAP(ssidAP,passwordAP);
+        activeLed(false, false);
+    }
+    else
+    {
+        initAP(ssidAP, passwordAP);
     }
     delay(200);
-    activeLed(false, false);
 
     initArduinoOta(deviceName, devicePassword);
     Serial.println("OTA server started");
@@ -68,23 +72,22 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     active = true;
 }
 
-void MastroServer::initAP(String ssid, String password){
+void MastroServer::initAP(String ssid, String password)
+{
 
     Serial.println("init AP mode");
-    //AsyncWiFiManager wifiManager(&webServer, &dnsServer);
-    //wifiManager.startConfigPortal(ssid.c_str(), password.c_str());
+    // AsyncWiFiManager wifiManager(&webServer, &dnsServer);
+    // wifiManager.startConfigPortal(ssid.c_str(), password.c_str());
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
     dnsServer.start(53, "*", WiFi.softAPIP());
-        // Print the AP IP address to the serial monitor
+    // Print the AP IP address to the serial monitor
     Serial.print("AP IP address: ");
     Serial.println(WiFi.softAPIP());
-      // Configure the captive portal behavior
-    //WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
-    
+    // Configure the captive portal behavior
+    // WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
+    activeLed(true, false);
 }
-
-
 
 void MastroServer::handleOta()
 {
@@ -110,6 +113,16 @@ String MastroServer::splitIpHost(String ip)
 
     // Use `substring()` function to extract a substring from "My_S" starting from the last newline character up to the end of the string.
     return ip.substring(index, length);
+}
+
+void MastroServer::wait5SecondsLedBlink()
+{
+    for (int i = 0; i < 5; i++)
+    {
+        delay(1000);
+        Serial.print(".");
+        activeLed(true, true);
+    }
 }
 
 void MastroServer::initArduinoOta(String deviceName, String devicePassword)
