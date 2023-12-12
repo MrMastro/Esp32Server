@@ -1,6 +1,6 @@
 #include "MastroServer.h"
 #include <ArduinoOTA.h>
-#include <AsyncElegantOTA.h>
+#include <ElegantOTA.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
 #include "Main.h"
@@ -60,7 +60,7 @@ MastroServer::MastroServer(String mode, String ssid, String password, String dev
     initArduinoOta(deviceName, devicePassword);
     Serial.println("OTA server started");
     setRoutes();
-    AsyncElegantOTA.begin(&webServer); // Start ElegantOTA
+    ElegantOTA.begin(&webServer); // Start ElegantOTA
     WebSerial.begin(&webServer);
     WebSerial.msgCallback(recvMsg);
     webServer.begin();

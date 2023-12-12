@@ -1,15 +1,7 @@
 #include "MastroLed.h"
-#include <ArduinoOTA.h>
-#include <AsyncElegantOTA.h>
-#include <ESPAsyncWebServer.h>
-#include <ESPAsyncWiFiManager.h>
 #include <LEDStripDriver.h>
-#include "Main.h"
 
-#define GREENPIN 6
-#define BLUEPIN 9
-#define ANALOGPIN 3
-// Din, Cin
+//                                  Din,Cin
 LEDStripDriver led = LEDStripDriver(19, 18);
 
 MastroLed::MastroLed()
