@@ -1,9 +1,9 @@
+#include <Arduino.h>
 #include "MastroServer.h"
 #include <ArduinoOTA.h>
 #include <ElegantOTA.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
-#include "Main.h"
 #include "WebSerial.h"
 #include "htmlPages.h"
 
@@ -13,34 +13,49 @@ DNSServer dnsServer;
 MastroServer::MastroServer()
 {
     active = false;
+    isActiveIndicatorLed = false;
+    ledIndicatorMode = false;
 }
 
 // mode:
 // Ap= access point
 // WIFI = wirless connect to your wifi
-MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword)
+MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, int ledPin)
 {
+    MastroServer();
+    if (ledPin != -1)
+    {
+        ledIndicatorMode = true;
+        ledPinIndicator = ledPin;
+    }
+    else
+    {
+        Serial.println("Led indicator disabled");
+    }
+
+    // Wait Indicator
+    wait5SecondsLedBlink();
+
     if (mode == "AP")
     {
         initAP(ssidAP, passwordAP);
     }
     else
     {
+        Serial.println("init WIFI mode");
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passwordWiFi);
     }
-
-    wait5SecondsLedBlink();
 
     // Wait for connection
     for (int i = 0; (WiFi.status() != WL_CONNECTED && mode != "AP"); i++)
     {
         delay(1000);
         Serial.print(".");
-        activeLed(true, true);
+        activeIndicatorLed(true, true);
         if (i == 10)
         {
-            Serial.println("Scaduti i 10 secondi, mi collego in Access point");
+            Serial.println("10 Seconds have elapsed, time out. Connecting in Access point mode");
             mode = "AP";
         }
     }
@@ -53,7 +68,7 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
         Serial.print("IP address: ");
         ip = WiFi.localIP().toString();
         Serial.println(ip);
-        activeLed(false, false);
+        activeIndicatorLed(false, false);
     }
     else
     {
@@ -74,7 +89,6 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
 
 void MastroServer::initAP(String ssid, String password)
 {
-
     Serial.println("init AP mode");
     // AsyncWiFiManager wifiManager(&webServer, &dnsServer);
     // wifiManager.startConfigPortal(ssid.c_str(), password.c_str());
@@ -86,7 +100,7 @@ void MastroServer::initAP(String ssid, String password)
     Serial.println(WiFi.softAPIP());
     // Configure the captive portal behavior
     // WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
-    activeLed(true, false);
+    activeIndicatorLed(true, false);
 }
 
 void MastroServer::handleOta()
@@ -115,13 +129,50 @@ String MastroServer::splitIpHost(String ip)
     return ip.substring(index, length);
 }
 
+boolean MastroServer::activeIndicatorLed(bool active, bool toggle)
+{
+    if (ledIndicatorMode == false)
+    {
+        return isActiveIndicatorLed;
+    }
+
+    delay(50);
+    if (toggle)
+    {
+        if (isActiveIndicatorLed)
+        {
+            digitalWrite(ledPinIndicator, LOW);
+        }
+        else
+        {
+            digitalWrite(ledPinIndicator, HIGH);
+        }
+        isActiveIndicatorLed = !isActiveIndicatorLed;
+    }
+    else if (active)
+    {
+        digitalWrite(ledPinIndicator, HIGH); // Accendi il LED
+        isActiveIndicatorLed = true;
+    }
+    else
+    {
+        digitalWrite(ledPinIndicator, LOW); // Spegni il LED
+        isActiveIndicatorLed = false;
+    }
+    delay(100);
+    return isActiveIndicatorLed;
+}
+
 void MastroServer::wait5SecondsLedBlink()
 {
-    for (int i = 0; i < 5; i++)
+    if (ledIndicatorMode)
     {
-        delay(1000);
-        Serial.print(".");
-        activeLed(true, true);
+        for (int i = 0; i < 5; i++)
+        {
+            delay(1000);
+            Serial.print(".");
+            activeIndicatorLed(true, true);
+        }
     }
 }
 
@@ -187,11 +238,4 @@ void MastroServer::setRoutes()
     String html = htmlPage; // Copy the HTML template from htmlCustom.h
     html.replace("%HOST_NAME%", scopeHost);
     request->send(200, "text/html", html); });
-
-    webServer.on("/api/handleLed", HTTP_POST, [](AsyncWebServerRequest *request)
-                 {
-                    bool result = activeLed(true,true);
-                    String msg = result ? "{\"lightLed\": true}": "{\"lightLed\": false}";
-                    
-    request->send(200, "application/json", msg); });
 }

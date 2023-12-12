@@ -130,7 +130,7 @@ void setup(void)
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
   activeLed(false, false);
-  myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword);
+  myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
   myRgbStript.setupLedRgb();
 }
 
@@ -140,3 +140,15 @@ void loop(void)
   myRgbStript.loopLedRgb();
   delay(10);
 }
+
+//todo set custom api
+/* 
+
+    webServer.on("/api/handleLed", HTTP_POST, [](AsyncWebServerRequest *request)
+                 {
+                    bool result = activeLed(true,true);
+                    String msg = result ? "{\"lightLed\": true}": "{\"lightLed\": false}";
+                    
+    request->send(200, "application/json", msg); });
+
+*/
