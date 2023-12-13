@@ -6,6 +6,5 @@
 #include <WebSerial.h>
 
 boolean activeLed(bool active, bool toggle);
-void println(String msg);
 
 #endif  // Main_H

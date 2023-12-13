@@ -1,6 +1,8 @@
 #include "Main.h"
 #include "MastroServer.h"
 #include "MastroLed.h"
+#include "utils/SerialSimple.h"
+#include "model/Cmd.h"
 
 // ################################################################################ //
 //                            Manage profile settings                               //
@@ -9,6 +11,7 @@
 // #include "./profileSettings/settingsDefault.h"                                   //
 // Comment the line below for apply default settings                                //
 #include "./profileSettings/mySettings.h"// <--- Custom settings                    //
+
 // ################################################################################ //
 //                     End of profile settings management                           //
 // ################################################################################ //
@@ -18,42 +21,6 @@ bool isActiveLed = false;
 MastroServer myServer;
 MastroLed myRgbStript;
 
-enum Cmd
-{
-  LED_ON,
-  LED_OFF,
-  LED_TOGGLE,
-  INFO,
-  OTHER
-};
-
-// Funzione per mappare una stringa a un valore enumerativo
-Cmd mapStringToEnum(String inputString)
-{
-  inputString.toUpperCase();
-  if (inputString.equalsIgnoreCase("led on"))
-  {
-    return LED_ON;
-  }
-  else if (inputString.equalsIgnoreCase("led off"))
-  {
-    return LED_OFF;
-  }
-  else if (inputString.equalsIgnoreCase("led toggle"))
-  {
-    return LED_TOGGLE;
-  }
-  else if (inputString.equalsIgnoreCase("info"))
-  {
-    return INFO;
-  }
-  else
-  {
-    // Valore predefinito in caso di stringa non riconosciuta
-    return OTHER; // Puoi scegliere un valore predefinito diverso se preferisci
-  }
-}
-
 void recvMsg(uint8_t *data, size_t len)
 {
   // WebSerial.println("Received Data...");
@@ -62,34 +29,34 @@ void recvMsg(uint8_t *data, size_t len)
   {
     d += char(data[i]);
   }
-  // WebSerial.println(d.length());
+
   if (d.length() > 0)
   {
     Cmd cmd;
     cmd = mapStringToEnum(d);
     switch (cmd)
     {
-    case LED_ON:
+    case Cmd::LED_ON:
       activeLed(true, false);
-      println(String("Led on"));
+      differentSerialprintln(String("Led on"),&Serial,&WebSerial);
       break;
-    case LED_OFF:
+    case Cmd::LED_OFF:
       activeLed(false, false);
-      println("Led off");
+      differentSerialprintln("Led off",&Serial,&WebSerial);
       break;
-    case LED_TOGGLE:
+    case Cmd::LED_TOGGLE:
       activeLed(true, true);
-      println("Led toggle");
+      differentSerialprintln("Led toggle",&Serial,&WebSerial);
       break;
-    case INFO:
-      println(myServer.getIp());
+    case Cmd::INFO:
+      differentSerialprintln(myServer.getIp());
       break;
     default:
       if(d.toInt()>0)
       {
         myRgbStript.setModeValue(d.toInt());
       }else{
-        println("Tasto non riconosciuto: " + d);
+        differentSerialprintln("Tasto non riconosciuto: " + d ,&Serial, &WebSerial);
       }
       
       break;
@@ -126,10 +93,10 @@ boolean activeLed(bool active, bool toggle)
   return isActiveLed;
 }
 
-void println(String msg)
-{
-  WebSerial.println(msg);
-}
+
+// ################################################################################ //
+//                               Custom api method                                  //
+// ################################################################################ //
 
 // Function to handle /text route
 void handleTextRequest(AsyncWebServerRequest *request)
@@ -150,6 +117,19 @@ void handleJsonMultiple(AsyncWebServerRequest *request)
   request->send(200, "application/json", json);
 }
 
+void handleMainLed(AsyncWebServerRequest *request)
+{
+  // allocate the memory for the document
+  DynamicJsonDocument doc(1024);
+  bool result = activeLed(true,true);
+  String json = myServer.getOneElementJsonString("lightLed", result?"true":"false");
+  request->send(200, "application/json", json);
+}
+
+// ################################################################################ //
+//                              Setup and Loop Method                               //
+// ################################################################################ //
+
 void setup(void)
 {
   Serial.begin(9600);
@@ -161,6 +141,7 @@ void setup(void)
   delay(50);
   myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
   myServer.setCustomApi("/multipleTry", HTTP_GET, handleJsonMultiple);
+  myServer.setCustomApi("/api/handleLed", HTTP_POST, handleMainLed);
 }
 
 void loop(void)
@@ -169,15 +150,3 @@ void loop(void)
   myRgbStript.loopLedRgb();
   delay(10);
 }
-
-//todo set custom api
-/* 
-
-    webServer.on("/api/handleLed", HTTP_POST, [](AsyncWebServerRequest *request)
-                 {
-                    bool result = activeLed(true,true);
-                    String msg = result ? "{\"lightLed\": true}": "{\"lightLed\": false}";
-                    
-    request->send(200, "application/json", msg); });
-
-*/
