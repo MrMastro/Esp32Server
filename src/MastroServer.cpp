@@ -37,6 +37,8 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     else
     {
         Serial.println("init WIFI mode");
+        Serial.print("Try to connect to: ");
+        Serial.println(ssid);
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passwordWiFi);
     }
