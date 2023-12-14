@@ -3,15 +3,15 @@
 #include "MastroLed.h"
 #include "utils/SerialSimple.h"
 #include "model/Cmd.h"
+#include "service/Services.h"
 
 // ################################################################################ //
 //                            Manage profile settings                               //
 // ################################################################################ //
 // Decomment the line below for apply default settings                              //                     
-// #include "./profileSettings/settingsDefault.h"                                   //
+// #include "./profileSettings/settingsDefault.h" //      <--- Default settings     //
 // Comment the line below for apply default settings                                //
-#include "./profileSettings/mySettings.h"// <--- Custom settings                    //
-
+#include "./profileSettings/mySettings.h"//               <--- Custom settings      //
 // ################################################################################ //
 //                     End of profile settings management                           //
 // ################################################################################ //
@@ -126,6 +126,12 @@ void handleMainLed(AsyncWebServerRequest *request)
   request->send(200, "application/json", json);
 }
 
+void handleSuccessResponse(AsyncWebServerRequest *request)
+{
+  String response = sendOk();
+  request->send(200, "application/json", response);
+}
+
 // ################################################################################ //
 //                              Setup and Loop Method                               //
 // ################################################################################ //
@@ -142,6 +148,7 @@ void setup(void)
   myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
   myServer.setCustomApi("/multipleTry", HTTP_GET, handleJsonMultiple);
   myServer.setCustomApi("/api/handleLed", HTTP_POST, handleMainLed);
+  myServer.setCustomApi("/api/checkOk", HTTP_GET, handleSuccessResponse);
 }
 
 void loop(void)
