@@ -9,9 +9,9 @@
 //                            Manage profile settings                               //
 // ################################################################################ //
 // Decomment the line below for apply default settings                              //                     
-// #include "./profileSettings/settingsDefault.h" //      <--- Default settings     //
+// #include "./settings/settingsDefault.h" //      <--- Default settings     //
 // Comment the line below for apply default settings                                //
-#include "./profileSettings/mySettings.h"//               <--- Custom settings      //
+#include "./settings/mySettings.h"//               <--- Custom settings      //
 #include "services/CommandService.h"
 // ################################################################################ //
 //                     End of profile settings management                           //
@@ -31,13 +31,15 @@ void setup(void)
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
   //activeLed(false, false); //todo active led
+
   myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
   if(myServer.isAvaible()){
     WebSerial.begin(myServer.getWebServer(),"/webConsole");
   }
-  myRgbStript.setupLedRgb();
   // Route handling
   initRoutes(myServer);
+
+  myRgbStript.setupLedRgb();
   delay(50);
 }
 
