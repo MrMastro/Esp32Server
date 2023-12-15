@@ -21,7 +21,10 @@ public:
     void setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
     String getOneElementJsonString(String key, String value);
     String getJsonStringByKeysAndValues(String keys[], String values[], int size);
+    boolean isAvaible();
+    AsyncWebServer* getWebServer();
 private:
+    AsyncWebServer* pointWebServer;
     bool ledIndicatorMode;
     int ledPinIndicator;
     bool serverActive;

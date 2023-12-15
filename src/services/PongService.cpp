@@ -3,13 +3,9 @@
 #include <constants/constants.h>
 #include <model/DataModelling.h>
 
-String sendOk()
+String pong()
 {
     StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::OK);
-    Serial.println("Descrizione di s:");
-    Serial.println(s.getDescription());
     BasicResponse response = BasicResponse(s);
-    Serial.println("Descrizione di response:");
-    Serial.println(response.toString());
     return dtoToJson(response);
 }

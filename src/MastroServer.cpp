@@ -76,10 +76,9 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     Serial.println("OTA server started");
     setRoutes();
     ElegantOTA.begin(&webServer); // Start ElegantOTA
-    WebSerial.begin(&webServer);
-    WebSerial.msgCallback(recvMsg);
     webServer.begin();
     Serial.println("HTTP server started");
+    pointWebServer = &webServer;
     serverActive = true;
 }
 
@@ -112,16 +111,14 @@ String MastroServer::getOneElementJsonString(String key, String value)
     return jsonString;
 }
 
-String MastroServer::getJsonStringByKeysAndValues(String keys[], String values[], int size)
+boolean MastroServer::isAvaible()
 {
-    DynamicJsonDocument jsonDoc(1024);
-    for (size_t i = 0; i < size; ++i)
-    {
-        jsonDoc[keys[i]] = values[i];
-    }
-    String jsonString;
-    serializeJson(jsonDoc, jsonString);
-    return jsonString;
+    return serverActive;
+}
+
+AsyncWebServer* MastroServer::getWebServer()
+{
+    return pointWebServer;
 }
 
 void MastroServer::handleOta()
@@ -266,3 +263,16 @@ void MastroServer::setCustomApi(const char* uri, WebRequestMethodComposite metho
     delay(50);
     webServer.on(uri, method, onRequest);
 }
+
+// String MastroServer::getJsonStringByKeysAndValues(String keys[], String values[], int size)
+// {
+//     DynamicJsonDocument jsonDoc(1024);
+//     for (size_t i = 0; i < size; ++i)
+//     {
+//         jsonDoc[keys[i]] = values[i];
+//     }
+//     String jsonString;
+//     serializeJson(jsonDoc, jsonString);
+//     return jsonString;
+// }
+
