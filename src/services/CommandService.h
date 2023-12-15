@@ -8,10 +8,14 @@ class CommandService
 {
 public:
     CommandService();
-    void executeCommand(CMD cmd, String cmdString);
-    void recvMsgAndExecute(uint8_t *data, size_t len); //returns the msg received
+    CommandService(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
+    void attach(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
+    String executeCommand(CMD cmd, String cmdString);
+    String recvMsgAndExecute(String data); //returns the msg received
 private:
     boolean isOperative;
+    HardwareSerial* serialPointer;
+    WebSerialClass* webSerialPointer;
 };
 
 
