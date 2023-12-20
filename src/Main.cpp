@@ -71,7 +71,6 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   if (dataString.length() > 0)
   {
     servicesCollector.executeMethod("CommandService","recvMsgAndExecute",dataString);
-    servicesCollector.executeMethod("LedService","changeLed","true");
   }
 }
 

@@ -1,5 +1,8 @@
 #include "ServicesCollector.h"
 
+#ifndef SERVICES_COLLECTOR_H
+#define SERVICES_COLLECTOR_H
+
 ServicesCollector::ServicesCollector()
 {
 }
@@ -39,6 +42,7 @@ void ServicesCollector::addService(std::shared_ptr<Service> service)
         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "The method getClassName of service can't have a empty name, modify geClassName Method");
         return;
     }
+    //service.get()->attachCollector(this);
     services.insert(std::make_pair(service->getClassName(), service));
 }
 
@@ -71,3 +75,4 @@ ServicesCollector::~ServicesCollector()
     }
     services.clear();
 }
+#endif // SERVICES_COLLECTOR_H

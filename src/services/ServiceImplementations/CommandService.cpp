@@ -73,11 +73,11 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
   switch (cmd)
   {
   case CMD::LED_ON:
-    // activeLed(true, false); //todo
     result = "Led on";
+    //executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(true));
     break;
   case CMD::LED_OFF:
-    // activeLed(false, false); //todo
+    //executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(false));
     result = "Led off";
     break;
   case CMD::LED_TOGGLE:

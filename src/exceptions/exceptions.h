@@ -22,7 +22,7 @@ const std::map<ERROR_CODE, String> ERROR_MAP = {
     // Add more status codes and information as needed
 };
 
-void throwError(ERROR_CODE err, const char* detailMessage);
+//void throwError(ERROR_CODE err, const char* detailMessage); comment useless method
 String getError(ERROR_CODE err, const char* detailMessage);
 
 #endif // EXCEPTIONS_H
