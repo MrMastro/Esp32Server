@@ -1,9 +1,6 @@
 #include "Main.h"
 #include "MastroServer.h"
 #include "MastroLed.h"
-#include "routes/Routes.h"
-#include "utils/SerialSimple.h"
-#include "services/Services.h"
 
 // ################################################################################ //
 //                            Manage profile settings                               //
@@ -12,16 +9,23 @@
 // #include "./settings/settingsDefault.h" //      <--- Default settings     //
 // Comment the line below for apply default settings                                //
 #include "./settings/mySettings.h"//               <--- Custom settings      //
-#include "services/CommandService.h"
 // ################################################################################ //
 //                     End of profile settings management                           //
 // ################################################################################ //
+
+#include "routes/Routes.h"
+#include "utils/SerialSimple.h"
+#include "./services/Service.h"
+#include "./services/ServiceImplementations/CommandService.h"
+#include "./services/ServiceImplementations/CommandService.h"
+
 
 const int ledPin = 2;
 bool isActiveLed = false;
 MastroServer myServer;
 MastroLed myRgbStript;
-CommandService myCommandManager;
+ServicesCollector servicesCollector;
+CommandService myCommandService;
 
 // ################################################################################ //
 //                              Setup and Loop Method                               //
@@ -36,10 +40,13 @@ void setup(void)
   if(myServer.isAvaible()){
     WebSerial.begin(myServer.getWebServer(),"/webConsole");
   }
-  //init services
-  myCommandManager = CommandService(&Serial,&WebSerial);
+  //init services and ServiceCollector
+  myCommandService = CommandService(&Serial,&WebSerial);
+  servicesCollector = ServicesCollector();
+  servicesCollector.addService(&myCommandService);
+ 
   // Route handling
-  initRoutes(myServer);
+  initRoutes(myServer,&servicesCollector);
   WebSerial.msgCallback(recvMsgBySerialWeb);
   myRgbStript.setupLedRgb();
   delay(50);
@@ -64,11 +71,11 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   }
   if (dataString.length() > 0)
   {
-    myCommandManager.recvMsgAndExecute(dataString);
+    //servicesCollector->executeMethod("CommandService","recvMsgAndExecute",dataString);
   }
 }
 
 void recvMsgBySerial(String data)
 {
-  myCommandManager.recvMsgAndExecute(data);
+  //myCommandManager.recvMsgAndExecute(data);
 }

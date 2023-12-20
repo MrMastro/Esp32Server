@@ -1,5 +1,39 @@
 #include "DataModelling.h"
 
+// Function to convert a boolean to JSON
+String simpleBooleanToJson(bool paramBool) {
+  // Create a JSON document
+  StaticJsonDocument<50> doc;
+
+  // Add the boolean value to the document
+  doc["data"] = paramBool;
+
+  // Serialize the JSON document to a String
+  String jsonString;
+  serializeJson(doc, jsonString);
+
+  return jsonString;
+}
+
+// Function to convert JSON to a boolean
+boolean jsonToSimpleBoolean(String jsonString) {
+  // Parse the JSON document
+  StaticJsonDocument<50> doc;
+  DeserializationError error = deserializeJson(doc, jsonString);
+
+  // Check for parsing errors
+  if (error) {
+    Serial.print("Error parsing JSON: ");
+    Serial.println(error.c_str());
+    return false;
+  }
+
+  // Extract the boolean value from the document
+  bool paramBool = doc["data"];
+
+  return paramBool;
+}
+
 StatusInfo jsonToStatusInfo(String &json)
 {
     // Create a JSON document to parse the incoming JSON string

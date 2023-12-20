@@ -1,21 +1,23 @@
 #include "Routes.h"
-#include "services/Services.h"
-#include "services/LedService.h"
-#include "model/response/BasicResponse.h"
+#include "./services/Service.h"
+#include "./services/ServiceImplementations/LedService.h"
+#include "models/response/BasicResponse.h"
 #include "constants/constants.h"
-#include "model/DataModelling.h"
+#include "models/DataModelling.h"
 
-void initRoutes(MastroServer &srv)
+void initRoutes(MastroServer &srv,ServicesCollector* serviceCollector)
 {
    srv.setCustomApi("/try", HTTP_GET, [](AsyncWebServerRequest *request)
                     {
-                        String message = handleTextRequest(request);
+                        String message = pongSuccess();
                         request->send(200, "application/json", message); });
 
    srv.setCustomApi("/api/handleLed", HTTP_POST, [](AsyncWebServerRequest *request)
                     {
-                        LedService ledService = LedService();
-                        boolean statusLed = ledService.changeLed(true, true);
+                        //todo
+                        //LedService ledService = LedService();
+                        //boolean statusLed = ledService.changeLed(true, true);
+                        boolean statusLed = false;
                         StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::OK);
                         BasicResponse response = BasicResponse(s,"{'ledOn':false}");
                         String jsonResponse = dtoToJson(response);
@@ -27,6 +29,7 @@ void initRoutes(MastroServer &srv)
                         request->send(200, "application/json", jsonResponse); });
    srv.setCustomApi("/api/sendCommand", HTTP_POST, [](AsyncWebServerRequest *request)
                     {
-                     String result = "";
-                     request->send(200, "application/json", result); });
+                        //todo
+                        String result = "";
+                        request->send(200, "application/json", result); });
 }

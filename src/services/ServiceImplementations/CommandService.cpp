@@ -1,7 +1,6 @@
-#include "Services.h"
-#include "model/response/BasicResponse.h"
-#include <constants/constants.h>
-#include <model/DataModelling.h>
+#include "./services/Service.h"
+#include "./constants/constants.h"
+#include <models/DataModelling.h>
 #include "CommandService.h"
 #include <utils/SerialSimple.h>
 #include <exceptions/exceptions.h>
@@ -18,18 +17,58 @@ CommandService::CommandService(HardwareSerial *serialPointerParam, WebSerialClas
   isOperative = true;
 }
 
-void CommandService::attach(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
+boolean CommandService::isAvaible()
+{
+  return isOperative;
+}
+
+void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
 {
   serialPointer = serialPointerParam;
   webSerialPointer = webSerialPointerParam;
   isOperative = true;
 }
 
+boolean CommandService::attachPins(std::vector<int> pins)
+{
+  return true;
+}
+
+String CommandService::executeJson(String methodName, String param)
+{
+  if (methodName == "recvMsgAndExecute")
+  {
+    return recvMsgAndExecute(param);
+  }
+  else
+  {
+    return "Service Method not found";
+  }
+}
+
+String CommandService::executeJson(String methodName, std::vector<String> jsonParams)
+{
+  if (methodName == "recvMsgAndExecute")
+  {
+    return recvMsgAndExecute(jsonParams.at(0));
+  }
+  else
+  {
+    return "Service Method not found";
+  }
+}
+
+String CommandService::getClassName() const
+{
+  return "CommandService";
+}
+
 String CommandService::executeCommand(CMD cmd, String cmdString)
 {
-  String result ="";
-  if(!isOperative){
-    return;
+  String result = "";
+  if (!isOperative)
+  {
+    return "Error";
   }
   switch (cmd)
   {
@@ -58,8 +97,9 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
 String CommandService::recvMsgAndExecute(String data)
 {
   // WebSerial.println("Received Data...");
-  if(!isOperative){
-    throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attach or use constructor with param non null");
+  if (!isOperative)
+  {
+    throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null");
     return "ERROR";
   }
   String result = executeCommand(mapStringToEnum(data), data);

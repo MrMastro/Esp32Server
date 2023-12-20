@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <map>
-#include <model/response/BasicResponse.h>
+#include <models/response/BasicResponse.h>
 #include "./utils/FunctionUtils.h"
 
 #ifndef CONSTANTS_H
