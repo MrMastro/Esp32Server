@@ -15,9 +15,8 @@
 
 #include "routes/Routes.h"
 #include "utils/SerialSimple.h"
-#include "./services/Service.h"
 #include "./services/ServiceImplementations/CommandService.h"
-#include "./services/ServiceImplementations/CommandService.h"
+#include "services/ServiceImplementations/LedService.h"
 
 
 const int ledPin = 2;
@@ -25,7 +24,6 @@ bool isActiveLed = false;
 MastroServer myServer;
 MastroLed myRgbStript;
 ServicesCollector servicesCollector;
-CommandService myCommandService;
 
 // ################################################################################ //
 //                              Setup and Loop Method                               //
@@ -41,9 +39,10 @@ void setup(void)
     WebSerial.begin(myServer.getWebServer(),"/webConsole");
   }
   //init services and ServiceCollector
-  myCommandService = CommandService(&Serial,&WebSerial);
   servicesCollector = ServicesCollector();
-  servicesCollector.addService(&myCommandService);
+  servicesCollector.addService(std::make_shared<CommandService>());
+  servicesCollector.addService(std::make_shared<LedService>());
+  servicesCollector.attachSerial(&Serial,&WebSerial);
  
   // Route handling
   initRoutes(myServer,&servicesCollector);
@@ -71,7 +70,8 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   }
   if (dataString.length() > 0)
   {
-    //servicesCollector->executeMethod("CommandService","recvMsgAndExecute",dataString);
+    servicesCollector.executeMethod("CommandService","recvMsgAndExecute",dataString);
+    servicesCollector.executeMethod("LedService","changeLed","true");
   }
 }
 

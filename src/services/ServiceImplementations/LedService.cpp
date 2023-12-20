@@ -1,6 +1,4 @@
 #include "LedService.h"
-#include "./models/DataModelling.h"
-#include <exceptions/exceptions.h>
 
 LedService::LedService()
 {
@@ -19,11 +17,6 @@ LedService::LedService(int ledPinInput)
 boolean LedService::isAvaible()
 {
     return isAttachedLed;
-}
-
-void LedService::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
-{
-
 }
 
 boolean LedService::attachPins(std::vector<int> pins)

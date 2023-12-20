@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <./services/Service.h>
 #ifndef LedService_H
 #define LedService_H
@@ -9,7 +8,7 @@ public:
     LedService();
     LedService(int ledPin);
     boolean isAvaible() override;
-    void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
+    //void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
     boolean attachPins(std::vector<int> pins) override;
     String executeJson(String methodName, String param) override;
     String executeJson(String methodName, std::vector<String> jsonParams) override;

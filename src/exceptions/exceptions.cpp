@@ -20,6 +20,5 @@ String getError(ERROR_CODE err, const char* detailMessage) {
   for (const auto& el : parts) {
     result+= (" - "+el);
   }
-  Serial.println(result);
   return result;
 }

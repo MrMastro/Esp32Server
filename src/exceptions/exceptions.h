@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <map>
 
+#ifndef EXCEPTIONS_H
+#define EXCEPTIONS_H
+
 enum ERROR_CODE {
   NO_ERROR,
   SENSOR_NOT_FOUND,
@@ -21,3 +24,5 @@ const std::map<ERROR_CODE, String> ERROR_MAP = {
 
 void throwError(ERROR_CODE err, const char* detailMessage);
 String getError(ERROR_CODE err, const char* detailMessage);
+
+#endif // EXCEPTIONS_H

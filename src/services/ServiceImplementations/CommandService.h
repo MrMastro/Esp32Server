@@ -1,6 +1,4 @@
-#include <Arduino.h>
 #include <services/Service.h>
-#include <constants/constants.h>
 #ifndef CommandService_H
 #define CommandService_H
 
@@ -11,7 +9,7 @@ public:
     CommandService();
     CommandService(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
     boolean isAvaible() override;
-    void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
+    void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
     boolean attachPins(std::vector<int> pins) override;
     String executeJson(String methodName, String param) override;
     String executeJson(String methodName, std::vector<String> jsonParams) override;
