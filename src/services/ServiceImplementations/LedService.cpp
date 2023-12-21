@@ -9,9 +9,7 @@ LedService::LedService()
 LedService::LedService(int ledPinInput)
 {
     isLedOn = false;
-    std::vector<int> pins(1);
-    pins.push_back(ledPinInput);
-    isAttachedLed = attachPins(pins);
+    isAttachedLed = attachPin(ledPinInput);
 }
 
 boolean LedService::isAvaible()
@@ -19,16 +17,11 @@ boolean LedService::isAvaible()
     return isAttachedLed;
 }
 
-boolean LedService::attachPins(std::vector<int> pins)
+boolean LedService::attachPin(int ledPinParam)
 {
-  if(pins.size() == 1)
-  {
-    pinMode(pins.at(0), OUTPUT);
-    ledPin = pins.at(0);
-    isAttachedLed = true;
-  }else{
-    isAttachedLed = false;
-  }
+  pinMode(ledPinParam, OUTPUT);
+  ledPin = ledPinParam;
+  isAttachedLed = true;
   return isAttachedLed;
 }
 

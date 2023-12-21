@@ -14,6 +14,5 @@ std::vector<String> splitString(const String &str, char delimiter)
     }
 
     tokens.push_back(str.substring(start));
-    Serial.println("Finito split");
     return tokens;
 }

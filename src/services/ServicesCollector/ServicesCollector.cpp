@@ -19,6 +19,13 @@ String ServicesCollector::executeMethod(String nameService, String nameMethod, S
     auto it = services.find(nameService);
     if (it != services.end())
     {
+        if(!it->second.get()->isAvaible())
+        {
+            String errorMsg = "the service {service} isn't avaible";
+            errorMsg.replace("{service}",it->second.get()->getClassName());
+            throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, errorMsg);
+            return "ERROR";
+        }
         result = it->second.get()->executeJson(nameMethod, param);
         if (result == "Service Method not found")
         {
@@ -31,7 +38,7 @@ String ServicesCollector::executeMethod(String nameService, String nameMethod, S
         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "can't find nameService");
         return "ERROR";
     }
-    return "result";
+    return result;
 }
 
 void ServicesCollector::addService(std::shared_ptr<Service> service)
@@ -42,26 +49,29 @@ void ServicesCollector::addService(std::shared_ptr<Service> service)
         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "The method getClassName of service can't have a empty name, modify geClassName Method");
         return;
     }
-    //service.get()->attachCollector(this);
+    service.get()->attachCollector(this);
     services.insert(std::make_pair(service->getClassName(), service));
 }
 
 void ServicesCollector::attachSerial(HardwareSerial * serialPointerParam, WebSerialClass * webSerialPointerParam)
 {
+    serialPointer = serialPointerParam;
+    webSerialPointer = webSerialPointerParam;
     for (const auto &pair : services)
     {
         pair.second.get()->attachSerial(&Serial,&WebSerial);
     }
 }
 
-void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const char* detailMessage) {
+void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const String detailMessage) {
   String result = "Error: ";
   String statusStr = ERROR_MAP.at(err);
   std::vector<String> parts = splitString(statusStr, ',');
   for (const auto& el : parts) {
-    result+= (" - "+el);
+    result+= (" - " + el);
   }
-  Serial.println(result);
+  result += " - " + detailMessage;
+  differentSerialprintln(result, serialPointer, webSerialPointer);
 }
 
 // Destructor to clean up dynamically allocated services

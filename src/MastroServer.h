@@ -20,7 +20,6 @@ public:
     String getIp();
     void setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
     String getOneElementJsonString(String key, String value);
-    String getJsonStringByKeysAndValues(String keys[], String values[], int size);
     boolean isAvaible();
     AsyncWebServer* getWebServer();
 private:
@@ -36,7 +35,7 @@ private:
     String splitIpHost(String ip);
     void initAP(String ssid, String password);
     bool activeIndicatorLed(bool active, bool toggle);
-    void wait5SecondsLedBlink();
+    void welcomeWaitLedBlink();
 };
 
 #endif

@@ -43,6 +43,7 @@ void setup(void)
   servicesCollector.addService(std::make_shared<CommandService>());
   servicesCollector.addService(std::make_shared<LedService>());
   servicesCollector.attachSerial(&Serial,&WebSerial);
+  servicesCollector.getService("LedService")->attachPin(ledPin);
  
   // Route handling
   initRoutes(myServer,&servicesCollector);
@@ -70,11 +71,12 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   }
   if (dataString.length() > 0)
   {
+    //servicesCollector.executeMethod("LedService","changeLed",simpleBooleanToJson(true));
     servicesCollector.executeMethod("CommandService","recvMsgAndExecute",dataString);
   }
 }
 
 void recvMsgBySerial(String data)
 {
-  //myCommandManager.recvMsgAndExecute(data);
+  servicesCollector.executeMethod("CommandService","recvMsgAndExecute",data);
 }

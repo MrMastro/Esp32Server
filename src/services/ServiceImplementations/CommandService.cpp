@@ -10,13 +10,6 @@ CommandService::CommandService()
   isOperative = false;
 }
 
-CommandService::CommandService(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
-{
-  serialPointer = serialPointerParam;
-  webSerialPointer = webSerialPointerParam;
-  isOperative = true;
-}
-
 boolean CommandService::isAvaible()
 {
   return isOperative;
@@ -27,11 +20,6 @@ void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialC
   serialPointer = serialPointerParam;
   webSerialPointer = webSerialPointerParam;
   isOperative = true;
-}
-
-boolean CommandService::attachPins(std::vector<int> pins)
-{
-  return true;
 }
 
 String CommandService::executeJson(String methodName, String param)
@@ -74,10 +62,10 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
   {
   case CMD::LED_ON:
     result = "Led on";
-    //executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(true));
+    executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(true));
     break;
   case CMD::LED_OFF:
-    //executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(false));
+    executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(false));
     result = "Led off";
     break;
   case CMD::LED_TOGGLE:

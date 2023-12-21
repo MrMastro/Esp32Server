@@ -28,7 +28,7 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     }
 
     // Wait Indicator
-    wait5SecondsLedBlink();
+    welcomeWaitLedBlink();
 
     if (mode == "AP")
     {
@@ -181,13 +181,13 @@ boolean MastroServer::activeIndicatorLed(bool active, bool toggle)
     return isActiveIndicatorLed;
 }
 
-void MastroServer::wait5SecondsLedBlink()
+void MastroServer::welcomeWaitLedBlink()
 {
     if (ledIndicatorMode)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 10; i++)
         {
-            delay(1000);
+            delay(100);
             Serial.print(".");
             activeIndicatorLed(true, true);
         }
@@ -196,12 +196,6 @@ void MastroServer::wait5SecondsLedBlink()
 
 void MastroServer::initArduinoOta(String deviceName, String devicePassword)
 {
-    /*
-while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-Serial.println("Connection Failed! Rebooting...");
-delay(5000);
-ESP.restart();
-}*/
 
     // Port defaults to 3232
     ArduinoOTA.setPort(3232);
