@@ -5,6 +5,12 @@
 
 ServicesCollector::ServicesCollector()
 {
+    server = nullptr;
+}
+
+ServicesCollector::ServicesCollector(MastroServer *serverParam)
+{
+    attachServer(serverParam);
 }
 
 std::shared_ptr<Service> ServicesCollector::getService(String name)
@@ -63,15 +69,27 @@ void ServicesCollector::attachSerial(HardwareSerial * serialPointerParam, WebSer
     }
 }
 
+void ServicesCollector::attachServer(MastroServer *serverParam)
+{
+    server = serverParam;
+}
+
 void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const String detailMessage) {
-  String result = "Error: ";
-  String statusStr = ERROR_MAP.at(err);
-  std::vector<String> parts = splitString(statusStr, ',');
-  for (const auto& el : parts) {
-    result+= (" - " + el);
-  }
-  result += " - " + detailMessage;
-  differentSerialprintln(result, serialPointer, webSerialPointer);
+  logError(getError(err, detailMessage));
+}
+
+void ServicesCollector::logInfo(String msg)
+{
+    String result = "[ LOG - ServiceCollector ] {msg}";
+    result.replace("{msg}", msg);
+    differentSerialprintln(result, serialPointer, webSerialPointer);
+}
+
+void ServicesCollector::logError(String msg)
+{
+    String error = "[ ERROR - ServiceCollector ] {msg}";
+    error.replace("{msg}", msg);
+    differentSerialprintln(error, serialPointer, webSerialPointer);
 }
 
 // Destructor to clean up dynamically allocated services

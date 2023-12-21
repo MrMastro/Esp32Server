@@ -5,11 +5,11 @@
 #include "constants/constants.h"
 #include "models/DataModelling.h"
 
-void initRoutes(MastroServer &srv,ServicesCollector* serviceCollector)
+void initRoutes(MastroServer &srv, ServicesCollector &serviceCollector)
 {
    srv.setCustomApi("/try", HTTP_GET, [](AsyncWebServerRequest *request)
                     {
-                        String message = pongSuccess();
+                        String message = "toDo"; //serviceCollector->executeMethod("InfoService","jsonPong");
                         request->send(200, "application/json", message); });
 
    srv.setCustomApi("/api/handleLed", HTTP_POST, [](AsyncWebServerRequest *request)
@@ -25,7 +25,7 @@ void initRoutes(MastroServer &srv,ServicesCollector* serviceCollector)
 
    srv.setCustomApi("/api/ping", HTTP_GET, [](AsyncWebServerRequest *request)
                     {
-                        String jsonResponse = pong();
+                        String jsonResponse = "toDo"; //serviceCollector.executeMethod("InfoService","jsonPong");;
                         request->send(200, "application/json", jsonResponse); });
    srv.setCustomApi("/api/sendCommand", HTTP_POST, [](AsyncWebServerRequest *request)
                     {

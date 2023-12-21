@@ -1,9 +1,19 @@
 #include "Service.h"
 #include "ServicesCollector/ServicesCollector.h"
 
+String Service::getClassName() const
+{
+    return String();
+}
+
 void Service::attachCollector(ServicesCollector *collectorParam)
 {
   collector = collectorParam;
+}
+
+boolean Service::isAvaible()
+{
+    return true;
 }
 
 void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
@@ -30,23 +40,21 @@ String Service::executeMethodByCollector(String nameService, String nameMethod, 
 
 void Service::throwError(ERROR_CODE err, const char *detailMessage)
 {
-  String result = "";
-  String statusStr = ERROR_MAP.at(err);
-  std::vector<String> parts = splitString(statusStr, ',');
-  for (const auto &el : parts)
-  {
-    result += (" - " + el);
-  }
-  logError(result);
+  logError(getError(err,detailMessage));
 }
 
 void Service::logInfo(String msg)
 {
-  differentSerialprintln(msg, serialPointer, webSerialPointer);
+  String log = "[ LOG - SERVICE {nameService} ] {msg}";
+  log.replace("{nameService}", getClassName());
+  log.replace("{msg}", msg);
+  differentSerialprintln(log, serialPointer, webSerialPointer);
 }
 
 void Service::logError(String msg)
 {
-  String error = "ERROR: " + msg;
-  differentSerialprintln(msg, serialPointer, webSerialPointer);
+  String error = "[ ERROR - SERVICE {nameService} ] {msg}";
+  error.replace("{nameService}", getClassName());
+  error.replace("{msg}", msg);
+  differentSerialprintln(error, serialPointer, webSerialPointer);
 }

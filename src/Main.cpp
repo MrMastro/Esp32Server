@@ -18,7 +18,6 @@
 #include "./services/ServiceImplementations/CommandService.h"
 #include "services/ServiceImplementations/LedService.h"
 
-
 const int ledPin = 2;
 bool isActiveLed = false;
 MastroServer myServer;
@@ -38,15 +37,17 @@ void setup(void)
   if(myServer.isAvaible()){
     WebSerial.begin(myServer.getWebServer(),"/webConsole");
   }
+
   //init services and ServiceCollector
-  servicesCollector = ServicesCollector();
+  servicesCollector = ServicesCollector(&myServer);
   servicesCollector.addService(std::make_shared<CommandService>());
   servicesCollector.addService(std::make_shared<LedService>());
+  servicesCollector.addService(std::make_shared<InfoService>());
   servicesCollector.attachSerial(&Serial,&WebSerial);
   servicesCollector.getService("LedService")->attachPin(ledPin);
  
   // Route handling
-  initRoutes(myServer,&servicesCollector);
+  initRoutes(myServer,servicesCollector);
   WebSerial.msgCallback(recvMsgBySerialWeb);
   myRgbStript.setupLedRgb();
   delay(50);

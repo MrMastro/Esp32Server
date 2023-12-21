@@ -25,6 +25,6 @@ const std::map<ERROR_CODE, String> ERROR_MAP = {
 };
 
 //void throwError(ERROR_CODE err, const char* detailMessage); comment useless method
-String getError(ERROR_CODE err, const char* detailMessage);
+String getError(ERROR_CODE err, const String detailMessage);
 
 #endif // EXCEPTIONS_H

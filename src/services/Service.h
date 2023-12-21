@@ -8,6 +8,10 @@
 #include <utils/FunctionUtils.h>
 #include <utils/SerialSimple.h>
 
+#ifndef InfoService_H
+#include "services/ServiceImplementations/InfoService.cpp"
+#endif
+
 #ifndef Services_H
 #define Services_H
 
@@ -19,15 +23,14 @@ String pongSuccess();
 // Service interface
 class Service {
 public:
-    // Pure virtual function makes this class abstract
-    virtual boolean isAvaible() = 0;
-    void attachCollector(ServicesCollector* collectorParam);
+    virtual boolean isAvaible();
     virtual void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
     virtual boolean attachPin(int pin);
     virtual String executeJson(String methodName, String param) = 0;
     virtual String executeJson(String methodName, std::vector<String> jsonParams) = 0;
+    virtual String getClassName() const;
+    void attachCollector(ServicesCollector* collectorParam);
     String executeMethodByCollector(String nameService,String nameMethod, String param);
-    virtual String getClassName() const = 0;
     virtual ~Service() {} // Virtual destructor for proper polymorphic destruction
 protected:
     HardwareSerial* serialPointer;
