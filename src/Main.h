@@ -5,13 +5,16 @@
 #include "MastroServer.h"
 #include "MastroLed.h"
 
-#include "routes/Routes.h"
-
+#include "./services/ServicesCollector/ServicesCollector.h"
 #include "services/ServiceImplementations/CommandService.h"
 #include "services/ServiceImplementations/LedService.h"
+
+#include "routes/Routes.h"
+
+
 //#include "services/ServiceImplementations/InfoService.cpp"
 
-ServicesCollector servicesCollector = ServicesCollector();
+ServicesCollector servicesCollector;
 MastroServer myServer;
 MastroLed myRgbStript;
 CommandService commandService;

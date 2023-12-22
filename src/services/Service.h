@@ -1,6 +1,3 @@
-
-
-
 #ifndef Services_H
 #define Services_H
 
