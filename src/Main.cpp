@@ -32,6 +32,7 @@ void setup(void)
     WebSerial.begin(myServer.getWebServer(),"/webConsole");
   }
   servicesCollector.attachSerial(&Serial,&WebSerial);
+  servicesCollector.attachServer(&myServer);
   //init services and ServiceCollector
   //servicesCollector = ServicesCollector(&myServer);
   // Service init
@@ -82,5 +83,5 @@ void logInfo(String msg)
 {
   String log = "[ LOG - MAIN ] {msg}";
   log.replace("{msg}", msg);
-  differentSerialprintln(log, &Serial, &WebSerial);
+  differentSerialprintln(log, "", &Serial, &WebSerial);
 }

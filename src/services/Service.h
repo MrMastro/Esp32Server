@@ -24,6 +24,7 @@ public:
     String getNameService();
     void attachCollector(ServicesCollector* collectorParam);
     String executeMethodByCollector(String nameService,String nameMethod, String param);
+    String getServerIpByCollector();
     virtual ~Service() {}
 protected:
     String nameService = "";

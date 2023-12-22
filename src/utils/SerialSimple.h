@@ -5,6 +5,6 @@
 #include <WebSerial.h>
 
 
-void differentSerialprintln(const String& msg, HardwareSerial* serial = nullptr, WebSerialClass* webSerial = nullptr);
-
-#endif  // Main_H
+void differentSerialprintln(const String& msg, String colorMsg, HardwareSerial* serial, WebSerialClass* webSerial = nullptr);
+void differentSerialprint(const String& msg, String colorMsg, HardwareSerial* serial, WebSerialClass* webSerial);
+#endif  // SerialSimple_H

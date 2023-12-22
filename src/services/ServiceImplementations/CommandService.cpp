@@ -82,6 +82,7 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
     result = "Led toggle";
     break;
   case CMD::INFO:
+    return getServerIpByCollector();
     // differentSerialprintln(myServer.getIp()); // todo
     break;
   default:
@@ -103,6 +104,6 @@ String CommandService::recvMsgAndExecute(String data)
     return "ERROR";
   }
   String result = executeCommand(mapStringToEnum(data), data);
-  differentSerialprintln(result, serialPointer, webSerialPointer);
+  differentSerialprintln(result, "", serialPointer, webSerialPointer);
   return result;
 }

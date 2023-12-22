@@ -83,6 +83,16 @@ String ServicesCollector::executeMethod(String nameService, String nameMethod, S
     return result;
 }
 
+MastroServer *ServicesCollector::getServer()
+{
+    if(server == nullptr){
+        throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "server point is null, attach server first", "getServer");
+        return nullptr;
+    }
+
+    return server;
+}
+
 void ServicesCollector::addService(Service* service, String name)
 {
     String s = "Adding service: {name}";
@@ -137,7 +147,7 @@ void ServicesCollector::logInfo(String msg)
 {
     String result = "[ LOG - ServiceCollector ] {msg}";
     result.replace("{msg}", msg);
-    differentSerialprintln(result, serialPointer, webSerialPointer);
+    differentSerialprintln(result, "\033[32m", serialPointer, webSerialPointer);
 }
 
 void ServicesCollector::logWarning(String msg, String context)
@@ -145,7 +155,7 @@ void ServicesCollector::logWarning(String msg, String context)
     String result = "[ WARNING - ServiceCollector on {context} ] {msg}";
     result.replace("{context}", context);
     result.replace("{msg}", msg);
-    differentSerialprintln(result, serialPointer, webSerialPointer);
+    differentSerialprintln(result, "\033[33m", serialPointer, webSerialPointer);
 }
 
 void ServicesCollector::logError(String msg, String context)
@@ -153,7 +163,7 @@ void ServicesCollector::logError(String msg, String context)
     String error = "[ ERROR - ServiceCollector on {context} ] {msg}";
     error.replace("{context}", context);
     error.replace("{msg}", msg);
-    differentSerialprintln(error, serialPointer, webSerialPointer);
+    differentSerialprintln(error, "\033[31m",serialPointer, webSerialPointer);
 }
 
 // Destructor to clean up dynamically allocated services

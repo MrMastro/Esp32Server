@@ -19,8 +19,8 @@ public:
     void attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam);
     void attachServer(MastroServer* serverParam);
     String executeMethod(String nameService,String nameMethod, String param);
+    MastroServer* getServer();
     ~ServicesCollector();
-    void doSome() const {}
 private:
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;

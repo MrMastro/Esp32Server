@@ -55,6 +55,16 @@ String Service::executeMethodByCollector(String nameService, String nameMethod, 
   return collector->executeMethod(nameService, nameMethod, param);
 }
 
+String Service::getServerIpByCollector()
+{
+  MastroServer* pointer = collector->getServer();
+  if(pointer == nullptr){
+    throwError(ERROR_CODE::SERVICE_ERROR, "server point is null", "getServer");
+    return "ERROR";
+  }
+    return pointer->getIp();
+}
+
 void Service::throwError(ERROR_CODE err, const char *detailMessage, String context)
 {
   logError(getError(err,detailMessage), context);
@@ -65,7 +75,7 @@ void Service::logInfo(String msg)
   String log = "[ LOG - SERVICE {nameService} ] {msg}";
   log.replace("{nameService}", nameService);
   log.replace("{msg}", msg);
-  differentSerialprintln(log, serialPointer, webSerialPointer);
+  differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer); //set green color
 }
 
 void Service::logWarning(String msg, String context)
@@ -74,7 +84,7 @@ void Service::logWarning(String msg, String context)
   log.replace("{nameService}", nameService);
   log.replace("{context}", context);
   log.replace("{msg}", msg);
-  differentSerialprintln(log, serialPointer, webSerialPointer);
+  differentSerialprintln(log, "\033[33m", serialPointer, webSerialPointer);
 }
 
 void Service::logError(String msg, String context)
@@ -83,5 +93,5 @@ void Service::logError(String msg, String context)
   error.replace("{nameService}", nameService);
   error.replace("{context}", context);
   error.replace("{msg}", msg);
-  differentSerialprintln(error, serialPointer, webSerialPointer);
+  differentSerialprintln(error, "\033[31m",serialPointer, webSerialPointer);
 }
