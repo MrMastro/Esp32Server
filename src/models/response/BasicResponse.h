@@ -1,7 +1,7 @@
-#include <ArduinoJson.h>
-#include <iostream>
 #ifndef BasicResponse_H
 #define BasicResponse_H
+
+#include <ArduinoJson.h>
 
 // Custom class to store additional information
 class StatusInfo

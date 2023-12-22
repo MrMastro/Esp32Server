@@ -1,10 +1,9 @@
-#include <Arduino.h>
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
 #include <map>
 #include <models/response/BasicResponse.h>
 #include "./utils/FunctionUtils.h"
-
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
 
 // Enum to represent http_code with additional information
 enum class HTTP_CODE
