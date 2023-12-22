@@ -17,6 +17,7 @@ boolean CommandService::isAvaible()
 
 void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
 {
+  logInfo("Attach Serial of CommandService");
   serialPointer = serialPointerParam;
   webSerialPointer = webSerialPointerParam;
   isOperative = true;
@@ -46,11 +47,6 @@ String CommandService::executeJson(String methodName, std::vector<String> jsonPa
   }
 }
 
-String CommandService::getClassName() const
-{
-  return "CommandService";
-}
-
 String CommandService::executeCommand(CMD cmd, String cmdString)
 {
   String result = "";
@@ -61,8 +57,8 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
   switch (cmd)
   {
   case CMD::LED_ON:
-    result = "Led on";
     executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(true));
+    result = "Led on";
     break;
   case CMD::LED_OFF:
     executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(false));
@@ -76,7 +72,7 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
     // differentSerialprintln(myServer.getIp()); // todo
     break;
   default:
-    result = "Tasto non riconosciuto: " + cmdString, serialPointer, webSerialPointer;
+    result = "Tasto non riconosciuto: " + cmdString;
     break;
   }
   return result;
@@ -87,7 +83,7 @@ String CommandService::recvMsgAndExecute(String data)
   // WebSerial.println("Received Data...");
   if (!isOperative)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null");
+    throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");
     return "ERROR";
   }
   String result = executeCommand(mapStringToEnum(data), data);

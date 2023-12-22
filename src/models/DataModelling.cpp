@@ -1,7 +1,7 @@
 #include "DataModelling.h"
 
 // Function to convert a boolean to JSON
-String simpleBooleanToJson(bool paramBool) {
+String simpleBooleanToJson(boolean paramBool) {
   // Create a JSON document
   StaticJsonDocument<50> doc;
 

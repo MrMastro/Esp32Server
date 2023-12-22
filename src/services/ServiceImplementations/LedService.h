@@ -9,10 +9,9 @@ public:
     LedService(int ledPin);
     boolean isAvaible() override;
     //void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
-    boolean attachPin(int ledPins) override;
+    boolean attachPin(int pin) override;
     String executeJson(String methodName, String param) override;
     String executeJson(String methodName, std::vector<String> jsonParams) override;
-    String getClassName() const override;
     boolean changeLed(boolean active, boolean toggle);
 private:
     boolean isAttachedLed;

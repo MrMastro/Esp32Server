@@ -1,6 +1,7 @@
-#include <services/Service.h>
 #ifndef CommandService_H
 #define CommandService_H
+
+#include <services/Service.h>
 
 
 class CommandService : public Service
@@ -11,8 +12,6 @@ public:
     void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
     String executeJson(String methodName, String param) override;
     String executeJson(String methodName, std::vector<String> jsonParams) override;
-    //String executeStringMethod(String nameMethod, String param) override; deprecated
-    String getClassName() const override;
     String recvMsgAndExecute(String data); //returns the msg received
 private:
     boolean isOperative;

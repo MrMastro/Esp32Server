@@ -1,19 +1,14 @@
-#include <Arduino.h>
-#include <ESPAsyncWebServer.h>
-#include <WebSerial.h>
-#include <vector>
+
+
+
+#ifndef Services_H
+#define Services_H
+
 #include "./models/DataModelling.h"
 #include <constants/constants.h>
 #include <exceptions/exceptions.h>
 #include <utils/FunctionUtils.h>
 #include <utils/SerialSimple.h>
-
-#ifndef InfoService_H
-#include "services/ServiceImplementations/InfoService.cpp"
-#endif
-
-#ifndef Services_H
-#define Services_H
 
 class ServicesCollector;
 
@@ -26,18 +21,21 @@ public:
     virtual boolean isAvaible();
     virtual void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
     virtual boolean attachPin(int pin);
-    virtual String executeJson(String methodName, String param) = 0;
-    virtual String executeJson(String methodName, std::vector<String> jsonParams) = 0;
-    virtual String getClassName() const;
+    virtual String executeJson(String methodName, String param);
+    virtual String executeJson(String methodName, std::vector<String> jsonParams);
+    void setNameService(String name);
+    String getNameService();
     void attachCollector(ServicesCollector* collectorParam);
     String executeMethodByCollector(String nameService,String nameMethod, String param);
-    virtual ~Service() {} // Virtual destructor for proper polymorphic destruction
+    virtual ~Service() {}
 protected:
+    String nameService = "";
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;
-    virtual void throwError(ERROR_CODE err, const char* detailMessage);
+    virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
     virtual void logInfo(String msg);
-    virtual void logError(String msg);
+    virtual void logWarning(String msg, String context);
+    virtual void logError(String msg, String context);
 private:
     ServicesCollector* collector;
 };

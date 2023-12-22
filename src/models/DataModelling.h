@@ -1,10 +1,9 @@
-#include <ArduinoJson.h>
-#include <iostream>
-#include <map>
-#include "response/BasicResponse.h"
-
 #ifndef DataModelling_H
 #define DataModelling_H
+
+#include <ArduinoJson.h>
+#include <iostream>
+#include "response/BasicResponse.h"
 
 boolean jsonToSimpleBoolean(String json);
 String simpleBooleanToJson(boolean paramBool);

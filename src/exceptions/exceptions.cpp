@@ -13,7 +13,7 @@
 //   Serial.println(result);
 // }
 
-String getError(ERROR_CODE err, const String detailMessage) 
+String getError(ERROR_CODE err, const String detailMessage)
 {
   String result = "";
   String statusStr = ERROR_MAP.at(err);

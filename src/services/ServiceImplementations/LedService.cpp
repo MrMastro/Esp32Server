@@ -17,10 +17,11 @@ boolean LedService::isAvaible()
     return isAttachedLed;
 }
 
-boolean LedService::attachPin(int ledPinParam)
+boolean LedService::attachPin(int pin)
 {
-  pinMode(ledPinParam, OUTPUT);
-  ledPin = ledPinParam;
+  logInfo("attachPin of ledService");
+  pinMode(pin, OUTPUT);
+  ledPin = pin;
   isAttachedLed = true;
   return isAttachedLed;
 }
@@ -53,22 +54,11 @@ String LedService::executeJson(String methodName, std::vector<String> jsonParams
   }
 }
 
-//Deprecated
-// String LedService::executeStringMethod(String nameMethod, String param)
-// {
-//     return String();
-// }
-
-String LedService::getClassName() const
-{
-    return "LedService";
-}
-
 boolean LedService::changeLed(boolean active, boolean toggle)
 {
   delay(50);
   if(!isAttachedLed){
-    throwError(ERROR_CODE::SERVICE_ERROR, "led not attached");
+    throwError(ERROR_CODE::SERVICE_ERROR, "led not attached", "changeLed");
   }
   if (toggle)
   {

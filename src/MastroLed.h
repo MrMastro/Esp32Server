@@ -1,7 +1,7 @@
-#include <Arduino.h>
-#include <LEDStripDriver.h>
 #ifndef MastroLed_h
 #define MastroLed_h
+
+#include <LEDStripDriver.h>
 
 class MastroLed
 {
