@@ -2,6 +2,8 @@
 
 #ifndef SERVICES_COLLECTOR_H
 #define SERVICES_COLLECTOR_H
+#include "services/ServicesCollector/ServicesCollector.h"
+ServicesCollector servicesCollector;
 
 ServicesCollector::ServicesCollector()
 {

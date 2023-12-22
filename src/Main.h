@@ -14,7 +14,6 @@
 
 //#include "services/ServiceImplementations/InfoService.cpp"
 
-ServicesCollector servicesCollector;
 MastroServer myServer;
 MastroLed myRgbStript;
 CommandService commandService;

@@ -25,6 +25,10 @@ void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialC
 
 String CommandService::executeJson(String methodName, String param)
 {
+  String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param={param})";
+  s.replace("{nameService}", nameService);
+  s.replace("{param}", param);
+  logInfo(s);
   if (methodName == "recvMsgAndExecute")
   {
     return recvMsgAndExecute(param);
@@ -37,6 +41,10 @@ String CommandService::executeJson(String methodName, String param)
 
 String CommandService::executeJson(String methodName, std::vector<String> jsonParams)
 {
+  String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param=vector)";
+  s.replace("{nameService}", nameService);
+  s.replace("{param}", jsonParams.at(0));
+  logInfo(s);
   if (methodName == "recvMsgAndExecute")
   {
     return recvMsgAndExecute(jsonParams.at(0));
@@ -49,19 +57,24 @@ String CommandService::executeJson(String methodName, std::vector<String> jsonPa
 
 String CommandService::executeCommand(CMD cmd, String cmdString)
 {
+  String s = "executeCommand(cmd={cmd},cmdString={cmdString})";
+  s.replace("{cmd}", cmdString);
+  s.replace("{cmdString}", cmdString);
+  logInfo(s);
   String result = "";
   if (!isOperative)
   {
-    return "Error";
+    throwError(ERROR_CODE::SERVICE_ERROR, "Attach Serials first (Serial or WebSerial)", "executeCommand");
+    return "ERROR";
   }
   switch (cmd)
   {
   case CMD::LED_ON:
-    executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(true));
+    executeMethodByCollector("LedService", "changeLed", simpleBooleanToJson(true));
     result = "Led on";
     break;
   case CMD::LED_OFF:
-    executeMethodByCollector("LedService","changeLed",simpleBooleanToJson(false));
+    executeMethodByCollector("LedService", "changeLed", simpleBooleanToJson(false));
     result = "Led off";
     break;
   case CMD::LED_TOGGLE:
@@ -80,6 +93,9 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
 
 String CommandService::recvMsgAndExecute(String data)
 {
+  String s = "recvMsgAndExecute(data={data})";
+  s.replace("{data}", data);
+  logInfo(s);
   // WebSerial.println("Received Data...");
   if (!isOperative)
   {

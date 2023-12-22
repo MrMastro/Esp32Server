@@ -32,4 +32,7 @@ private:
     void logError(String msg, String context);
 };
 
+
+extern ServicesCollector servicesCollector;
+
 #endif  // ServicesCollector_H

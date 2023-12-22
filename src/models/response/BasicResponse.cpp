@@ -5,7 +5,6 @@ BasicResponse::BasicResponse() : status(), dataJson("") {}
 
 BasicResponse::BasicResponse(StatusInfo info, const String &dataJsonInput)
 {
-    Serial.println("BasicResponse constructor:");
     status = info;
     if(dataJsonInput != "")
         dataJson = dataJsonInput;

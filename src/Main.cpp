@@ -1,5 +1,4 @@
 #include "Main.h"
-#include "globals.h"
 
 // ################################################################################ //
 //                            Manage profile settings                               //
