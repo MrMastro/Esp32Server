@@ -1,24 +1,25 @@
 #include "Service.h"
 #include "ServicesCollector/ServicesCollector.h"
+#include <cstdarg>
 
 String Service::executeJson(String methodName, std::vector<String> jsonParams)
 {
-  return executeJson("","");
+  return executeJson("", "");
 }
 
 void Service::setNameService(String name)
 {
-    nameService = name;
+  nameService = name;
 }
 
 String Service::getNameService()
 {
-    return nameService;
+  return nameService;
 }
 
 String Service::executeJson(String methodName, String param)
 {
-  throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of this class in the <ServiceImplementations> directory", "executeJson");
+  throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED, "please create the implementation of this class in the <ServiceImplementations> directory", "executeJson");
   return "ERROR";
 }
 
@@ -29,14 +30,26 @@ void Service::attachCollector(ServicesCollector *collectorParam)
 
 boolean Service::isAvaible()
 {
-    throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of this class in the <ServiceImplementations> directory and implements methot isAvaible()", "executeJson");
-    return false;
+  throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED, "please create the implementation of this class in the <ServiceImplementations> directory and implements methot isAvaible()", "executeJson");
+  return false;
 }
 
 void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
 {
   serialPointer = serialPointerParam;
   webSerialPointer = webSerialPointerParam;
+}
+
+bool Service::attachPin(int pinsInput...)
+{
+  std::va_list args;
+  va_start(args, pinsInput);
+  logInfo("Attaching pins into vector pins");
+  for (int i = 0; i < pinsInput; ++i){
+    pins.push_back(va_arg(args, int));
+  }
+  preparePin();
+  return true;
 }
 
 boolean Service::preparePin()
@@ -57,30 +70,33 @@ String Service::executeMethodByCollector(String nameService, String nameMethod, 
 
 String Service::getServerIpByCollector()
 {
-  if(collector==nullptr){
+  if (collector == nullptr)
+  {
     throwError(ERROR_CODE::SERVICE_ERROR, "attach serviceCollector first", "getServiceByCollector");
     return "ERROR";
   }
-  MastroServer* pointer = collector->getServer();
-  if(pointer == nullptr){
+  MastroServer *pointer = collector->getServer();
+  if (pointer == nullptr)
+  {
     throwError(ERROR_CODE::SERVICE_ERROR, "server point is null", "getServer");
     return "ERROR";
   }
-    return pointer->getIp();
+  return pointer->getIp();
 }
 
 Service *Service::getServiceByCollector(String nameService)
 {
-  if(collector==nullptr){
+  if (collector == nullptr)
+  {
     throwError(ERROR_CODE::SERVICE_ERROR, "attach serviceCollector first", "getServiceByCollector");
     return nullptr;
   }
-    return collector->getService(nameService);
+  return collector->getService(nameService);
 }
 
 void Service::throwError(ERROR_CODE err, const char *detailMessage, String context)
 {
-  logError(getError(err,detailMessage), context);
+  logError(getError(err, detailMessage), context);
 }
 
 void Service::logInfo(String msg)
@@ -88,7 +104,7 @@ void Service::logInfo(String msg)
   String log = "[ LOG - SERVICE {nameService} ] {msg}";
   log.replace("{nameService}", nameService);
   log.replace("{msg}", msg);
-  differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer); //set green color
+  differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer); // set green color
 }
 
 void Service::logWarning(String msg, String context)
@@ -106,5 +122,5 @@ void Service::logError(String msg, String context)
   error.replace("{nameService}", nameService);
   error.replace("{context}", context);
   error.replace("{msg}", msg);
-  differentSerialprintln(error, "\033[31m",serialPointer, webSerialPointer);
+  differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }

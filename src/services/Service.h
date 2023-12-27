@@ -17,8 +17,7 @@ class Service {
 public:
     virtual boolean isAvaible();
     virtual void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
-    template<typename T, typename... Args>
-    bool attachPin(T first, Args... rest);
+    bool attachPin(int pinsInput...);
     virtual boolean preparePin();
     virtual String executeJson(String methodName, String param);
     virtual String executeJson(String methodName, std::vector<String> jsonParams);
@@ -41,5 +40,4 @@ protected:
 private:
     ServicesCollector* collector;
 };
-#include "Service.tpp"
 #endif  // Services_H
