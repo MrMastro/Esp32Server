@@ -39,9 +39,9 @@ void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *w
   webSerialPointer = webSerialPointerParam;
 }
 
-boolean Service::attachPin(int pin)
+boolean Service::preparePin()
 {
-  logInfo("attach pin don't necessary, this procedure is ignored, if your service use a single pin implements method attachPin(int pin)");
+  logInfo("prepare pin don't necessary");
   return false;
 }
 
@@ -57,12 +57,25 @@ String Service::executeMethodByCollector(String nameService, String nameMethod, 
 
 String Service::getServerIpByCollector()
 {
+  if(collector==nullptr){
+    throwError(ERROR_CODE::SERVICE_ERROR, "attach serviceCollector first", "getServiceByCollector");
+    return "ERROR";
+  }
   MastroServer* pointer = collector->getServer();
   if(pointer == nullptr){
     throwError(ERROR_CODE::SERVICE_ERROR, "server point is null", "getServer");
     return "ERROR";
   }
     return pointer->getIp();
+}
+
+Service *Service::getServiceByCollector(String nameService)
+{
+  if(collector==nullptr){
+    throwError(ERROR_CODE::SERVICE_ERROR, "attach serviceCollector first", "getServiceByCollector");
+    return nullptr;
+  }
+    return collector->getService(nameService);
 }
 
 void Service::throwError(ERROR_CODE err, const char *detailMessage, String context)

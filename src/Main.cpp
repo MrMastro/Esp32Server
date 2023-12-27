@@ -3,62 +3,68 @@
 // ################################################################################ //
 //                            Manage profile settings                               //
 // ################################################################################ //
-// Decomment the line below for apply default settings                              //                     
+// Decomment the line below for apply default settings                              //
 // #include "./settings/settingsDefault.h" //      <--- Default settings     //
 // Comment the line below for apply default settings                                //
-#include "./settings/mySettings.h"//               <--- Custom settings      //
+#include "./settings/mySettings.h" //               <--- Custom settings      //
 // ################################################################################ //
 //                     End of profile settings management                           //
 // ################################################################################ //
 
 
-const int ledPin = 2;
+int ledPin = 2;
+//boolean doTest = false;
+
 // ################################################################################ //
 //                              Setup and Loop Method                               //
 // ################################################################################ //
 
 void test()
 {
-  logInfo("Begin Test");
-  servicesCollector.executeMethod("CommandService","recvMsgAndExecute","test");
+  logInfo("Begin Test 5");
 }
 
 void setup(void)
 {
   Serial.begin(9600);
-  //activeLed(false, false); //todo active led
   myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
-  if(myServer.isAvaible()){
-    WebSerial.begin(myServer.getWebServer(),"/webConsole");
+  if (myServer.isAvaible())
+  {
+    WebSerial.begin(myServer.getWebServer(), "/webConsole");
   }
-  servicesCollector.attachSerial(&Serial,&WebSerial);
+  servicesCollector.attachSerial(&Serial, &WebSerial);
   servicesCollector.attachServer(&myServer);
-  //init services and ServiceCollector
-  //servicesCollector = ServicesCollector(&myServer);
-  // Service init
-  servicesCollector.addService(&commandService,"CommandService");
-  servicesCollector.addService(&ledService,"LedService");
-  //servicesCollector.addService(&infoService,"InfoService");
-  // Attach pin
-  servicesCollector.getService("LedService")->attachPin(ledPin);
-  
+  // init services and ServiceCollector
+  // servicesCollector = ServicesCollector(&myServer);
+  //  Service init
+  servicesCollector.addService(&commandService, "CommandService");
+  //servicesCollector.addService(&ledService, "LedService");
+  // servicesCollector.addService(&infoService,"InfoService");
+  //  Attach pin
+  //servicesCollector.getService("LedService")->attachPin(ledPin, 5);
+
   // Route handling
   initRoutes(myServer);
-  
+
   // Other
   WebSerial.msgCallback(recvMsgBySerialWeb);
-  myRgbStript.setupLedRgb();
+  //myRgbStript.setupLedRgb();
   delay(50);
 }
 
 void loop(void)
 {
   myServer.handleOta();
-  myRgbStript.loopLedRgb();
+  //myRgbStript.loopLedRgb();
   delay(10);
-  if(Serial.available()){
+  if (Serial.available())
+  {
     recvMsgBySerial(Serial.readString());
   }
+
+  // if(doTest){
+  //   test();
+  // }
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
@@ -70,13 +76,13 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   }
   if (dataString.length() > 0)
   {
-    servicesCollector.executeMethod("CommandService","recvMsgAndExecute",dataString);
+    servicesCollector.executeMethod("CommandService", "recvMsgAndExecute", dataString);
   }
 }
 
 void recvMsgBySerial(String data)
 {
-  servicesCollector.executeMethod("CommandService","recvMsgAndExecute",data);
+  servicesCollector.executeMethod("CommandService", "recvMsgAndExecute", data);
 }
 
 void logInfo(String msg)

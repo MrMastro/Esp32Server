@@ -15,11 +15,12 @@
 //#include "services/ServiceImplementations/InfoService.cpp"
 
 MastroServer myServer;
-MastroLed myRgbStript;
+//MastroLed myRgbStript;
 CommandService commandService;
 LedService ledService;
 //InfoService infoService;
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);
 void logInfo(String msg);
+//void changeColorBar(int r, int g, int b, int wait);
 #endif  // Main_H

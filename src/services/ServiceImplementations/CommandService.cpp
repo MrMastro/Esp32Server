@@ -70,23 +70,31 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
   switch (cmd)
   {
   case CMD::LED_ON:
-    executeMethodByCollector("LedService", "changeLed", simpleBooleanToJson(true));
+    ((LedService*) getServiceByCollector("LedService"))->changeLed(true,false);
     result = "Led on";
     break;
   case CMD::LED_OFF:
-    executeMethodByCollector("LedService", "changeLed", simpleBooleanToJson(false));
+    ((LedService*) getServiceByCollector("LedService"))->changeLed(false,false);
     result = "Led off";
     break;
   case CMD::LED_TOGGLE:
-    // activeLed(true, true); //todo
+    ((LedService*) getServiceByCollector("LedService"))->changeLed(true,true);
     result = "Led toggle";
+    break;
+  case CMD::START_PROGRESS_BAR:
+    ((LedService *) getServiceByCollector("LedService"))->effectPrograssiveBar(getColor(0,0,255),10);
+    result = "Effect progressive bar blu";
+    break;
+  case CMD::OFF_STRIPT:
+    ((LedService *) getServiceByCollector("LedService"))->shotdownLed();
+    result = "Stript off";
     break;
   case CMD::INFO:
     return getServerIpByCollector();
     // differentSerialprintln(myServer.getIp()); // todo
     break;
   default:
-    result = "Tasto non riconosciuto: " + cmdString;
+    result = "Comando non riconosciuto: " + cmdString;
     break;
   }
   return result;

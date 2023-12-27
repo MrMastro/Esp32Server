@@ -2,7 +2,6 @@
 #include "constants/htmlPages.h"
 
 AsyncWebServer webServer(80);
-DNSServer dnsServer;
 
 MastroServer::MastroServer()
 {
@@ -19,6 +18,7 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     MastroServer();
     if (ledPin != -1)
     {
+        pinMode(ledPin, OUTPUT);
         ledIndicatorMode = true;
         ledPinIndicator = ledPin;
     }
@@ -89,7 +89,7 @@ void MastroServer::initAP(String ssid, String password)
     // wifiManager.startConfigPortal(ssid.c_str(), password.c_str());
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
-    dnsServer.start(53, "*", WiFi.softAPIP());
+    //DNSServer.start(53, "*", WiFi.softAPIP());
     // Print the AP IP address to the serial monitor
     Serial.print("AP IP address: ");
     Serial.println(WiFi.softAPIP());

@@ -34,18 +34,22 @@ enum class CMD
   LED_ON,
   LED_OFF,
   LED_TOGGLE,
+  START_PROGRESS_BAR,
+  OFF_STRIPT,
   INFO,
   OTHER
 };
 
-const std::map<CMD, String> CMD_MAP = {
-    {CMD::LED_ON, "led on"},
-    {CMD::LED_OFF, "led off"},
-    {CMD::LED_TOGGLE, "led toggle"},
-    {CMD::INFO, "info"},
-    {CMD::OTHER, "other"}
-    // Add more status codes and information as needed
-};
+// const std::pair<CMD, String> CMD_PAIR[] = {
+//     {CMD::LED_ON, "led on"},
+//     {CMD::LED_OFF, "led off"},
+//     {CMD::LED_TOGGLE, "led toggle"},
+//     {CMD::START_PROGRESS_BAR, "start progress bar"},
+//     {CMD::OFF_STRIPT, "off stript"},
+//     {CMD::INFO, "info"},
+//     {CMD::OTHER, "other"}
+//     // Add more status codes and information as needed
+// };
 
 CMD mapStringToEnum(String inputString);
 StatusInfo getStatusInfoByHttpCode(HTTP_CODE code);

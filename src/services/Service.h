@@ -17,19 +17,23 @@ class Service {
 public:
     virtual boolean isAvaible();
     virtual void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
-    virtual boolean attachPin(int pin);
+    template<typename T, typename... Args>
+    bool attachPin(T first, Args... rest);
+    virtual boolean preparePin();
     virtual String executeJson(String methodName, String param);
     virtual String executeJson(String methodName, std::vector<String> jsonParams);
     void setNameService(String name);
     String getNameService();
     void attachCollector(ServicesCollector* collectorParam);
     String executeMethodByCollector(String nameService,String nameMethod, String param);
+    Service* getServiceByCollector(String nameService);
     String getServerIpByCollector();
     virtual ~Service() {}
 protected:
     String nameService = "";
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;
+    std::vector<int> pins;
     virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
     virtual void logInfo(String msg);
     virtual void logWarning(String msg, String context);
@@ -37,5 +41,5 @@ protected:
 private:
     ServicesCollector* collector;
 };
-
+#include "Service.tpp"
 #endif  // Services_H

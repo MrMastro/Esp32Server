@@ -2,7 +2,7 @@
 #define CommandService_H
 
 #include <services/Service.h>
-
+#include "LedService.h"
 
 class CommandService : public Service
 {

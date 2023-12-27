@@ -16,7 +16,6 @@ void MastroLed::setupLedRgb()
     b = 255;
     attualspeed = 10;
     led.setColor(0, g, b); // RGB
-                           // Serial.begin(9600);
 }
 
 void MastroLed::setModeValue(int value)
@@ -56,7 +55,6 @@ void MastroLed::salita(int *speedg)
             break;
         }
         delayMicroseconds(attualspeed);
-        //controllo();
     }
 }
 
@@ -79,13 +77,10 @@ void MastroLed::discesa(int *speedg)
         }
         else
             delayMicroseconds(attualspeed);
-        //controllo();
     }
 }
 void MastroLed::loopLedRgb()
 {
-    // Serial.println(attualspeed);
-    //controllo();
     if (value < 4)
     {
         led.setColor(r, g, b); // RGB
