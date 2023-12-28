@@ -13,28 +13,43 @@ StatusInfo getStatusInfoByHttpCode(HTTP_CODE code)
     return StatusInfo{};
 }
 
+
 CMD mapStringToEnum(String inputString)
 {
-  inputString.toUpperCase();
-  if (inputString.equalsIgnoreCase("led on"))
+  inputString.toLowerCase();
+  for (const auto &entry : CMD_PAIR)
   {
-    return CMD::LED_ON;
+    if (entry.second == inputString)
+    {
+      return entry.first;
+    }
   }
-  else if (inputString.equalsIgnoreCase("led off"))
-  {
-    return CMD::LED_OFF;
-  }
-  else if (inputString.equalsIgnoreCase("led toggle"))
-  {
-    return CMD::LED_TOGGLE;
-  }
-  else if (inputString.equalsIgnoreCase("info"))
-  {
-    return CMD::INFO;
-  }
-  else
-  {
-    // Valore predefinito in caso di stringa non riconosciuta
-    return CMD::OTHER;
-  }
+  // Return a special value or throw an exception if the string is not found
+  return CMD::OTHER;
 }
+
+// CMD mapStringToEnum(String inputString)
+// {
+//   inputString.toUpperCase();
+//   if (inputString.equalsIgnoreCase("led on"))
+//   {
+//     return CMD::LED_ON;
+//   }
+//   else if (inputString.equalsIgnoreCase("led off"))
+//   {
+//     return CMD::LED_OFF;
+//   }
+//   else if (inputString.equalsIgnoreCase("led toggle"))
+//   {
+//     return CMD::LED_TOGGLE;
+//   }
+//   else if (inputString.equalsIgnoreCase("info"))
+//   {
+//     return CMD::INFO;
+//   }
+//   else
+//   {
+//     // Valore predefinito in caso di stringa non riconosciuta
+//     return CMD::OTHER;
+//   }
+// }

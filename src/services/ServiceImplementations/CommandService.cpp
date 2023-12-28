@@ -76,12 +76,20 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
     ((LedService*) getServiceByCollector("LedService"))->changeLed(true,true);
     result = "Led toggle";
     break;
+  case CMD::START_PROGRESS_BAR:
+    //((LedService *) getServiceByCollector("LedService"))->effectPrograssiveBar(getColor(0,0,255),10);
+    result = "Effect progressive bar blu (WIP)";
+    break;
+  case CMD::OFF_STRIPT:
+    //((LedService *) getServiceByCollector("LedService"))->shotdownLed();
+    result = "Stript off (WIP)";
+    break;
   case CMD::INFO:
     return getServerIpByCollector();
     // differentSerialprintln(myServer.getIp()); // todo
     break;
   default:
-    result = "Tasto non riconosciuto: " + cmdString;
+    result = "Comando non riconosciuto: " + cmdString;
     break;
   }
   return result;
