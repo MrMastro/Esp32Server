@@ -14,6 +14,8 @@ public:
     String executeJson(String methodName, String param) override;
     String executeJson(String methodName, std::vector<String> jsonParams) override;
     boolean changeLed(boolean active, boolean toggle);
+    void effectPrograssiveBar(uint32_t colorRgb, int deltaTms);
+    void shotdownLed();
 private:
     boolean isAttachedLed;
     int ledPin;

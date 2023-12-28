@@ -34,6 +34,9 @@ boolean LedService::preparePin()
       ws2811Pin = pin;
       numLeds = 32;
       ledStript = Adafruit_NeoPixel(numLeds, ws2811Pin, NEO_BRG + NEO_KHZ800);
+      ledStript.begin();
+      shotdownLed();
+      //ledStript.show();
     }
     else
     {
@@ -105,4 +108,28 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   }
   delay(100);
   return isLedOn;
+}
+
+void LedService::effectPrograssiveBar(uint32_t colorRgb, int deltaTms)
+{
+  if (!isAttachedLed)
+  {
+    throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");
+  }
+  for (int pixel = 0; pixel < numLeds; pixel++)
+  {
+    ledStript.setPixelColor(pixel, ledStript.Color(0,0,255));
+    ledStript.show();
+    delay(deltaTms);
+  }
+}
+
+void LedService::shotdownLed()
+{
+  if (!isAttachedLed)
+  {
+    throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "shotdownLed");
+  }
+  ledStript.clear();
+  ledStript.show();
 }

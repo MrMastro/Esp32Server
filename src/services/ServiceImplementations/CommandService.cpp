@@ -77,11 +77,11 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
     result = "Led toggle";
     break;
   case CMD::START_PROGRESS_BAR:
-    //((LedService *) getServiceByCollector("LedService"))->effectPrograssiveBar(getColor(0,0,255),10);
+    ((LedService *) getServiceByCollector("LedService"))->effectPrograssiveBar(0,100);
     result = "Effect progressive bar blu (WIP)";
     break;
   case CMD::OFF_STRIPT:
-    //((LedService *) getServiceByCollector("LedService"))->shotdownLed();
+    ((LedService *) getServiceByCollector("LedService"))->shotdownLed();
     result = "Stript off (WIP)";
     break;
   case CMD::INFO:

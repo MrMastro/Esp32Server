@@ -16,3 +16,8 @@ std::vector<String> splitString(const String &str, char delimiter)
     tokens.push_back(str.substring(start));
     return tokens;
 }
+
+uint32_t getColor(int r, int g, int b)
+{
+    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+}
