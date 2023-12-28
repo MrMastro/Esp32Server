@@ -12,7 +12,7 @@
 // ################################################################################ //
 
 
-const int ledPin = 2;
+int ledPin = 2;
 // ################################################################################ //
 //                              Setup and Loop Method                               //
 // ################################################################################ //
@@ -40,7 +40,7 @@ void setup(void)
   servicesCollector.addService(&ledService,"LedService");
   //servicesCollector.addService(&infoService,"InfoService");
   // Attach pin
-  servicesCollector.getService("LedService")->attachPin(ledPin);
+  servicesCollector.getService("LedService")->attachPin({2,5});
   
   // Route handling
   initRoutes(myServer);
