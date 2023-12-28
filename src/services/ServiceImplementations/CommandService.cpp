@@ -1,9 +1,4 @@
-#include "./services/Service.h"
-#include "./constants/constants.h"
-#include <models/DataModelling.h>
-#include "CommandService.h"
-#include <utils/SerialSimple.h>
-#include <exceptions/exceptions.h>
+#include "./services/ServiceImplementations/CommandService.h"
 
 CommandService::CommandService()
 {
@@ -70,15 +65,15 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
   switch (cmd)
   {
   case CMD::LED_ON:
-    executeMethodByCollector("LedService", "changeLed", simpleBooleanToJson(true));
+    ((LedService*) getServiceByCollector("LedService"))->changeLed(true,false);
     result = "Led on";
     break;
   case CMD::LED_OFF:
-    executeMethodByCollector("LedService", "changeLed", simpleBooleanToJson(false));
+    ((LedService*) getServiceByCollector("LedService"))->changeLed(false,false);
     result = "Led off";
     break;
   case CMD::LED_TOGGLE:
-    // activeLed(true, true); //todo
+    ((LedService*) getServiceByCollector("LedService"))->changeLed(true,true);
     result = "Led toggle";
     break;
   case CMD::INFO:

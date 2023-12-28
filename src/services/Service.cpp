@@ -63,6 +63,16 @@ String Service::executeMethodByCollector(String nameService, String nameMethod, 
   return collector->executeMethod(nameService, nameMethod, param);
 }
 
+Service *Service::getServiceByCollector(String nameService)
+{
+  if (collector == nullptr)
+  {
+    throwError(ERROR_CODE::SERVICE_ERROR, "attach serviceCollector first", "getServiceByCollector");
+    return nullptr;
+  }
+  return collector->getService(nameService);
+}
+
 String Service::getServerIpByCollector()
 {
   MastroServer* pointer = collector->getServer();

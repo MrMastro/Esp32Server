@@ -25,7 +25,7 @@ public:
     String getNameService();
     void attachCollector(ServicesCollector* collectorParam);
     String executeMethodByCollector(String nameService,String nameMethod, String param);
-    //Service* getServiceByCollector(String nameService);
+    Service* getServiceByCollector(String nameService);
     String getServerIpByCollector();
     virtual ~Service() {}
 protected:

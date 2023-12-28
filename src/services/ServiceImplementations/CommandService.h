@@ -2,7 +2,12 @@
 #define CommandService_H
 
 #include <services/Service.h>
-
+#include "LedService.h"
+#include "./constants/constants.h"
+#include <models/DataModelling.h>
+#include "CommandService.h"
+#include <utils/SerialSimple.h>
+#include <exceptions/exceptions.h>
 
 class CommandService : public Service
 {
