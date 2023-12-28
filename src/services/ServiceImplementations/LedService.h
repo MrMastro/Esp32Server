@@ -2,22 +2,25 @@
 #define LedService_H
 
 #include <./services/Service.h>
+#include <Adafruit_NeoPixel.h>
 
 class LedService: public Service
 {
 public:
     LedService();
-    LedService(int ledPin);
     boolean isAvaible() override;
-    //void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
-    boolean attachPin(int pin) override;
+    boolean preparePin();
+    // void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
     String executeJson(String methodName, String param) override;
     String executeJson(String methodName, std::vector<String> jsonParams) override;
     boolean changeLed(boolean active, boolean toggle);
 private:
     boolean isAttachedLed;
     int ledPin;
+    int ws2811Pin;
+    int numLeds;
     bool isLedOn;
+    Adafruit_NeoPixel ledStript;
 };
 
 #endif  // LedService_H

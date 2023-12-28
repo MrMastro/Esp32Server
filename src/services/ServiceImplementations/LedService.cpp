@@ -6,23 +6,44 @@ LedService::LedService()
     isAttachedLed = false;
 }
 
-LedService::LedService(int ledPinInput)
-{
-    isLedOn = false;
-    isAttachedLed = attachPin(ledPinInput);
-}
-
 boolean LedService::isAvaible()
 {
     return isAttachedLed;
 }
 
-boolean LedService::attachPin(int pin)
+boolean LedService::preparePin()
 {
-  logInfo("attachPin of ledService");
-  pinMode(pin, OUTPUT);
-  ledPin = pin;
-  isAttachedLed = true;
+  logInfo("prepare pin of ledService");
+  String s = "Pins size: {n}";
+  s.replace("{n}", String(pins.size()));
+  logInfo(s);
+  for (int i = 0; i < pins.size(); ++i)
+  {
+    s = "Preparing pin: {pin} at position: {i}";
+    int pin = pins.at(i);
+    s.replace("{pin}", String(pin));
+    s.replace("{i}", String(i));
+    logInfo(s);
+    if (i == 0)
+    {
+      ledPin = pin;
+      pinMode(pin, OUTPUT);
+    }
+    else if (i == 1)
+    {
+      ws2811Pin = pin;
+      numLeds = 32;
+      ledStript = Adafruit_NeoPixel(numLeds, ws2811Pin, NEO_BRG + NEO_KHZ800);
+    }
+    else
+    {
+      s = "Pin {pin} have been ignored, this service has already all the necessary pin";
+      s.replace("{pin}", String(pin));
+      logWarning(s, "preparePin");
+    }
+    isAttachedLed = true;
+  }
+  logInfo("Pin preparated");
   return isAttachedLed;
 }
 

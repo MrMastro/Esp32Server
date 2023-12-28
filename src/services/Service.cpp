@@ -1,5 +1,6 @@
 #include "Service.h"
 #include "ServicesCollector/ServicesCollector.h"
+#include <cstdarg>
 
 String Service::executeJson(String methodName, std::vector<String> jsonParams)
 {
@@ -39,9 +40,16 @@ void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *w
   webSerialPointer = webSerialPointerParam;
 }
 
-boolean Service::attachPin(int pin)
+boolean Service::attachPin(std::vector<int> values)
 {
-  logInfo("attach pin don't necessary, this procedure is ignored, if your service use a single pin implements method attachPin(int pin)");
+  pins = values;
+  preparePin();
+  return true;
+}
+
+boolean Service::preparePin()
+{
+  logInfo("prepare pin don't necessary, override this method and use pins vector");
   return false;
 }
 
