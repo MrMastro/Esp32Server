@@ -1,37 +1,40 @@
 #include "DataModelling.h"
 
 // Function to convert a boolean to JSON
-String simpleBooleanToJson(boolean paramBool) {
-  // Create a JSON document
-  StaticJsonDocument<50> doc;
+String simpleBooleanToJson(boolean paramBool)
+{
+    // Create a JSON document
+    StaticJsonDocument<50> doc;
 
-  // Add the boolean value to the document
-  doc["data"] = paramBool;
+    // Add the boolean value to the document
+    doc["data"] = paramBool;
 
-  // Serialize the JSON document to a String
-  String jsonString;
-  serializeJson(doc, jsonString);
+    // Serialize the JSON document to a String
+    String jsonString;
+    serializeJson(doc, jsonString);
 
-  return jsonString;
+    return jsonString;
 }
 
 // Function to convert JSON to a boolean
-boolean jsonToSimpleBoolean(String jsonString) {
-  // Parse the JSON document
-  StaticJsonDocument<50> doc;
-  DeserializationError error = deserializeJson(doc, jsonString);
+boolean jsonToSimpleBoolean(String jsonString)
+{
+    // Parse the JSON document
+    StaticJsonDocument<50> doc;
+    DeserializationError error = deserializeJson(doc, jsonString);
 
-  // Check for parsing errors
-  if (error) {
-    Serial.print("Error parsing JSON: ");
-    Serial.println(error.c_str());
-    return false;
-  }
+    // Check for parsing errors
+    if (error)
+    {
+        Serial.print("Error parsing JSON: ");
+        Serial.println(error.c_str());
+        return false;
+    }
 
-  // Extract the boolean value from the document
-  bool paramBool = doc["data"];
+    // Extract the boolean value from the document
+    bool paramBool = doc["data"];
 
-  return paramBool;
+    return paramBool;
 }
 
 StatusInfo jsonToStatusInfo(String &json)
@@ -85,7 +88,8 @@ String dtoToJson(StatusInfo &info)
     return jsonString;
 }
 
-BasicResponse jsonToDto(String &json){
+BasicResponse jsonToDto(String &json)
+{
     // Create a JSON document to parse the incoming JSON string
     StaticJsonDocument<200> jsonDocument;
 
@@ -113,7 +117,8 @@ BasicResponse jsonToDto(String &json){
     return BasicResponse(message, description, dataJson);
 }
 
-String dtoToJson(BasicResponse &data){
+String dtoToJson(BasicResponse &data)
+{
     // Create a JSON document with enough capacity to store the data
     StaticJsonDocument<200> jsonDocument;
     StaticJsonDocument<200> jsonInnerDocument;
@@ -125,12 +130,13 @@ String dtoToJson(BasicResponse &data){
 
     // Convert the struct to a JsonObject
     JsonObject statusObject = jsonInnerDocument.to<JsonObject>();
-    statusObject["message"] =  data.getStatus().getMessage();
+    statusObject["message"] = data.getStatus().getMessage();
     statusObject["description"] = data.getStatus().getDescription();
     jsonDocument["status"] = statusObject;
 
-    if(data.getDataJson() != ""){
-        jsonDocument["data"]= data.getDataJson();
+    if (data.getDataJson() != "")
+    {
+        jsonDocument["data"] = data.getDataJson();
     }
 
     // Create a String to store the JSON
