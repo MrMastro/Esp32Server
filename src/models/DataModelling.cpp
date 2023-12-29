@@ -107,7 +107,7 @@ BasicResponse jsonToDto(String &json){
     int code = jsonDocument["code"];
     String message = jsonDocument["message"].as<String>();
     String description = jsonDocument["description"].as<String>();
-    String dataJson = jsonDocument["dataJson"].as<String>();
+    String dataJson = jsonDocument["data"].as<String>();
 
     // Create and return a BasicResponse object
     return BasicResponse(message, description, dataJson);
@@ -130,8 +130,7 @@ String dtoToJson(BasicResponse &data){
     jsonDocument["status"] = statusObject;
 
     if(data.getDataJson() != ""){
-        JsonObject dataObject = jsonDocument.to<JsonObject>();
-        dataObject["dataJson"]= data.getDataJson();
+        jsonDocument["data"]= data.getDataJson();
     }
 
     // Create a String to store the JSON
