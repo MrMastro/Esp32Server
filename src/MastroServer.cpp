@@ -1,5 +1,5 @@
 #include "MastroServer.h"
-#include "htmlPages.h"
+#include "constants/htmlPages.h"
 
 AsyncWebServer webServer(80);
 DNSServer dnsServer;
@@ -28,7 +28,7 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     }
 
     // Wait Indicator
-    wait5SecondsLedBlink();
+    welcomeWaitLedBlink();
 
     if (mode == "AP")
     {
@@ -37,6 +37,8 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     else
     {
         Serial.println("init WIFI mode");
+        Serial.print("Try to connect to: ");
+        Serial.println(ssid);
         WiFi.mode(WIFI_STA);
         WiFi.begin(ssid, passwordWiFi);
     }
@@ -74,10 +76,9 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     Serial.println("OTA server started");
     setRoutes();
     ElegantOTA.begin(&webServer); // Start ElegantOTA
-    WebSerial.begin(&webServer);
-    WebSerial.msgCallback(recvMsg);
     webServer.begin();
     Serial.println("HTTP server started");
+    pointWebServer = &webServer;
     serverActive = true;
 }
 
@@ -95,6 +96,29 @@ void MastroServer::initAP(String ssid, String password)
     // Configure the captive portal behavior
     // WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     activeIndicatorLed(true, false);
+}
+
+String MastroServer::getOneElementJsonString(String key, String value)
+{
+    // Create a JSON object
+    DynamicJsonDocument jsonDoc(1024);
+    // Add data to the JSON object
+    jsonDoc[key] = value;
+    // serialaze json
+    String jsonString;
+    serializeJson(jsonDoc, jsonString);
+    //return
+    return jsonString;
+}
+
+boolean MastroServer::isAvaible()
+{
+    return serverActive;
+}
+
+AsyncWebServer* MastroServer::getWebServer()
+{
+    return pointWebServer;
 }
 
 void MastroServer::handleOta()
@@ -157,13 +181,13 @@ boolean MastroServer::activeIndicatorLed(bool active, bool toggle)
     return isActiveIndicatorLed;
 }
 
-void MastroServer::wait5SecondsLedBlink()
+void MastroServer::welcomeWaitLedBlink()
 {
     if (ledIndicatorMode)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 10; i++)
         {
-            delay(1000);
+            delay(100);
             Serial.print(".");
             activeIndicatorLed(true, true);
         }
@@ -172,12 +196,6 @@ void MastroServer::wait5SecondsLedBlink()
 
 void MastroServer::initArduinoOta(String deviceName, String devicePassword)
 {
-    /*
-while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-Serial.println("Connection Failed! Rebooting...");
-delay(5000);
-ESP.restart();
-}*/
 
     // Port defaults to 3232
     ArduinoOTA.setPort(3232);
@@ -239,3 +257,16 @@ void MastroServer::setCustomApi(const char* uri, WebRequestMethodComposite metho
     delay(50);
     webServer.on(uri, method, onRequest);
 }
+
+// String MastroServer::getJsonStringByKeysAndValues(String keys[], String values[], int size)
+// {
+//     DynamicJsonDocument jsonDoc(1024);
+//     for (size_t i = 0; i < size; ++i)
+//     {
+//         jsonDoc[keys[i]] = values[i];
+//     }
+//     String jsonString;
+//     serializeJson(jsonDoc, jsonString);
+//     return jsonString;
+// }
+

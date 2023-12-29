@@ -3,6 +3,7 @@
 //---- DEVICE SETTINGS -------
 const char* deviceName = "MastroDevice";
 const char* devicePassword = "Password";
+const boolean debug = false;
 
 //---- WIRELESS SETTINGS -------
 const String wirlessMode = "AP"; //AP or WIFI
