@@ -39,49 +39,49 @@ Service* ServicesCollector::getService(String name)
     return containerService.at(name);
 }
 
-String ServicesCollector::executeMethod(String nameService, String nameMethod, String param)
-{
-    String s = "executeMethod(nameService={nameService}, nameMethod={nameMethod}, param={param})";
-    s.replace("{nameService}", nameService);
-    s.replace("{nameMethod}", nameMethod);
-    s.replace("{param}", param);
-    logInfo(s);
-    String result = "ERROR";
-    if (!isPresentInMap(nameService))
-    {
-        String msg = "don't found service called {name}";
-        msg.replace("{name}", nameService);
-        throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, msg, "executeMethod");
-        return "ERROR";
-    }
+// String ServicesCollector::executeMethod(String nameService, String nameMethod, String param)
+// {
+//     String s = "executeMethod(nameService={nameService}, nameMethod={nameMethod}, param={param})";
+//     s.replace("{nameService}", nameService);
+//     s.replace("{nameMethod}", nameMethod);
+//     s.replace("{param}", param);
+//     logInfo(s);
+//     String result = "ERROR";
+//     if (!isPresentInMap(nameService))
+//     {
+//         String msg = "don't found service called {name}";
+//         msg.replace("{name}", nameService);
+//         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, msg, "executeMethod");
+//         return "ERROR";
+//     }
 
-    Service* it = getService(nameService);
-    if(it == nullptr){
-        return "ERROR";
-    }
-    if (it->getNameService() == "")
-    {
-        throwServicesCollectorError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED, "please create the implementation of this class and ovverride getClassName with name of Service implemented", "executeMethod");
-        return "ERROR";
-    }
+//     Service* it = getService(nameService);
+//     if(it == nullptr){
+//         return "ERROR";
+//     }
+//     if (it->getNameService() == "")
+//     {
+//         throwServicesCollectorError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED, "please create the implementation of this class and ovverride getClassName with name of Service implemented", "executeMethod");
+//         return "ERROR";
+//     }
 
-    if (!it->isAvaible())
-    {
-        String errorMsg = "the service {service} isn't avaible";
-        errorMsg.replace("{service}", it->getNameService());
-        throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, errorMsg, "executeMethod");
-        return "ERROR";
-    }
+//     if (!it->isAvaible())
+//     {
+//         String errorMsg = "the service {service} isn't avaible";
+//         errorMsg.replace("{service}", it->getNameService());
+//         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, errorMsg, "executeMethod");
+//         return "ERROR";
+//     }
 
-    result = it->executeJson(nameMethod, param);
+//     result = it->executeJson(nameMethod, param);
 
-    if (result == "Service Method not found")
-    {
-        throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "can't find nameMethod: ", "executeMethod");
-        return "ERROR";
-    }
-    return result;
-}
+//     if (result == "Service Method not found")
+//     {
+//         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "can't find nameMethod: ", "executeMethod");
+//         return "ERROR";
+//     }
+//     return result;
+// }
 
 MastroServer *ServicesCollector::getServer()
 {

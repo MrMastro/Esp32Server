@@ -18,7 +18,7 @@ public:
     void addService(Service* service, String name);
     void attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam);
     void attachServer(MastroServer* serverParam);
-    String executeMethod(String nameService,String nameMethod, String param);
+    //String executeMethod(String nameService,String nameMethod, String param);
     MastroServer* getServer();
     ~ServicesCollector();
 private:

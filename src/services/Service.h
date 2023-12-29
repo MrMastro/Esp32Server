@@ -19,12 +19,12 @@ public:
     virtual void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
     boolean attachPin(std::vector<int> values);
     virtual boolean preparePin();
-    virtual String executeJson(String methodName, String param);
-    virtual String executeJson(String methodName, std::vector<String> jsonParams);
+    //virtual String executeJson(String methodName, String param); deprecated
+    //virtual String executeJson(String methodName, std::vector<String> jsonParams); deprecated
     void setNameService(String name);
     String getNameService();
     void attachCollector(ServicesCollector* collectorParam);
-    String executeMethodByCollector(String nameService,String nameMethod, String param);
+    //String executeMethodByCollector(String nameService,String nameMethod, String param); deprecated
     Service* getServiceByCollector(String nameService);
     String getServerIpByCollector();
     virtual ~Service() {}

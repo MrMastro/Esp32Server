@@ -12,30 +12,30 @@ public:
     InfoService() {}  // Constructor
     ~InfoService() {} // Destructor
 
-    String executeJson(String methodName, String param) override
-    {
-        if (methodName == "jsonPong")
-        {
-            return jsonPong();
-        }
-        else if (methodName == "jsonInfoSuccess")
-        {
-            return jsonInfoSuccess();
-        }
-        else if (methodName == "getIp")
-        {
-            return "workInProgress";
-        }
-        else
-        {
-            return "Service Method not found";
-        }
-    }
+    // String executeJson(String methodName, String param) override
+    // {
+    //     if (methodName == "jsonPong")
+    //     {
+    //         return jsonPong();
+    //     }
+    //     else if (methodName == "jsonInfoSuccess")
+    //     {
+    //         return jsonInfoSuccess();
+    //     }
+    //     else if (methodName == "getIp")
+    //     {
+    //         return "workInProgress";
+    //     }
+    //     else
+    //     {
+    //         return "Service Method not found";
+    //     }
+    // }
 
-    String executeJson(String methodName, std::vector<String> jsonParams) override
-    {
-        return executeJson(methodName,"");
-    }
+    // String executeJson(String methodName, std::vector<String> jsonParams) override
+    // {
+    //     return executeJson(methodName,"");
+    // }
 
     String jsonPong()
     {

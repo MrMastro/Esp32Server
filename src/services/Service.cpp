@@ -2,10 +2,10 @@
 #include "ServicesCollector/ServicesCollector.h"
 #include <cstdarg>
 
-String Service::executeJson(String methodName, std::vector<String> jsonParams)
-{
-  return executeJson("","");
-}
+// String Service::executeJson(String methodName, std::vector<String> jsonParams)
+// {
+//   return executeJson("","");
+// }
 
 void Service::setNameService(String name)
 {
@@ -17,11 +17,11 @@ String Service::getNameService()
     return nameService;
 }
 
-String Service::executeJson(String methodName, String param)
-{
-  throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of this class in the <ServiceImplementations> directory", "executeJson");
-  return "ERROR";
-}
+// String Service::executeJson(String methodName, String param)
+// {
+//   throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of this class in the <ServiceImplementations> directory", "executeJson");
+//   return "ERROR";
+// }
 
 void Service::attachCollector(ServicesCollector *collectorParam)
 {
@@ -53,15 +53,15 @@ boolean Service::preparePin()
   return false;
 }
 
-String Service::executeMethodByCollector(String nameService, String nameMethod, String param)
-{
-  if (collector == nullptr)
-  {
-    throwError(ERROR_CODE::SERVICE_ERROR, "collector pointer of this service is null", "executeMethodByCollector");
-    return "ERROR";
-  }
-  return collector->executeMethod(nameService, nameMethod, param);
-}
+// String Service::executeMethodByCollector(String nameService, String nameMethod, String param)
+// {
+//   if (collector == nullptr)
+//   {
+//     throwError(ERROR_CODE::SERVICE_ERROR, "collector pointer of this service is null", "executeMethodByCollector");
+//     return "ERROR";
+//   }
+//   return collector->executeMethod(nameService, nameMethod, param);
+// }
 
 Service *Service::getServiceByCollector(String nameService)
 {

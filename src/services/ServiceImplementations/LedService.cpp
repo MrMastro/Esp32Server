@@ -2,13 +2,15 @@
 
 LedService::LedService()
 {
-    isLedOn = false;
-    isAttachedLed = false;
+  isLedOn = false;
+  isAttachedLed = false;
+  ws2811Step = STEP_LIFE_EFFECT::OFF;
+  ws2811Effect = WS2811_EFFECT::NO_EFFECT;
 }
 
 boolean LedService::isAvaible()
 {
-    return isAttachedLed;
+  return isAttachedLed;
 }
 
 boolean LedService::preparePin()
@@ -35,8 +37,9 @@ boolean LedService::preparePin()
       numLeds = 32;
       ledStript = Adafruit_NeoPixel(numLeds, ws2811Pin, NEO_BRG + NEO_KHZ800);
       ledStript.begin();
-      shotdownLed();
-      //ledStript.show();
+      ws2811Step = STEP_LIFE_EFFECT::OFF;
+      ledStript.clear();
+      ledStript.show();
     }
     else
     {
@@ -50,38 +53,39 @@ boolean LedService::preparePin()
   return isAttachedLed;
 }
 
-String LedService::executeJson(String methodName, String param)
-{
-  if (methodName == "changeLed")
-  {
-    boolean active = jsonToSimpleBoolean(param);
-    boolean toggle = false;
-    return simpleBooleanToJson(changeLed(active,toggle));
-  }
-  else
-  {
-    return "Service Method not found";
-  }
-}
+// String LedService::executeJson(String methodName, String param)
+// {
+//   if (methodName == "changeLed")
+//   {
+//     boolean active = jsonToSimpleBoolean(param);
+//     boolean toggle = false;
+//     return simpleBooleanToJson(changeLed(active, toggle));
+//   }
+//   else
+//   {
+//     return "Service Method not found";
+//   }
+// }
 
-String LedService::executeJson(String methodName, std::vector<String> jsonParams)
-{
-  if (methodName == "changeLed")
-  {
-    boolean active = jsonToSimpleBoolean(jsonParams.at(0));
-    boolean toggle = jsonToSimpleBoolean(jsonParams.at(1));
-    return simpleBooleanToJson(changeLed(active,toggle));
-  }
-  else
-  {
-    return "Service Method not found";
-  }
-}
+// String LedService::executeJson(String methodName, std::vector<String> jsonParams)
+// {
+//   if (methodName == "changeLed")
+//   {
+//     boolean active = jsonToSimpleBoolean(jsonParams.at(0));
+//     boolean toggle = jsonToSimpleBoolean(jsonParams.at(1));
+//     return simpleBooleanToJson(changeLed(active, toggle));
+//   }
+//   else
+//   {
+//     return "Service Method not found";
+//   }
+// }
 
 boolean LedService::changeLed(boolean active, boolean toggle)
 {
   delay(50);
-  if(!isAttachedLed){
+  if (!isAttachedLed)
+  {
     throwError(ERROR_CODE::SERVICE_ERROR, "led not attached", "changeLed");
   }
   if (toggle)
@@ -110,26 +114,114 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   return isLedOn;
 }
 
-void LedService::effectPrograssiveBar(uint32_t colorRgb, int deltaTms)
+void LedService::startEffect(WS2811_EFFECT effect, uint32_t colorRgb, int deltaTms)
 {
   if (!isAttachedLed)
   {
     throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");
+    return;
   }
-  for (int pixel = 0; pixel < numLeds; pixel++)
-  {
-    ledStript.setPixelColor(pixel, ledStript.Color(0,0,255));
-    ledStript.show();
-    delay(deltaTms);
-  }
+  ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
+  ws2811Effect = effect;
+  deltaTmsEffect = deltaTms;
+  colorEffect = ledStript.Color(0, 0, 255); // colorRgb;
 }
 
-void LedService::shotdownLed()
+void LedService::stopEffect(uint32_t colorRgb, int deltaTms)
+{
+  ws2811Step = STEP_LIFE_EFFECT::END_STEP;
+  deltaTmsEffect = deltaTms;
+  colorEffect = ledStript.Color(0, 0, 255); // colorRgb;
+}
+
+void LedService::runEffectWs2811()
 {
   if (!isAttachedLed)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "shotdownLed");
+    throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "runEffectWs2811");
+    return;
   }
-  ledStript.clear();
-  ledStript.show();
+  String s = "Effect: {effect}, Step: {step}";
+  s.replace("{effect}", WS2811EffectEnomToString(ws2811Effect));
+
+  switch (ws2811Step)
+  {
+  case STEP_LIFE_EFFECT::BEGIN_STEP:
+    s.replace("{step}","BEGIN_STEP");
+    logInfo(s);
+    doBeginStep(colorEffect, deltaTmsEffect);
+    ws2811Step = STEP_LIFE_EFFECT::LOOP_STEP;
+    break;
+  case STEP_LIFE_EFFECT::LOOP_STEP:
+    s.replace("{step}","LOOP_STEP");
+    logInfo(s);
+    doLoopStep(colorEffect, deltaTmsEffect);
+    ws2811Step = STEP_LIFE_EFFECT::LOOP_STEP;
+    break;
+  case STEP_LIFE_EFFECT::END_STEP:
+    s.replace("{step}","END_STEP");
+    logInfo(s);
+    doEndStep(colorEffect, deltaTmsEffect);
+    ws2811Step = STEP_LIFE_EFFECT::OFF;
+    break;
+  default: // OFF_STEP
+    s.replace("{step}","OFF_STEP");
+    logInfo(s);
+    ledStript.clear();
+    ledStript.show();
+    break;
+  }
 }
+
+void LedService::doBeginStep(uint32_t colorRgb, int deltaTms)
+{
+  switch (ws2811Effect)
+  {
+  case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
+    for (int pixel = 0; pixel < numLeds; pixel++)
+    {
+      ledStript.setPixelColor(pixel, colorRgb);
+      ledStript.show();
+      delay(deltaTms);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+void LedService::doLoopStep(uint32_t colorRgb, int deltaTms)
+{
+  switch (ws2811Effect)
+  {
+  case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
+    for (int pixel = 0; pixel < numLeds; pixel++)
+    {
+      ledStript.setPixelColor(pixel, colorRgb);
+      delay(deltaTms);
+    }
+    ledStript.show();
+    break;
+  default:
+    break;
+  }
+}
+
+void LedService::doEndStep(uint32_t colorRgb, int deltaTms)
+{
+  switch (ws2811Effect)
+  {
+  case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
+    for (int pixel = 255; pixel == 0; --pixel)
+    {
+      ledStript.setBrightness(pixel);
+      ledStript.show();
+      delay(deltaTms);
+    }
+    break;
+  default:
+    break;
+  }
+}
+
+// Function of effect

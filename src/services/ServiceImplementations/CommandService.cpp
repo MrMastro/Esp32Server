@@ -18,37 +18,37 @@ void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialC
   isOperative = true;
 }
 
-String CommandService::executeJson(String methodName, String param)
-{
-  String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param={param})";
-  s.replace("{nameService}", nameService);
-  s.replace("{param}", param);
-  logInfo(s);
-  if (methodName == "recvMsgAndExecute")
-  {
-    return recvMsgAndExecute(param);
-  }
-  else
-  {
-    return "Service Method not found";
-  }
-}
+// String CommandService::executeJson(String methodName, String param)
+// {
+//   String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param={param})";
+//   s.replace("{nameService}", nameService);
+//   s.replace("{param}", param);
+//   logInfo(s);
+//   if (methodName == "recvMsgAndExecute")
+//   {
+//     return recvMsgAndExecute(param);
+//   }
+//   else
+//   {
+//     return "Service Method not found";
+//   }
+// }
 
-String CommandService::executeJson(String methodName, std::vector<String> jsonParams)
-{
-  String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param=vector)";
-  s.replace("{nameService}", nameService);
-  s.replace("{param}", jsonParams.at(0));
-  logInfo(s);
-  if (methodName == "recvMsgAndExecute")
-  {
-    return recvMsgAndExecute(jsonParams.at(0));
-  }
-  else
-  {
-    return "Service Method not found";
-  }
-}
+// String CommandService::executeJson(String methodName, std::vector<String> jsonParams)
+// {
+//   String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param=vector)";
+//   s.replace("{nameService}", nameService);
+//   s.replace("{param}", jsonParams.at(0));
+//   logInfo(s);
+//   if (methodName == "recvMsgAndExecute")
+//   {
+//     return recvMsgAndExecute(jsonParams.at(0));
+//   }
+//   else
+//   {
+//     return "Service Method not found";
+//   }
+// }
 
 String CommandService::executeCommand(CMD cmd, String cmdString)
 {
@@ -77,11 +77,11 @@ String CommandService::executeCommand(CMD cmd, String cmdString)
     result = "Led toggle";
     break;
   case CMD::START_PROGRESS_BAR:
-    ((LedService *) getServiceByCollector("LedService"))->effectPrograssiveBar(0,100);
+    ((LedService *) getServiceByCollector("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,0,100);
     result = "Effect progressive bar blu (WIP)";
     break;
   case CMD::OFF_STRIPT:
-    ((LedService *) getServiceByCollector("LedService"))->shotdownLed();
+    ((LedService *) getServiceByCollector("LedService"))->stopEffect(0,100);
     result = "Stript off (WIP)";
     break;
   case CMD::INFO:
