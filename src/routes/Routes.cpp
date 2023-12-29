@@ -27,6 +27,7 @@ void initRoutes(MastroServer &srv)
    //                      String result = "";
    //                      request->send(200, "application/json", result); });
      srv.setCustomApi("/api/sendCommand", HTTP_POST, commandController);
-     
+     srv.setCustomApi("/api/checkOk", HTTP_GET, getOk);
+
 }
 
