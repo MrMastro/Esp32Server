@@ -34,7 +34,6 @@ void differentSerialprint(const String &msg, String colorMsg, HardwareSerial *se
 }
 
 String formatMsg(String msg, std::vector<String> args){
-    String result = msg;
     size_t pos = 0;
 
     int count = countSubString(msg,"{}");
@@ -47,7 +46,7 @@ String formatMsg(String msg, std::vector<String> args){
     {
         msg.replace("{}",args.at(i));
     }
-    return result;
+    return msg;
 }
 
 int countSubString(String msg, String subString)

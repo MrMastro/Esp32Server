@@ -25,7 +25,7 @@ CMD mapStringToEnum(String inputString)
     }
   }
   // Return a special value or throw an exception if the string is not found
-  return CMD::OTHER;
+  return CMD::UNKNOWN;
 }
 
 // CMD mapStringToEnum(String inputString)

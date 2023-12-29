@@ -1,9 +1,9 @@
-#ifndef CommandControllers_H
-#define CommandControllers_H
-
-#include "services/ServicesCollector/ServicesCollector.h"
+#ifndef Controllers_H
+#define Controllers_H
 
 #include <ESPAsyncWebServer.h>
+#include "services/ServicesCollector/ServicesCollector.h"
+#include "services/ServiceImplementations/CommandService.h"
 #include "models/response/BasicResponse.h"
 #include "constants/constants.h"
 #include "models/DataModelling.h"

@@ -2,7 +2,7 @@
 #define Routes_H
 #include "MastroServer.h"
 #ifndef CommandControllers_H
-#include "./controllers/CommandControllers.h"
+#include "./controllers/Controllers.h"
 #endif
 
 void initRoutes(MastroServer &srv);

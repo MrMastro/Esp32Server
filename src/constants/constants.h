@@ -5,7 +5,7 @@
 #include <models/response/BasicResponse.h>
 #include "./utils/FunctionUtils.h"
 
-// Enum to represent http_code with additional information
+//Enum to represent http_code with additional information
 enum class HTTP_CODE
 {
     OK = 200,
@@ -29,6 +29,11 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
     // Add more status codes and information as needed
 };
 
+//FRONT END CUSTOM MESSAGE
+#define SUCCESS_COMMAND "Comando eseguito: {}"
+#define UKNOWN_COMMAND "Comando non riconosciuto: {}"
+
+//COMMAND OF COMMANDSERVICE
 enum class CMD
 {
   LED_ON,
@@ -37,7 +42,7 @@ enum class CMD
   START_PROGRESS_BAR,
   OFF_STRIPT,
   INFO,
-  OTHER
+  UNKNOWN
 };
 
 const std::pair<CMD, String> CMD_PAIR[] = {
@@ -47,10 +52,11 @@ const std::pair<CMD, String> CMD_PAIR[] = {
     {CMD::START_PROGRESS_BAR, "start progress bar"},
     {CMD::OFF_STRIPT, "off stript"},
     {CMD::INFO, "info"},
-    {CMD::OTHER, "other"}
+    {CMD::UNKNOWN, "Unknown command"}
     // Add more status codes and information as needed
 };
 
+//FUNCTION FOR MAPPING
 CMD mapStringToEnum(String inputString);
 StatusInfo getStatusInfoByHttpCode(HTTP_CODE code);
 

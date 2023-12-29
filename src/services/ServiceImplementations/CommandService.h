@@ -16,10 +16,10 @@ public:
     void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
     //String executeJson(String methodName, String param) override; deprecated
     //String executeJson(String methodName, std::vector<String> jsonParams) override; deprecated
-    String recvMsgAndExecute(String data); //returns the msg received
+    StatusInfo recvMsgAndExecute(String data); //returns the msg received
 private:
     boolean isOperative;
-    String executeCommand(CMD cmd, String cmdString);
+    StatusInfo executeCommand(CMD cmd, String cmdString);
 };
 
 

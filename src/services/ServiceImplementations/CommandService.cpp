@@ -50,52 +50,54 @@ void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialC
 //   }
 // }
 
-String CommandService::executeCommand(CMD cmd, String cmdString)
+StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
 {
+  StatusInfo result = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
+  String content = "";
   String s = "executeCommand(cmd={cmd},cmdString={cmdString})";
   s.replace("{cmd}", cmdString);
   s.replace("{cmdString}", cmdString);
   logInfo(s);
-  String result = "";
   if (!isOperative)
   {
     throwError(ERROR_CODE::SERVICE_ERROR, "Attach Serials first (Serial or WebSerial)", "executeCommand");
-    return "ERROR";
+    return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   }
   switch (cmd)
   {
   case CMD::LED_ON:
     ((LedService*) getServiceByCollector("LedService"))->changeLed(true,false);
-    result = "Led on";
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::LED_OFF:
     ((LedService*) getServiceByCollector("LedService"))->changeLed(false,false);
-    result = "Led off";
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::LED_TOGGLE:
     ((LedService*) getServiceByCollector("LedService"))->changeLed(true,true);
-    result = "Led toggle";
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::START_PROGRESS_BAR:
     ((LedService *) getServiceByCollector("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,0,100);
-    result = "Effect progressive bar blu (WIP)";
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::OFF_STRIPT:
     ((LedService *) getServiceByCollector("LedService"))->stopEffect(0,100);
-    result = "Stript off (WIP)";
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::INFO:
-    return getServerIpByCollector();
-    // differentSerialprintln(myServer.getIp()); // todo
+    content = getServerIpByCollector();
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    result.setDescription(content);
     break;
   default:
-    result = "Comando non riconosciuto: " + cmdString;
+    result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
     break;
   }
   return result;
 }
 
-String CommandService::recvMsgAndExecute(String data)
+StatusInfo CommandService::recvMsgAndExecute(String data)
 {
   String s = "recvMsgAndExecute(data={data})";
   s.replace("{data}", data);
@@ -104,9 +106,16 @@ String CommandService::recvMsgAndExecute(String data)
   if (!isOperative)
   {
     throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");
-    return "ERROR";
+    return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   }
-  String result = executeCommand(mapStringToEnum(data), data);
-  differentSerialprintln(result, "", serialPointer, webSerialPointer);
+  
+  StatusInfo result = executeCommand(mapStringToEnum(data), data);
+  if(result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage()){
+    differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", serialPointer, webSerialPointer);
+  }else
+  {
+    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data}), "", serialPointer, webSerialPointer);    
+  }
+
   return result;
 }
