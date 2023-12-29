@@ -27,11 +27,11 @@ boolean ServicesCollector::isPresentInMap(String name)
     }
 }
 
-Service* ServicesCollector::getService(String name)
+Service *ServicesCollector::getService(String name)
 {
     if (!isPresentInMap(name))
     {
-        String msg = "don't found service called {name}";
+        String msg = "don't found service called {name}, you should add service usign addService(...) before calling getService method";
         msg.replace("{name}", name);
         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, msg, "getService");
         return nullptr;
@@ -85,7 +85,8 @@ Service* ServicesCollector::getService(String name)
 
 MastroServer *ServicesCollector::getServer()
 {
-    if(server == nullptr){
+    if (server == nullptr)
+    {
         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "server point is null, attach server first", "getServer");
         return nullptr;
     }
@@ -93,7 +94,7 @@ MastroServer *ServicesCollector::getServer()
     return server;
 }
 
-void ServicesCollector::addService(Service* service, String name)
+void ServicesCollector::addService(Service *service, String name)
 {
     String s = "Adding service: {name}";
     s.replace("{name}", name);
@@ -163,7 +164,7 @@ void ServicesCollector::logError(String msg, String context)
     String error = "[ ERROR - ServiceCollector on {context} ] {msg}";
     error.replace("{context}", context);
     error.replace("{msg}", msg);
-    differentSerialprintln(error, "\033[31m",serialPointer, webSerialPointer);
+    differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }
 
 // Destructor to clean up dynamically allocated services

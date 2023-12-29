@@ -1,6 +1,7 @@
 #ifndef Services_H
 #define Services_H
 
+#include <MastroServer.h>
 #include "./models/DataModelling.h"
 #include <constants/constants.h>
 #include <exceptions/exceptions.h>
@@ -8,9 +9,6 @@
 #include <utils/SerialSimple.h>
 
 class ServicesCollector;
-
-String pong();
-String pongSuccess();
 
 // Service interface
 class Service {
@@ -24,7 +22,6 @@ public:
     void setNameService(String name);
     String getNameService();
     void attachCollector(ServicesCollector* collectorParam);
-    //String executeMethodByCollector(String nameService,String nameMethod, String param); deprecated
     Service* getServiceByCollector(String nameService);
     String getServerIpByCollector();
     virtual ~Service() {}
@@ -33,6 +30,7 @@ protected:
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;
     std::vector<int> pins;
+    MastroServer* getServerByCollector();
     virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
     virtual void logInfo(String msg);
     virtual void logWarning(String msg, String context);

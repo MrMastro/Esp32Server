@@ -30,7 +30,7 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
 };
 
 //FRONT END CUSTOM MESSAGE
-#define SUCCESS_COMMAND "Comando eseguito: {}"
+#define SUCCESS_COMMAND "Comando eseguito: {} - {}"
 #define UKNOWN_COMMAND "Comando non riconosciuto: {}"
 
 //COMMAND OF COMMANDSERVICE

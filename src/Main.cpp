@@ -45,10 +45,12 @@ void setup(void)
   servicesCollector.attachServer(&myServer);
   // init services and ServiceCollector
   // servicesCollector = ServicesCollector(&myServer);
+  
   //  Service init
   servicesCollector.addService(&commandService, "CommandService");
   servicesCollector.addService(&ledService, "LedService");
-  // servicesCollector.addService(&infoService,"InfoService");
+  servicesCollector.addService(&infoService,"InfoService");
+
   //  Attach pin
   servicesCollector.getService("LedService")->attachPin({2, 5});
 

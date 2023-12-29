@@ -1,4 +1,5 @@
 #include "./services/ServiceImplementations/CommandService.h"
+#include "InfoService.cpp"
 
 CommandService::CommandService()
 {
@@ -86,7 +87,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::INFO:
-    content = getServerIpByCollector();
+    content = ((InfoService *) getServiceByCollector("InfoService"))->getIp();
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     result.setDescription(content);
     break;
@@ -114,7 +115,7 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
     differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", serialPointer, webSerialPointer);
   }else
   {
-    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data}), "", serialPointer, webSerialPointer);    
+    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}), "", serialPointer, webSerialPointer);    
   }
 
   return result;

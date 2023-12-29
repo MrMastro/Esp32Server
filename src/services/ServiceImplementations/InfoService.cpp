@@ -9,7 +9,10 @@
 class InfoService : public Service
 {
 public:
-    InfoService() {}  // Constructor
+    InfoService() 
+    {
+        
+    }  // Constructor
     ~InfoService() {} // Destructor
 
     String jsonPong()
@@ -24,9 +27,9 @@ public:
         return getStatusInfoByHttpCode(HTTP_CODE::OK);
     }
 
-    // String getIp(){
-    //     return
-    // }
+    String getIp(){
+        return getServerByCollector()->getIp();
+    }
 };
 
 #endif // InfoService_H

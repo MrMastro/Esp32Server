@@ -30,7 +30,7 @@ void Service::attachCollector(ServicesCollector *collectorParam)
 
 boolean Service::isAvaible()
 {
-    throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of this class in the <ServiceImplementations> directory and implements methot isAvaible()", "executeJson");
+    throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of isAvaible() in this service ", "isAvaible");
     return false;
 }
 
@@ -81,6 +81,16 @@ String Service::getServerIpByCollector()
     return "ERROR";
   }
     return pointer->getIp();
+}
+
+MastroServer* Service::getServerByCollector()
+{
+  MastroServer* pointer = collector->getServer();
+  if(pointer == nullptr){
+    throwError(ERROR_CODE::SERVICE_ERROR, "server point is null", "getServer");
+    return nullptr;
+  }
+    return pointer;
 }
 
 void Service::throwError(ERROR_CODE err, const char *detailMessage, String context)

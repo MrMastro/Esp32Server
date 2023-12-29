@@ -1,23 +1,7 @@
 #ifndef BasicResponse_H
 #define BasicResponse_H
 
-#include <ArduinoJson.h>
-
-// Custom class to store additional information
-class StatusInfo
-{
-public:
-    StatusInfo();
-    StatusInfo(const String &message, const String &description);
-    String getMessage();
-    String getDescription();
-    void setMessage(const String &newMessage);
-    void setDescription(const String &newDescription);
-    String toString();
-private:
-    String message;
-    String description;
-};
+#include <./models/StatusInfo.h>
 
 class BasicResponse
 {
