@@ -19,20 +19,6 @@ boolean requestInAction = false;
 //                              Setup and Loop Method                               //
 // ################################################################################ //
 
-void test()
-{
-  logInfo("Test");
-  ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811();
-}
-
-void ledTask(void *pvParameters)
-{
-  while (doTest)
-  {
-    test();
-  }
-}
-
 void setup(void)
 {
   Serial.begin(9600);
@@ -45,11 +31,11 @@ void setup(void)
   servicesCollector.attachServer(&myServer);
   // init services and ServiceCollector
   // servicesCollector = ServicesCollector(&myServer);
-  
+
   //  Service init
   servicesCollector.addService(&commandService, "CommandService");
   servicesCollector.addService(&ledService, "LedService");
-  servicesCollector.addService(&infoService,"InfoService");
+  servicesCollector.addService(&infoService, "InfoService");
 
   //  Attach pin
   servicesCollector.getService("LedService")->attachPin({2, 5});
@@ -60,26 +46,60 @@ void setup(void)
   // Other
   WebSerial.msgCallback(recvMsgBySerialWeb);
   myRgbStript.setupLedRgb();
+
   delay(50);
+
+  // Thread running
+  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  vTaskStartScheduler(); // Start the FreeRTOS scheduler
+  
 }
 
 void loop(void)
 {
   myServer.handleOta();
-  myRgbStript.loopLedRgb();
-  delay(10);
-  if (Serial.available())
-  {
-    recvMsgBySerial(Serial.readString());
-  }
 
-  if (doTest)
+  if (!servicesCollector.isBusyForServiceApi())
   {
-    logInfo("do test");
-    ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811();
-    logInfo("rerun");
+    if (Serial.available())
+    {
+      recvMsgBySerial(Serial.readString());
+    }
+  }
+  else
+  {
+    yield();
   }
 }
+
+void ledTask(void *pvParameters)
+{
+  logInfo("LedTask Running");
+
+  ((LedService *) servicesCollector.getService("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100);
+
+  while (true)
+  {
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      myRgbStript.loopLedRgb();
+      delay(10);
+      ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811LifeCycle();
+    }
+    else
+    {
+      yield();
+    }
+  }
+}
+
+void test()
+{
+  logInfo("Test");
+}
+
+
+
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
 {
@@ -97,14 +117,14 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
 void recvMsgBySerial(String data)
 {
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
-  doTest = true;
-  // xTaskCreate(ledTask, "LedTaskAsync", 4096, NULL, 1, &LedTask);
-  // vTaskStartScheduler(); // Start the FreeRTOS scheduler
 }
 
 void logInfo(String msg)
 {
-  String log = "[ LOG - MAIN ] {msg}";
-  log.replace("{msg}", msg);
-  differentSerialprintln(log, "", &Serial, &WebSerial);
+  if (DEBUG)
+  {
+    String log = "[ LOG - MAIN ] {msg}";
+    log.replace("{msg}", msg);
+    differentSerialprintln(log, "", &Serial, &WebSerial);
+  }
 }
