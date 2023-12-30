@@ -1,5 +1,6 @@
 #include "BasicResponse.h"
 #include <utils/FunctionUtils.h>
+#include "constants/constants.h"
 
 BasicResponse::BasicResponse() : status(), dataJson("") {}
 
@@ -13,6 +14,22 @@ BasicResponse::BasicResponse(StatusInfo info, const String &dataJsonInput)
 BasicResponse::BasicResponse(const String &message, const String &description, const String &dataJsonInput){
     status = StatusInfo(message,description);
     dataJson = dataJsonInput;
+}
+
+BasicResponse::BasicResponse(HTTP_CODE code)
+{
+    BasicResponse(getStatusInfoByHttpCode(code));
+}
+
+BasicResponse::BasicResponse(HTTP_CODE code, String customDescription)
+{
+    BasicResponse(getStatusInfoByHttpCode(code));
+    status.setDescription(customDescription);
+}
+
+BasicResponse::BasicResponse(StatusInfo info)
+{
+    status = info;
 }
 
 StatusInfo BasicResponse::getStatus()
