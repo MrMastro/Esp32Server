@@ -18,12 +18,12 @@ BasicResponse::BasicResponse(const String &message, const String &description, c
 
 BasicResponse::BasicResponse(HTTP_CODE code)
 {
-    BasicResponse(getStatusInfoByHttpCode(code));
+    status = getStatusInfoByHttpCode(code);
 }
 
 BasicResponse::BasicResponse(HTTP_CODE code, String customDescription)
 {
-    BasicResponse(getStatusInfoByHttpCode(code));
+    status = getStatusInfoByHttpCode(code);
     status.setDescription(customDescription);
 }
 

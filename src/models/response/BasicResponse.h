@@ -4,6 +4,10 @@
 #include "./models/StatusInfo.h"
 #include <./constants/constants.h>
 
+enum class HTTP_CODE;
+
+class StatusInfo;
+
 class BasicResponse
 {
 public:
