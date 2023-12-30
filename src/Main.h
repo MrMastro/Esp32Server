@@ -17,7 +17,14 @@
 MastroServer myServer;
 MastroLed myRgbStript;
 CommandService commandService;
-LedService ledService;
+// NeoPixelBus<NeoBgrFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBgrFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBgrFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBgrFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBgrFeature, Neo800KbpsMethod>
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>
+NeoPixelBus<NeoBgrFeature, Neo800KbpsMethod> strip(32, 5);
+LedService ledService(&strip);
 InfoService infoService;
 
 void recvMsgBySerial(String data);

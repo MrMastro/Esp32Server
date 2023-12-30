@@ -8,6 +8,7 @@ ServicesCollector servicesCollector;
 ServicesCollector::ServicesCollector()
 {
     server = nullptr;
+    busy = false;
 }
 
 ServicesCollector::ServicesCollector(MastroServer *serverParam)
@@ -25,6 +26,29 @@ boolean ServicesCollector::isPresentInMap(String name)
     {
         return false;
     }
+}
+
+boolean ServicesCollector::isBusyForServiceApi()
+{
+    return busy;
+}
+
+void ServicesCollector::takeExclusiveExecution()
+{
+    if (busy)
+    {
+        logWarning("first call takeExclusiveExecution, the busy flag should have been false instead is true", "takeExclusiveExecution");
+    }
+    busy = true;
+}
+
+void ServicesCollector::freeExclusiveExecution()
+{
+    if (!busy)
+    {
+        logWarning("first call freeExclusiveExecution, the busy flag should have been true instead is false", "freeExclusiveExecution");
+    }
+    busy = false;
 }
 
 Service *ServicesCollector::getService(String name)
@@ -146,9 +170,12 @@ void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const String
 
 void ServicesCollector::logInfo(String msg)
 {
-    String result = "[ LOG - ServiceCollector ] {msg}";
-    result.replace("{msg}", msg);
-    differentSerialprintln(result, "\033[32m", serialPointer, webSerialPointer);
+    if (DEBUG)
+    {
+        String result = "[ LOG - ServiceCollector ] {msg}";
+        result.replace("{msg}", msg);
+        differentSerialprintln(result, "\033[32m", serialPointer, webSerialPointer);
+    }
 }
 
 void ServicesCollector::logWarning(String msg, String context)
