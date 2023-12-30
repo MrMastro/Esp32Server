@@ -83,7 +83,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::OFF_STRIPT:
-    ((LedService *) getServiceByCollector("LedService"))->stopEffect(RgbColor(0,0,255),100);
+    ((LedService *) getServiceByCollector("LedService"))->stopEffect(WS2811_EFFECT::ACTUAL_EFFECT, RgbColor(0,0,0), 100);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::INFO:

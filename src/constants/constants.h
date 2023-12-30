@@ -5,7 +5,7 @@
 #include <models/response/BasicResponse.h>
 #include "./utils/FunctionUtils.h"
 
-#define DEBUG false
+#define DEBUG true
 
 //Enum to represent http_code with additional information
 enum class HTTP_CODE
