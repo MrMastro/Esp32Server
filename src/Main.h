@@ -14,7 +14,6 @@
 
 //#include "services/ServiceImplementations/InfoService.cpp"
 
-MastroServer myServer;
 MastroLed myRgbStript;
 CommandService commandService;
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO

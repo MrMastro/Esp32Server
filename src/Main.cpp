@@ -1,4 +1,3 @@
-// todo NeoPixelBus
 #include "Main.h"
 
 // ################################################################################ //
@@ -22,13 +21,13 @@ boolean requestInAction = false;
 void setup(void)
 {
   Serial.begin(9600);
-  myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
-  if (myServer.isAvaible())
+  mastroServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
+  if (mastroServer.isAvaible())
   {
-    WebSerial.begin(myServer.getWebServer(), "/webConsole");
+    WebSerial.begin(mastroServer.getWebServer(), "/webConsole");
   }
   servicesCollector.attachSerial(&Serial, &WebSerial);
-  servicesCollector.attachServer(&myServer);
+  servicesCollector.attachServer(&mastroServer);
   // init services and ServiceCollector
   // servicesCollector = ServicesCollector(&myServer);
 
@@ -41,7 +40,7 @@ void setup(void)
   servicesCollector.getService("LedService")->attachPin({2, 5});
 
   // Route handling
-  initRoutes(myServer);
+  initRoutes(mastroServer);
 
   // Other
   WebSerial.msgCallback(recvMsgBySerialWeb);
@@ -50,14 +49,14 @@ void setup(void)
   delay(50);
 
   // Thread running
-  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
-  vTaskStartScheduler(); // Start the FreeRTOS scheduler
+  //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
   
 }
 
 void loop(void)
 {
-  myServer.handleOta();
+  mastroServer.handleOta();
 
   if (!servicesCollector.isBusyForServiceApi())
   {
