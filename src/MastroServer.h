@@ -18,7 +18,6 @@ public:
     String getName();
     String getIp();
     void setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
-    String getOneElementJsonString(String key, String value);
     boolean isAvaible();
     AsyncWebServer* getWebServer();
 private:
@@ -35,6 +34,9 @@ private:
     void initAP(String ssid, String password);
     bool activeIndicatorLed(bool active, bool toggle);
     void welcomeWaitLedBlink();
+    void beginListFiles(String path);
+    void listFiles(fs::File file, String path);
+    void setRouteSystem(String path, String resource);
 };
 
 String processor(const String& var);

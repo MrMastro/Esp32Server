@@ -83,6 +83,7 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
 
     initArduinoOta(deviceName, devicePassword);
     Serial.println("OTA server started");
+    beginListFiles("/");
     setRoutes();
     ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
     // ElegantOTA.begin(&webServer); // Start ElegantOTA
@@ -106,19 +107,6 @@ void MastroServer::initAP(String ssid, String password)
     // Configure the captive portal behavior
     // WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     activeIndicatorLed(true, false);
-}
-
-String MastroServer::getOneElementJsonString(String key, String value)
-{
-    // Create a JSON object
-    DynamicJsonDocument jsonDoc(1024);
-    // Add data to the JSON object
-    jsonDoc[key] = value;
-    // serialaze json
-    String jsonString;
-    serializeJson(jsonDoc, jsonString);
-    // return
-    return jsonString;
 }
 
 boolean MastroServer::isAvaible()
@@ -204,6 +192,52 @@ void MastroServer::welcomeWaitLedBlink()
     }
 }
 
+void MastroServer::beginListFiles(String path)
+{
+    Serial.println("Listing files in: " + path);
+    fs::File root = LittleFS.open(path);
+    listFiles(root,"");
+}
+
+void MastroServer::listFiles(fs::File root, String path)
+{
+
+    for (fs::File file = root.openNextFile(); file != File(); file = root.openNextFile())
+    {
+
+        if (!file.isDirectory())
+        {
+            Serial.print("is a file: ");
+            Serial.print(file.name());
+            Serial.print(" - Add api ");
+            setRouteSystem(path, String(file.name()));
+        }
+        else
+        {
+            Serial.print("is a directory: ");
+            Serial.print(file.name());
+            Serial.println(" - Analizing directory");
+            listFiles(file, path + "/" + String(file.name()));
+        }
+    }
+}
+
+void MastroServer::setRouteSystem(String path, String resource)
+{
+
+    String resourcePath = path + "/" + resource;
+    if(resource.endsWith(".html")){
+        int index = resource.lastIndexOf(".html");
+        int length = resource.length();
+        resource = resource.substring(0, index);
+    }
+    String apiPath = path + "/" + resource;
+    Serial.println( String(""+ apiPath + " - getting: " + resourcePath) );
+    webServer.on(apiPath.c_str(), HTTP_GET, [resourcePath](AsyncWebServerRequest *request)
+                 {
+                    request->send(LittleFS, resourcePath, String(), false); });
+}
+
 void MastroServer::initArduinoOta(String deviceName, String devicePassword)
 {
 
@@ -264,8 +298,7 @@ void MastroServer::setRoutes()
     webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request)
                  {
                     Serial.println("getting html page");
-                    request->send(LittleFS, "/control.html", String(), false, processor);
-                });
+                    request->send(LittleFS, "/control.html", String(), false, processor); });
 }
 
 void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
@@ -276,9 +309,10 @@ void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite metho
 
 String processor(const String &var)
 {
-  Serial.println(var);
-  if(var == "HOST_NAME"){
-    return ""; //mastroServer.getName();
-  }
-  return String();
+    Serial.println(var);
+    if (var == "HOST_NAME")
+    {
+        return ""; // mastroServer.getName();
+    }
+    return String();
 }
