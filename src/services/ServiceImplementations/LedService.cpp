@@ -120,6 +120,7 @@ void LedService::startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaT
     throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");
     return;
   }
+  logInfo("start effect " + WS2811EffectEnomToString(effect));
   ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
   ws2811Effect = effect;
   deltaTmsEffect = deltaTms;
@@ -128,6 +129,7 @@ void LedService::startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaT
 
 void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms)
 {
+  logInfo("stop effect " + WS2811EffectEnomToString(effectInput));
   ws2811Step = STEP_LIFE_EFFECT::END_STEP;
   ws2811Effect = (effectInput != WS2811_EFFECT::ACTUAL_EFFECT) ? effectInput : ws2811Effect;
   deltaTmsEffect = deltaTms;

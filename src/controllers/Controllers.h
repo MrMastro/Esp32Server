@@ -17,5 +17,6 @@ void getOk(AsyncWebServerRequest *request);
 
 //LedController
 void setEffectWs2811(AsyncWebServerRequest *request);
+void stopEffectWs2811(AsyncWebServerRequest *request);
 
 #endif  // CommandControllers_H
