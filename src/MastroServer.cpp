@@ -1,6 +1,8 @@
 #include "MastroServer.h"
 #include "constants/htmlPages.h"
+#include "LITTLEFS.h"
 
+MastroServer mastroServer;
 AsyncWebServer webServer(80);
 DNSServer dnsServer;
 
@@ -29,6 +31,13 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
 
     // Wait Indicator
     welcomeWaitLedBlink();
+
+    // Initialize SPIFFS
+    if (!LittleFS.begin())
+    {
+        Serial.println("An Error has occurred while mounting SPIFFS");
+        return;
+    }
 
     if (mode == "AP")
     {
@@ -75,7 +84,8 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     initArduinoOta(deviceName, devicePassword);
     Serial.println("OTA server started");
     setRoutes();
-    ElegantOTA.begin(&webServer); // Start ElegantOTA
+    ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
+    // ElegantOTA.begin(&webServer); // Start ElegantOTA
     webServer.begin();
     Serial.println("HTTP server started");
     pointWebServer = &webServer;
@@ -107,7 +117,7 @@ String MastroServer::getOneElementJsonString(String key, String value)
     // serialaze json
     String jsonString;
     serializeJson(jsonDoc, jsonString);
-    //return
+    // return
     return jsonString;
 }
 
@@ -116,7 +126,7 @@ boolean MastroServer::isAvaible()
     return serverActive;
 }
 
-AsyncWebServer* MastroServer::getWebServer()
+AsyncWebServer *MastroServer::getWebServer()
 {
     return pointWebServer;
 }
@@ -250,23 +260,25 @@ void MastroServer::setRoutes()
     String html = htmlPage; // Copy the HTML template from htmlCustom.h
     html.replace("%HOST_NAME%", scopeHost);
     request->send(200, "text/html", html); });
+
+    webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request)
+                 {
+                    Serial.println("getting html page");
+                    request->send(LittleFS, "/control.html", String(), false, processor);
+                });
 }
 
-void MastroServer::setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
+void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
 {
     delay(50);
     webServer.on(uri, method, onRequest);
 }
 
-// String MastroServer::getJsonStringByKeysAndValues(String keys[], String values[], int size)
-// {
-//     DynamicJsonDocument jsonDoc(1024);
-//     for (size_t i = 0; i < size; ++i)
-//     {
-//         jsonDoc[keys[i]] = values[i];
-//     }
-//     String jsonString;
-//     serializeJson(jsonDoc, jsonString);
-//     return jsonString;
-// }
-
+String processor(const String &var)
+{
+  Serial.println(var);
+  if(var == "HOST_NAME"){
+    return ""; //mastroServer.getName();
+  }
+  return String();
+}

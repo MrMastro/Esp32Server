@@ -37,4 +37,8 @@ private:
     void welcomeWaitLedBlink();
 };
 
+String processor(const String& var);
+
+extern MastroServer mastroServer;
+
 #endif
