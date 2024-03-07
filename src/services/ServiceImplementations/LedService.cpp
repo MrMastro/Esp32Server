@@ -52,34 +52,6 @@ boolean LedService::preparePin()
   return isAttachedLed;
 }
 
-// String LedService::executeJson(String methodName, String param)
-// {
-//   if (methodName == "changeLed")
-//   {
-//     boolean active = jsonToSimpleBoolean(param);
-//     boolean toggle = false;
-//     return simpleBooleanToJson(changeLed(active, toggle));
-//   }
-//   else
-//   {
-//     return "Service Method not found";
-//   }
-// }
-
-// String LedService::executeJson(String methodName, std::vector<String> jsonParams)
-// {
-//   if (methodName == "changeLed")
-//   {
-//     boolean active = jsonToSimpleBoolean(jsonParams.at(0));
-//     boolean toggle = jsonToSimpleBoolean(jsonParams.at(1));
-//     return simpleBooleanToJson(changeLed(active, toggle));
-//   }
-//   else
-//   {
-//     return "Service Method not found";
-//   }
-// }
-
 boolean LedService::changeLed(boolean active, boolean toggle)
 {
   delay(50);
@@ -175,7 +147,7 @@ void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFF
   // SWITCH ALL EFFECT
   switch (ws2811EffectInput)
   {
-  case WS2811_EFFECT::CONSTANTS_UNIQUE_COLOR:
+  case WS2811_EFFECT::CONSTANT_UNIQUE_COLOR:
     ws2811EffectConstantsUniqueColor(ws2811StepInput, colorInput, deltaTimeMsInput);
     break;
   case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
