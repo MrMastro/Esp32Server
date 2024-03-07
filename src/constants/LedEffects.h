@@ -26,7 +26,7 @@ enum class WS2811_EFFECT
     UKNOWN_EFFECT, //I don't know the effect
     ACTUAL_EFFECT, //The effect that run in this moment
     PROGRESSIVE_BAR_UNIQUE_COLOR, //Effect of progressive color
-    CONSTANTS_UNIQUE_COLOR // Effect of constant color in all pixel of stript
+    CONSTANT_UNIQUE_COLOR // Effect of constant color in all pixel of stript
 };
 
 const std::pair<WS2811_EFFECT, String> EFFECT_PAIR[] = {
@@ -34,7 +34,7 @@ const std::pair<WS2811_EFFECT, String> EFFECT_PAIR[] = {
     {WS2811_EFFECT::UKNOWN_EFFECT, "UKNOWN_EFFECT"},
     {WS2811_EFFECT::ACTUAL_EFFECT, "ACTUAL_EFFECT"},
     {WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR, "PROGRESSIVE_BAR_UNIQUE_COLOR"},
-    {WS2811_EFFECT::CONSTANTS_UNIQUE_COLOR, "CONSTANTS_UNIQUE_COLOR"}
+    {WS2811_EFFECT::CONSTANT_UNIQUE_COLOR, "CONSTANT_UNIQUE_COLOR"}
     // Add more effect codes and information as needed
 };
 
