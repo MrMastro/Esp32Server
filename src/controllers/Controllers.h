@@ -9,7 +9,14 @@
 #include "constants/constants.h"
 #include "models/DataModelling.h"
 
+//CommandController
 void commandController(AsyncWebServerRequest *request);
+
+//InfoController
 void getOk(AsyncWebServerRequest *request);
+
+//LedController
+void setEffectWs2811(AsyncWebServerRequest *request);
+void stopEffectWs2811(AsyncWebServerRequest *request);
 
 #endif  // CommandControllers_H

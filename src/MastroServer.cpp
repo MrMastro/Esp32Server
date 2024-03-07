@@ -1,6 +1,8 @@
 #include "MastroServer.h"
 #include "constants/htmlPages.h"
+#include "LITTLEFS.h"
 
+MastroServer mastroServer;
 AsyncWebServer webServer(80);
 DNSServer dnsServer;
 
@@ -9,6 +11,7 @@ MastroServer::MastroServer()
     serverActive = false;
     isActiveIndicatorLed = false;
     ledIndicatorMode = false;
+    littleFSAvaible = false;
 }
 
 // mode:
@@ -29,6 +32,18 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
 
     // Wait Indicator
     welcomeWaitLedBlink();
+
+    // Initialize SPIFFS
+    if (!LittleFS.begin())
+    {
+        littleFSAvaible = false;
+        Serial.println("An Error has occurred while mounting SPIFFS (read file in rom)");
+        Serial.println("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
+    }
+    else
+    {
+        littleFSAvaible = true;
+    }
 
     if (mode == "AP")
     {
@@ -74,8 +89,10 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
 
     initArduinoOta(deviceName, devicePassword);
     Serial.println("OTA server started");
+    beginListFiles("/www");
     setRoutes();
-    ElegantOTA.begin(&webServer); // Start ElegantOTA
+    ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
+    // ElegantOTA.begin(&webServer); // Start ElegantOTA
     webServer.begin();
     Serial.println("HTTP server started");
     pointWebServer = &webServer;
@@ -98,25 +115,12 @@ void MastroServer::initAP(String ssid, String password)
     activeIndicatorLed(true, false);
 }
 
-String MastroServer::getOneElementJsonString(String key, String value)
-{
-    // Create a JSON object
-    DynamicJsonDocument jsonDoc(1024);
-    // Add data to the JSON object
-    jsonDoc[key] = value;
-    // serialaze json
-    String jsonString;
-    serializeJson(jsonDoc, jsonString);
-    //return
-    return jsonString;
-}
-
 boolean MastroServer::isAvaible()
 {
     return serverActive;
 }
 
-AsyncWebServer* MastroServer::getWebServer()
+AsyncWebServer *MastroServer::getWebServer()
 {
     return pointWebServer;
 }
@@ -194,6 +198,93 @@ void MastroServer::welcomeWaitLedBlink()
     }
 }
 
+void MastroServer::beginListFiles(String path)
+{
+    if (littleFSAvaible)
+    {
+        Serial.println("Listing absolute file");
+        Serial.println("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
+        webServer.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+                {
+                    //
+                    request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
+                    //
+                });
+        Serial.println("Listing files in: " + path);
+        fs::File root = LittleFS.open(path);
+        listFiles(root, path);
+    }
+    else
+    {
+        Serial.println("Can't preparated www api for get pages (littelFs don't ready)");
+    }
+}
+
+void MastroServer::listFiles(fs::File root, String path)
+{
+
+    for (fs::File file = root.openNextFile(); file != File(); file = root.openNextFile())
+    {
+
+        if (!file.isDirectory())
+        {
+            Serial.print("is a file: ");
+            Serial.print(file.name());
+            Serial.print(" - Add api ");
+            setRouteSystem(path, String(file.name()));
+        }
+        else
+        {
+            Serial.print("is a directory: ");
+            Serial.print(file.name());
+            Serial.println(" - Analizing directory");
+            listFiles(file, path + "/" + String(file.name()));
+        }
+    }
+}
+
+void MastroServer::setRouteSystem(String path, String resource)
+{
+    boolean apiRedirected = false;
+    String resourcePath = path + "/" + resource;
+    String apiPath = path + "/" + resource;
+    if (resource.endsWith(".html"))
+    {
+        String pathNotModified = resourcePath;
+        int index = resource.lastIndexOf(".html");
+        int length = resource.length();
+        resource = resource.substring(0, index);
+        apiPath = path + "/" + resource;
+        webServer.on(pathNotModified.c_str(), HTTP_GET, [apiPath](AsyncWebServerRequest *request)
+                     { request->redirect(apiPath); });
+    }
+
+    // if for redirect on web commented for now
+    // if (resource.endsWith("bootstrap.min.css"))
+    // {
+    //     apiRedirected = true;
+    //     String bootStraptWeb = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+    //     Serial.println(String("" + apiPath + " - getting: redirected on web - " + bootStraptWeb));
+    //     webServer.on(apiPath.c_str(), HTTP_GET, [bootStraptWeb](AsyncWebServerRequest *request)
+    //             {
+    //                 //
+    //                 request->redirect(bootStraptWeb);
+    //                 //
+    //             });
+    // }
+
+    if (!apiRedirected)
+    {
+        Serial.println(String("" + apiPath + " - getting: " + resourcePath));
+        webServer.on(apiPath.c_str(), HTTP_GET, [resourcePath](AsyncWebServerRequest *request)
+                     {
+                         //
+                         request->send(LittleFS, resourcePath, String(), false);
+                         //
+                     });
+    }
+}
+
 void MastroServer::initArduinoOta(String deviceName, String devicePassword)
 {
 
@@ -245,28 +336,34 @@ void MastroServer::setRoutes()
     webServer.on("/text", HTTP_GET, [](AsyncWebServerRequest *request)
                  { request->send(200, "text", "Hi! I am ESP32 :)"); });
 
-    webServer.on("/", HTTP_GET, [scopeHost](AsyncWebServerRequest *request)
+    // old root
+    webServer.on("/indexOld", HTTP_GET, [scopeHost](AsyncWebServerRequest *request)
                  {
-    String html = htmlPage; // Copy the HTML template from htmlCustom.h
-    html.replace("%HOST_NAME%", scopeHost);
-    request->send(200, "text/html", html); });
+     String html = htmlPage; // Copy the HTML template from htmlCustom.h
+     html.replace("%HOST_NAME%", scopeHost);
+     request->send(200, "text/html", html); });
+
+    // New root
+    webServer.on("/", HTTP_GET, [scopeHost](AsyncWebServerRequest *request)
+                 { request->redirect("/www/control"); });
+
+    // Api to get control web page
+    webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request)
+                 { request->redirect("/www/control"); });
 }
 
-void MastroServer::setCustomApi(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
+void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
 {
     delay(50);
     webServer.on(uri, method, onRequest);
 }
 
-// String MastroServer::getJsonStringByKeysAndValues(String keys[], String values[], int size)
-// {
-//     DynamicJsonDocument jsonDoc(1024);
-//     for (size_t i = 0; i < size; ++i)
-//     {
-//         jsonDoc[keys[i]] = values[i];
-//     }
-//     String jsonString;
-//     serializeJson(jsonDoc, jsonString);
-//     return jsonString;
-// }
-
+String processor(const String &var)
+{
+    Serial.println(var);
+    if (var == "HOST_NAME")
+    {
+        return ""; // mastroServer.getName();
+    }
+    return String();
+}

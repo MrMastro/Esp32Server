@@ -33,23 +33,6 @@ void differentSerialprint(const String &msg, String colorMsg, HardwareSerial *se
     delay(25);
 }
 
-
-// String formatMsg(String msg, std::vector<String> args){
-//     size_t pos = 0;
-
-//     int count = countSubString(msg,"{}");
-//     if(count<args.size())
-//     {
-//         //ERROR
-//         return msg;
-//     }
-//     for(int i=0; i<count; i++)
-//     {
-//         msg.replace("{}",args.at(i));
-//     }
-//     return msg;
-// } old format msg
-
 String formatMsg(String msg, std::vector<String> args){
     std::string stdMsg = msg.c_str();
     //String result = String(stdMsg.c_str());

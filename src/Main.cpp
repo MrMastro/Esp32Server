@@ -1,4 +1,3 @@
-// todo NeoPixelBus
 #include "Main.h"
 
 // ################################################################################ //
@@ -19,67 +18,90 @@ boolean requestInAction = false;
 //                              Setup and Loop Method                               //
 // ################################################################################ //
 
-void test()
-{
-  logInfo("Test");
-  ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811();
-}
-
-void ledTask(void *pvParameters)
-{
-  while (doTest)
-  {
-    test();
-  }
-}
-
 void setup(void)
 {
   Serial.begin(9600);
-  myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
-  if (myServer.isAvaible())
+  mastroServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
+  if (mastroServer.isAvaible())
   {
-    WebSerial.begin(myServer.getWebServer(), "/webConsole");
+    WebSerial.begin(mastroServer.getWebServer(), "/webConsole");
   }
   servicesCollector.attachSerial(&Serial, &WebSerial);
-  servicesCollector.attachServer(&myServer);
+  servicesCollector.attachServer(&mastroServer);
   // init services and ServiceCollector
   // servicesCollector = ServicesCollector(&myServer);
-  
+
   //  Service init
+
+  logInfo("Service init");
   servicesCollector.addService(&commandService, "CommandService");
   servicesCollector.addService(&ledService, "LedService");
-  servicesCollector.addService(&infoService,"InfoService");
+  servicesCollector.addService(&infoService, "InfoService");
 
   //  Attach pin
   servicesCollector.getService("LedService")->attachPin({2, 5});
 
   // Route handling
-  initRoutes(myServer);
+  initRoutes(mastroServer);
 
   // Other
   WebSerial.msgCallback(recvMsgBySerialWeb);
   myRgbStript.setupLedRgb();
+
   delay(50);
+  logInfo("Init procedure completed");
+
+  // Thread running
+  //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
+  
 }
 
 void loop(void)
 {
-  myServer.handleOta();
-  myRgbStript.loopLedRgb();
-  delay(10);
-  if (Serial.available())
-  {
-    recvMsgBySerial(Serial.readString());
-  }
+  mastroServer.handleOta();
 
-  if (doTest)
+  if (!servicesCollector.isBusyForServiceApi())
   {
-    logInfo("do test");
-    ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811();
-    logInfo("rerun");
+    if (Serial.available())
+    {
+      recvMsgBySerial(Serial.readString());
+    }
+  }
+  else
+  {
+    yield();
   }
 }
+
+void ledTask(void *pvParameters)
+{
+  logInfo("LedTask Running");
+
+  ((LedService *) servicesCollector.getService("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100);
+
+  while (true)
+  {
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      myRgbStript.loopLedRgb();
+      delay(10);
+      ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811LifeCycle();
+    }
+    else
+    {
+      yield();
+    }
+  }
+}
+
+void test()
+{
+  logInfo("Test");
+}
+
+
+
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
 {
@@ -97,14 +119,14 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
 void recvMsgBySerial(String data)
 {
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
-  doTest = true;
-  // xTaskCreate(ledTask, "LedTaskAsync", 4096, NULL, 1, &LedTask);
-  // vTaskStartScheduler(); // Start the FreeRTOS scheduler
 }
 
 void logInfo(String msg)
 {
-  String log = "[ LOG - MAIN ] {msg}";
-  log.replace("{msg}", msg);
-  differentSerialprintln(log, "", &Serial, &WebSerial);
+  if (DEBUG)
+  {
+    String log = "[ LOG - MAIN ] {msg}";
+    log.replace("{msg}", msg);
+    differentSerialprintln(log, "\033[32m", &Serial, &WebSerial);
+  }
 }

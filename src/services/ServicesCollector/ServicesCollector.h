@@ -14,6 +14,9 @@ public:
     ServicesCollector();
     ServicesCollector(MastroServer* serverParam);
     boolean isPresentInMap(String name);
+    boolean isBusyForServiceApi();
+    void takeExclusiveExecution();
+    void freeExclusiveExecution();
     Service* getService(String name);
     void addService(Service* service, String name);
     void attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam);
@@ -22,6 +25,7 @@ public:
     MastroServer* getServer();
     ~ServicesCollector();
 private:
+    boolean busy;
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;
     MastroServer* server;

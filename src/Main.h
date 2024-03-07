@@ -14,11 +14,19 @@
 
 //#include "services/ServiceImplementations/InfoService.cpp"
 
-MastroServer myServer;
 MastroLed myRgbStript;
 CommandService commandService;
-LedService ledService;
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
+// NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> SI
+NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> strip(32, 5);
+LedService ledService(&strip);
 InfoService infoService;
+
+void ledTask(void *pvParameters);
 
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);

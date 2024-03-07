@@ -9,12 +9,12 @@
 
 void Service::setNameService(String name)
 {
-    nameService = name;
+  nameService = name;
 }
 
 String Service::getNameService()
 {
-    return nameService;
+  return nameService;
 }
 
 // String Service::executeJson(String methodName, String param)
@@ -30,8 +30,8 @@ void Service::attachCollector(ServicesCollector *collectorParam)
 
 boolean Service::isAvaible()
 {
-    throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED,"please create the implementation of isAvaible() in this service ", "isAvaible");
-    return false;
+  throwError(ERROR_CODE::SERVICE_NOT_IMPLEMENTED, "please create the implementation of isAvaible() in this service ", "isAvaible");
+  return false;
 }
 
 void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
@@ -75,35 +75,40 @@ Service *Service::getServiceByCollector(String nameService)
 
 String Service::getServerIpByCollector()
 {
-  MastroServer* pointer = collector->getServer();
-  if(pointer == nullptr){
+  MastroServer *pointer = collector->getServer();
+  if (pointer == nullptr)
+  {
     throwError(ERROR_CODE::SERVICE_ERROR, "server point is null", "getServer");
     return "ERROR";
   }
-    return pointer->getIp();
+  return pointer->getIp();
 }
 
-MastroServer* Service::getServerByCollector()
+MastroServer *Service::getServerByCollector()
 {
-  MastroServer* pointer = collector->getServer();
-  if(pointer == nullptr){
+  MastroServer *pointer = collector->getServer();
+  if (pointer == nullptr)
+  {
     throwError(ERROR_CODE::SERVICE_ERROR, "server point is null", "getServer");
     return nullptr;
   }
-    return pointer;
+  return pointer;
 }
 
 void Service::throwError(ERROR_CODE err, const char *detailMessage, String context)
 {
-  logError(getError(err,detailMessage), context);
+  logError(getError(err, detailMessage), context);
 }
 
 void Service::logInfo(String msg)
 {
-  String log = "[ LOG - SERVICE {nameService} ] {msg}";
-  log.replace("{nameService}", nameService);
-  log.replace("{msg}", msg);
-  differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer); //set green color
+  if (DEBUG)
+  {
+    String log = "[ LOG - SERVICE {nameService} ] {msg}";
+    log.replace("{nameService}", nameService);
+    log.replace("{msg}", msg);
+    differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer); // set green color
+  }
 }
 
 void Service::logWarning(String msg, String context)
@@ -121,5 +126,5 @@ void Service::logError(String msg, String context)
   error.replace("{nameService}", nameService);
   error.replace("{context}", context);
   error.replace("{msg}", msg);
-  differentSerialprintln(error, "\033[31m",serialPointer, webSerialPointer);
+  differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }
