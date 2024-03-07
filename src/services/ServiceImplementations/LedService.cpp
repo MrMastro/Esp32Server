@@ -85,23 +85,29 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   return isLedOn;
 }
 
-void LedService::startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms)
+void LedService::startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
 {
   if (!isAttachedLed)
   {
     throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");
     return;
   }
-  logInfo("start effect " + WS2811EffectEnomToString(effect));
+  String colorString = rgbColorToString(colorRgb);
+  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}",{WS2811EffectEnomToString(effect),colorString,String(deltaTms),String(actionRgbStript),String(actionWs2811Stript)});
+  logInfo(msg);
+  //todo create status for stript rgb and stript ws2811
   ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
   ws2811Effect = effect;
   deltaTmsEffect = deltaTms;
   colorEffect = colorRgb;
 }
 
-void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms)
+void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms,boolean actionRgb,boolean actionWs2811)
 {
-  logInfo("stop effect " + WS2811EffectEnomToString(effectInput));
+  String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R),String(colorRgb.G),String(colorRgb.B)});
+  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}",{WS2811EffectEnomToString(effectInput),colorString,String(deltaTms),String(actionRgb),String(actionWs2811)});
+  logInfo(msg);
+  //todo create status for stript rgb and stript ws2811
   ws2811Step = STEP_LIFE_EFFECT::END_STEP;
   ws2811Effect = (effectInput != WS2811_EFFECT::ACTUAL_EFFECT) ? effectInput : ws2811Effect;
   deltaTmsEffect = deltaTms;

@@ -17,8 +17,8 @@ public:
     boolean preparePin();
     boolean changeLed(boolean active, boolean toggle);
     //Service Methods
-    void startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTmsInput);
-    void stopEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms);
+    void startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
+    void stopEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
     void runEffectWs2811LifeCycle();
 private:
     boolean isAttachedLed;

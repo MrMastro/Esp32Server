@@ -78,7 +78,7 @@ void ledTask(void *pvParameters)
 {
   logInfo("LedTask Running");
 
-  ((LedService *) servicesCollector.getService("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100);
+  ((LedService *) servicesCollector.getService("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100,true,true);
 
   while (true)
   {

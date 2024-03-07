@@ -79,11 +79,11 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::START_PROGRESS_BAR:
-    ((LedService *) getServiceByCollector("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100);
+    ((LedService *) getServiceByCollector("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100, false, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::OFF_STRIPT:
-    ((LedService *) getServiceByCollector("LedService"))->stopEffect(WS2811_EFFECT::ACTUAL_EFFECT, RgbColor(0,0,0), 100);
+    ((LedService *) getServiceByCollector("LedService"))->stopEffect(WS2811_EFFECT::ACTUAL_EFFECT, RgbColor(0,0,0), 100, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::INFO:
