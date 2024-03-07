@@ -26,6 +26,7 @@ private:
     int ledPinIndicator;
     bool serverActive;
     bool isActiveIndicatorLed;
+    bool littleFSAvaible;
     String ip;
     String deviceName;
     void initArduinoOta(String deviceName, String devicePassword);

@@ -32,6 +32,8 @@ void setup(void)
   // servicesCollector = ServicesCollector(&myServer);
 
   //  Service init
+
+  logInfo("Service init");
   servicesCollector.addService(&commandService, "CommandService");
   servicesCollector.addService(&ledService, "LedService");
   servicesCollector.addService(&infoService, "InfoService");
@@ -47,6 +49,7 @@ void setup(void)
   myRgbStript.setupLedRgb();
 
   delay(50);
+  logInfo("Init procedure completed");
 
   // Thread running
   //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
@@ -124,6 +127,6 @@ void logInfo(String msg)
   {
     String log = "[ LOG - MAIN ] {msg}";
     log.replace("{msg}", msg);
-    differentSerialprintln(log, "", &Serial, &WebSerial);
+    differentSerialprintln(log, "\033[32m", &Serial, &WebSerial);
   }
 }
