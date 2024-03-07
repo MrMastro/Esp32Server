@@ -298,7 +298,8 @@ void MastroServer::setRoutes()
     webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request)
                  {
                     Serial.println("getting html page");
-                    request->send(LittleFS, "/control.html", String(), false, processor); });
+                    request->send(LittleFS, "www/control.html", String(), false, processor);
+                });
 }
 
 void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
