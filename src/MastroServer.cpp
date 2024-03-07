@@ -202,6 +202,14 @@ void MastroServer::beginListFiles(String path)
 {
     if (littleFSAvaible)
     {
+        Serial.println("Listing absolute file");
+        Serial.println("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
+        webServer.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+                {
+                    //
+                    request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
+                    //
+                });
         Serial.println("Listing files in: " + path);
         fs::File root = LittleFS.open(path);
         listFiles(root, path);
@@ -264,7 +272,7 @@ void MastroServer::setRouteSystem(String path, String resource)
     //                 //
     //             });
     // }
-    
+
     if (!apiRedirected)
     {
         Serial.println(String("" + apiPath + " - getting: " + resourcePath));
