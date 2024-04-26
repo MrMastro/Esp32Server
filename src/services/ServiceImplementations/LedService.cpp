@@ -64,7 +64,7 @@ boolean LedService::preparePin()
       logInfo("rgbStript don't passed, is not prepared");
     }
 
-    if (rgbStript != nullptr)
+    if (ws2811Stript != nullptr)
     {
       ws2811Stript->Begin();
       ws2811Stript->Show();
@@ -73,7 +73,7 @@ boolean LedService::preparePin()
     }
     else
     {
-      logInfo("2s2811Stript don't passed, is not prepared");
+      logInfo("ws2811Stript don't passed, is not prepared");
     }
 
     isAttachedLed = true;
