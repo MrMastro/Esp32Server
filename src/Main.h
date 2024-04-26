@@ -22,8 +22,9 @@ CommandService commandService;
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> SI
-NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> strip(32, 5);
-LedService ledService(&strip);
+NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> ws2811Strip(32, 5);
+LEDStripDriver rgbStript(19, 18);
+LedService ledService(&ws2811Strip, &rgbStript);
 InfoService infoService;
 
 void ledTask(void *pvParameters);

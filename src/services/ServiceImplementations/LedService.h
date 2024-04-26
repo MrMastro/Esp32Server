@@ -2,7 +2,7 @@
 #define LedService_H
 
 #include <./services/Service.h>
-//#include <LEDStripDriver.h>
+#include <LEDStripDriver.h>
 #include <NeoPixelBus.h>
 #include "constants/LedEffects.h"
 
@@ -12,8 +12,9 @@
 class LedService: public Service
 {
 public:
+    LedService();
     LedService(uint16_t countPixels, uint8_t pin);
-    LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>* ledStriptInput);
+    LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver* rgbLedStriptInput);
     boolean isAvaible() override;
     boolean preparePin();
     boolean changeLed(boolean active, boolean toggle);
@@ -26,7 +27,7 @@ private:
     int ledPin;
     bool isLedOn;
     NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>* ws2811Stript;
-    //LEDStripDriver RGBStript;
+    LEDStripDriver* rgbStript;
     int ws2811Pin;
     int numLeds;
     WS2811_EFFECT ws2811Effect;

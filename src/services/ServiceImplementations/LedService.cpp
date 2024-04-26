@@ -1,11 +1,26 @@
 #include "LedService.h"
 
-LedService::LedService(uint16_t countPixels, uint8_t pin)
-    : isLedOn(false), isAttachedLed(false), ws2811Step(STEP_LIFE_EFFECT::OFF), ws2811Effect(WS2811_EFFECT::NO_EFFECT) {}
+LedService::LedService()
+{
+  isLedOn = false;
+  isAttachedLed = false;
+  ws2811Step = STEP_LIFE_EFFECT::OFF;
+  ws2811Effect = WS2811_EFFECT::NO_EFFECT;
+}
 
-LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput)
+//deprecated
+LedService::LedService(uint16_t countPixels, uint8_t pin)
+{
+  isLedOn = false;
+  isAttachedLed = false;
+  ws2811Step = STEP_LIFE_EFFECT::OFF;
+  ws2811Effect = WS2811_EFFECT::NO_EFFECT;
+}
+
+LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver* rgbLedStriptInput)
 {
   ws2811Stript = ledStriptInput;
+  rgbStript = rgbLedStriptInput;
 }
 
 boolean LedService::isAvaible()
