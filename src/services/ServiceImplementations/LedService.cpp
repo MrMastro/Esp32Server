@@ -8,7 +8,7 @@ LedService::LedService()
   ws2811Effect = WS2811_EFFECT::NO_EFFECT;
 }
 
-//deprecated
+// deprecated
 LedService::LedService(uint16_t countPixels, uint8_t pin)
 {
   isLedOn = false;
@@ -17,7 +17,7 @@ LedService::LedService(uint16_t countPixels, uint8_t pin)
   ws2811Effect = WS2811_EFFECT::NO_EFFECT;
 }
 
-LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver* rgbLedStriptInput)
+LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput)
 {
   ws2811Stript = ledStriptInput;
   rgbStript = rgbLedStriptInput;
@@ -46,21 +46,36 @@ boolean LedService::preparePin()
       ledPin = pin;
       pinMode(pin, OUTPUT);
     }
-    else if (i == 1)
-    {
-      ws2811Pin = pin;
-      numLeds = 32;
-      ws2811Stript->Begin();
-      ws2811Stript->Show();
-      logInfo("Strip preparated");
-      ws2811Step = STEP_LIFE_EFFECT::OFF;
-    }
     else
     {
       s = "Pin {pin} have been ignored, this service has already all the necessary pin";
       s.replace("{pin}", String(pin));
       logWarning(s, "preparePin");
     }
+
+    if (rgbStript != nullptr)
+    {
+      rgbStript->setColor(0, 0, 0);
+      rgbStep = STEP_LIFE_EFFECT::OFF;
+      logInfo("rgbStript preparated");
+    }
+    else
+    {
+      logInfo("rgbStript don't passed, is not prepared");
+    }
+
+    if (rgbStript != nullptr)
+    {
+      ws2811Stript->Begin();
+      ws2811Stript->Show();
+      ws2811Step = STEP_LIFE_EFFECT::OFF;
+      logInfo("ws2811Stript preparated");
+    }
+    else
+    {
+      logInfo("2s2811Stript don't passed, is not prepared");
+    }
+
     isAttachedLed = true;
   }
   logInfo("Pin preparated");
@@ -100,7 +115,7 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   return isLedOn;
 }
 
-void LedService::startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
+void LedService::startEffect(WS2811_EFFECT effectWS2811, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
 {
   if (!isAttachedLed)
   {
@@ -108,25 +123,62 @@ void LedService::startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaT
     return;
   }
   String colorString = rgbColorToString(colorRgb);
-  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}",{WS2811EffectEnomToString(effect),colorString,String(deltaTms),String(actionRgbStript),String(actionWs2811Stript)});
+  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {WS2811EffectEnomToString(effectWS2811), colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
   logInfo(msg);
-  //todo create status for stript rgb and stript ws2811
+  // todo create status for stript rgb and stript ws2811
+
+  rgbStep = STEP_LIFE_EFFECT::BEGIN_STEP;
+  rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
+
   ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
-  ws2811Effect = effect;
+  ws2811Effect = effectWS2811;
+
   deltaTmsEffect = deltaTms;
   colorEffect = colorRgb;
 }
 
-void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms,boolean actionRgb,boolean actionWs2811)
+void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
 {
-  String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R),String(colorRgb.G),String(colorRgb.B)});
-  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}",{WS2811EffectEnomToString(effectInput),colorString,String(deltaTms),String(actionRgb),String(actionWs2811)});
+  String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
+  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {WS2811EffectEnomToString(effectInput), colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
   logInfo(msg);
-  //todo create status for stript rgb and stript ws2811
+  // todo create status for stript rgb and stript ws2811
+
+  rgbStep = STEP_LIFE_EFFECT::END_STEP;
+  rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
+
   ws2811Step = STEP_LIFE_EFFECT::END_STEP;
   ws2811Effect = (effectInput != WS2811_EFFECT::ACTUAL_EFFECT) ? effectInput : ws2811Effect;
+
   deltaTmsEffect = deltaTms;
   colorEffect = colorRgb;
+}
+
+void LedService::runEffectRgbLifeCycle()
+{
+  if (!isAttachedLed)
+  {
+    throwError(ERROR_CODE::SERVICE_ERROR, "rgb Stript not attached", "runEffectRgb");
+    return;
+  }
+
+  switch (ws2811Step)
+  {
+  case STEP_LIFE_EFFECT::BEGIN_STEP:
+    rgbStep = STEP_LIFE_EFFECT::LOOP_STEP;
+    execRgbEffect(rgbEffect, STEP_LIFE_EFFECT::BEGIN_STEP, colorEffect, deltaTmsEffect);
+    break;
+  case STEP_LIFE_EFFECT::LOOP_STEP:
+    execRgbEffect(rgbEffect, STEP_LIFE_EFFECT::LOOP_STEP, colorEffect, deltaTmsEffect);
+    break;
+  case STEP_LIFE_EFFECT::END_STEP:
+    rgbStep = STEP_LIFE_EFFECT::OFF;
+    execRgbEffect(rgbEffect, STEP_LIFE_EFFECT::END_STEP, colorEffect, deltaTmsEffect);
+    break;
+  default: // OFF_STEP
+    rgbStript->setColor(0, 0, 0);
+    break;
+  }
 }
 
 void LedService::runEffectWs2811LifeCycle()
@@ -157,67 +209,157 @@ void LedService::runEffectWs2811LifeCycle()
   }
 }
 
-void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
+void LedService::execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbStepInput, RgbColor colorInput, int deltaTimeMsInput)
 {
   String s = "\nPlays\nEffect {},\nStep: {},\nRgbColor: {},\ndeltaTimesMs: {}";
-  String sEffect = WS2811EffectEnomToString(ws2811EffectInput);
-  String sLifeStep = stepLifeEffectEnomToString(ws2811StepInput);
-  String sColor =formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-  logInfo(formatMsg(s,{sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
+  String sEffect = rgbEffectEnomToString(rgbEffectInput);
+  String sLifeStep = stepLifeEffectEnomToString(rgbStepInput);
+  String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
+  logInfo(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
 
   // SWITCH ALL EFFECT
-  switch (ws2811EffectInput)
+  switch (rgbEffectInput)
   {
-  case WS2811_EFFECT::CONSTANT_UNIQUE_COLOR:
-    ws2811EffectConstantsUniqueColor(ws2811StepInput, colorInput, deltaTimeMsInput);
+  case RGB_EFFECT::CONSTANT_UNIQUE_COLOR:
+    effectConstantsUniqueColor(STRIPT_EXECUTION::RGB , rgbStepInput, colorInput, deltaTimeMsInput);
     break;
-  case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
-    ws2811EffectProgressiveBarUniqueColor(ws2811StepInput, colorInput, deltaTimeMsInput);
+  case RGB_EFFECT::WAWE_UNIQUE_COLOR:
+    effectWaweUniqueColor(STRIPT_EXECUTION::RGB , rgbStepInput, colorInput, deltaTimeMsInput);
     break;
   default:
     break;
   }
 }
 
-// Function of effect
-void LedService::ws2811EffectConstantsUniqueColor(STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
+void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
 {
-  for (int i = 0; i < ws2811Stript->PixelCount(); i++)
+  String s = "\nPlays\nEffect {},\nStep: {},\nRgbColor: {},\ndeltaTimesMs: {}";
+  String sEffect = WS2811EffectEnomToString(ws2811EffectInput);
+  String sLifeStep = stepLifeEffectEnomToString(ws2811StepInput);
+  String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
+  logInfo(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
+
+  // SWITCH ALL EFFECT
+  switch (ws2811EffectInput)
   {
-    ws2811Stript->SetPixelColor(i, colorInput);
+  case WS2811_EFFECT::CONSTANT_UNIQUE_COLOR:
+    effectConstantsUniqueColor(STRIPT_EXECUTION::WS2811 ,ws2811StepInput, colorInput, deltaTimeMsInput);
+    break;
+  case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
+    effectProgressiveBarUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
+    break;
+  default:
+    break;
   }
-  ws2811Stript->Show();
 }
 
-void LedService::ws2811EffectProgressiveBarUniqueColor(STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
+// Function of effectWS2811
+void LedService::effectConstantsUniqueColor(STRIPT_EXECUTION stript, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput)
 {
-  if (ws2811StepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
+
+  // rgb Stript
+  if (rgbStript != nullptr && (stript == STRIPT_EXECUTION::RGB || stript == STRIPT_EXECUTION::ALL))
   {
-    for (int pixel = 0; pixel < ws2811Stript->PixelCount(); pixel++)
-    {
-      ws2811Stript->SetPixelColor(pixel, colorInput);
-      ws2811Stript->Show();
-      delay(deltaTimeMsInput);
-    }
+    rgbStript->setColor(colorInput.R, colorInput.G, colorInput.B);
   }
-  else if (ws2811StepInput == STEP_LIFE_EFFECT::LOOP_STEP)
+
+  if (ws2811Stript != nullptr && (stript == STRIPT_EXECUTION::WS2811 || stript == STRIPT_EXECUTION::ALL))
   {
-    for (int pixel = 0; pixel < ws2811Stript->PixelCount(); pixel++)
+    // ws2811 stript
+    for (int i = 0; i < ws2811Stript->PixelCount(); i++)
     {
-      ws2811Stript->SetPixelColor(pixel, colorInput);
-      delay(deltaTimeMsInput);
+      ws2811Stript->SetPixelColor(i, colorInput);
     }
     ws2811Stript->Show();
   }
-  else if (ws2811StepInput == STEP_LIFE_EFFECT::END_STEP)
+}
+
+void LedService::effectWaweUniqueColor(STRIPT_EXECUTION stript, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput)
+{
+  RgbColor off = RgbColor(0);
+  RgbColor color = colorInput;
+  while (color.CalculateBrightness() > 0)
   {
-    for (int light = 255; light == 0; --light)
+    color.Darken(10);
+    // rgb stript
+    if (rgbStript != nullptr && (stript == STRIPT_EXECUTION::RGB || stript == STRIPT_EXECUTION::ALL))
     {
-      RgbColor darken = ws2811Stript->GetPixelColor(0);
-      darken.Darken(light);
-      ws2811Stript->ClearTo(darken);
-      delay(deltaTimeMsInput);
+      rgbStript->setColor(color.R, color.G, color.B);
+    }
+
+    // Ws2811 Stript
+    if (ws2811Stript != nullptr && (stript == STRIPT_EXECUTION::WS2811 || stript == STRIPT_EXECUTION::ALL))
+    {
+      for (int i = 0; i < ws2811Stript->PixelCount(); i++)
+      {
+        ws2811Stript->SetPixelColor(i, color);
+      }
       ws2811Stript->Show();
+    }
+
+    // delay delta
+    delay(deltaTimeMsInput);
+  }
+
+  while (color.CalculateBrightness() < colorInput.CalculateBrightness())
+  {
+    color.Lighten(10);
+    // rgb stript
+    if (rgbStript != nullptr && (stript == STRIPT_EXECUTION::RGB || stript == STRIPT_EXECUTION::ALL))
+    {
+      rgbStript->setColor(color.R, color.G, color.B);
+    }
+
+    // Ws2811 Stript
+    if (ws2811Stript != nullptr && (stript == STRIPT_EXECUTION::WS2811 || stript == STRIPT_EXECUTION::ALL))
+    {
+      for (int i = 0; i < ws2811Stript->PixelCount(); i++)
+      {
+        ws2811Stript->SetPixelColor(i, color);
+      }
+      ws2811Stript->Show();
+    }
+
+    // delay delta
+    delay(deltaTimeMsInput);
+  }
+}
+
+void LedService::effectProgressiveBarUniqueColor(STRIPT_EXECUTION stript, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput)
+{
+  // rgb stript not supported
+
+  // ws2811 Stript
+  if (ws2811Stript != nullptr && (stript == STRIPT_EXECUTION::WS2811 || stript == STRIPT_EXECUTION::ALL))
+  {
+    if (stepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
+    {
+      for (int pixel = 0; pixel < ws2811Stript->PixelCount(); pixel++)
+      {
+        ws2811Stript->SetPixelColor(pixel, colorInput);
+        ws2811Stript->Show();
+        delay(deltaTimeMsInput);
+      }
+    }
+    else if (stepInput == STEP_LIFE_EFFECT::LOOP_STEP)
+    {
+      for (int pixel = 0; pixel < ws2811Stript->PixelCount(); pixel++)
+      {
+        ws2811Stript->SetPixelColor(pixel, colorInput);
+        delay(deltaTimeMsInput);
+      }
+      ws2811Stript->Show();
+    }
+    else if (stepInput == STEP_LIFE_EFFECT::END_STEP)
+    {
+      for (int light = 255; light == 0; --light)
+      {
+        RgbColor darken = ws2811Stript->GetPixelColor(0);
+        darken.Darken(light);
+        ws2811Stript->ClearTo(darken);
+        delay(deltaTimeMsInput);
+        ws2811Stript->Show();
+      }
     }
   }
 }

@@ -14,7 +14,7 @@
 
 //#include "services/ServiceImplementations/InfoService.cpp"
 
-MastroLed myRgbStript;
+MastroLed myRgbStript; //LEDStripDriver(Din: 19, Cin: 18);
 CommandService commandService;
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO

@@ -9,6 +9,13 @@
 //numPixel = 32
 //pinStrip = 5
 
+enum class STRIPT_EXECUTION
+{
+  ALL,
+  RGB,
+  WS2811
+};
+
 class LedService: public Service
 {
 public:
@@ -21,23 +28,28 @@ public:
     //Service Methods
     void startEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
     void stopEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
+    void runEffectRgbLifeCycle();
     void runEffectWs2811LifeCycle();
 private:
     boolean isAttachedLed;
     int ledPin;
     bool isLedOn;
-    NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>* ws2811Stript;
+    RGB_EFFECT rgbEffect;
+    STEP_LIFE_EFFECT rgbStep;
     LEDStripDriver* rgbStript;
-    int ws2811Pin;
-    int numLeds;
+    NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>* ws2811Stript;
+    //int ws2811Pin; removed
+    //int numLeds; removed
     WS2811_EFFECT ws2811Effect;
     STEP_LIFE_EFFECT ws2811Step;
     int deltaTmsEffect;
     RgbColor colorEffect;
-    void execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput);
+    void execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbStepInput, RgbColor colorInput, int deltaTimeMsInput);
+    void execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
     // Effect
-    void ws2811EffectConstantsUniqueColor(STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput);
-    void ws2811EffectProgressiveBarUniqueColor(STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput);
+    void effectConstantsUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
+    void effectWaweUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
+    void effectProgressiveBarUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
 };
 
 #endif  // LedService_H

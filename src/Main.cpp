@@ -39,7 +39,7 @@ void setup(void)
   servicesCollector.addService(&infoService, "InfoService");
 
   //  Attach pin
-  servicesCollector.getService("LedService")->attachPin({2, 5});
+  servicesCollector.getService("LedService")->attachPin({ledPin});
 
   // Route handling
   initRoutes(mastroServer);
@@ -87,6 +87,7 @@ void ledTask(void *pvParameters)
       myRgbStript.loopLedRgb();
       delay(10);
       ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811LifeCycle();
+      //((LedService *)servicesCollector.getService("LedService"))->runEffectRgbLifeCycle(); //for now don't play rgb stript
     }
     else
     {
