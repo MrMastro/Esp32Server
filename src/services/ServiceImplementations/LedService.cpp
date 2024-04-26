@@ -127,11 +127,17 @@ void LedService::startEffect(WS2811_EFFECT effectWS2811, RgbColor colorRgb, int 
   logInfo(msg);
   // todo create status for stript rgb and stript ws2811
 
-  rgbStep = STEP_LIFE_EFFECT::BEGIN_STEP;
-  rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
+  if (actionRgbStript)
+  {
+    rgbStep = STEP_LIFE_EFFECT::BEGIN_STEP;
+    rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
+  }
 
-  ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
-  ws2811Effect = effectWS2811;
+  if (actionWs2811Stript)
+  {
+    ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
+    ws2811Effect = effectWS2811;
+  }
 
   deltaTmsEffect = deltaTms;
   colorEffect = colorRgb;
@@ -221,10 +227,10 @@ void LedService::execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbSt
   switch (rgbEffectInput)
   {
   case RGB_EFFECT::CONSTANT_UNIQUE_COLOR:
-    effectConstantsUniqueColor(STRIPT_EXECUTION::RGB , rgbStepInput, colorInput, deltaTimeMsInput);
+    effectConstantsUniqueColor(STRIPT_EXECUTION::RGB, rgbStepInput, colorInput, deltaTimeMsInput);
     break;
   case RGB_EFFECT::WAWE_UNIQUE_COLOR:
-    effectWaweUniqueColor(STRIPT_EXECUTION::RGB , rgbStepInput, colorInput, deltaTimeMsInput);
+    effectWaweUniqueColor(STRIPT_EXECUTION::RGB, rgbStepInput, colorInput, deltaTimeMsInput);
     break;
   default:
     break;
@@ -243,7 +249,7 @@ void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFF
   switch (ws2811EffectInput)
   {
   case WS2811_EFFECT::CONSTANT_UNIQUE_COLOR:
-    effectConstantsUniqueColor(STRIPT_EXECUTION::WS2811 ,ws2811StepInput, colorInput, deltaTimeMsInput);
+    effectConstantsUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
     break;
   case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
     effectProgressiveBarUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
