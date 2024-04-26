@@ -235,9 +235,9 @@ void MastroServer::listFiles(fs::File root, String path)
         }
         else
         {
-            Serial.print("is a directory: ");
-            Serial.print(file.name());
-            Serial.println(" - Analizing directory");
+            // Serial.print("is a directory: ");
+            // Serial.print(file.name());
+            // Serial.println(" - Analizing directory");
             listFiles(file, path + "/" + String(file.name()));
         }
     }

@@ -5,7 +5,7 @@ LedService::LedService(uint16_t countPixels, uint8_t pin)
 
 LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput)
 {
-  ledStript = ledStriptInput;
+  ws2811Stript = ledStriptInput;
 }
 
 boolean LedService::isAvaible()
@@ -35,8 +35,8 @@ boolean LedService::preparePin()
     {
       ws2811Pin = pin;
       numLeds = 32;
-      ledStript->Begin();
-      ledStript->Show();
+      ws2811Stript->Begin();
+      ws2811Stript->Show();
       logInfo("Strip preparated");
       ws2811Step = STEP_LIFE_EFFECT::OFF;
     }
@@ -136,8 +136,8 @@ void LedService::runEffectWs2811LifeCycle()
     execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::END_STEP, colorEffect, deltaTmsEffect);
     break;
   default: // OFF_STEP
-    ledStript->ClearTo(RgbColor(0));
-    ledStript->Show();
+    ws2811Stript->ClearTo(RgbColor(0));
+    ws2811Stript->Show();
     break;
   }
 }
@@ -167,42 +167,42 @@ void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFF
 // Function of effect
 void LedService::ws2811EffectConstantsUniqueColor(STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
 {
-  for (int i = 0; i < ledStript->PixelCount(); i++)
+  for (int i = 0; i < ws2811Stript->PixelCount(); i++)
   {
-    ledStript->SetPixelColor(i, colorInput);
+    ws2811Stript->SetPixelColor(i, colorInput);
   }
-  ledStript->Show();
+  ws2811Stript->Show();
 }
 
 void LedService::ws2811EffectProgressiveBarUniqueColor(STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
 {
   if (ws2811StepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
   {
-    for (int pixel = 0; pixel < ledStript->PixelCount(); pixel++)
+    for (int pixel = 0; pixel < ws2811Stript->PixelCount(); pixel++)
     {
-      ledStript->SetPixelColor(pixel, colorInput);
-      ledStript->Show();
+      ws2811Stript->SetPixelColor(pixel, colorInput);
+      ws2811Stript->Show();
       delay(deltaTimeMsInput);
     }
   }
   else if (ws2811StepInput == STEP_LIFE_EFFECT::LOOP_STEP)
   {
-    for (int pixel = 0; pixel < ledStript->PixelCount(); pixel++)
+    for (int pixel = 0; pixel < ws2811Stript->PixelCount(); pixel++)
     {
-      ledStript->SetPixelColor(pixel, colorInput);
+      ws2811Stript->SetPixelColor(pixel, colorInput);
       delay(deltaTimeMsInput);
     }
-    ledStript->Show();
+    ws2811Stript->Show();
   }
   else if (ws2811StepInput == STEP_LIFE_EFFECT::END_STEP)
   {
     for (int light = 255; light == 0; --light)
     {
-      RgbColor darken = ledStript->GetPixelColor(0);
+      RgbColor darken = ws2811Stript->GetPixelColor(0);
       darken.Darken(light);
-      ledStript->ClearTo(darken);
+      ws2811Stript->ClearTo(darken);
       delay(deltaTimeMsInput);
-      ledStript->Show();
+      ws2811Stript->Show();
     }
   }
 }

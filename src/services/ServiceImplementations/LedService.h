@@ -2,6 +2,7 @@
 #define LedService_H
 
 #include <./services/Service.h>
+//#include <LEDStripDriver.h>
 #include <NeoPixelBus.h>
 #include "constants/LedEffects.h"
 
@@ -24,7 +25,8 @@ private:
     boolean isAttachedLed;
     int ledPin;
     bool isLedOn;
-    NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>* ledStript;
+    NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>* ws2811Stript;
+    //LEDStripDriver RGBStript;
     int ws2811Pin;
     int numLeds;
     WS2811_EFFECT ws2811Effect;
