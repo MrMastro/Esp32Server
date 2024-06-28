@@ -1,0 +1,59 @@
+@media  {
+  .containerLabel {
+    display: flex;
+    justify-content: center;
+    width: auto;
+    min-width: 100px;
+  }
+}
+
+.form-label {
+  min-height: 30px;
+  height: auto;
+  max-height: inherit;
+}
+
+.character-container {
+}
+
+.character-container {
+}
+
+.character-container {
+}
+
+.character-container {
+}
+
+.componentForm.rangeForm {
+  height: auto;
+  min-width: 205px;
+  max-width: initial;
+  min-height: 40px;
+  font-size: 20px;
+  text-align: center;
+  color: var(--bs-body-bg);
+  position: sticky;
+}
+
+.buttonForm {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.navbar-nav {
+  margin-right: 0;
+}
+
+.container-positioning-center {
+}
+
+.form-label-title {
+  font-size: 16.5px;
+  font-weight: bold;
+}
+
+.fieldIp {
+  text-align: center;
+}
+

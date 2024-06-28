@@ -1,0 +1,36 @@
+{
+  "name": "com.mastroconnect.mastroled",
+  "displayName": "mastroLed",
+  "version": "1.0.0",
+  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Apache Cordova Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cordova-android": "13.0.0",
+    "cordova-browser": "7.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android",
+      "browser"
+    ],
+    "plugins": {
+      "cordova-plugin-http": {},
+      "cordova-plugin-advanced-http": {
+        "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
+      }
+    }
+  },
+  "devDependencies": {
+    "cordova-plugin-advanced-http": "^3.3.1",
+    "cordova-plugin-file": "^8.1.0",
+    "cordova-plugin-http": "^1.2.0"
+  }
+}
