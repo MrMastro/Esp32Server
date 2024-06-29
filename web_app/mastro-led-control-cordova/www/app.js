@@ -68,7 +68,7 @@ const app = {
         let b = hexToRgb(color).b;
         let rgbAction = $("#rgbCheck")[0].checked;
         let ws2811Action = $("#ws2811Check")[0].checked;
-    
+
         var url = "/api/ws2811SetEffect";
         var queryParam =
             "effect=" + encodeURIComponent(effect) +
@@ -79,7 +79,7 @@ const app = {
             "&b=" + encodeURIComponent(b) +
             "&rgbAction=" + encodeURIComponent(rgbAction) +
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
-    
+
         postCustom(url, queryParam, {});
     },
 
@@ -92,7 +92,7 @@ const app = {
         let b = hexToRgb(color).b;
         let rgbAction = $("#rgbCheck")[0].checked;
         let ws2811Action = $("#ws2811Check")[0].checked;
-    
+
         var url = "/api/ws2811StopEffect";
         var queryParam =
             "effect=" + encodeURIComponent(effect) +
@@ -103,9 +103,9 @@ const app = {
             "&b=" + encodeURIComponent(b) +
             "&rgbAction=" + encodeURIComponent(rgbAction) +
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
-    
+
         url += (queryParam != "") ? ("?" + queryParam) : ("");
-        postCustom(url, queryParam,{});
+        postCustom(url, queryParam, {});
     }
 
 
@@ -135,28 +135,68 @@ function hexToRgb(hex) {
     } : null;
 }
 
-function postCustom(url, queryParam, postData) {
-    url = host+url;
-    url += (queryParam != "") ? ("?" + queryParam) : ("");
-    cordova.plugin.http.sendRequest(url, {
-        method: 'post',
+function postCustom(path, queryParam, postData) {
+    url = host + path;
+    let method = "POST";
+    let body = queryParam;
+    let headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+    };
+    let options = {
+        method: "post",
+        headers: { "Accept": "application/json" },
         data: postData,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    }, response => {
-        console.log(response.status);
-        console.log(response.data);
-        alert("Success");
-        $('#response').text('Response: ' + response.data);
-    }, response => {
-        console.error(response.error);
-        alert('Error: ' + response.error);
-    });
+        param: queryParam
+      };
+    // fetch(url, {
+    //     method,
+    //     headers,
+    //     body
+    // }).then((response) => {
+    //     // convert to json
+    //     alert("Success");
+    // }).then((result) => {
+    //     alert(JSON.stringify(result));
+    // });
+
+    // //url += (queryParam != "") ? ("?" + queryParam) : ("");
+    // url = "http://"+host+url;
+    // cordova.plugin.http.sendRequest(url, {
+    //     method: 'get',
+    //     param: queryParam,
+    //     data: {},
+    //     headers: {
+    //         'Content-Type': 'application/x-www-form-urlencoded'
+    //     }
+    // }, response => {
+    //     console.log(response.status);
+    //     console.log(response.data);
+    //     alert("Success");
+    //     $('#response').text('Response: ' + response.data);
+    // }, response => {
+    //     console.error(response.error);
+    //     alert('Error: ' + response.error);
+    // });
+
+    // cordova.plugin.http.sendRequest(url, {
+    //     method: method,
+    //     param: queryParam,
+    //     data: {},
+    //     headers: headers
+    // }, response => {
+    //     console.log(response.status);
+    //     console.log(response.data);
+    //     alert("Success");
+    //     $('#response').text('Response: ' + response.data);
+    // }, response => {
+    //     console.error(response.error);
+    //     alert('Error: ' + response.error);
+    // });
 
     // $.ajax({
-    //     type: "POST",
-    //     url: url,
+    //     type: method,
+    //     url: url+"?"+queryParam,
     //     data: null, // No data in the request body
     //     success: function (response) {
     //         // Handle the success response
@@ -168,5 +208,16 @@ function postCustom(url, queryParam, postData) {
     //         console.log("Status code:" + error.status);
     //     }
     // });
-}
 
+    cordova.plugin.http.sendRequest("http://"+url+"?"+queryParam, options, (response) => {
+        // success
+        alert("success" + response);
+        console.log(response.status);
+      }, (response) => {
+        // error
+        alert('Error: ' + response.error);
+        console.log(response.status);
+        console.log(response.error);
+      });
+
+}
