@@ -40,3 +40,7 @@ src/settings.h
 #Custom
 /src/settings/*.h
 !/src/settings/settingsDefault.h
+web_app/mastro-led-control-cordova/mastroLed/.idea
+web_app/mastro-led-control/android
+web_app/mastro-led-control/ios
+web_app/mastro-led-control-cordova/.idea
