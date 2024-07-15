@@ -1,5 +1,4 @@
 #include "MastroLed.h"
-#include <LEDStripDriver.h>
 
 //                                  Din,Cin
 LEDStripDriver led = LEDStripDriver(19, 18);

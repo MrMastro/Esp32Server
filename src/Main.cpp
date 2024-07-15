@@ -1,170 +1,133 @@
 #include "Main.h"
-#include "MastroServer.h"
-#include "MastroLed.h"
 
 // ################################################################################ //
 //                            Manage profile settings                               //
 // ################################################################################ //
-// Decomment the line below for apply default settings                              //                     
-// #include "./profileSettings/settingsDefault.h"                                   //
+// Decomment the line below for apply default settings                              //
+// #include "./settings/settingsDefault.h" //      <--- Default settings     //
 // Comment the line below for apply default settings                                //
-#include "./profileSettings/mySettings.h"// <--- Custom settings                    //
+#include "./settings/mySettings.h" //               <--- Custom settings      //
 // ################################################################################ //
 //                     End of profile settings management                           //
 // ################################################################################ //
-
-const int ledPin = 2;
-bool isActiveLed = false;
-MastroServer myServer;
-MastroLed myRgbStript;
-
-enum Cmd
-{
-  LED_ON,
-  LED_OFF,
-  LED_TOGGLE,
-  INFO,
-  OTHER
-};
-
-// Funzione per mappare una stringa a un valore enumerativo
-Cmd mapStringToEnum(String inputString)
-{
-  inputString.toUpperCase();
-  if (inputString.equalsIgnoreCase("led on"))
-  {
-    return LED_ON;
-  }
-  else if (inputString.equalsIgnoreCase("led off"))
-  {
-    return LED_OFF;
-  }
-  else if (inputString.equalsIgnoreCase("led toggle"))
-  {
-    return LED_TOGGLE;
-  }
-  else if (inputString.equalsIgnoreCase("info"))
-  {
-    return INFO;
-  }
-  else
-  {
-    // Valore predefinito in caso di stringa non riconosciuta
-    return OTHER; // Puoi scegliere un valore predefinito diverso se preferisci
-  }
-}
-
-void recvMsg(uint8_t *data, size_t len)
-{
-  // WebSerial.println("Received Data...");
-  String d = "";
-  for (int i = 0; i < len; i++)
-  {
-    d += char(data[i]);
-  }
-  // WebSerial.println(d.length());
-  if (d.length() > 0)
-  {
-    Cmd cmd;
-    cmd = mapStringToEnum(d);
-    switch (cmd)
-    {
-    case LED_ON:
-      activeLed(true, false);
-      println(String("Led on"));
-      break;
-    case LED_OFF:
-      activeLed(false, false);
-      println("Led off");
-      break;
-    case LED_TOGGLE:
-      activeLed(true, true);
-      println("Led toggle");
-      break;
-    case INFO:
-      println(myServer.getIp());
-      break;
-    default:
-      if(d.toInt()>0)
-      {
-        myRgbStript.setModeValue(d.toInt());
-      }else{
-        println("Tasto non riconosciuto: " + d);
-      }
-      
-      break;
-    }
-  }
-}
-
-boolean activeLed(bool active, bool toggle)
-{
-  delay(50);
-  if (toggle)
-  {
-    if (isActiveLed)
-    {
-      digitalWrite(ledPin, LOW);
-    }
-    else
-    {
-      digitalWrite(ledPin, HIGH);
-    }
-    isActiveLed = !isActiveLed;
-  }
-  else if (active)
-  {
-    digitalWrite(ledPin, HIGH); // Accendi il LED
-    isActiveLed = true;
-  }
-  else
-  {
-    digitalWrite(ledPin, LOW); // Spegni il LED
-    isActiveLed = false;
-  }
-  delay(100);
-  return isActiveLed;
-}
-
-void println(String msg)
-{
-  WebSerial.println(msg);
-}
-
-// Function to handle /text route
-void handleTextRequest(AsyncWebServerRequest *request)
-{
-  String message = "Hello, this is a text for try api!";
-  request->send(200, "text/plain", message);
-}
+TaskHandle_t LedTask;
+boolean doTest = false;
+int ledPin = 2;
+boolean requestInAction = false;
+// ################################################################################ //
+//                              Setup and Loop Method                               //
+// ################################################################################ //
 
 void setup(void)
 {
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);
-  activeLed(false, false);
-  myServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
-  myRgbStript.setupLedRgb();
+  mastroServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
+  if (mastroServer.isAvaible())
+  {
+    WebSerial.begin(mastroServer.getWebServer(), "/webConsole");
+  }
+  servicesCollector.attachSerial(&Serial, &WebSerial);
+  servicesCollector.attachServer(&mastroServer);
+  // init services and ServiceCollector
+  // servicesCollector = ServicesCollector(&myServer);
+
+  //  Service init
+
+  logInfo("Service init");
+  servicesCollector.addService(&commandService, "CommandService");
+  servicesCollector.addService(&ledService, "LedService");
+  servicesCollector.addService(&infoService, "InfoService");
+
+  //  Attach pin
+  servicesCollector.getService("LedService")->attachPin({ledPin});
+
   // Route handling
+  initRoutes(mastroServer);
+
+  // Other
+  WebSerial.msgCallback(recvMsgBySerialWeb);
+  myRgbStript.setupLedRgb();
+
   delay(50);
-  myServer.setCustomApi("/try", HTTP_GET, handleTextRequest);
+  logInfo("Init procedure completed");
+
+  // Thread running
+  //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
+  
 }
 
 void loop(void)
 {
-  myServer.handleOta();
-  myRgbStript.loopLedRgb();
-  delay(10);
+  mastroServer.handleOta();
+
+  if (!servicesCollector.isBusyForServiceApi())
+  {
+    if (Serial.available())
+    {
+      recvMsgBySerial(Serial.readString());
+    }
+  }
+  else
+  {
+    yield();
+  }
 }
 
-//todo set custom api
-/* 
+void ledTask(void *pvParameters)
+{
+  logInfo("LedTask Running");
 
-    webServer.on("/api/handleLed", HTTP_POST, [](AsyncWebServerRequest *request)
-                 {
-                    bool result = activeLed(true,true);
-                    String msg = result ? "{\"lightLed\": true}": "{\"lightLed\": false}";
-                    
-    request->send(200, "application/json", msg); });
+  ((LedService *) servicesCollector.getService("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100,true,true);
 
-*/
+  while (true)
+  {
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      myRgbStript.loopLedRgb();
+      delay(10);
+      ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811LifeCycle();
+      //((LedService *)servicesCollector.getService("LedService"))->runEffectRgbLifeCycle(); //for now don't play rgb stript
+    }
+    else
+    {
+      yield();
+    }
+  }
+}
+
+void test()
+{
+  logInfo("Test");
+}
+
+
+
+
+void recvMsgBySerialWeb(uint8_t *data, size_t len)
+{
+  String dataString = "";
+  for (int i = 0; i < len; i++)
+  {
+    dataString += char(data[i]);
+  }
+  if (dataString.length() > 0)
+  {
+    ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(dataString);
+  }
+}
+
+void recvMsgBySerial(String data)
+{
+  ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
+}
+
+void logInfo(String msg)
+{
+  if (DEBUG)
+  {
+    String log = "[ LOG - MAIN ] {msg}";
+    log.replace("{msg}", msg);
+    differentSerialprintln(log, "\033[32m", &Serial, &WebSerial);
+  }
+}
