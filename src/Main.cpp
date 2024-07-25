@@ -52,7 +52,7 @@ void setup(void)
   logInfo("Init procedure completed");
 
   // Thread running
-  //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
   //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
   
 }
@@ -78,7 +78,9 @@ void ledTask(void *pvParameters)
 {
   logInfo("LedTask Running");
 
-  ((LedService *) servicesCollector.getService("LedService"))->startEffect(WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR,RgbColor(0,0,255),100,true,true);
+  //Initial effect (commented for disable initial effect)
+  WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(initialEffect);
+  ((LedService *) servicesCollector.getService("LedService"))->startEffect(firstEffect,RgbColor(0,0,255),100,true,true);
 
   while (true)
   {
