@@ -115,7 +115,7 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   return isLedOn;
 }
 
-void LedService::startEffect(WS2811_EFFECT effectWS2811, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
+void LedService::startEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
 {
   if (!isAttachedLed)
   {
@@ -123,35 +123,57 @@ void LedService::startEffect(WS2811_EFFECT effectWS2811, RgbColor colorRgb, int 
     return;
   }
   String colorString = rgbColorToString(colorRgb);
-  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {WS2811EffectEnomToString(effectWS2811), colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
+  String effectInputString = WS2811EffectEnomToString(effectInput);
+  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
   logInfoln(msg);
   // todo create status for stript rgb and stript ws2811
 
-  if (actionRgbStript)
+  if (actionRgbStript && matchRgbEffect(effectInputString))
   {
     rgbStep = STEP_LIFE_EFFECT::BEGIN_STEP;
-    rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
+    rgbEffect = rgbEffectStringToEnum(effectInputString);
   }
 
   if (actionWs2811Stript)
   {
     ws2811Step = STEP_LIFE_EFFECT::BEGIN_STEP;
-    ws2811Effect = effectWS2811;
+    ws2811Effect = effectInput;
   }
 
   deltaTmsEffect = deltaTms;
   colorEffect = colorRgb;
 }
 
+boolean LedService::matchRgbEffect(String effect)
+{
+  boolean match = false;
+  for (std::pair<RGB_EFFECT, String> pair : EFFECT_RGB_PAIR)
+  {
+    if (effect == pair.second)
+    {
+      match = true;
+      break;
+    }
+  }
+  return match;
+}
+
 void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
 {
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
-  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {WS2811EffectEnomToString(effectInput), colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
+  String effectInputString = WS2811EffectEnomToString(effectInput);
+  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
   logInfoln(msg);
   // todo create status for stript rgb and stript ws2811
 
   rgbStep = STEP_LIFE_EFFECT::END_STEP;
   rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
+
+  if (actionRgb && matchRgbEffect(effectInputString))
+  {
+    rgbStep = STEP_LIFE_EFFECT::BEGIN_STEP;
+    rgbEffect = rgbEffectStringToEnum(effectInputString);
+  }
 
   ws2811Step = STEP_LIFE_EFFECT::END_STEP;
   ws2811Effect = (effectInput != WS2811_EFFECT::ACTUAL_EFFECT) ? effectInput : ws2811Effect;

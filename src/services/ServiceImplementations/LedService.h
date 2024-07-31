@@ -30,6 +30,7 @@ public:
     void stopEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
     void runEffectRgbLifeCycle();
     void runEffectWs2811LifeCycle();
+
 private:
     boolean isAttachedLed;
     int ledPin;
@@ -50,6 +51,7 @@ private:
     void effectConstantsUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
     void effectWaweUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
     void effectProgressiveBarUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
+    boolean matchRgbEffect(String effectWS2811);
 };
 
 #endif  // LedService_H
