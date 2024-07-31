@@ -69,7 +69,7 @@ Service *ServicesCollector::getService(String name)
 //     s.replace("{nameService}", nameService);
 //     s.replace("{nameMethod}", nameMethod);
 //     s.replace("{param}", param);
-//     logInfo(s);
+//     logInfoln(s);
 //     String result = "ERROR";
 //     if (!isPresentInMap(nameService))
 //     {
@@ -122,10 +122,10 @@ void ServicesCollector::addService(Service *service, String name)
 {
     String s = "Adding service: {name}";
     s.replace("{name}", name);
-    logInfo(s);
+    logInfoln(s);
     if (serialPointer == nullptr || webSerialPointer == nullptr)
     {
-        logInfo("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
+        logInfoln("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
     }
 
     if (name == "")
@@ -168,7 +168,7 @@ void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const String
     logError(getError(err, detailMessage), context);
 }
 
-void ServicesCollector::logInfo(String msg)
+void ServicesCollector::logInfoln(String msg)
 {
     if (DEBUG)
     {

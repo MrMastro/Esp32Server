@@ -1,15 +1,4 @@
 #include "Main.h"
-
-// ################################################################################ //
-//                            Manage profile settings                               //
-// ################################################################################ //
-// Decomment the line below for apply default settings                              //
-// #include "./settings/settingsDefault.h" //      <--- Default settings     //
-// Comment the line below for apply default settings                                //
-#include "./settings/mySettings.h" //               <--- Custom settings      //
-// ################################################################################ //
-//                     End of profile settings management                           //
-// ################################################################################ //
 TaskHandle_t LedTask;
 boolean doTest = false;
 int ledPin = 2;
@@ -21,6 +10,7 @@ boolean requestInAction = false;
 void setup(void)
 {
   Serial.begin(9600);
+  delay(10);
   mastroServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
   if (mastroServer.isAvaible())
   {
@@ -28,12 +18,8 @@ void setup(void)
   }
   servicesCollector.attachSerial(&Serial, &WebSerial);
   servicesCollector.attachServer(&mastroServer);
-  // init services and ServiceCollector
-  // servicesCollector = ServicesCollector(&myServer);
 
-  //  Service init
-
-  logInfo("Service init");
+  logInfoln("Service init");
   servicesCollector.addService(&commandService, "CommandService");
   servicesCollector.addService(&ledService, "LedService");
   servicesCollector.addService(&infoService, "InfoService");
@@ -49,7 +35,10 @@ void setup(void)
   myRgbStript.setupLedRgb();
 
   delay(50);
-  logInfo("Init procedure completed");
+  logInfoln("Init procedure completed");
+
+  Serial.println("IP");
+  Serial.println(((InfoService *) servicesCollector.getService("LedService"))->getIp());
 
   // Thread running
   xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
@@ -76,7 +65,7 @@ void loop(void)
 
 void ledTask(void *pvParameters)
 {
-  logInfo("LedTask Running");
+  logInfoln("LedTask Running");
 
   //Initial effect (commented for disable initial effect)
   WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(initialEffect);
@@ -100,7 +89,7 @@ void ledTask(void *pvParameters)
 
 void test()
 {
-  logInfo("Test");
+  logInfoln("Test");
 }
 
 
@@ -124,7 +113,7 @@ void recvMsgBySerial(String data)
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
 }
 
-void logInfo(String msg)
+void logInfoln(String msg)
 {
   if (DEBUG)
   {

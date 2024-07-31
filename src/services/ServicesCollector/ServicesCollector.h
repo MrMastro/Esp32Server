@@ -31,7 +31,7 @@ private:
     MastroServer* server;
     std::map<String,Service*> containerService;
     void throwServicesCollectorError(ERROR_CODE err, const String detailMessage, const String context);
-    void logInfo(String msg);
+    void logInfoln(String msg);
     void logWarning(String msg, String context);
     void logError(String msg, String context);
 };

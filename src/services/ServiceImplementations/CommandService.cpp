@@ -13,7 +13,7 @@ boolean CommandService::isAvaible()
 
 void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
 {
-  logInfo("Attach Serial of CommandService");
+  logInfoln("Attach Serial of CommandService");
   serialPointer = serialPointerParam;
   webSerialPointer = webSerialPointerParam;
   isOperative = true;
@@ -24,7 +24,7 @@ void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialC
 //   String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param={param})";
 //   s.replace("{nameService}", nameService);
 //   s.replace("{param}", param);
-//   logInfo(s);
+//   logInfoln(s);
 //   if (methodName == "recvMsgAndExecute")
 //   {
 //     return recvMsgAndExecute(param);
@@ -40,7 +40,7 @@ void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialC
 //   String s = "executeJson(nameService={nameService}, nameMethod={nameMethod}, param=vector)";
 //   s.replace("{nameService}", nameService);
 //   s.replace("{param}", jsonParams.at(0));
-//   logInfo(s);
+//   logInfoln(s);
 //   if (methodName == "recvMsgAndExecute")
 //   {
 //     return recvMsgAndExecute(jsonParams.at(0));
@@ -58,7 +58,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
   String s = "executeCommand(cmd={cmd},cmdString={cmdString})";
   s.replace("{cmd}", cmdString);
   s.replace("{cmdString}", cmdString);
-  logInfo(s);
+  logInfoln(s);
   if (!isOperative)
   {
     throwError(ERROR_CODE::SERVICE_ERROR, "Attach Serials first (Serial or WebSerial)", "executeCommand");
@@ -102,7 +102,7 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
 {
   String s = "recvMsgAndExecute(data={data})";
   s.replace("{data}", data);
-  logInfo(s);
+  logInfoln(s);
   // WebSerial.println("Received Data...");
   if (!isOperative)
   {

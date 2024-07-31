@@ -2,6 +2,17 @@
 #define Main_H
 #include <Arduino.h>
 
+// ################################################################################ //
+//                            Manage profile settings                               //
+// ################################################################################ //
+// Decomment the line below for apply default settings                              //
+// #include "./settings/settingsDefault.h" //      <--- Default settings     //
+// Comment the line below for apply default settings                                //
+#include "./settings/mySettings.h" //               <--- Custom settings      //
+// ################################################################################ //
+//                     End of profile settings management                           //
+// ################################################################################ //
+
 #include "MastroServer.h"
 #include "MastroLed.h"
 
@@ -31,5 +42,5 @@ void ledTask(void *pvParameters);
 
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);
-void logInfo(String msg);
+void logInfoln(String msg);
 #endif  // Main_H

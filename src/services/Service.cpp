@@ -49,7 +49,7 @@ boolean Service::attachPin(std::vector<int> values)
 
 boolean Service::preparePin()
 {
-  logInfo("prepare pin don't necessary, override this method and use pins vector");
+  logInfoln("prepare pin don't necessary, override this method and use pins vector");
   return false;
 }
 
@@ -100,7 +100,7 @@ void Service::throwError(ERROR_CODE err, const char *detailMessage, String conte
   logError(getError(err, detailMessage), context);
 }
 
-void Service::logInfo(String msg)
+void Service::logInfoln(String msg)
 {
   if (DEBUG)
   {

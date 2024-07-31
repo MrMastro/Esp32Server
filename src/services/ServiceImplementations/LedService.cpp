@@ -30,17 +30,17 @@ boolean LedService::isAvaible()
 
 boolean LedService::preparePin()
 {
-  logInfo("prepare pin of ledService");
+  logInfoln("prepare pin of ledService");
   String s = "Pins size: {n}";
   s.replace("{n}", String(pins.size()));
-  logInfo(s);
+  logInfoln(s);
   for (int i = 0; i < pins.size(); ++i)
   {
     s = "Preparing pin: {pin} at position: {i}";
     int pin = pins.at(i);
     s.replace("{pin}", String(pin));
     s.replace("{i}", String(i));
-    logInfo(s);
+    logInfoln(s);
     if (i == 0)
     {
       ledPin = pin;
@@ -57,11 +57,11 @@ boolean LedService::preparePin()
     {
       rgbStript->setColor(0, 0, 0);
       rgbStep = STEP_LIFE_EFFECT::OFF;
-      logInfo("rgbStript preparated");
+      logInfoln("rgbStript preparated");
     }
     else
     {
-      logInfo("rgbStript don't passed, is not prepared");
+      logInfoln("rgbStript don't passed, is not prepared");
     }
 
     if (ws2811Stript != nullptr)
@@ -69,16 +69,16 @@ boolean LedService::preparePin()
       ws2811Stript->Begin();
       ws2811Stript->Show();
       ws2811Step = STEP_LIFE_EFFECT::OFF;
-      logInfo("ws2811Stript preparated");
+      logInfoln("ws2811Stript preparated");
     }
     else
     {
-      logInfo("ws2811Stript don't passed, is not prepared");
+      logInfoln("ws2811Stript don't passed, is not prepared");
     }
 
     isAttachedLed = true;
   }
-  logInfo("Pin preparated");
+  logInfoln("Pin preparated");
   return isAttachedLed;
 }
 
@@ -124,7 +124,7 @@ void LedService::startEffect(WS2811_EFFECT effectWS2811, RgbColor colorRgb, int 
   }
   String colorString = rgbColorToString(colorRgb);
   String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {WS2811EffectEnomToString(effectWS2811), colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
-  logInfo(msg);
+  logInfoln(msg);
   // todo create status for stript rgb and stript ws2811
 
   if (actionRgbStript)
@@ -147,7 +147,7 @@ void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int de
 {
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
   String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {WS2811EffectEnomToString(effectInput), colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
-  logInfo(msg);
+  logInfoln(msg);
   // todo create status for stript rgb and stript ws2811
 
   rgbStep = STEP_LIFE_EFFECT::END_STEP;
@@ -221,7 +221,7 @@ void LedService::execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbSt
   String sEffect = rgbEffectEnomToString(rgbEffectInput);
   String sLifeStep = stepLifeEffectEnomToString(rgbStepInput);
   String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-  logInfo(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
+  logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
 
   // SWITCH ALL EFFECT
   switch (rgbEffectInput)
@@ -243,7 +243,7 @@ void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFF
   String sEffect = WS2811EffectEnomToString(ws2811EffectInput);
   String sLifeStep = stepLifeEffectEnomToString(ws2811StepInput);
   String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-  logInfo(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
+  logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
 
   // SWITCH ALL EFFECT
   switch (ws2811EffectInput)

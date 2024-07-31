@@ -1,6 +1,8 @@
 #include "MastroServer.h"
 #include "constants/htmlPages.h"
 #include "LITTLEFS.h"
+#include "utils/SerialSimple.h"
+#include "constants/constants.h"
 
 MastroServer mastroServer;
 AsyncWebServer webServer(80);
@@ -20,6 +22,7 @@ MastroServer::MastroServer()
 MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, int ledPin)
 {
     MastroServer();
+    logInfo("\n");
     if (ledPin != -1)
     {
         ledIndicatorMode = true;
@@ -27,59 +30,35 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     }
     else
     {
-        Serial.println("Led indicator disabled");
+        logInfoln("Led indicator disabled");
     }
 
     // Wait Indicator
-    welcomeWaitLedBlink();
+    // welcomeWaitLedBlink();
 
     // Initialize SPIFFS
     if (!LittleFS.begin())
     {
         littleFSAvaible = false;
-        Serial.println("An Error has occurred while mounting SPIFFS (read file in rom)");
-        Serial.println("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
+        logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
+        logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
     }
     else
     {
         littleFSAvaible = true;
     }
 
-    if (mode == "AP")
-    {
-        initAP(ssidAP, passwordAP);
-    }
-    else
-    {
-        Serial.println("init WIFI mode");
-        Serial.print("Try to connect to: ");
-        Serial.println(ssid);
-        WiFi.mode(WIFI_STA);
-        WiFi.begin(ssid, passwordWiFi);
-    }
-
-    // Wait for connection
-    for (int i = 0; (WiFi.status() != WL_CONNECTED && mode != "AP"); i++)
-    {
-        delay(1000);
-        Serial.print(".");
-        activeIndicatorLed(true, true);
-        if (i == 10)
-        {
-            Serial.println("10 Seconds have elapsed, time out. Connecting in Access point mode");
-            mode = "AP";
-        }
-    }
+    logInfo("\n");
 
     if (mode != "AP")
     {
-        Serial.println("");
-        Serial.print("Connected to ");
-        Serial.println(ssid);
-        Serial.print("IP address: ");
-        ip = WiFi.localIP().toString();
-        Serial.println(ip);
-        activeIndicatorLed(false, false);
+        boolean successWifi = initWIFI(ssid, passwordWiFi);
+        if(!successWifi)
+        {
+            logInfo("\n");
+            logInfoln("10 Seconds have elapsed, time out. Connecting in Access point mode");
+            initAP(ssidAP, passwordAP);
+        }
     }
     else
     {
@@ -88,28 +67,57 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     delay(200);
 
     initArduinoOta(deviceName, devicePassword);
-    Serial.println("OTA server started");
+    logInfoln("OTA server started");
     beginListFiles("/www");
     setRoutes();
     ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
     // ElegantOTA.begin(&webServer); // Start ElegantOTA
     webServer.begin();
-    Serial.println("HTTP server started");
+    logInfoln("HTTP server started");
     pointWebServer = &webServer;
     serverActive = true;
 }
 
+boolean MastroServer::initWIFI(String &ssid, String &passwordWiFi)
+{
+    logInfoln("init WIFI mode");
+    logInfoln("Try to connected to ");
+    logInfoln(ssid);
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, passwordWiFi);
+
+    // Wait for connection
+    for (int i = 0; (WiFi.status() != WL_CONNECTED); i++)
+    {
+        delay(1000);
+        logInfo(".");
+        activeIndicatorLed(true, true);
+        if (i == 10)
+        {
+            // Fail
+            return false;
+        }
+    }
+
+    // Success
+    logInfoln("IP address: ");
+    ip = WiFi.localIP().toString();
+    logInfoln(ip);
+    activeIndicatorLed(false, false);
+    return true;
+}
+
 void MastroServer::initAP(String ssid, String password)
 {
-    Serial.println("init AP mode");
-    // AsyncWiFiManager wifiManager(&webServer, &dnsServer);
-    // wifiManager.startConfigPortal(ssid.c_str(), password.c_str());
+    logInfoln("init AP mode");
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
     dnsServer.start(53, "*", WiFi.softAPIP());
     // Print the AP IP address to the serial monitor
-    Serial.print("AP IP address: ");
-    Serial.println(WiFi.softAPIP());
+    logInfoln("AP IP address: ");
+    ip = WiFi.softAPIP().toString();
+    logInfoln(ip);
     // Configure the captive portal behavior
     // WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     activeIndicatorLed(true, false);
@@ -202,21 +210,21 @@ void MastroServer::beginListFiles(String path)
 {
     if (littleFSAvaible)
     {
-        Serial.println("Listing absolute file");
-        Serial.println("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
+        logInfoln("Listing absolute file");
+        logInfoln("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
         webServer.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
-                {
-                    //
-                    request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
-                    //
-                });
-        Serial.println("Listing files in: " + path);
+                     {
+                         //
+                         request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
+                         //
+                     });
+        logInfoln("Listing files in: " + path);
         fs::File root = LittleFS.open(path);
         listFiles(root, path);
     }
     else
     {
-        Serial.println("Can't preparated www api for get pages (littelFs don't ready)");
+        logInfoln("Can't preparated www api for get pages (littelFs don't ready)");
     }
 }
 
@@ -228,9 +236,9 @@ void MastroServer::listFiles(fs::File root, String path)
 
         if (!file.isDirectory())
         {
-            Serial.print("is a file: ");
-            Serial.print(file.name());
-            Serial.print(" - Add api ");
+            logInfoln("is a file: ");
+            logInfoln(file.name());
+            logInfoln(" - Add api ");
             setRouteSystem(path, String(file.name()));
         }
         else
@@ -275,7 +283,7 @@ void MastroServer::setRouteSystem(String path, String resource)
 
     if (!apiRedirected)
     {
-        Serial.println(String("" + apiPath + " - getting: " + resourcePath));
+        logInfoln(String("" + apiPath + " - getting: " + resourcePath));
         webServer.on(apiPath.c_str(), HTTP_GET, [resourcePath](AsyncWebServerRequest *request)
                      {
                          //
@@ -366,4 +374,24 @@ String processor(const String &var)
         return ""; // mastroServer.getName();
     }
     return String();
+}
+
+void MastroServer::logInfoln(String msg)
+{
+    if (DEBUG)
+    {
+        String log = "[ LOG - MastroServer ] {msg}";
+        log.replace("{msg}", msg);
+        differentSerialprintln(log, "\033[32m", &Serial, nullptr);
+    }
+}
+
+void MastroServer::logInfo(String msg)
+{
+    if (DEBUG)
+    {
+        String log = "{msg}";
+        log.replace("{msg}", msg);
+        differentSerialprint(log, "\033[32m", &Serial, nullptr);
+    }
 }

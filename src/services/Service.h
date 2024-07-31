@@ -32,7 +32,7 @@ protected:
     std::vector<int> pins;
     MastroServer* getServerByCollector();
     virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
-    virtual void logInfo(String msg);
+    virtual void logInfoln(String msg);
     virtual void logWarning(String msg, String context);
     virtual void logError(String msg, String context);
 private:
