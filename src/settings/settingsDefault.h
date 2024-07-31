@@ -19,4 +19,16 @@ const char* passwordAP = "8GvsfMEC";
 const char* ssid = "MySsid";
 const char* password = "myPass";
 
+String defaultContentSettings = R"({
+    "deviceName": "ESP32_Device",
+    "devicePassword": "esp32password",
+    "debug": false,
+    "initialEffect": "NO_EFFECT",
+    "wirelessMode": "AP",
+    "ssidAP": "ESP32_AP",
+    "passwordAP": "ap_password",
+    "ssidWIFI": "Home_Network",
+    "passwordWIFI": "wifi_password"
+  })";
+
 //todo update per compilare il bin.

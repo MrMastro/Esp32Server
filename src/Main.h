@@ -1,6 +1,7 @@
 #ifndef Main_H
 #define Main_H
 #include <Arduino.h>
+#include <LittleFS.h>
 
 // ################################################################################ //
 //                            Manage profile settings                               //
@@ -8,7 +9,7 @@
 // Decomment the line below for apply default settings                              //
 // #include "./settings/settingsDefault.h" //      <--- Default settings     //
 // Comment the line below for apply default settings                                //
-#include "./settings/mySettings.h" //               <--- Custom settings      //
+#include "./settings/settingsDefault.h" //               <--- Custom settings      //
 // ################################################################################ //
 //                     End of profile settings management                           //
 // ################################################################################ //
