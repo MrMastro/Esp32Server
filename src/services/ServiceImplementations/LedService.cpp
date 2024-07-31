@@ -166,12 +166,9 @@ void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int de
   logInfoln(msg);
   // todo create status for stript rgb and stript ws2811
 
-  rgbStep = STEP_LIFE_EFFECT::END_STEP;
-  rgbEffect = RGB_EFFECT::WAWE_UNIQUE_COLOR; // todo add parameter for effectWS2811 by FE (for now is default)
-
   if (actionRgb && matchRgbEffect(effectInputString))
   {
-    rgbStep = STEP_LIFE_EFFECT::BEGIN_STEP;
+    rgbStep = STEP_LIFE_EFFECT::END_STEP;
     rgbEffect = rgbEffectStringToEnum(effectInputString);
   }
 
