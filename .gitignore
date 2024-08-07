@@ -46,3 +46,4 @@ web_app/mastro-led-control/ios
 web_app/mastro-led-control-cordova/.idea
 data/settings/mySettings.json
 data/settings/sereSettings.json
+data/settings/settings.json
