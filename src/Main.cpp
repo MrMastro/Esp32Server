@@ -1,10 +1,10 @@
 #include "Main.h"
-#include "models/settingModel/Settings.h"
 
 TaskHandle_t LedTask;
 boolean doTest = false;
 int ledPin = 2;
 boolean requestInAction = false;
+SettingsModel s;
 // ################################################################################ //
 //                              Setup and Loop Method                               //
 // ################################################################################ //
@@ -13,11 +13,12 @@ void setup(void)
 {
   Serial.begin(9600);
   delay(10);
-
-  Settings mySettings = getSettings();
-  //todo use settings with mySettings
-  //todo remove DEBUG constants and use debug inside mySettings
-  mastroServer = MastroServer(wirlessMode, ssid, password, ssidAP, passwordAP, deviceName, devicePassword, ledPin);
+  // todo use settings with mySettings
+  // todo remove DEBUG constants and use debug inside mySettings
+  servicesCollector.addService(&settingService, "SettingsService");
+  settingService.loadSettings("/settings/settings.json");
+  s = settingService.getSettings();
+  mastroServer = MastroServer(s.wirelessMode, s.ssidWIFI, s.passwordWIFI, s.ssidAP, s.passwordAP, s.deviceName, s.devicePassword, s.debug, ledPin);
   if (mastroServer.isAvaible())
   {
     WebSerial.begin(mastroServer.getWebServer(), "/webConsole");
@@ -60,6 +61,7 @@ void loop(void)
     if (Serial.available())
     {
       recvMsgBySerial(Serial.readString());
+      test();
     }
   }
   else
@@ -73,8 +75,22 @@ void ledTask(void *pvParameters)
   logInfoln("LedTask Running");
 
   // Initial effect (commented for disable initial effect)
-  WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(initialEffect);
-  ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(0, 0, 255), 100, true, true);
+  WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(s.initialEffect);
+  String firstEffectString = WS2811EffectEnomToString(firstEffect);
+
+  switch (firstEffect)
+  {
+  case WS2811_EFFECT::NO_EFFECT:
+  case WS2811_EFFECT::UKNOWN_EFFECT:
+  case WS2811_EFFECT::ACTUAL_EFFECT:
+    logInfoln(firstEffectString + " - None initial effect applied");
+    break;
+
+  default:
+    logInfoln("First effect running: " + firstEffectString);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(0, 0, 255), 100, true, true);
+    break;
+  }
 
   while (true)
   {
@@ -97,69 +113,6 @@ void test()
   logInfoln("Test");
 }
 
-Settings getSettings()
-{
-  // Initialize SPIFFS
-  if (!LittleFS.begin())
-  {
-    logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
-    logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
-  }
-
-  const char *filename = "settings/setting.json";
-
-  if (!LittleFS.exists(filename)){
-    logInfoln("settings.json non presente lo creo");
-    
-    // Crea e scrivi il contenuto predefinito nel file
-    File file = LittleFS.open(filename, "w");
-    if (!file) {
-      logInfoln("Errore nella creazione del file");
-      return;
-    }
-
-    // Scrivi il contenuto predefinito
-    file.print(defaultContentSettings);
-
-    // Chiudi il file
-    file.close();
-
-    logInfoln("File creato con il contenuto predefinito.");
-  }
-
-  // Verifica se il file esiste
-  if (LittleFS.exists(filename))
-  {
-
-    // Apri il file in modalità lettura
-    File file = LittleFS.open(filename, "r");
-    if (!file)
-    {
-      Serial.println("Errore nell'aprire il file");
-      return;
-    }
-
-    String fileContent;
-
-    // Leggi il contenuto del file e immagazzinalo in una stringa
-    while (file.available()) {
-      fileContent += (char)file.read();
-    }
-
-    // Stampa il contenuto del file
-    logInfoln("Caricate le seguenti impostazioni:\n");
-    logInfoln(fileContent);
-
-    // Chiudi il file
-    file.close();
-
-    Settings deviceSettings;
-    deviceSettings.fromJson(fileContent);
-
-    return deviceSettings;
-  }
-}
-
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
 {
   String dataString = "";
@@ -180,7 +133,7 @@ void recvMsgBySerial(String data)
 
 void logInfoln(String msg)
 {
-  if (DEBUG)
+  if (s.debug)
   {
     String log = "[ LOG - MAIN ] {msg}";
     log.replace("{msg}", msg);

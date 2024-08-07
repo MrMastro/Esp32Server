@@ -9,11 +9,13 @@ ServicesCollector::ServicesCollector()
 {
     server = nullptr;
     busy = false;
+    debug = false;
 }
 
-ServicesCollector::ServicesCollector(MastroServer *serverParam)
+ServicesCollector::ServicesCollector(MastroServer *serverParam, boolean debugMode)
 {
     attachServer(serverParam);
+    debug = debugMode;
 }
 
 boolean ServicesCollector::isPresentInMap(String name)
@@ -170,7 +172,7 @@ void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const String
 
 void ServicesCollector::logInfoln(String msg)
 {
-    if (DEBUG)
+    if (debug)
     {
         String result = "[ LOG - ServiceCollector ] {msg}";
         result.replace("{msg}", msg);

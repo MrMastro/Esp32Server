@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-class Settings
+class SettingsModel
 {
 public:
     //---- DEVICE SETTINGS -------
@@ -69,6 +69,9 @@ public:
 
         return true;
     }
+
+    private:
+    
 };
 
 #endif // SETTINGS_MODEL_H

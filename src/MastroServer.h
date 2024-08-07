@@ -13,7 +13,7 @@ class MastroServer
 {
 public:
     MastroServer();
-    MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, int ledPin = -1); // Costruttore
+    MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debug, int ledPin = -1); // Costruttore
     void handleOta();
     String getName();
     String getIp();
@@ -29,6 +29,7 @@ private:
     bool littleFSAvaible;
     String ip;
     String deviceName;
+    boolean debug;
     void initArduinoOta(String deviceName, String devicePassword);
     void setRoutes();
     String splitIpHost(String ip);

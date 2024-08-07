@@ -12,7 +12,7 @@ class ServicesCollector
 {
 public:
     ServicesCollector();
-    ServicesCollector(MastroServer* serverParam);
+    ServicesCollector(MastroServer* serverParam, boolean debug);
     boolean isPresentInMap(String name);
     boolean isBusyForServiceApi();
     void takeExclusiveExecution();
@@ -30,6 +30,7 @@ private:
     WebSerialClass* webSerialPointer;
     MastroServer* server;
     std::map<String,Service*> containerService;
+    boolean debug;
     void throwServicesCollectorError(ERROR_CODE err, const String detailMessage, const String context);
     void logInfoln(String msg);
     void logWarning(String msg, String context);

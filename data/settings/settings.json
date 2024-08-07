@@ -1,7 +1,7 @@
 {
     "deviceName": "ESP32_Device",
     "devicePassword": "esp32password",
-    "debug": false,
+    "debug": true,
     "initialEffect": "NO_EFFECT",
     "wirelessMode": "AP",
     "ssidAP": "ESP32_AP",
