@@ -3,8 +3,8 @@
 TaskHandle_t LedTask;
 boolean doTest = false;
 int ledPin = 2;
-boolean requestInAction = false;
 SettingsModel s;
+
 // ################################################################################ //
 //                              Setup and Loop Method                               //
 // ################################################################################ //
@@ -13,8 +13,6 @@ void setup(void)
 {
   Serial.begin(9600);
   delay(10);
-  // todo use settings with mySettings
-  // todo remove DEBUG constants and use debug inside mySettings
   servicesCollector.addService(&settingService, "SettingsService");
   settingService.loadSettings("/settings/settings.json");
   s = settingService.getSettings();
