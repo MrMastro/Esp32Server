@@ -14,14 +14,16 @@ MastroServer::MastroServer()
     isActiveIndicatorLed = false;
     ledIndicatorMode = false;
     littleFSAvaible = false;
+    debug = false;
 }
 
 // mode:
 // Ap= access point
 // WIFI = wirless connect to your wifi
-MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, int ledPin)
+MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debugMode, int ledPin)
 {
     MastroServer();
+    debug = debugMode;
     logInfo("\n");
     if (ledPin != -1)
     {
@@ -378,7 +380,7 @@ String processor(const String &var)
 
 void MastroServer::logInfoln(String msg)
 {
-    if (DEBUG)
+    if (debug)
     {
         String log = "[ LOG - MastroServer ] {msg}";
         log.replace("{msg}", msg);
@@ -388,7 +390,7 @@ void MastroServer::logInfoln(String msg)
 
 void MastroServer::logInfo(String msg)
 {
-    if (DEBUG)
+    if (debug)
     {
         String log = "{msg}";
         log.replace("{msg}", msg);

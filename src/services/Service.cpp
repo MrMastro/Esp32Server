@@ -102,7 +102,7 @@ void Service::throwError(ERROR_CODE err, const char *detailMessage, String conte
 
 void Service::logInfoln(String msg)
 {
-  if (DEBUG)
+  if (settings.debug)
   {
     String log = "[ LOG - SERVICE {nameService} ] {msg}";
     log.replace("{nameService}", nameService);

@@ -3,6 +3,7 @@
 
 #include <MastroServer.h>
 #include "./models/DataModelling.h"
+#include "./models/settingModel/SettingsModel.h"
 #include <constants/constants.h>
 #include <exceptions/exceptions.h>
 #include <utils/FunctionUtils.h>
@@ -31,6 +32,7 @@ protected:
     WebSerialClass* webSerialPointer;
     std::vector<int> pins;
     MastroServer* getServerByCollector();
+    SettingsModel settings;
     virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
     virtual void logInfoln(String msg);
     virtual void logWarning(String msg, String context);
