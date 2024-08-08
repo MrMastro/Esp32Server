@@ -25,9 +25,9 @@ void setup(void)
   servicesCollector.attachServer(&mastroServer);
 
   logInfoln("Service init");
-  servicesCollector.addService(&commandService, "CommandService");
-  servicesCollector.addService(&ledService, "LedService");
-  servicesCollector.addService(&infoService, "InfoService");
+  servicesCollector.addService(&commandService, "CommandService",s);
+  servicesCollector.addService(&ledService, "LedService",s);
+  servicesCollector.addService(&infoService, "InfoService",s);
 
   //  Attach pin
   servicesCollector.getService("LedService")->attachPin({ledPin});

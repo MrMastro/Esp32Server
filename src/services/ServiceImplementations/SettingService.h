@@ -19,9 +19,10 @@ public:
     SettingService();
     SettingsModel getSettings();
     void loadSettings(String path);
+protected:
+    SettingsModel settings;
 private:
     boolean isOperative;
-    SettingsModel settings;
 };
 
 

@@ -142,6 +142,30 @@ void ServicesCollector::addService(Service *service, String name)
     containerService[name] = service;
 }
 
+void ServicesCollector::addService(Service *service, String name, SettingsModel s)
+{
+    String log = "Adding service: {name}";
+    log.replace("{name}", name);
+    logInfoln(log);
+    if (serialPointer == nullptr || webSerialPointer == nullptr)
+    {
+        logInfoln("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
+    }
+
+    if (name == "")
+    {
+        throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "insert the non empty name", "addService");
+        return;
+    }
+
+    service->setNameService(name);
+    service->attachCollector(this);
+    service->attachSerial(serialPointer, webSerialPointer);
+    service->setSettings(s);
+    containerService[name] = service;
+}
+
+
 void ServicesCollector::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
 {
     if (serialPointer != nullptr || webSerialPointer != nullptr)
