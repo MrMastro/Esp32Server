@@ -14,6 +14,10 @@ public:
 
     //---- Initial Operation -------
     String initialEffect;
+    String initialDeltaT;
+    String initialR;
+    String initialG;
+    String initialB;
 
     //---- WIRELESS SETTINGS -------
     String wirelessMode; // AP or WIFI
@@ -39,6 +43,10 @@ public:
         doc["passwordAP"] = passwordAP;
         doc["ssidWIFI"] = ssidWIFI;
         doc["passwordWIFI"] = passwordWIFI;
+        doc["initialDeltaT"] = initialDeltaT;
+        doc["initialR"] = initialR;
+        doc["initialG"] = initialG;
+        doc["initialB"] = initialB;
 
         String output;
         serializeJson(doc, output);
@@ -66,7 +74,10 @@ public:
         passwordAP = doc["passwordAP"].as<String>();
         ssidWIFI = doc["ssidWIFI"].as<String>();
         passwordWIFI = doc["passwordWIFI"].as<String>();
-
+        initialDeltaT = doc["initialDeltaT"].as<String>();
+        initialR = doc["initialR"].as<String>();
+        initialG = doc["initialG"].as<String>();
+        initialB = doc["initialB"].as<String>();
         return true;
     }
 

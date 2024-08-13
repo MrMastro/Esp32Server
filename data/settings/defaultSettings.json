@@ -7,5 +7,9 @@
     "ssidAP": "ESP32_AP",
     "passwordAP": "ap_password",
     "ssidWIFI": "Home_Network",
-    "passwordWIFI": "wifi_password"
+    "passwordWIFI": "wifi_password",
+    "initialDeltaT": "100",
+    "initialR": "0",
+    "initialG": "0",
+    "initialB": "0"
 }

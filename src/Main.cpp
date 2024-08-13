@@ -45,6 +45,8 @@ void setup(void)
   Serial.println("IP");
   Serial.println(((InfoService *)servicesCollector.getService("LedService"))->getIp());
 
+  logInfoln("Load settings:\n" + s.toJson());
+
   // Thread running
   xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
@@ -71,7 +73,7 @@ void loop(void)
 void ledTask(void *pvParameters)
 {
   logInfoln("LedTask Running");
-
+  String msg = "";
   // Initial effect (commented for disable initial effect)
   WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(s.initialEffect);
   String firstEffectString = WS2811EffectEnomToString(firstEffect);
@@ -81,11 +83,13 @@ void ledTask(void *pvParameters)
   case WS2811_EFFECT::NO_EFFECT:
   case WS2811_EFFECT::UKNOWN_EFFECT:
   case WS2811_EFFECT::ACTUAL_EFFECT:
-    logInfoln(firstEffectString + " - None initial effect applied");
+    msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {firstEffectString, s.initialDeltaT, s.initialR, s.initialG, s.initialB});
+    logInfoln(msg);
     break;
 
   default:
-    logInfoln("First effect running: " + firstEffectString);
+    msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {firstEffectString, s.initialDeltaT, s.initialR, s.initialG, s.initialB});
+    logInfoln(msg);
     ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(0, 0, 255), 100, true, true);
     break;
   }
