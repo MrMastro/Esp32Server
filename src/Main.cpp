@@ -83,14 +83,14 @@ void ledTask(void *pvParameters)
   case WS2811_EFFECT::NO_EFFECT:
   case WS2811_EFFECT::UKNOWN_EFFECT:
   case WS2811_EFFECT::ACTUAL_EFFECT:
-    msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {firstEffectString, s.initialDeltaT, s.initialR, s.initialG, s.initialB});
+    msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
     logInfoln(msg);
     break;
 
   default:
-    msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {firstEffectString, s.initialDeltaT, s.initialR, s.initialG, s.initialB});
+    msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
     logInfoln(msg);
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(0, 0, 255), 100, true, true);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, true, true);
     break;
   }
 

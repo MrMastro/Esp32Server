@@ -14,10 +14,10 @@ public:
 
     //---- Initial Operation -------
     String initialEffect;
-    String initialDeltaT;
-    String initialR;
-    String initialG;
-    String initialB;
+    int initialDeltaT;
+    int initialR;
+    int initialG;
+    int initialB;
 
     //---- WIRELESS SETTINGS -------
     String wirelessMode; // AP or WIFI
@@ -74,10 +74,10 @@ public:
         passwordAP = doc["passwordAP"].as<String>();
         ssidWIFI = doc["ssidWIFI"].as<String>();
         passwordWIFI = doc["passwordWIFI"].as<String>();
-        initialDeltaT = doc["initialDeltaT"].as<String>();
-        initialR = doc["initialR"].as<String>();
-        initialG = doc["initialG"].as<String>();
-        initialB = doc["initialB"].as<String>();
+        initialDeltaT = doc["initialDeltaT"].as<int>();
+        initialR = doc["initialR"].as<int>();
+        initialG = doc["initialG"].as<int>();
+        initialB = doc["initialB"].as<int>();
         return true;
     }
 
