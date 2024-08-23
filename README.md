@@ -13,3 +13,6 @@ RoadMap:
     -Set setting by SettingService to modify only or more value into Settings s
     -Settings modify with Serial usb, Serial Web and Serial bluetooth (To think)
     -Create a doc with protocol for communicate with serial.
+
+Other features but not planning:
+    -Esp32 with more security protocol like https, ssl and certificate.
