@@ -17,11 +17,12 @@ SettingsModel SettingService::getSettings()
 
 void SettingService::loadSettings(String path)
 {
+    boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
     {
-        logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
-        logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
+        logWarning("An Error has occurred while mounting SPIFFS (read file in rom)","loadSettings(String path)");
+        logWarning("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)","loadSettings(String path)");
         isOperative = false;
         return;
     }
@@ -50,21 +51,9 @@ void SettingService::loadSettings(String path)
     }
     else
     {
-        logInfoln("settings.json non presente lo creo");
-
-        // Crea e scrivi il contenuto predefinito nel file
-        file = LittleFS.open(path, "w");
-        if (!file)
-        {
-            logInfoln("Errore nella creazione del file");
-            isOperative = false;
-            return;
-        }
-
-        // Scrivi il contenuto predefinito
-        logInfoln("File creato con il contenuto predefinito.");
-        file.print(defaultContentSettings);
-        fileContent = defaultContentSettings;
+        String defaultContent =  SettingsModel::getDefault().toJson();
+        writeFile(file, path, defaultContent);
+        fileContent = defaultContent;
     }
 
     // Chiudi il file
@@ -75,7 +64,33 @@ void SettingService::loadSettings(String path)
 
     // carico il contenuto di filecontent dentro loadSettings
     SettingsModel deviceSettings;
-    deviceSettings.fromJson(fileContent);
-    settings = deviceSettings;
+    boolean res = deviceSettings.fromJson(fileContent);
+    if(res){
+       settings = deviceSettings;
+    }else{
+        logWarning("Errore file json, ripristino json","loadSettings(String path)");
+        SettingsModel defaultSettingsModel = SettingsModel::getDefault();
+        String defaultContent =  defaultSettingsModel.toJson();
+        writeFile(file, path, defaultContent);
+        fileContent = defaultContent;
+        settings = defaultSettingsModel;
+    }
     isOperative = true;
+}
+
+boolean SettingService::writeFile(fs::File &file, String &path, String &content)
+{
+    // Crea e scrivi il contenuto predefinito nel file
+    file = LittleFS.open(path, "w");
+    if (!file)
+    {
+        logWarning("Errore nella creazione del file","loadSettings(String path)");
+        isOperative = false;
+        return false;
+    }
+
+    // Scrivi il contenuto predefinito
+    logInfoln("File creato con il contenuto predefinito.");
+    file.print(content);
+    return true;
 }

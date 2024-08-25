@@ -1,7 +1,6 @@
 #ifndef SettingService_H
 #define SettingService_H
 
-#include <./constants/settingsDefault.h>
 #include <services/Service.h>
 #include "./services/ServiceImplementations/LedService.h"
 #include "./constants/constants.h"
@@ -19,13 +18,13 @@ public:
     SettingService();
     SettingsModel getSettings();
     void loadSettings(String path);
+
 protected:
     SettingsModel settings;
+
 private:
     boolean isOperative;
+    boolean writeFile(fs::File &file, String &path, String& content);
 };
 
-
-
-
-#endif  // SettingService_H
+#endif // SettingService_H

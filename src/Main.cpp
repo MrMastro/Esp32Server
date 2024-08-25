@@ -4,6 +4,14 @@ TaskHandle_t LedTask;
 boolean doTest = false;
 int ledPin = 2;
 SettingsModel s;
+MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
+NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip = nullptr;
+LEDStripDriver *rgbStrip = nullptr;
+
+CommandService commandService;
+SettingService settingService;
+LedService ledService;
+InfoService infoService;
 
 // ################################################################################ //
 //                              Setup and Loop Method                               //
@@ -16,6 +24,23 @@ void setup(void)
   servicesCollector.addService(&settingService, "SettingsService");
   settingService.loadSettings("/settings/settings.json");
   s = settingService.getSettings();
+
+  Serial.println("");
+  Serial.println("Load settings:");
+  Serial.println(s.toJson());
+
+  // init LedService
+  if (s.ledSettings.enableStripRgb)
+  {
+    rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
+  }
+  if (s.ledSettings.enableStripWs2811)
+  {
+    ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
+  }
+  ledService = LedService(ws2811Strip, rgbStrip);
+  //
+
   mastroServer = MastroServer(s.wirelessMode, s.ssidWIFI, s.passwordWIFI, s.ssidAP, s.passwordAP, s.deviceName, s.devicePassword, s.debug, ledPin);
   if (mastroServer.isAvaible())
   {
@@ -25,9 +50,9 @@ void setup(void)
   servicesCollector.attachServer(&mastroServer);
 
   logInfoln("Service init");
-  servicesCollector.addService(&commandService, "CommandService",s);
-  servicesCollector.addService(&ledService, "LedService",s);
-  servicesCollector.addService(&infoService, "InfoService",s);
+  servicesCollector.addService(&commandService, "CommandService", s);
+  servicesCollector.addService(&ledService, "LedService", s);
+  servicesCollector.addService(&infoService, "InfoService", s);
 
   //  Attach pin
   servicesCollector.getService("LedService")->attachPin({ledPin});
@@ -41,11 +66,9 @@ void setup(void)
 
   delay(50);
   logInfoln("Init procedure completed");
-
+  Serial.println("\n");
   Serial.println("IP");
-  Serial.println(((InfoService *)servicesCollector.getService("LedService"))->getIp());
-
-  logInfoln("Load settings:\n" + s.toJson());
+  Serial.println(((InfoService *)servicesCollector.getService("InfoService"))->getIp());
 
   // Thread running
   xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);

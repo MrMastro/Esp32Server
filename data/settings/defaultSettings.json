@@ -3,13 +3,21 @@
     "devicePassword": "esp32password",
     "debug": true,
     "initialEffect": "NO_EFFECT",
+    "initialDeltaT": 100,
+    "initialR": 0,
+    "initialG": 0,
+    "initialB": 255,
     "wirelessMode": "AP",
     "ssidAP": "ESP32_AP",
     "passwordAP": "ap_password",
     "ssidWIFI": "Home_Network",
     "passwordWIFI": "wifi_password",
-    "initialDeltaT": "100",
-    "initialR": "0",
-    "initialG": "0",
-    "initialB": "0"
+    "ledSettings": {
+        "enableStripWs2811": true,
+        "numLedWs2811": 32,
+        "pinLedWs2811": 5,
+        "enableStripRgb": false,
+        "pinLedDinRgb": 19,
+        "pinLedCinRgb": 18
+      }
 }

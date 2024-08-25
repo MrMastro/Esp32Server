@@ -13,18 +13,6 @@
 
 #include "routes/Routes.h"
 
-MastroLed myRgbStript; //LEDStripDriver(Din: 19, Cin: 18);
-NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> ws2811Strip(32, 5);
-LEDStripDriver rgbStript(19, 18);
-
-CommandService commandService;
-SettingService settingService;
-LedService ledService(&ws2811Strip, nullptr);
-InfoService infoService;
-
-
-
-
 void ledTask(void *pvParameters);
 void test();
 void recvMsgBySerial(String data);
