@@ -96,7 +96,7 @@ public:
 
     // Metodo statico per ottenere un'istanza di SettingsModel con valori di default
     static SettingsModel getDefault() {
-        SettingsModel defaultSettings;
+        SettingsModel defaultSettings = SettingsModel();
         defaultSettings.deviceName = "ESP32_Device";
         defaultSettings.devicePassword = "esp32password";
         defaultSettings.debug = false;
