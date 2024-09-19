@@ -98,7 +98,7 @@ void ServicesCollector::addService(Service *service, String name)
     containerService[name] = service;
 }
 
-void ServicesCollector::addService(Service *service, String name, SettingsModel s)
+void ServicesCollector::addService(Service *service, String name, SettingsModel* s)
 {
     String log = "Adding service: {name}";
     log.replace("{name}", name);
@@ -113,11 +113,10 @@ void ServicesCollector::addService(Service *service, String name, SettingsModel 
         throwServicesCollectorError(ERROR_CODE::SERVICE_ERROR, "insert the non empty name", "addService");
         return;
     }
-
     service->setNameService(name);
+    service->setSettings(s);
     service->attachCollector(this);
     service->attachSerial(serialPointer, webSerialPointer);
-    service->setSettings(s);
     containerService[name] = service;
 }
 
@@ -131,6 +130,7 @@ void ServicesCollector::attachSerial(HardwareSerial *serialPointerParam, WebSeri
     }
     serialPointer = serialPointerParam;
     webSerialPointer = webSerialPointerParam;
+
     if (containerService.size() > 0)
     {
         for (auto &entry : containerService)

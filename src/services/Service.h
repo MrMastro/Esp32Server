@@ -23,7 +23,7 @@ public:
     void attachCollector(ServicesCollector* collectorParam);
     Service* getServiceByCollector(String nameService);
     String getServerIpByCollector();
-    void setSettings(SettingsModel s);
+    void setSettings(SettingsModel* s);
     virtual ~Service() {}
 protected:
     String nameService = "";
@@ -31,7 +31,7 @@ protected:
     WebSerialClass* webSerialPointer;
     std::vector<int> pins;
     MastroServer* getServerByCollector();
-    SettingsModel settings;
+    SettingsModel* settings;
     virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
     virtual void logInfoln(String msg);
     virtual void logWarning(String msg, String context);

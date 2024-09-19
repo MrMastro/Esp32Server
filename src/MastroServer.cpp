@@ -1,5 +1,4 @@
 #include "MastroServer.h"
-#include "constants/htmlPages.h"
 #include "LITTLEFS.h"
 #include "utils/SerialSimple.h"
 #include "constants/constants.h"
@@ -346,13 +345,7 @@ void MastroServer::setRoutes()
     webServer.on("/text", HTTP_GET, [](AsyncWebServerRequest *request)
                  { request->send(200, "text", "Hi! I am ESP32 :)"); });
 
-    // old root
-    webServer.on("/indexOld", HTTP_GET, [scopeHost](AsyncWebServerRequest *request)
-                 {
-     String html = htmlPage; // Copy the HTML template from htmlCustom.h
-     html.replace("%HOST_NAME%", scopeHost);
-     request->send(200, "text/html", html); });
-
+    /*------------------------------------------ Deprecated area (use web app ) -----------------------------
     // New root
     webServer.on("/", HTTP_GET, [scopeHost](AsyncWebServerRequest *request)
                  { request->redirect("/www/control"); });
@@ -360,6 +353,8 @@ void MastroServer::setRoutes()
     // Api to get control web page
     webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request)
                  { request->redirect("/www/control"); });
+    --------------------------------------------------------------------------------------------------------*/
+    
 }
 
 void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)

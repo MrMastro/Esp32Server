@@ -4,7 +4,8 @@ TaskHandle_t LedTask;
 boolean doTest = false;
 int ledPin = 2;
 SettingsModel s;
-MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
+
+// Deprecated: MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
 NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip = nullptr;
 LEDStripDriver *rgbStrip = nullptr;
 
@@ -12,6 +13,7 @@ CommandService commandService;
 SettingService settingService;
 LedService ledService;
 InfoService infoService;
+SerialService serialService;
 
 // ################################################################################ //
 //                              Setup and Loop Method                               //
@@ -19,12 +21,17 @@ InfoService infoService;
 
 void setup(void)
 {
-  Serial.begin(9600);
+  delay(1000);
+  serialService.initSerialBegin(9600);
+  serialService.logInfoln("Setup","MAIN");
   delay(10);
+  servicesCollector.addService(&serialService, "SerialService");
   servicesCollector.addService(&settingService, "SettingsService");
+
   settingService.loadSettings("/settings/settings.json");
   s = settingService.getSettings();
 
+  // SerialSerivice init bluetooth with name s.getDevice
   Serial.println("");
   Serial.println("Load settings:");
   Serial.println(s.toJson());
@@ -46,21 +53,25 @@ void setup(void)
   {
     WebSerial.begin(mastroServer.getWebServer(), "/webConsole");
   }
+
   servicesCollector.attachSerial(&Serial, &WebSerial);
   servicesCollector.attachServer(&mastroServer);
 
   logInfoln("Service init");
-  servicesCollector.addService(&commandService, "CommandService", s);
-  servicesCollector.addService(&ledService, "LedService", s);
-  servicesCollector.addService(&infoService, "InfoService", s);
+  servicesCollector.addService(&commandService, "CommandService", &s);
+  servicesCollector.addService(&ledService, "LedService", &s);
+  servicesCollector.addService(&infoService, "InfoService", &s);
 
   //  Attach pin
+  logInfoln("Attach pin");
   servicesCollector.getService("LedService")->attachPin({ledPin});
 
   // Route handling
+  logInfoln("Route handling");
   initRoutes(mastroServer);
 
   // Other
+  logInfoln("Attach web serial");
   WebSerial.msgCallback(recvMsgBySerialWeb);
   // myRgbStript.setupLedRgb(); deprecated MastroLed
 
@@ -81,11 +92,19 @@ void loop(void)
 
   if (!servicesCollector.isBusyForServiceApi())
   {
-    if (Serial.available())
-    {
-      recvMsgBySerial(Serial.readString());
-      test();
-    }
+
+    // if (serialService.availableSerial())
+    // {
+    //   String msg = serialService.getMsgbySerial();
+    //   Serial.print("Ricevuto:");
+    //   Serial.println(msg);
+    // }
+
+    // if (Serial.available())
+    // {
+    //   recvMsgBySerial(Serial.readString());
+    //   test();
+    // }
   }
   else
   {

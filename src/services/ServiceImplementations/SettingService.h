@@ -10,6 +10,7 @@
 #include <models/settingModel/SettingsModel.h>
 #include <Arduino.h>
 #include <LittleFS.h>
+#include "SerialService.h"
 
 
 class SettingService : public Service
@@ -20,7 +21,7 @@ public:
     void loadSettings(String path);
 
 protected:
-    SettingsModel settings;
+    SettingsModel* settings;
 
 private:
     boolean isOperative;

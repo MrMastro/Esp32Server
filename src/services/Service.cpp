@@ -52,8 +52,16 @@ boolean Service::isAvaible()
  */
 void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
 {
-  serialPointer = serialPointerParam;
-  webSerialPointer = webSerialPointerParam;
+  if(serialPointerParam != nullptr)
+  {
+    serialPointer = serialPointerParam;
+  }
+
+  if(webSerialPointer != nullptr)
+  {
+    webSerialPointer = webSerialPointerParam;
+  }
+
 }
 
 /**
@@ -116,11 +124,11 @@ String Service::getServerIpByCollector()
 }
 
 /**
- * @brief Set the settings for the service.
+ * @brief Set the reference settings for the service.
  * 
  * @param s The SettingsModel object containing the settings to be applied.
  */
-void Service::setSettings(SettingsModel s)
+void Service::setSettings(SettingsModel* s)
 {
   settings = s;
 }
@@ -161,7 +169,7 @@ void Service::throwError(ERROR_CODE err, const char *detailMessage, String conte
  */
 void Service::logInfoln(String msg)
 {
-  if (settings.debug)
+  if (settings->debug)
   {
     String log = "[ LOG - SERVICE {nameService} ] {msg}";
     log.replace("{nameService}", nameService);
