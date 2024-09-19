@@ -1,7 +1,6 @@
 #ifndef Main_H
 #define Main_H
 #include <Arduino.h>
-#include <LittleFS.h>
 #include <NeoPixelBus.h>
 
 #include "MastroServer.h"
@@ -18,7 +17,6 @@ void ledTask(void *pvParameters);
 void test();
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);
-void logInfoln(String msg);
 #endif  // Main_H
 
 // NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> NO

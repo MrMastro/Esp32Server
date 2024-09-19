@@ -57,26 +57,26 @@ void setup(void)
   servicesCollector.attachSerial(&Serial, &WebSerial);
   servicesCollector.attachServer(&mastroServer);
 
-  logInfoln("Service init");
+  serialService.logInfoln("Service init", "MAIN");
   servicesCollector.addService(&commandService, "CommandService", &s);
   servicesCollector.addService(&ledService, "LedService", &s);
   servicesCollector.addService(&infoService, "InfoService", &s);
 
   //  Attach pin
-  logInfoln("Attach pin");
+  serialService.logInfoln("Attach pin", "MAIN");
   servicesCollector.getService("LedService")->attachPin({ledPin});
 
   // Route handling
-  logInfoln("Route handling");
+  serialService.logInfoln("Route handling", "MAIN");
   initRoutes(mastroServer);
 
   // Other
-  logInfoln("Attach web serial");
+  serialService.logInfoln("Attach web serial", "MAIN");
   WebSerial.msgCallback(recvMsgBySerialWeb);
   // myRgbStript.setupLedRgb(); deprecated MastroLed
 
   delay(50);
-  logInfoln("Init procedure completed");
+  serialService.logInfoln("Init procedure completed", "MAIN");
   Serial.println("\n");
   Serial.println("IP");
   Serial.println(((InfoService *)servicesCollector.getService("InfoService"))->getIp());
@@ -114,7 +114,7 @@ void loop(void)
 
 void ledTask(void *pvParameters)
 {
-  logInfoln("LedTask Running");
+  serialService.logInfoln("LedTask Running", "MAIN");
   String msg = "";
   // Initial effect (commented for disable initial effect)
   WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(s.initialEffect);
@@ -126,12 +126,12 @@ void ledTask(void *pvParameters)
   case WS2811_EFFECT::UKNOWN_EFFECT:
   case WS2811_EFFECT::ACTUAL_EFFECT:
     msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
-    logInfoln(msg);
+    serialService.logInfoln(msg, "MAIN");
     break;
 
   default:
     msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
-    logInfoln(msg);
+    serialService.logInfoln(msg, "MAIN");
     ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, true, true);
     break;
   }
@@ -154,7 +154,7 @@ void ledTask(void *pvParameters)
 
 void test()
 {
-  logInfoln("Test");
+  serialService.logInfoln("Test", "MAIN");
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
@@ -173,14 +173,4 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
 void recvMsgBySerial(String data)
 {
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
-}
-
-void logInfoln(String msg)
-{
-  if (s.debug)
-  {
-    String log = "[ LOG - MAIN ] {msg}";
-    log.replace("{msg}", msg);
-    differentSerialprintln(log, "\033[32m", &Serial, &WebSerial);
-  }
 }
