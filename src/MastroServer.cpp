@@ -2,6 +2,7 @@
 #include "LITTLEFS.h"
 #include "utils/SerialSimple.h"
 #include "constants/constants.h"
+#include <DNSServer.h>
 
 MastroServer mastroServer;
 AsyncWebServer webServer(80);
