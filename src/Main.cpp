@@ -1,7 +1,6 @@
 #include "Main.h"
 
 TaskHandle_t LedTask;
-boolean doTest = false;
 int ledPin = 2;
 SettingsModel s;
 
@@ -19,17 +18,19 @@ SerialService serialService;
 //                              Setup and Loop Method                               //
 // ################################################################################ //
 
+//other baud rate: 115200
+//baud rate: 9600
+
 void setup(void)
 {
-  delay(1000);
   serialService.initSerialBegin(9600);
-  serialService.logInfoln("Setup","MAIN");
-  delay(10);
   servicesCollector.addService(&serialService, "SerialService");
+  delay(10);
   servicesCollector.addService(&settingService, "SettingsService");
-
   settingService.loadSettings("/settings/settings.json");
   s = settingService.getSettings();
+  serialService.setSettings(&s);
+  settingService.setSettings(&s);
 
   // SerialSerivice init bluetooth with name s.getDevice
   Serial.println("");
@@ -79,10 +80,10 @@ void setup(void)
   serialService.logInfoln("Init procedure completed", "MAIN");
   Serial.println("\n");
   Serial.println("IP");
-  Serial.println(((InfoService *)servicesCollector.getService("InfoService"))->getIp());
+  Serial.println(infoService.getIp());
 
   // Thread running
-  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 }
 
@@ -98,13 +99,14 @@ void loop(void)
     //   String msg = serialService.getMsgbySerial();
     //   Serial.print("Ricevuto:");
     //   Serial.println(msg);
+    //   recvMsgBySerial(msg);
     // }
 
-    // if (Serial.available())
-    // {
-    //   recvMsgBySerial(Serial.readString());
-    //   test();
-    // }
+    if (Serial.available())
+    {
+      recvMsgBySerial(Serial.readString());
+      test();
+    }
   }
   else
   {
@@ -154,6 +156,7 @@ void ledTask(void *pvParameters)
 
 void test()
 {
+  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
   serialService.logInfoln("Test", "MAIN");
 }
 

@@ -19,7 +19,6 @@ SettingsModel SettingService::getSettings()
 void SettingService::loadSettings(String path)
 {
     SerialService* serialService = ( (SerialService*) getServiceByCollector("SerialService"));
-    Serial.println("loadSettings");
     boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
@@ -64,10 +63,14 @@ void SettingService::loadSettings(String path)
 
     // Chiudi il file
     file.close();
-
-    // Stampa il contenuto del file
-    serialService->logInfoln("Caricate le seguenti impostazioni:\n"+fileContent, getNameService());
-
+    Serial.println("file vuoto?");
+    Serial.println("Contenuto del file:");
+    Serial.println(fileContent);
+    if(fileContent.isEmpty()){
+        serialService->logWarning("Contenuto del file vuoto", getNameService(),"loadSettings(String path)");
+        serialService->logWarning("Carico impostazioni di default" , getNameService(),"loadSettings(String path)");
+        fileContent = SettingsModel::getDefault().toJson();
+    }
     // carico il contenuto di filecontent dentro loadSettings
     boolean res = settings->fromJson(fileContent);
     if(!res){
@@ -92,8 +95,6 @@ boolean SettingService::writeFile(fs::File &file, String &path, String &content)
         return false;
     }
 
-    // Scrivi il contenuto predefinito
-    logInfoln("File creato con il contenuto predefinito.");
     file.print(content);
     return true;
 }

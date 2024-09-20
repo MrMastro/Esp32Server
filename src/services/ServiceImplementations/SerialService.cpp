@@ -48,7 +48,7 @@ void SerialService::initSerialBtBegin(String localName, bool isMaster)
     //     //SerialBT.begin(localName, isMaster);
     //     btSerialPointer = &SerialBT;
     // }
-    // isOperative = true;
+    isOperative = true;
 }
 
 void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
@@ -109,7 +109,7 @@ String SerialService::getMsgbyBluetooth()
 void SerialService::logInfoln(String msg, String subject)
 {
     // todo use s.debug
-    if (true)
+    if (settings->debug)
     {
         String log = "[ LOG - {subject} ] {msg}";
         log.replace("{subject}", subject);
@@ -121,8 +121,23 @@ void SerialService::logInfoln(String msg, String subject)
 void SerialService::logWarning(String msg, String subject, String context)
 {
     String log = "[ WARNING - SERVICE {nameService} on {context} ] {msg}";
-    log.replace("{nameService}", nameService);
+    log.replace("{nameService}", subject);
     log.replace("{context}", context);
     log.replace("{msg}", msg);
     differentSerialprintln(log, "\033[33m", serialPointer, webSerialPointer);
+}
+
+/**
+ * @brief Log an error message with context.
+ * 
+ * @param msg The error message to be logged.
+ * @param context The context in which the error occurred.
+ */
+void SerialService::logError(String msg, String subject, String context)
+{
+  String error = "[ ERROR - SERVICE {nameService} on {context} ] {msg}";
+  error.replace("{nameService}", subject);
+  error.replace("{context}", context);
+  error.replace("{msg}", msg);
+  differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }

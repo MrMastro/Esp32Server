@@ -15,13 +15,6 @@ public:
     }  // Constructor
     ~InfoService() {} // Destructor
 
-    String jsonPong()
-    {
-        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::OK);
-        BasicResponse response = BasicResponse(s);
-        return dtoToJson(response);
-    }
-
     StatusInfo infoSuccess()
     {
         return getStatusInfoByHttpCode(HTTP_CODE::OK);

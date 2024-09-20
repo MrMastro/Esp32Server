@@ -31,10 +31,11 @@ public:
 
     void logInfoln(String msg, String subject);
     void logWarning(String msg, String subject, String context);
+    void logError(String msg, String subject, String context);
 
 private:
     boolean isOperative;
-    //BluetoothSerial SerialBT;
+    BluetoothSerial SerialBT;
 protected:
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;
