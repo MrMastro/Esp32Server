@@ -5,6 +5,7 @@
  */
 SerialService::SerialService()
 {
+    btSerialPointer = new BluetoothSerial();
     isOperative = false;
 }
 
@@ -43,12 +44,13 @@ void SerialService::initSerialBegin(unsigned long baud, uint32_t config, int8_t 
 
 void SerialService::initSerialBtBegin(String localName, bool isMaster)
 {
-    // if (btSerialPointer == nullptr)
-    // {
-    //     //SerialBT.begin(localName, isMaster);
-    //     btSerialPointer = &SerialBT;
-    // }
-    isOperative = true;
+    if (btSerialPointer != nullptr)
+    {
+        btSerialPointer = new BluetoothSerial();
+        btSerialPointer->begin(localName, isMaster);
+        isOperative = true;
+    }
+   
 }
 
 void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
@@ -80,12 +82,11 @@ boolean SerialService::availableSerial()
 
 boolean SerialService::availableSerialBt()
 {
-    // if (btSerialPointer == nullptr)
-    // {
-    //     return false;
-    // }
-    // return btSerialPointer->available();
-    return false;
+    if (btSerialPointer == nullptr)
+    {
+        return false;
+    }
+    return btSerialPointer->available();
 }
 
 String SerialService::getMsgbySerial()
@@ -99,22 +100,25 @@ String SerialService::getMsgbySerial()
 
 String SerialService::getMsgbyBluetooth()
 {
-    // if (availableSerialBt())
-    // {
-    //     return btSerialPointer->readString();
-    // }
+    if (availableSerialBt())
+    {
+        return btSerialPointer->readString();
+    }
     return String();
 }
 
 void SerialService::logInfoln(String msg, String subject)
 {
     // todo use s.debug
-    if (settings->debug)
+    if (settings != nullptr)
     {
-        String log = "[ LOG - {subject} ] {msg}";
-        log.replace("{subject}", subject);
-        log.replace("{msg}", msg);
-        differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer);
+        if (settings->debug)
+        {
+            String log = "[ LOG - {subject} ] {msg}";
+            log.replace("{subject}", subject);
+            log.replace("{msg}", msg);
+            differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer);
+        }
     }
 }
 
@@ -129,15 +133,15 @@ void SerialService::logWarning(String msg, String subject, String context)
 
 /**
  * @brief Log an error message with context.
- * 
+ *
  * @param msg The error message to be logged.
  * @param context The context in which the error occurred.
  */
 void SerialService::logError(String msg, String subject, String context)
 {
-  String error = "[ ERROR - SERVICE {nameService} on {context} ] {msg}";
-  error.replace("{nameService}", subject);
-  error.replace("{context}", context);
-  error.replace("{msg}", msg);
-  differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
+    String error = "[ ERROR - SERVICE {nameService} on {context} ] {msg}";
+    error.replace("{nameService}", subject);
+    error.replace("{context}", context);
+    error.replace("{msg}", msg);
+    differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }

@@ -35,11 +35,11 @@ public:
 
 private:
     boolean isOperative;
-    BluetoothSerial SerialBT;
+    //BluetoothSerial serialBT;
 protected:
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;
-    //BluetoothSerial* btSerialPointer;
+    BluetoothSerial* btSerialPointer;
 };
 
 

@@ -11,7 +11,10 @@ void differentSerialprintln(const String &msg, String colorMsg, HardwareSerial *
 
     if (webSerial != nullptr)
     {
-        webSerial->println(msg.c_str());
+        if(webSerial->availableForWrite())
+        {
+            webSerial->println(msg.c_str());
+        } 
     }
 }
 

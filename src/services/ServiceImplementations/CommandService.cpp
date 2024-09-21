@@ -24,7 +24,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
 {
   StatusInfo result = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   String content = "";
-  String s = "executeCommand(cmd={cmd},cmdString={cmdString})";
+  String s = "executeCommand(cmd={cmd}, cmdString={cmdString})";
   s.replace("{cmd}", cmdString);
   s.replace("{cmdString}", cmdString);
   logInfoln(s);
@@ -72,7 +72,6 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
   String s = "recvMsgAndExecute(data={data})";
   s.replace("{data}", data);
   logInfoln(s);
-  // WebSerial.println("Received Data...");
   if (!isOperative)
   {
     throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");

@@ -1,6 +1,12 @@
 #include "Main.h"
 
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
 TaskHandle_t LedTask;
+TaskHandle_t WebServerTask;
+TaskHandle_t SerialTask;
 int ledPin = 2;
 SettingsModel s;
 
@@ -18,8 +24,22 @@ SerialService serialService;
 //                              Setup and Loop Method                               //
 // ################################################################################ //
 
-//other baud rate: 115200
-//baud rate: 9600
+// other baud rate: 115200
+// baud rate: 9600
+
+BluetoothSerial SerialBT;
+
+void tryFunction(void)
+{
+  serialService.initSerialBegin(9600);
+  servicesCollector.addService(&settingService, "SettingsService");
+  settingService.loadSettings("/settings/settings.json");
+  s = settingService.getSettings();
+  serialService.initSerialBtBegin(s.deviceName);
+  servicesCollector.attachSerial(&Serial, &WebSerial);
+  servicesCollector.addService(&commandService, "CommandService", &s);
+  servicesCollector.addService(&infoService, "InfoService", &s);
+}
 
 void setup(void)
 {
@@ -30,9 +50,7 @@ void setup(void)
   settingService.loadSettings("/settings/settings.json");
   s = settingService.getSettings();
   serialService.setSettings(&s);
-  settingService.setSettings(&s);
 
-  // SerialSerivice init bluetooth with name s.getDevice
   Serial.println("");
   Serial.println("Load settings:");
   Serial.println(s.toJson());
@@ -83,29 +101,24 @@ void setup(void)
   Serial.println(infoService.getIp());
 
   // Thread running
-  //xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
+  xTaskCreate(webServerTask, "WebServerTaskExecution", 4096, NULL, 1, &WebServerTask);
+  //xTaskCreate(serialTask, "SerialServerTaskExecution", 4096, NULL, 1, &SerialTask);
+
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 }
 
 void loop(void)
 {
-  mastroServer.handleOta();
 
   if (!servicesCollector.isBusyForServiceApi())
   {
 
-    // if (serialService.availableSerial())
-    // {
-    //   String msg = serialService.getMsgbySerial();
-    //   Serial.print("Ricevuto:");
-    //   Serial.println(msg);
-    //   recvMsgBySerial(msg);
-    // }
-
-    if (Serial.available())
+    if (serialService.availableSerial())
     {
-      recvMsgBySerial(Serial.readString());
-      test();
+      String msg = serialService.getMsgbySerial();
+      Serial.println("Serial has msg: " + msg);
+      recvMsgBySerial(msg);
     }
   }
   else
@@ -114,9 +127,34 @@ void loop(void)
   }
 }
 
+void serialTask(void *pvParameters)
+{
+  serialService.logInfoln("Serial Task execution", "MAIN");
+  serialService.initSerialBtBegin(s.deviceName);
+  while (true)
+  {
+    if (serialService.availableSerialBt())
+    {
+      String msgBt = serialService.getMsgbyBluetooth();
+      Serial.println("bluetooth Serial has msg: " + msgBt);
+      recvMsgBySerial(msgBt);
+    }
+  }
+}
+
+void webServerTask(void *pvParameters)
+{
+  serialService.logInfoln("Web Task execution", "MAIN");
+  while (true)
+  {
+    mastroServer.handleOta();
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+}
+
 void ledTask(void *pvParameters)
 {
-  serialService.logInfoln("LedTask Running", "MAIN");
+  serialService.logInfoln("Led Task execution", "MAIN");
   String msg = "";
   // Initial effect (commented for disable initial effect)
   WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(s.initialEffect);
@@ -151,13 +189,16 @@ void ledTask(void *pvParameters)
     {
       yield();
     }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
 
 void test()
 {
-  xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
   serialService.logInfoln("Test", "MAIN");
+  String st = "name of device: " + s.deviceName;
+  serialService.logInfoln(st, "MAIN");
+  serialService.initSerialBtBegin(s.deviceName);
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)

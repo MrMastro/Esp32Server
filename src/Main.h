@@ -14,6 +14,9 @@
 #include "routes/Routes.h"
 
 void ledTask(void *pvParameters);
+void webServerTask(void *pvParameters);
+void serialTask(void *pvParameters);
+
 void test();
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);
