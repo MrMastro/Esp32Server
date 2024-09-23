@@ -52,6 +52,9 @@ void setup(void)
   s = settingService.getSettings();
   serialService.setSettings(&s);
 
+  //init blutooth
+  //serialService.initSerialBtBegin(s.deviceName);
+
   Serial.println("");
   Serial.println("Load settings:");
   Serial.println(s.toJson());
@@ -103,9 +106,9 @@ void setup(void)
 
   // Thread running
   xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
-  xTaskCreate(webOtaServerTask, "WebServerTaskExecution", 4096, NULL, 1, &WebOtaServerTask);
+  xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 4096, NULL, 1, &WebOtaServerTask);
   xTaskCreate(serialCableTask, "SerialCableTaskExecution", 4096, NULL, 1, &SerialCableTask);
-  // xTaskCreate(serialTask, "SerialServerTaskExecution", 4096, NULL, 1, &SerialTask);
+  //xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", 4096, NULL, 1, &SerialBtTask);
 
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 }
@@ -113,19 +116,23 @@ void setup(void)
 // loop is used for print debug
 void loop(void)
 {
-    if(s.debug)
+  if (s.debug)
+  {
+    if (!serialService.getLastSentMsg().equals("[ LOG - MAIN (info task) ] Info"))
     {
-      delay(1000);
-      serialService.logInfoln("Info","MAIN (info task)");
+      serialService.logInfoln("Info", "MAIN (info task)");
     }
-    yield();
+    delay(10);
+  }
+  yield();
 }
 
 // Serial bt task check input for bluetooth message
 void serialBtTask(void *pvParameters)
 {
-  serialService.logInfoln("Serial Task execution", "MAIN");
-  serialService.initSerialBtBegin(s.deviceName);
+  serialService.logInfoln("Serial Bluetooth Task execution", "MAIN");
+  //serialService.initSerialBtBegin(s.deviceName);
+  serialService.logInfoln("Start listining bluethoot serial", "MAIN");
   while (true)
   {
     if (!servicesCollector.isBusyForServiceApi())
@@ -155,8 +162,15 @@ void serialCableTask(void *pvParameters)
       if (serialService.availableSerial())
       {
         String msg = serialService.getMsgbySerial();
-        Serial.println("Serial has msg: " + msg);
-        recvMsgBySerial(msg);
+        if (msg.equals("t"))
+        {
+          test();
+        }
+        else
+        {
+          Serial.println("Serial has msg: " + msg);
+          recvMsgBySerial(msg);
+        }
       }
     }
     else
@@ -224,7 +238,11 @@ void test()
   serialService.logInfoln("Test", "MAIN");
   String st = "name of device: " + s.deviceName;
   serialService.logInfoln(st, "MAIN");
-  serialService.initSerialBtBegin(s.deviceName);
+  Serial.println("Free heap first Bluetooth: " + String(ESP.getFreeHeap()));
+  //serialService.initSerialBtBegin(s.deviceName);
+  serialService.logInfoln("create task bluetooth", "MAIN");
+  //Serial.println("Free heap after Bluetooth: " + String(ESP.getFreeHeap()));
+  xTaskCreate(serialBtTask, "SerialServerTaskExecution", 8192, NULL, 1, &SerialBtTask);
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)

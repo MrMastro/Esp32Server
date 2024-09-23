@@ -6,7 +6,7 @@
 
 MastroServer mastroServer;
 AsyncWebServer webServer(80);
-DNSServer dnsServer;
+//DNSServer dnsServer;
 
 MastroServer::MastroServer()
 {
@@ -68,12 +68,15 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     }
     delay(200);
 
-    initArduinoOta(deviceName, devicePassword);
-    logInfoln("OTA server started");
-    beginListFiles("/www");
+    logInfoln("Set Route");
     setRoutes();
-    ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
-    // ElegantOTA.begin(&webServer); // Start ElegantOTA
+    beginListFiles("/www");
+
+    // logInfoln("OTA server started");
+    // initArduinoOta(deviceName, devicePassword);
+    // ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
+
+    logInfoln("Starting web server...");
     webServer.begin();
     logInfoln("HTTP server started");
     pointWebServer = &webServer;
@@ -115,7 +118,7 @@ void MastroServer::initAP(String ssid, String password)
     logInfoln("init AP mode");
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
-    dnsServer.start(53, "*", WiFi.softAPIP());
+    //dnsServer.start(53, "*", WiFi.softAPIP());
     // Print the AP IP address to the serial monitor
     logInfoln("AP IP address: ");
     ip = WiFi.softAPIP().toString();

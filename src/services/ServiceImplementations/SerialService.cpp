@@ -5,6 +5,7 @@
  */
 SerialService::SerialService()
 {
+    lastSentMsg = "";
     btSerialPointer = new BluetoothSerial();
     isOperative = false;
 }
@@ -14,6 +15,7 @@ SerialService::SerialService()
  */
 SerialService::SerialService(unsigned long baud, String deviceName)
 {
+    lastSentMsg = "";
     initSerialBegin(baud);
     initSerialBtBegin(deviceName);
     isOperative = true;
@@ -32,6 +34,10 @@ boolean SerialService::isAvaible()
     return isOperative;
 }
 
+String SerialService::getLastSentMsg(){
+    return lastSentMsg;
+}
+
 void SerialService::initSerialBegin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms, uint8_t rxfifo_full_thrhd)
 {
     if (serialPointer == nullptr)
@@ -46,8 +52,10 @@ void SerialService::initSerialBtBegin(String localName, bool isMaster)
 {
     if (btSerialPointer != nullptr)
     {
+        logInfoln("Init Bluetooth with name: "+localName, "SerialService");
         btSerialPointer = new BluetoothSerial();
         btSerialPointer->begin(localName, isMaster);
+        logInfoln("Bluetooth initializated", "SerialService");
         isOperative = true;
     }
    
@@ -93,7 +101,8 @@ String SerialService::getMsgbySerial()
 {
     if (availableSerial())
     {
-        return serialPointer->readString();
+        String msg = serialPointer->readString();
+        return msg;
     }
     return String();
 }
@@ -102,7 +111,8 @@ String SerialService::getMsgbyBluetooth()
 {
     if (availableSerialBt())
     {
-        return btSerialPointer->readString();
+        String msg = btSerialPointer->readString();
+        return msg;
     }
     return String();
 }
@@ -117,6 +127,7 @@ void SerialService::logInfoln(String msg, String subject)
             String log = "[ LOG - {subject} ] {msg}";
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
+            lastSentMsg = log; //todo integrate in differentSerialPrintln of service (to create)
             differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer);
         }
     }
@@ -124,11 +135,12 @@ void SerialService::logInfoln(String msg, String subject)
 
 void SerialService::logWarning(String msg, String subject, String context)
 {
-    String log = "[ WARNING - SERVICE {nameService} on {context} ] {msg}";
-    log.replace("{nameService}", subject);
-    log.replace("{context}", context);
-    log.replace("{msg}", msg);
-    differentSerialprintln(log, "\033[33m", serialPointer, webSerialPointer);
+    String warn = "[ WARNING - SERVICE {nameService} on {context} ] {msg}";
+    warn.replace("{nameService}", subject);
+    warn.replace("{context}", context);
+    warn.replace("{msg}", msg);
+    lastSentMsg = warn; //todo integrate in differentSerialPrintln of service (to create)
+    differentSerialprintln(warn, "\033[33m", serialPointer, webSerialPointer);
 }
 
 /**
@@ -143,5 +155,6 @@ void SerialService::logError(String msg, String subject, String context)
     error.replace("{nameService}", subject);
     error.replace("{context}", context);
     error.replace("{msg}", msg);
+    lastSentMsg = error; //todo integrate in differentSerialPrintln of service (to create)
     differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }

@@ -15,6 +15,7 @@ public:
     SerialService(unsigned long baud, String deviceName);
     SerialService(unsigned long baud, String deviceName, AsyncWebServer *server, const char *url = "/webserial");
     boolean isAvaible() override;
+    String getLastSentMsg();
     void initSerialBegin(unsigned long baud, uint32_t config = SERIAL_8N1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
     void initSerialBtBegin(String localName = String(), bool isMaster = false);
     void initSerialWebBegin(AsyncWebServer *server, const char *url);
@@ -35,6 +36,7 @@ public:
 
 private:
     boolean isOperative;
+    String lastSentMsg;
     //BluetoothSerial serialBT;
 protected:
     HardwareSerial* serialPointer;
