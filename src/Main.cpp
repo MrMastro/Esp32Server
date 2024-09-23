@@ -5,8 +5,9 @@
 #endif
 
 TaskHandle_t LedTask;
-TaskHandle_t WebServerTask;
-TaskHandle_t SerialTask;
+TaskHandle_t WebOtaServerTask;
+TaskHandle_t SerialCableTask;
+TaskHandle_t SerialBtTask;
 int ledPin = 2;
 SettingsModel s;
 
@@ -102,47 +103,71 @@ void setup(void)
 
   // Thread running
   xTaskCreate(ledTask, "LedTaskExecution", 4096, NULL, 1, &LedTask);
-  xTaskCreate(webServerTask, "WebServerTaskExecution", 4096, NULL, 1, &WebServerTask);
-  //xTaskCreate(serialTask, "SerialServerTaskExecution", 4096, NULL, 1, &SerialTask);
+  xTaskCreate(webOtaServerTask, "WebServerTaskExecution", 4096, NULL, 1, &WebOtaServerTask);
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", 4096, NULL, 1, &SerialCableTask);
+  // xTaskCreate(serialTask, "SerialServerTaskExecution", 4096, NULL, 1, &SerialTask);
 
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 }
 
+// loop is used for print debug
 void loop(void)
 {
-
-  if (!servicesCollector.isBusyForServiceApi())
-  {
-
-    if (serialService.availableSerial())
+    if(s.debug)
     {
-      String msg = serialService.getMsgbySerial();
-      Serial.println("Serial has msg: " + msg);
-      recvMsgBySerial(msg);
+      delay(1000);
+      serialService.logInfoln("Info","MAIN (info task)");
     }
-  }
-  else
-  {
     yield();
-  }
 }
 
-void serialTask(void *pvParameters)
+// Serial bt task check input for bluetooth message
+void serialBtTask(void *pvParameters)
 {
   serialService.logInfoln("Serial Task execution", "MAIN");
   serialService.initSerialBtBegin(s.deviceName);
   while (true)
   {
-    if (serialService.availableSerialBt())
+    if (!servicesCollector.isBusyForServiceApi())
     {
-      String msgBt = serialService.getMsgbyBluetooth();
-      Serial.println("bluetooth Serial has msg: " + msgBt);
-      recvMsgBySerial(msgBt);
+      if (serialService.availableSerialBt())
+      {
+        String msgBt = serialService.getMsgbyBluetooth();
+        Serial.println("bluetooth Serial has msg: " + msgBt);
+        recvMsgBySerial(msgBt);
+      }
     }
+    else
+    {
+      yield();
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
 
-void webServerTask(void *pvParameters)
+// Serial Cable task check input for usb Serial message
+void serialCableTask(void *pvParameters)
+{
+  while (true)
+  {
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      if (serialService.availableSerial())
+      {
+        String msg = serialService.getMsgbySerial();
+        Serial.println("Serial has msg: " + msg);
+        recvMsgBySerial(msg);
+      }
+    }
+    else
+    {
+      yield();
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+}
+
+void webOtaServerTask(void *pvParameters)
 {
   serialService.logInfoln("Web Task execution", "MAIN");
   while (true)
@@ -189,6 +214,7 @@ void ledTask(void *pvParameters)
     {
       yield();
     }
+
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
