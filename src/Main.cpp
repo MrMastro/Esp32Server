@@ -130,6 +130,7 @@ void setup(void)
   //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 
   // ///
+  Serial.println("Setup done");
 }
 
 // loop is used for print debug

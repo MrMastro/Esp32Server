@@ -3,14 +3,15 @@
 #include <Arduino.h>
 #include "MastroServer.h"
 #include <NeoPixelBus.h>
+#include <BluetoothSerial.h>
 
 
 
-#include "./services/ServicesCollector/ServicesCollector.h"
-#include "./services/ServiceImplementations/CommandService.h"
-#include "./services/ServiceImplementations/LedService.h"
-#include "./services/ServiceImplementations/SettingService.h"
-#include "./services/ServiceImplementations/SerialService.h"
+//#include "./services/ServicesCollector/ServicesCollector.h"
+// #include "./services/ServiceImplementations/CommandService.h"
+// #include "./services/ServiceImplementations/LedService.h"
+// #include "./services/ServiceImplementations/SettingService.h"
+// #include "./services/ServiceImplementations/SerialService.h"
 
 #include "routes/Routes.h"
 
