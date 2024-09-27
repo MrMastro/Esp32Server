@@ -1,7 +1,7 @@
 #include "SerialSimple.h"
-#include <vector>
 
-void differentSerialprintln(const String &msg, String colorMsg, HardwareSerial *serial, WebSerialClass *webSerial)
+void differentSerialprintln(const String &msg, String colorMsg, HardwareSerial *serial//, WebSerialClass *webSerial
+)
 {
     String msgColored = colorMsg + msg + "\033[0m";
     if (serial != nullptr)
@@ -9,27 +9,28 @@ void differentSerialprintln(const String &msg, String colorMsg, HardwareSerial *
         colorMsg == "" ? serial->println(msg.c_str()) : serial->println(msgColored.c_str());
     }
 
-    if (webSerial != nullptr)
-    {
-        if(webSerial->availableForWrite())
-        {
-            webSerial->println(msg.c_str());
-        } 
-    }
+    // if (webSerial != nullptr)
+    // {
+    //     if(webSerial->availableForWrite())
+    //     {
+    //         webSerial->println(msg.c_str());
+    //     } 
+    // }
 }
 
-void differentSerialprint(const String &msg, String colorMsg, HardwareSerial *serial, WebSerialClass *webSerial)
+void differentSerialprint(const String &msg, String colorMsg, HardwareSerial *serial//,WebSerialClass *webSerial)
+)
 {
     String msgColored = colorMsg + msg + "\033[0m";
     if (serial != nullptr)
     {
-        colorMsg == "" ? webSerial->print(msg.c_str()) : serial->print(msgColored.c_str());
+        colorMsg == "" ? serial->print(msg.c_str()) : serial->print(msgColored.c_str());
     }
 
-    if (webSerial != nullptr)
-    {
-        webSerial->print(msg.c_str());
-    }
+    // if (webSerial != nullptr)
+    // {
+    //     webSerial->print(msg.c_str());
+    // }
 }
 
 String formatMsg(String msg, std::vector<String> args){

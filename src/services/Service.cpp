@@ -50,16 +50,11 @@ boolean Service::isAvaible()
  * @param serialPointerParam Pointer to the HardwareSerial.
  * @param webSerialPointerParam Pointer to the WebSerialClass.
  */
-void Service::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
+void Service::attachSerial(HardwareSerial *serialPointerParam)
 {
   if(serialPointerParam != nullptr)
   {
     serialPointer = serialPointerParam;
-  }
-
-  if(webSerialPointer != nullptr)
-  {
-    webSerialPointer = webSerialPointerParam;
   }
 
 }
@@ -174,7 +169,7 @@ void Service::logInfoln(String msg)
     String log = "[ LOG - SERVICE {nameService} ] {msg}";
     log.replace("{nameService}", nameService);
     log.replace("{msg}", msg);
-    differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer); // set green color
+    differentSerialprintln(log, "\033[32m", serialPointer); // set green color
   }
 }
 
@@ -190,7 +185,7 @@ void Service::logWarning(String msg, String context)
   log.replace("{nameService}", nameService);
   log.replace("{context}", context);
   log.replace("{msg}", msg);
-  differentSerialprintln(log, "\033[33m", serialPointer, webSerialPointer);
+  differentSerialprintln(log, "\033[33m", serialPointer);
 }
 
 /**
@@ -205,5 +200,5 @@ void Service::logError(String msg, String context)
   error.replace("{nameService}", nameService);
   error.replace("{context}", context);
   error.replace("{msg}", msg);
-  differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
+  differentSerialprintln(error, "\033[31m", serialPointer);
 }

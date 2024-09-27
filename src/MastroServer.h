@@ -1,12 +1,11 @@
 #ifndef MastroServer_h
 #define MastroServer_h
 
-#include <ESPAsyncWebServer.h>
-#include <ArduinoOTA.h>
-#include <ElegantOTA.h>
-#include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
-#include <WebSerial.h>
+#include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
+#include "utils/SerialSimple.h"
+#include "constants/constants.h"
 
 class MastroServer
 {

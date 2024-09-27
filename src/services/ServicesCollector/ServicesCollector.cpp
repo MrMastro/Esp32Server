@@ -14,6 +14,7 @@ ServicesCollector::ServicesCollector()
 
 ServicesCollector::ServicesCollector(MastroServer *serverParam, boolean debugMode)
 {
+    ServicesCollector();
     attachServer(serverParam);
     debug = debugMode;
 }
@@ -81,7 +82,7 @@ void ServicesCollector::addService(Service *service, String name)
     String s = "Adding service: {name}";
     s.replace("{name}", name);
     logInfoln(s);
-    if (serialPointer == nullptr || webSerialPointer == nullptr)
+    if (serialPointer == nullptr)
     {
         logInfoln("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
     }
@@ -94,7 +95,7 @@ void ServicesCollector::addService(Service *service, String name)
 
     service->setNameService(name);
     service->attachCollector(this);
-    service->attachSerial(serialPointer, webSerialPointer);
+    service->attachSerial(serialPointer);
     containerService[name] = service;
 }
 
@@ -103,7 +104,7 @@ void ServicesCollector::addService(Service *service, String name, SettingsModel*
     String log = "Adding service: {name}";
     log.replace("{name}", name);
     logInfoln(log);
-    if (serialPointer == nullptr || webSerialPointer == nullptr)
+    if (serialPointer == nullptr)
     {
         logInfoln("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
     }
@@ -116,26 +117,25 @@ void ServicesCollector::addService(Service *service, String name, SettingsModel*
     service->setNameService(name);
     service->setSettings(s);
     service->attachCollector(this);
-    service->attachSerial(serialPointer, webSerialPointer);
+    service->attachSerial(serialPointer);
     containerService[name] = service;
 }
 
 
-void ServicesCollector::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
+void ServicesCollector::attachSerial(HardwareSerial *serialPointerParam)
 {
-    if (serialPointer != nullptr || webSerialPointer != nullptr)
+    if (serialPointer != nullptr)
     {
         logWarning("serial and webSerial is already attached", "attachSerial");
         return;
     }
     serialPointer = serialPointerParam;
-    webSerialPointer = webSerialPointerParam;
 
     if (containerService.size() > 0)
     {
         for (auto &entry : containerService)
         {
-            entry.second->attachSerial(&Serial, &WebSerial);
+            entry.second->attachSerial(&Serial);
         }
     }
 }
@@ -156,7 +156,7 @@ void ServicesCollector::logInfoln(String msg)
     {
         String result = "[ LOG - ServiceCollector ] {msg}";
         result.replace("{msg}", msg);
-        differentSerialprintln(result, "\033[32m", serialPointer, webSerialPointer);
+        differentSerialprintln(result, "\033[32m", serialPointer);
     }
 }
 
@@ -165,7 +165,7 @@ void ServicesCollector::logWarning(String msg, String context)
     String result = "[ WARNING - ServiceCollector on {context} ] {msg}";
     result.replace("{context}", context);
     result.replace("{msg}", msg);
-    differentSerialprintln(result, "\033[33m", serialPointer, webSerialPointer);
+    differentSerialprintln(result, "\033[33m", serialPointer);
 }
 
 void ServicesCollector::logError(String msg, String context)
@@ -173,7 +173,7 @@ void ServicesCollector::logError(String msg, String context)
     String error = "[ ERROR - ServiceCollector on {context} ] {msg}";
     error.replace("{context}", context);
     error.replace("{msg}", msg);
-    differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
+    differentSerialprintln(error, "\033[31m", serialPointer);
 }
 
 
@@ -183,7 +183,6 @@ void ServicesCollector::logError(String msg, String context)
 ServicesCollector::~ServicesCollector()
 {
     delete serialPointer;
-    delete webSerialPointer;
     delete server;
     containerService.clear();
 }

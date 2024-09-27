@@ -41,7 +41,6 @@ private:
     String lastSentMsg;
 protected:
     HardwareSerial* serialPointer;
-    WebSerialClass* webSerialPointer;
     BluetoothSerial* btSerialPointer;
 };
 

@@ -1,9 +1,5 @@
 #include "Main.h"
 
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-#endif
-
 int ledPin = 2;
 SettingsModel s;
 
@@ -43,6 +39,7 @@ LEDStripDriver *rgbStrip = nullptr;
 
 void setup(void)
 {
+  delay(1000);
   Serial.begin(9600);
   //serialService.attachSerial(&Serial);
   //servicesCollector.addService(&serialService, "SerialService");
@@ -122,14 +119,15 @@ void setup(void)
   // Serial.println("IP");
   // Serial.println(infoService.getIp());
 
+  Serial.println("Run TASK");
   // // Thread running
   // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL);
   // // xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", 10000, NULL, 0, NULL);
-  xTaskCreate(serialCableTask, "SerialCableTaskExecution", 10000, NULL, 2, NULL);
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", 10000, NULL, 0, NULL);
   // xTaskCreate(ledTask, "LedTaskExecution", 10000, NULL, 3, NULL);
 
   // // xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", 4096, NULL, 1, NULL); <-backup
-  // // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
+  //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 
   // ///
 }
@@ -145,8 +143,6 @@ void loop(void)
   //     serialService.logInfoln("Info", "MAIN (info task)");
   //   }
   // }
-  // yield();
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 // Serial bt task check input for bluetooth message
@@ -155,6 +151,7 @@ void serialBtTask(void *pvParameters)
   // //todoserialService.logInfoln("Serial Bluetooth Task execution", "MAIN");
   // // serialService.initSerialBtBegin(s.deviceName, &SerialBT);
   // serialService.logInfoln("Start listining bluethoot serial", "MAIN");
+  Serial.println("Serial Bluetooth Task execution");
   while (true)
   {
     if (!servicesCollector.isBusyForServiceApi())
@@ -180,30 +177,33 @@ void serialBtTask(void *pvParameters)
 // Serial Cable task check input for usb Serial message
 void serialCableTask(void *pvParameters)
 {
-  // while (true)
-  // {
-  //   if (!servicesCollector.isBusyForServiceApi())
-  //   {
-  //     if (serialService.availableSerial())
-  //     {
-  //       String msg = serialService.getMsgbySerial();
-  //       if (msg.equals("t"))
-  //       {
-  //         test();
-  //       }
-  //       else
-  //       {
-  //         Serial.println("Serial has msg: " + msg);
-  //         recvMsgBySerial(msg);
-  //       }
-  //     }
-  //   }
-  //   else
-  //   {
-  //     yield();
-  //   }
-  //   vTaskDelay(10 / portTICK_PERIOD_MS);
-  // }
+  Serial.println("Serial Task execution");
+  while (true)
+  {
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      //todo change with if (serialService.availableSerial())
+      if (Serial.available())
+      {
+        String msg = Serial.readString();
+        //todo change with String msg = serialService.getMsgbySerial();
+        if (msg.equals("t"))
+        {
+          test();
+        }
+        else
+        {
+          Serial.println("Serial has msg: " + msg);
+          recvMsgBySerial(msg);
+        }
+      }
+    }
+    else
+    {
+      yield();
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
 }
 
 void webOtaServerTask(void *pvParameters)

@@ -13,7 +13,7 @@ class CommandService : public Service
 public:
     CommandService();
     boolean isAvaible() override;
-    void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
+    void attachSerial(HardwareSerial* serialPointerParam) override;
     //String executeJson(String methodName, String param) override; deprecated
     //String executeJson(String methodName, std::vector<String> jsonParams) override; deprecated
     StatusInfo recvMsgAndExecute(String data); //returns the msg received

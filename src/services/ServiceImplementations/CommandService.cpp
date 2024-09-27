@@ -11,11 +11,10 @@ boolean CommandService::isAvaible()
   return isOperative;
 }
 
-void CommandService::attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam)
+void CommandService::attachSerial(HardwareSerial *serialPointerParam)
 {
   logInfoln("Attach Serial of CommandService");
   serialPointer = serialPointerParam;
-  webSerialPointer = webSerialPointerParam;
   isOperative = true;
 }
 
@@ -80,10 +79,10 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
   
   StatusInfo result = executeCommand(mapStringToEnum(data), data);
   if(result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage()){
-    differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", serialPointer, webSerialPointer);
+    differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", serialPointer);
   }else
   {
-    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}), "", serialPointer, webSerialPointer);    
+    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}), "", serialPointer);    
   }
 
   return result;

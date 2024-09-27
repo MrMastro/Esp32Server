@@ -96,14 +96,15 @@ void SerialService::initSerialBtBegin(String localName, BluetoothSerial *btlPoin
     }
 }
 
+//todo
 void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
 {
-    if (webSerialPointer == nullptr)
-    {
-        WebSerial.begin(server, url);
-        webSerialPointer = &WebSerial;
-    }
-    isOperative = true;
+    // if (webSerialPointer == nullptr)
+    // {
+    //     WebSerial.begin(server, url);
+    //     webSerialPointer = &WebSerial;
+    // }
+    // isOperative = true;
 }
 
 void SerialService::initAllSerials(unsigned long baud, BluetoothSerial *bluetoothPointer, String deviceName, AsyncWebServer *server, const char *url)
@@ -163,7 +164,7 @@ void SerialService::logInfoln(String msg, String subject)
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
             lastSentMsg = log; // todo integrate in differentSerialPrintln of service (to create)
-            differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer);
+            differentSerialprintln(log, "\033[32m", serialPointer);
         }
     }
 }
@@ -175,7 +176,7 @@ void SerialService::logWarning(String msg, String subject, String context)
     warn.replace("{context}", context);
     warn.replace("{msg}", msg);
     lastSentMsg = warn; // todo integrate in differentSerialPrintln of service (to create)
-    differentSerialprintln(warn, "\033[33m", serialPointer, webSerialPointer);
+    differentSerialprintln(warn, "\033[33m", serialPointer);
 }
 
 /**
@@ -191,5 +192,5 @@ void SerialService::logError(String msg, String subject, String context)
     error.replace("{context}", context);
     error.replace("{msg}", msg);
     lastSentMsg = error; // todo integrate in differentSerialPrintln of service (to create)
-    differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
+    differentSerialprintln(error, "\033[31m", serialPointer);
 }

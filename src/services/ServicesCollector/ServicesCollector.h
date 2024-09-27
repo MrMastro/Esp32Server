@@ -20,14 +20,14 @@ public:
     Service* getService(String name);
     void addService(Service* service, String name);
     void addService(Service* service, String name, SettingsModel* s);
-    void attachSerial(HardwareSerial *serialPointerParam, WebSerialClass *webSerialPointerParam);
+    void attachSerial(HardwareSerial *serialPointerParam);
     void attachServer(MastroServer* serverParam);
     MastroServer* getServer();
     ~ServicesCollector();
 private:
     boolean busy;
     HardwareSerial* serialPointer;
-    WebSerialClass* webSerialPointer;
+    //todo WebSerialClass* webSerialPointer;
     MastroServer* server;
     std::map<String,Service*> containerService;
     boolean debug;

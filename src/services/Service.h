@@ -14,7 +14,7 @@ class ServicesCollector;
 class Service {
 public:
     virtual boolean isAvaible();
-    virtual void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam);
+    virtual void attachSerial(HardwareSerial* serialPointerParam);
     boolean attachPin(std::vector<int> values);
     virtual boolean preparePin();
     void setNameService(String name);
@@ -27,7 +27,6 @@ public:
 protected:
     String nameService = "";
     HardwareSerial* serialPointer;
-    WebSerialClass* webSerialPointer;
     std::vector<int> pins;
     MastroServer* getServerByCollector();
     SettingsModel* settings;
