@@ -63,7 +63,6 @@ void SettingService::loadSettings(String path)
 
     // Chiudi il file
     file.close();
-    Serial.println("file vuoto?");
     Serial.println("Contenuto del file:");
     Serial.println(fileContent);
     if(fileContent.isEmpty()){

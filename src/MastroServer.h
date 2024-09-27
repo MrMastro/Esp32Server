@@ -12,7 +12,7 @@ class MastroServer
 {
 public:
     MastroServer();
-    MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debug, int ledPin = -1); // Costruttore
+    MastroServer(AsyncWebServer* webServer, String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debug, int ledPin = -1); // Costruttore
     void handleOta();
     String getName();
     String getIp();

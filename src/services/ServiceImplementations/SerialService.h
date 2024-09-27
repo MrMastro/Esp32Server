@@ -12,17 +12,19 @@ class SerialService : public Service
 {
 public:
     SerialService();
-    SerialService(unsigned long baud, String deviceName);
-    SerialService(unsigned long baud, String deviceName, AsyncWebServer *server, const char *url = "/webserial");
+    SerialService(unsigned long baud, String deviceName, BluetoothSerial* btlPointer, bool isMaster = false);   //Serial and SerialBluetooth
+    SerialService(unsigned long baud, BluetoothSerial* btlPointer, String deviceName, AsyncWebServer *server, const char *url = "/webserial"); //All Serials
     boolean isAvaible() override;
     String getLastSentMsg();
     void initSerialBegin(unsigned long baud, uint32_t config = SERIAL_8N1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
-    void initSerialBtBegin(String localName = String(), bool isMaster = false);
+    void initSerialBtBegin(String localName, BluetoothSerial* bluetoothSerialPointer, bool isMaster = false);
     void initSerialWebBegin(AsyncWebServer *server, const char *url);
+
+    void attachSerial(HardwareSerial* serial);
 
     // void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
 
-    void initAllSerials(unsigned long baud, String deviceName, AsyncWebServer *server, const char *url = "/webserial");
+    void initAllSerials(unsigned long baud, BluetoothSerial* bluetoothPointer, String deviceName,  AsyncWebServer *server, const char *url = "/webserial");
     
     boolean availableSerial();
     boolean availableSerialBt();
@@ -37,7 +39,6 @@ public:
 private:
     boolean isOperative;
     String lastSentMsg;
-    //BluetoothSerial serialBT;
 protected:
     HardwareSerial* serialPointer;
     WebSerialClass* webSerialPointer;

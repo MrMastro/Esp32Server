@@ -2,14 +2,13 @@
 #include "LITTLEFS.h"
 #include "utils/SerialSimple.h"
 #include "constants/constants.h"
-#include <DNSServer.h>
 
 MastroServer mastroServer;
-AsyncWebServer webServer(80);
 //DNSServer dnsServer;
 
 MastroServer::MastroServer()
 {
+    pointWebServer = nullptr;
     serverActive = false;
     isActiveIndicatorLed = false;
     ledIndicatorMode = false;
@@ -20,9 +19,10 @@ MastroServer::MastroServer()
 // mode:
 // Ap= access point
 // WIFI = wirless connect to your wifi
-MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debugMode, int ledPin)
+MastroServer::MastroServer(AsyncWebServer* webServer, String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debugMode, int ledPin)
 {
     MastroServer();
+    pointWebServer = webServer;
     debug = debugMode;
     logInfo("\n");
     if (ledPin != -1)
@@ -38,17 +38,17 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
     // Wait Indicator
     // welcomeWaitLedBlink();
 
-    // Initialize SPIFFS
-    if (!LittleFS.begin())
-    {
-        littleFSAvaible = false;
-        logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
-        logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
-    }
-    else
-    {
-        littleFSAvaible = true;
-    }
+    //todo Initialize SPIFFS
+    // if (!LittleFS.begin())
+    // {
+    //     littleFSAvaible = false;
+    //     logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
+    //     logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
+    // }
+    // else
+    // {
+    //     littleFSAvaible = true;
+    // }
 
     logInfo("\n");
 
@@ -70,16 +70,15 @@ MastroServer::MastroServer(String mode, String ssid, String passwordWiFi, String
 
     logInfoln("Set Route");
     setRoutes();
-    beginListFiles("/www");
+    //beginListFiles("/www");
 
     // logInfoln("OTA server started");
     // initArduinoOta(deviceName, devicePassword);
     // ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
 
     logInfoln("Starting web server...");
-    webServer.begin();
+    //webServer.begin();
     logInfoln("HTTP server started");
-    pointWebServer = &webServer;
     serverActive = true;
 }
 
@@ -116,7 +115,7 @@ boolean MastroServer::initWIFI(String &ssid, String &passwordWiFi)
 void MastroServer::initAP(String ssid, String password)
 {
     logInfoln("init AP mode");
-    WiFi.mode(WIFI_AP);
+    WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(ssid, password);
     //dnsServer.start(53, "*", WiFi.softAPIP());
     // Print the AP IP address to the serial monitor
@@ -211,13 +210,14 @@ void MastroServer::welcomeWaitLedBlink()
     }
 }
 
+//todo listinfile
 void MastroServer::beginListFiles(String path)
 {
     if (littleFSAvaible)
     {
         logInfoln("Listing absolute file");
         logInfoln("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
-        webServer.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+        pointWebServer->on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
                      {
                          //
                          request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
@@ -268,7 +268,7 @@ void MastroServer::setRouteSystem(String path, String resource)
         int length = resource.length();
         resource = resource.substring(0, index);
         apiPath = path + "/" + resource;
-        webServer.on(pathNotModified.c_str(), HTTP_GET, [apiPath](AsyncWebServerRequest *request)
+        pointWebServer->on(pathNotModified.c_str(), HTTP_GET, [apiPath](AsyncWebServerRequest *request)
                      { request->redirect(apiPath); });
     }
 
@@ -289,7 +289,7 @@ void MastroServer::setRouteSystem(String path, String resource)
     if (!apiRedirected)
     {
         logInfoln(String("" + apiPath + " - getting: " + resourcePath));
-        webServer.on(apiPath.c_str(), HTTP_GET, [resourcePath](AsyncWebServerRequest *request)
+        pointWebServer->on(apiPath.c_str(), HTTP_GET, [resourcePath](AsyncWebServerRequest *request)
                      {
                          //
                          request->send(LittleFS, resourcePath, String(), false);
@@ -346,7 +346,7 @@ void MastroServer::initArduinoOta(String deviceName, String devicePassword)
 void MastroServer::setRoutes()
 {
     String scopeHost = getName();
-    webServer.on("/text", HTTP_GET, [](AsyncWebServerRequest *request)
+    pointWebServer->on("/text", HTTP_GET, [](AsyncWebServerRequest *request)
                  { request->send(200, "text", "Hi! I am ESP32 :)"); });
 
     /*------------------------------------------ Deprecated area (use web app ) -----------------------------
@@ -364,7 +364,7 @@ void MastroServer::setRoutes()
 void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
 {
     delay(50);
-    webServer.on(uri, method, onRequest);
+    pointWebServer->on(uri, method, onRequest);
 }
 
 String processor(const String &var)

@@ -6,27 +6,28 @@
 SerialService::SerialService()
 {
     lastSentMsg = "";
-    btSerialPointer = new BluetoothSerial();
     isOperative = false;
 }
 
 /**
  * Create a SerialService with Serial and bluetooth Serial
  */
-SerialService::SerialService(unsigned long baud, String deviceName)
+SerialService::SerialService(unsigned long baud, String deviceName, BluetoothSerial *btlPointer, bool isMaster)
 {
+    SerialService();
     lastSentMsg = "";
     initSerialBegin(baud);
-    initSerialBtBegin(deviceName);
+    initSerialBtBegin(deviceName, btlPointer, isMaster);
     isOperative = true;
 }
 
 /**
  * Create a SerialService with all 3 Serial avaible (Serial, bluetooth Serial and web Serial)
  */
-SerialService::SerialService(unsigned long baud, String deviceName, AsyncWebServer *server, const char *url)
+SerialService::SerialService(unsigned long baud, BluetoothSerial *btlPointer, String deviceName, AsyncWebServer *server, const char *url)
 {
-    initAllSerials(baud, deviceName, server, url);
+    SerialService();
+    initAllSerials(baud, btlPointer, deviceName, server, url);
 }
 
 boolean SerialService::isAvaible()
@@ -34,31 +35,65 @@ boolean SerialService::isAvaible()
     return isOperative;
 }
 
-String SerialService::getLastSentMsg(){
+String SerialService::getLastSentMsg()
+{
     return lastSentMsg;
 }
 
+void SerialService::attachSerial(HardwareSerial* serial)
+{
+    if (serialPointer != nullptr)
+    {
+        logError("Serial already previously initializated, cannot reinizilizer", "SerialService", "initSerialBegin");
+        return;
+    }
+
+    if (serialPointer == nullptr)
+    {
+        serialPointer = serial;
+        isOperative = true;
+    }
+}
+
+// WARNING 
+//todo remove
 void SerialService::initSerialBegin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms, uint8_t rxfifo_full_thrhd)
 {
+    if (serialPointer != nullptr)
+    {
+        logError("Serial already previously initializated, cannot reinizilizer", "SerialService", "initSerialBegin");
+        return;
+    }
+
     if (serialPointer == nullptr)
     {
         Serial.begin(baud, config, rxPin, txPin, invert, timeout_ms, rxfifo_full_thrhd);
+        logInfoln("Init Serial with baud: " + baud, "SerialService");
         serialPointer = &Serial;
+        isOperative = true;
     }
-    isOperative = true;
 }
 
-void SerialService::initSerialBtBegin(String localName, bool isMaster)
+void SerialService::initSerialBtBegin(String localName, BluetoothSerial *btlPointer, bool isMaster)
 {
     if (btSerialPointer != nullptr)
     {
-        logInfoln("Init Bluetooth with name: "+localName, "SerialService");
-        btSerialPointer = new BluetoothSerial();
-        btSerialPointer->begin(localName, isMaster);
+        logError("Bluotooth already previously initializated, cannot reinizilizer", "SerialService", "initSerialBtBegin");
+        return;
+    }
+
+    logInfoln("Init Bluetooth with name: " + localName, "SerialService");
+    // Avvia Bluetooth seriale
+    if (!btlPointer->begin(localName, isMaster))
+    { // Imposta il nome del dispositivo Bluetooth
+        logError("An error occurred initializing Bluetooth", "SerialService", "initSerialBtBegin");
+    }
+    else
+    {
         logInfoln("Bluetooth initializated", "SerialService");
+        btSerialPointer = btlPointer;
         isOperative = true;
     }
-   
 }
 
 void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
@@ -71,10 +106,10 @@ void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
     isOperative = true;
 }
 
-void SerialService::initAllSerials(unsigned long baud, String deviceName, AsyncWebServer *server, const char *url)
+void SerialService::initAllSerials(unsigned long baud, BluetoothSerial *bluetoothPointer, String deviceName, AsyncWebServer *server, const char *url)
 {
     initSerialBegin(baud);
-    initSerialBtBegin(deviceName);
+    initSerialBtBegin(deviceName, bluetoothPointer);
     initSerialWebBegin(server, url);
     isOperative = true;
 }
@@ -127,7 +162,7 @@ void SerialService::logInfoln(String msg, String subject)
             String log = "[ LOG - {subject} ] {msg}";
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
-            lastSentMsg = log; //todo integrate in differentSerialPrintln of service (to create)
+            lastSentMsg = log; // todo integrate in differentSerialPrintln of service (to create)
             differentSerialprintln(log, "\033[32m", serialPointer, webSerialPointer);
         }
     }
@@ -139,7 +174,7 @@ void SerialService::logWarning(String msg, String subject, String context)
     warn.replace("{nameService}", subject);
     warn.replace("{context}", context);
     warn.replace("{msg}", msg);
-    lastSentMsg = warn; //todo integrate in differentSerialPrintln of service (to create)
+    lastSentMsg = warn; // todo integrate in differentSerialPrintln of service (to create)
     differentSerialprintln(warn, "\033[33m", serialPointer, webSerialPointer);
 }
 
@@ -155,6 +190,6 @@ void SerialService::logError(String msg, String subject, String context)
     error.replace("{nameService}", subject);
     error.replace("{context}", context);
     error.replace("{msg}", msg);
-    lastSentMsg = error; //todo integrate in differentSerialPrintln of service (to create)
+    lastSentMsg = error; // todo integrate in differentSerialPrintln of service (to create)
     differentSerialprintln(error, "\033[31m", serialPointer, webSerialPointer);
 }
