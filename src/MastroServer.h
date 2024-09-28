@@ -1,11 +1,14 @@
 #ifndef MastroServer_h
 #define MastroServer_h
+#define DEPRECATED __attribute__((deprecated))
 
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 #include "utils/SerialSimple.h"
-#include "constants/constants.h"
+#include "constants/Constants.h"
+
+
 
 class MastroServer
 {
@@ -15,6 +18,7 @@ public:
     void handleOta();
     String getName();
     String getIp();
+    String getWifiCommunicationMode();
     void setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
     boolean isAvaible();
     AsyncWebServer* getWebServer();
@@ -25,10 +29,11 @@ private:
     bool serverActive;
     bool isActiveIndicatorLed;
     bool littleFSAvaible;
+    String wifiCommunicationMode;
     String ip;
     String deviceName;
     boolean debug;
-    void initArduinoOta(String deviceName, String devicePassword);
+    DEPRECATED void initOta(String deviceName, String devicePassword); 
     void setRoutes();
     String splitIpHost(String ip);
     boolean initWIFI(String &ssid, String &passwordWiFi);

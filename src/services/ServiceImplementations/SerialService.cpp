@@ -7,6 +7,8 @@ SerialService::SerialService()
 {
     lastSentMsg = "";
     isOperative = false;
+    serialPointer = nullptr;
+    btSerialPointer = nullptr;
 }
 
 /**
@@ -44,7 +46,7 @@ void SerialService::attachSerial(HardwareSerial* serial)
 {
     if (serialPointer != nullptr)
     {
-        logError("Serial already previously initializated, cannot reinizilizer", "SerialService", "initSerialBegin");
+        logError("Serial already previously initializated, cannot reinizilizer", "SerialService", "attachSerial");
         return;
     }
 

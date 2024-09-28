@@ -3,21 +3,22 @@
 
 #include <services/Service.h>
 #include "./services/ServiceImplementations/LedService.h"
-#include "./constants/constants.h"
+#include "./constants/Commands.h"
+#include "./constants/Constants.h"
 #include <models/DataModelling.h>
 #include <utils/SerialSimple.h>
 #include <exceptions/exceptions.h>
+#include "SerialService.h"
 
 class CommandService : public Service
 {
 public:
     CommandService();
     boolean isAvaible() override;
-    void attachSerial(HardwareSerial* serialPointerParam) override;
-    //String executeJson(String methodName, String param) override; deprecated
-    //String executeJson(String methodName, std::vector<String> jsonParams) override; deprecated
-    StatusInfo recvMsgAndExecute(String data); //returns the msg received
+    void onInitServiceCollector();
+    StatusInfo recvMsgAndExecute(String data); // returns the msg received
 private:
+    SerialService* serialService;
     boolean isOperative;
     StatusInfo executeCommand(CMD cmd, String cmdString);
 };

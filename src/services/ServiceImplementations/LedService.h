@@ -5,6 +5,7 @@
 #include <LEDStripDriver.h>
 #include <NeoPixelBus.h>
 #include "constants/LedEffects.h"
+#include "SerialService.h"
 
 //numPixel = 32
 //pinStrip = 5
@@ -23,6 +24,7 @@ public:
     LedService(uint16_t countPixels, uint8_t pin);
     LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver* rgbLedStriptInput);
     boolean isAvaible() override;
+    void onInitServiceCollector();
     boolean preparePin();
     boolean changeLed(boolean active, boolean toggle);
     //Service Methods
@@ -32,6 +34,7 @@ public:
     void runEffectWs2811LifeCycle();
 
 private:
+    SerialService* serialService;
     boolean isAttachedLed;
     int ledPin;
     bool isLedOn;

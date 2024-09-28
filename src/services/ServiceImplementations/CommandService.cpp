@@ -1,5 +1,6 @@
 #include "./services/ServiceImplementations/CommandService.h"
 #include "InfoService.cpp"
+#include "CommandService.h"
 
 CommandService::CommandService()
 {
@@ -11,10 +12,9 @@ boolean CommandService::isAvaible()
   return isOperative;
 }
 
-void CommandService::attachSerial(HardwareSerial *serialPointerParam)
+void CommandService::onInitServiceCollector()
 {
-  logInfoln("Attach Serial of CommandService");
-  serialPointer = serialPointerParam;
+  serialService = ((SerialService *)servicesCollector.getService("SerialService"));
   isOperative = true;
 }
 
@@ -26,10 +26,10 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
   String s = "executeCommand(cmd={cmd}, cmdString={cmdString})";
   s.replace("{cmd}", cmdString);
   s.replace("{cmdString}", cmdString);
-  logInfoln(s);
+  serialService->logInfoln(s,"CommandService");
   if (!isOperative)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "Attach Serials first (Serial or WebSerial)", "executeCommand");
+    //throwError(ERROR_CODE::SERVICE_ERROR, "Attach Serials first (Serial or WebSerial)", "executeCommand");
     return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   }
   switch (cmd)
@@ -70,19 +70,21 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
 {
   String s = "recvMsgAndExecute(data={data})";
   s.replace("{data}", data);
-  logInfoln(s);
+  serialService->logInfoln(s,"CommandService");
   if (!isOperative)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");
+    //throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");
     return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   }
   
   StatusInfo result = executeCommand(mapStringToEnum(data), data);
   if(result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage()){
-    differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", serialPointer);
+    //todo create a mechanism to send with SerialService without loginfo, only direct msg
+    differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", &Serial);
   }else
   {
-    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}), "", serialPointer);    
+    //todo create a mechanism to send with SerialService without loginfo, only direct msg
+    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}), "", &Serial);    
   }
 
   return result;

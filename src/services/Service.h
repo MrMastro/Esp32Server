@@ -3,18 +3,47 @@
 
 #include <MastroServer.h>
 #include "./models/settingModel/SettingsModel.h"
-#include <constants/constants.h>
+#include <constants/Constants.h>
 #include <exceptions/exceptions.h>
 #include <utils/FunctionUtils.h>
 #include <utils/SerialSimple.h>
 
-class ServicesCollector;
+class Service;
+
+typedef std::map<String,Service*> MapService;
+
+class ServicesCollector
+{
+public:
+    ServicesCollector();
+    ServicesCollector(MastroServer* serverParam, boolean debug);
+    boolean isPresentInMap(String name);
+    boolean isBusyForServiceApi();
+    void takeExclusiveExecution();
+    void freeExclusiveExecution();
+    Service* getService(String name);
+    void addService(Service* service, String name);
+    void addService(Service* service, String name, SettingsModel* s);
+    void attachServer(MastroServer* serverParam);
+    MastroServer* getServer();
+    ~ServicesCollector();
+private:
+    boolean busy;
+    MastroServer* server;
+    std::map<String,Service*> containerService;
+    boolean debug;
+    void throwServicesCollectorError(ERROR_CODE err, const String detailMessage, const String context);
+    void logError(String msg, String subject, String context);
+    void logInfoln(String msg, String subject);
+    void logWarning(String msg, String subject, String context);
+};
+
+extern ServicesCollector servicesCollector;
 
 // Service interface
 class Service {
 public:
     virtual boolean isAvaible();
-    virtual void attachSerial(HardwareSerial* serialPointerParam);
     boolean attachPin(std::vector<int> values);
     virtual boolean preparePin();
     void setNameService(String name);
@@ -23,17 +52,13 @@ public:
     Service* getServiceByCollector(String nameService);
     String getServerIpByCollector();
     void setSettings(SettingsModel* s);
+    virtual void onInitServiceCollector();
     virtual ~Service() {}
 protected:
     String nameService = "";
-    HardwareSerial* serialPointer;
     std::vector<int> pins;
-    MastroServer* getServerByCollector();
     SettingsModel* settings;
-    virtual void throwError(ERROR_CODE err, const char* detailMessage, String context);
-    virtual void logInfoln(String msg);
-    virtual void logWarning(String msg, String context);
-    virtual void logError(String msg, String context);
+    MastroServer* getServerByCollector();
 private:
     ServicesCollector* collector;
 };

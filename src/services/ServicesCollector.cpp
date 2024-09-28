@@ -1,8 +1,9 @@
-#include "ServicesCollector.h"
+#include <services/Service.h>
+#include "Service.h"
 
 #ifndef SERVICES_COLLECTOR_H
 #define SERVICES_COLLECTOR_H
-#include "services/ServicesCollector/ServicesCollector.h"
+
 ServicesCollector servicesCollector;
 
 ServicesCollector::ServicesCollector()
@@ -40,7 +41,7 @@ void ServicesCollector::takeExclusiveExecution()
 {
     if (busy)
     {
-        logWarning("first call takeExclusiveExecution, the busy flag should have been false instead is true", "takeExclusiveExecution");
+        logWarning("first call takeExclusiveExecution, the busy flag should have been false instead is true", "ServicesCollector", "takeExclusiveExecution");
     }
     busy = true;
 }
@@ -49,7 +50,7 @@ void ServicesCollector::freeExclusiveExecution()
 {
     if (!busy)
     {
-        logWarning("first call freeExclusiveExecution, the busy flag should have been true instead is false", "freeExclusiveExecution");
+        logWarning("first call freeExclusiveExecution, the busy flag should have been true instead is false", "ServicesCollector",  "freeExclusiveExecution");
     }
     busy = false;
 }
@@ -81,11 +82,7 @@ void ServicesCollector::addService(Service *service, String name)
 {
     String s = "Adding service: {name}";
     s.replace("{name}", name);
-    logInfoln(s);
-    if (serialPointer == nullptr)
-    {
-        logInfoln("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
-    }
+    logInfoln(s, "ServicesCollector");
 
     if (name == "")
     {
@@ -95,19 +92,14 @@ void ServicesCollector::addService(Service *service, String name)
 
     service->setNameService(name);
     service->attachCollector(this);
-    service->attachSerial(serialPointer);
     containerService[name] = service;
 }
 
-void ServicesCollector::addService(Service *service, String name, SettingsModel* s)
+void ServicesCollector::addService(Service *service, String name, SettingsModel *s)
 {
     String log = "Adding service: {name}";
     log.replace("{name}", name);
-    logInfoln(log);
-    if (serialPointer == nullptr)
-    {
-        logInfoln("Warning: it is recommended first attach Serial or webSerial with the attachSerial method cause the services that add can required Serials");
-    }
+    logInfoln(log, "ServicesCollector");
 
     if (name == "")
     {
@@ -117,27 +109,8 @@ void ServicesCollector::addService(Service *service, String name, SettingsModel*
     service->setNameService(name);
     service->setSettings(s);
     service->attachCollector(this);
-    service->attachSerial(serialPointer);
+    service->onInitServiceCollector();
     containerService[name] = service;
-}
-
-
-void ServicesCollector::attachSerial(HardwareSerial *serialPointerParam)
-{
-    if (serialPointer != nullptr)
-    {
-        logWarning("serial and webSerial is already attached", "attachSerial");
-        return;
-    }
-    serialPointer = serialPointerParam;
-
-    if (containerService.size() > 0)
-    {
-        for (auto &entry : containerService)
-        {
-            entry.second->attachSerial(&Serial);
-        }
-    }
 }
 
 void ServicesCollector::attachServer(MastroServer *serverParam)
@@ -147,43 +120,52 @@ void ServicesCollector::attachServer(MastroServer *serverParam)
 
 void ServicesCollector::throwServicesCollectorError(ERROR_CODE err, const String detailMessage, const String context)
 {
-    logError(getError(err, detailMessage), context);
+    logError(getError(err,detailMessage), "ServicesCollector", context);
 }
 
-void ServicesCollector::logInfoln(String msg)
+
+/**
+ * @brief Log an error message with context.
+ *
+ * @param msg The error message to be logged.
+ * @param context The context in which the error occurred.
+ */
+void ServicesCollector::logError(String msg, String subject, String context)
+{
+    String error = "[ ERROR - SERVICE {nameService} on {context} ] {msg}";
+    error.replace("{nameService}", subject);
+    error.replace("{context}", context);
+    error.replace("{msg}", msg);
+    differentSerialprintln(error, "\033[31m", &Serial);
+}
+
+void ServicesCollector::logWarning(String msg, String subject, String context)
+{
+    String warn = "[ WARNING - SERVICE {nameService} on {context} ] {msg}";
+    warn.replace("{nameService}", subject);
+    warn.replace("{context}", context);
+    warn.replace("{msg}", msg);
+    differentSerialprintln(warn, "\033[33m", &Serial);
+}
+
+void ServicesCollector::logInfoln(String msg, String subject)
 {
     if (debug)
     {
-        String result = "[ LOG - ServiceCollector ] {msg}";
-        result.replace("{msg}", msg);
-        differentSerialprintln(result, "\033[32m", serialPointer);
+        String log = "[ LOG - {subject} ] {msg}";
+        log.replace("{subject}", subject);
+        log.replace("{msg}", msg);
+        differentSerialprintln(log, "\033[32m", &Serial);
     }
 }
-
-void ServicesCollector::logWarning(String msg, String context)
-{
-    String result = "[ WARNING - ServiceCollector on {context} ] {msg}";
-    result.replace("{context}", context);
-    result.replace("{msg}", msg);
-    differentSerialprintln(result, "\033[33m", serialPointer);
-}
-
-void ServicesCollector::logError(String msg, String context)
-{
-    String error = "[ ERROR - ServiceCollector on {context} ] {msg}";
-    error.replace("{context}", context);
-    error.replace("{msg}", msg);
-    differentSerialprintln(error, "\033[31m", serialPointer);
-}
-
 
 /**
  * Destructor to clean up dynamically allocated services
  */
 ServicesCollector::~ServicesCollector()
 {
-    delete serialPointer;
     delete server;
     containerService.clear();
 }
+
 #endif // SERVICES_COLLECTOR_H

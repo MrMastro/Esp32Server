@@ -11,6 +11,7 @@ MastroServer::MastroServer()
     ledIndicatorMode = false;
     littleFSAvaible = false;
     debug = false;
+    wifiCommunicationMode = "off";
 }
 
 // mode:
@@ -35,18 +36,6 @@ MastroServer::MastroServer(AsyncWebServer* webServer, String mode, String ssid, 
     // Wait Indicator
     // welcomeWaitLedBlink();
 
-    //todo Initialize SPIFFS
-    // if (!LittleFS.begin())
-    // {
-    //     littleFSAvaible = false;
-    //     logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
-    //     logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
-    // }
-    // else
-    // {
-    //     littleFSAvaible = true;
-    // }
-
     logInfo("\n");
 
     if (mode != "AP")
@@ -65,16 +54,14 @@ MastroServer::MastroServer(AsyncWebServer* webServer, String mode, String ssid, 
     }
     delay(200);
 
+    // init ota, for this version is deprecated
+
     logInfoln("Set Route");
     setRoutes();
-    //beginListFiles("/www");
-
-    // logInfoln("OTA server started");
-    // initArduinoOta(deviceName, devicePassword);
-    // ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
+    beginListFiles("/www");
 
     logInfoln("Starting web server...");
-    //webServer.begin();
+    webServer->begin();
     logInfoln("HTTP server started");
     serverActive = true;
 }
@@ -86,6 +73,7 @@ boolean MastroServer::initWIFI(String &ssid, String &passwordWiFi)
     logInfoln(ssid);
 
     WiFi.mode(WIFI_STA);
+    wifiCommunicationMode = "WIFI_STA";
     WiFi.begin(ssid, passwordWiFi);
 
     // Wait for connection
@@ -113,6 +101,7 @@ void MastroServer::initAP(String ssid, String password)
 {
     logInfoln("init AP mode");
     WiFi.mode(WIFI_AP_STA);
+    wifiCommunicationMode = "WIFI_AP_STA";
     WiFi.softAP(ssid, password);
     //dnsServer.start(53, "*", WiFi.softAPIP());
     // Print the AP IP address to the serial monitor
@@ -136,7 +125,9 @@ AsyncWebServer *MastroServer::getWebServer()
 
 void MastroServer::handleOta()
 {
-    //todo ArduinoOTA.handle();
+    // if(isAvaible()){
+    //     ArduinoOTA.handle();
+    // }
 }
 
 String MastroServer::getName()
@@ -147,6 +138,11 @@ String MastroServer::getName()
 String MastroServer::getIp()
 {
     return ip;
+}
+
+String MastroServer::getWifiCommunicationMode()
+{
+    return wifiCommunicationMode;
 }
 
 String MastroServer::splitIpHost(String ip)
@@ -207,19 +203,22 @@ void MastroServer::welcomeWaitLedBlink()
     }
 }
 
-//todo listinfile
 void MastroServer::beginListFiles(String path)
 {
     if (littleFSAvaible)
     {
         logInfoln("Listing absolute file");
         logInfoln("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
+        if(LittleFS.exists("/www/assets/img/favicon.png"))
+        {
         pointWebServer->on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
                      {
-                         //
                          request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
-                         //
                      });
+        }else{
+            logInfoln("Warning: /www/assets/img/favicon.png dosen't exist");
+        }
+
         logInfoln("Listing files in: " + path);
         fs::File root = LittleFS.open(path);
         listFiles(root, path);
@@ -295,18 +294,13 @@ void MastroServer::setRouteSystem(String path, String resource)
     }
 }
 
-void MastroServer::initArduinoOta(String deviceName, String devicePassword)
+void MastroServer::initOta(String deviceName, String devicePassword)
 {
-//todo
+    // ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
+    
     // // Port defaults to 3232
     // ArduinoOTA.setPort(3232);
-
-    // // Hostname defaults to esp3232-[MAC]
     // ArduinoOTA.setHostname(deviceName.c_str());
-    // // ArduinoOTA.setHostname("myesp32");
-
-    // // No authentication by default
-    // // ArduinoOTA.setPassword("admin");
     // ArduinoOTA.setPassword(devicePassword.c_str());
 
     // // Password can be set with it's md5 value as well
@@ -336,7 +330,6 @@ void MastroServer::initArduinoOta(String deviceName, String devicePassword)
     //   else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
     //   else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
     //   else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
-
     // ArduinoOTA.begin();
 }
 

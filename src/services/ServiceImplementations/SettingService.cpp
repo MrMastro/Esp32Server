@@ -10,7 +10,7 @@ SettingsModel SettingService::getSettings()
 {
     if (!isOperative)
     {
-        throwError(ERROR_CODE::SERVICE_ERROR, "Service not avaible, error to load settings", "getSettingByName");
+        //todo throwError(ERROR_CODE::SERVICE_ERROR, "Service not avaible, error to load settings", "getSettingByName");
         return SettingsModel();
     }
     return *settings;
@@ -18,7 +18,9 @@ SettingsModel SettingService::getSettings()
 
 void SettingService::loadSettings(String path)
 {
+    Serial.println("get Serial Service");
     SerialService* serialService = ( (SerialService*) getServiceByCollector("SerialService"));
+    Serial.println("getted Serial Service");
     boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
@@ -89,7 +91,7 @@ boolean SettingService::writeFile(fs::File &file, String &path, String &content)
     file = LittleFS.open(path, "w");
     if (!file)
     {
-        logWarning("Errore nella creazione del file","loadSettings(String path)");
+        //todo logWarning("Errore nella creazione del file","loadSettings(String path)");
         isOperative = false;
         return false;
     }
