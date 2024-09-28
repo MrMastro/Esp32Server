@@ -38,6 +38,7 @@ private:
     String splitIpHost(String ip);
     boolean initWIFI(String &ssid, String &passwordWiFi);
     void initAP(String ssid, String password);
+    void initLittleFs();
     bool activeIndicatorLed(bool active, bool toggle);
     void welcomeWaitLedBlink();
     void beginListFiles(String path);

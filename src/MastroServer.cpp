@@ -1,7 +1,7 @@
 #include "MastroServer.h"
 
 MastroServer mastroServer;
-//DNSServer dnsServer;
+// DNSServer dnsServer;
 
 MastroServer::MastroServer()
 {
@@ -17,12 +17,15 @@ MastroServer::MastroServer()
 // mode:
 // Ap= access point
 // WIFI = wirless connect to your wifi
-MastroServer::MastroServer(AsyncWebServer* webServer, String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debugMode, int ledPin)
+MastroServer::MastroServer(AsyncWebServer *webServer, String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debugMode, int ledPin)
 {
     MastroServer();
     pointWebServer = webServer;
     debug = debugMode;
     logInfo("\n");
+
+    initLittleFs();
+
     if (ledPin != -1)
     {
         ledIndicatorMode = true;
@@ -41,7 +44,7 @@ MastroServer::MastroServer(AsyncWebServer* webServer, String mode, String ssid, 
     if (mode != "AP")
     {
         boolean successWifi = initWIFI(ssid, passwordWiFi);
-        if(!successWifi)
+        if (!successWifi)
         {
             logInfo("\n");
             logInfoln("10 Seconds have elapsed, time out. Connecting in Access point mode");
@@ -103,14 +106,29 @@ void MastroServer::initAP(String ssid, String password)
     WiFi.mode(WIFI_AP_STA);
     wifiCommunicationMode = "WIFI_AP_STA";
     WiFi.softAP(ssid, password);
-    //dnsServer.start(53, "*", WiFi.softAPIP());
-    // Print the AP IP address to the serial monitor
+    // dnsServer.start(53, "*", WiFi.softAPIP());
+    //  Print the AP IP address to the serial monitor
     logInfoln("AP IP address: ");
     ip = WiFi.softAPIP().toString();
     logInfoln(ip);
     // Configure the captive portal behavior
     // WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
     activeIndicatorLed(true, false);
+}
+
+void MastroServer::initLittleFs()
+{
+    logInfo("Prepared littleFs");
+    if (!LittleFS.begin())
+    {
+        littleFSAvaible = false;
+        logInfoln("An Error has occurred while mounting SPIFFS (read file in rom)");
+        logInfoln("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)");
+    }
+    else
+    {
+        littleFSAvaible = true;
+    }
 }
 
 boolean MastroServer::isAvaible()
@@ -209,13 +227,13 @@ void MastroServer::beginListFiles(String path)
     {
         logInfoln("Listing absolute file");
         logInfoln("Add api /favicon.ico - getting: /www/assets/img/favicon.png");
-        if(LittleFS.exists("/www/assets/img/favicon.png"))
+        if (LittleFS.exists("/www/assets/img/favicon.png"))
         {
-        pointWebServer->on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
-                     {
-                         request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false);
-                     });
-        }else{
+            pointWebServer->on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+                               { request->send(LittleFS, "/www/assets/img/favicon.ico", String(), false); });
+        }
+        else
+        {
             logInfoln("Warning: /www/assets/img/favicon.png dosen't exist");
         }
 
@@ -265,7 +283,7 @@ void MastroServer::setRouteSystem(String path, String resource)
         resource = resource.substring(0, index);
         apiPath = path + "/" + resource;
         pointWebServer->on(pathNotModified.c_str(), HTTP_GET, [apiPath](AsyncWebServerRequest *request)
-                     { request->redirect(apiPath); });
+                           { request->redirect(apiPath); });
     }
 
     // if for redirect on web commented for now
@@ -286,18 +304,18 @@ void MastroServer::setRouteSystem(String path, String resource)
     {
         logInfoln(String("" + apiPath + " - getting: " + resourcePath));
         pointWebServer->on(apiPath.c_str(), HTTP_GET, [resourcePath](AsyncWebServerRequest *request)
-                     {
-                         //
-                         request->send(LittleFS, resourcePath, String(), false);
-                         //
-                     });
+                           {
+                               //
+                               request->send(LittleFS, resourcePath, String(), false);
+                               //
+                           });
     }
 }
 
 void MastroServer::initOta(String deviceName, String devicePassword)
 {
     // ElegantOTA.begin(&webServer, deviceName.c_str(), devicePassword.c_str());
-    
+
     // // Port defaults to 3232
     // ArduinoOTA.setPort(3232);
     // ArduinoOTA.setHostname(deviceName.c_str());
@@ -337,7 +355,7 @@ void MastroServer::setRoutes()
 {
     String scopeHost = getName();
     pointWebServer->on("/text", HTTP_GET, [](AsyncWebServerRequest *request)
-                 { request->send(200, "text", "Hi! I am ESP32 :)"); });
+                       { request->send(200, "text", "Hi! I am ESP32 :)"); });
 
     /*------------------------------------------ Deprecated area (use web app ) -----------------------------
     // New root
@@ -348,7 +366,6 @@ void MastroServer::setRoutes()
     webServer.on("/control", HTTP_GET, [](AsyncWebServerRequest *request)
                  { request->redirect("/www/control"); });
     --------------------------------------------------------------------------------------------------------*/
-    
 }
 
 void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest)
@@ -384,6 +401,6 @@ void MastroServer::logInfo(String msg)
         String log = "{msg}";
         log.replace("{msg}", msg);
         differentSerialprint(log, "\033[32m", &Serial);
-        //differentSerialprint(log, "\033[32m", &Serial, nullptr);
+        // differentSerialprint(log, "\033[32m", &Serial, nullptr);
     }
 }
