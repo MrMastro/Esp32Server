@@ -2,6 +2,7 @@
 
 SettingService::SettingService()
 {
+    settings = new SettingsModel();
     isOperative = false;
 }
 
@@ -9,20 +10,23 @@ SettingsModel SettingService::getSettings()
 {
     if (!isOperative)
     {
-        throwError(ERROR_CODE::SERVICE_ERROR, "Service not avaible, error to load settings", "getSettingByName");
+        //todo throwError(ERROR_CODE::SERVICE_ERROR, "Service not avaible, error to load settings", "getSettingByName");
         return SettingsModel();
     }
-    return settings;
+    return *settings;
 }
 
 void SettingService::loadSettings(String path)
 {
+    Serial.println("get Serial Service");
+    SerialService* serialService = ( (SerialService*) getServiceByCollector("SerialService"));
+    Serial.println("getted Serial Service");
     boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
     {
-        logWarning("An Error has occurred while mounting SPIFFS (read file in rom)","loadSettings(String path)");
-        logWarning("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)","loadSettings(String path)");
+        serialService->logWarning("An Error has occurred while mounting SPIFFS (read file in rom)", getNameService(),"loadSettings(String path)");
+        serialService->logWarning("Try go into /update elegant ota set ota mode littleFs / SPIFFS and upload FileSystem image (littlefs.bin)", getNameService(),"loadSettings(String path)");
         isOperative = false;
         return;
     }
@@ -38,6 +42,7 @@ void SettingService::loadSettings(String path)
         file = LittleFS.open(path, "r");
         if (!file)
         {
+            ( (SerialService*) getServiceByCollector("SerialService"))->logWarning("Errore nell'aprire il file", getNameService(),"loadSettings(String path)");
             Serial.println("Errore nell'aprire il file");
             isOperative = false;
             return;
@@ -51,6 +56,8 @@ void SettingService::loadSettings(String path)
     }
     else
     {
+        serialService->logWarning("File non trovato, path: " + path , getNameService(),"loadSettings(String path)");
+        serialService->logWarning("Carico impostazioni di default" , getNameService(),"loadSettings(String path)");
         String defaultContent =  SettingsModel::getDefault().toJson();
         writeFile(file, path, defaultContent);
         fileContent = defaultContent;
@@ -58,24 +65,28 @@ void SettingService::loadSettings(String path)
 
     // Chiudi il file
     file.close();
-
-    // Stampa il contenuto del file
-    logInfoln("Caricate le seguenti impostazioni:\n"+fileContent);
-
+    Serial.println("Contenuto del file:");
+    Serial.println(fileContent);
+    if(fileContent.isEmpty()){
+        serialService->logWarning("Contenuto del file vuoto", getNameService(),"loadSettings(String path)");
+        serialService->logWarning("Carico impostazioni di default" , getNameService(),"loadSettings(String path)");
+        fileContent = SettingsModel::getDefault().toJson();
+    }
     // carico il contenuto di filecontent dentro loadSettings
-    SettingsModel deviceSettings;
-    boolean res = deviceSettings.fromJson(fileContent);
-    if(res){
-       settings = deviceSettings;
-    }else{
-        logWarning("Errore file json, ripristino json","loadSettings(String path)");
+    boolean res = settings->fromJson(fileContent);
+    if(!res){
+        serialService->logWarning("Errore file json, ripristino json", getNameService(),"loadSettings(String path)");
         SettingsModel defaultSettingsModel = SettingsModel::getDefault();
         String defaultContent =  defaultSettingsModel.toJson();
         writeFile(file, path, defaultContent);
         fileContent = defaultContent;
-        settings = defaultSettingsModel;
+        settings->fromJson(defaultContent);
     }
     isOperative = true;
+}
+
+void SettingService::onInitServiceCollector()
+{
 }
 
 boolean SettingService::writeFile(fs::File &file, String &path, String &content)
@@ -84,13 +95,11 @@ boolean SettingService::writeFile(fs::File &file, String &path, String &content)
     file = LittleFS.open(path, "w");
     if (!file)
     {
-        logWarning("Errore nella creazione del file","loadSettings(String path)");
+        //todo logWarning("Errore nella creazione del file","loadSettings(String path)");
         isOperative = false;
         return false;
     }
 
-    // Scrivi il contenuto predefinito
-    logInfoln("File creato con il contenuto predefinito.");
     file.print(content);
     return true;
 }

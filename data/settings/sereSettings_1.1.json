@@ -1,0 +1,23 @@
+{
+  "deviceName": "ToothlessDevice",
+  "devicePassword": "seiunasola",
+  "communicationMode": "AP_MODE",
+  "debug": false,
+  "initialEffect": "PROGRESSIVE_BAR_UNIQUE_COLOR",
+  "initialDeltaT": 100,
+  "initialR": 0,
+  "initialG": 0,
+  "initialB": 255,
+  "ssidAP": "ToothlessDevice",
+  "passwordAP": "seiunasola",
+  "ssidWIFI": "Home_Network",
+  "passwordWIFI": "wifi_password",
+  "ledSettings": {
+    "enableStripWs2811": true,
+    "numLedWs2811": 32,
+    "pinLedWs2811": 5,
+    "enableStripRgb": true,
+    "pinLedDinRgb": 19,
+    "pinLedCinRgb": 18
+  }
+}

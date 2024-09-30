@@ -11,9 +11,9 @@ void test_settings_model_creation_from_default(void) {
     // Verifica dei valori di default
     TEST_ASSERT_EQUAL_STRING("ESP32_Device", settings.deviceName.c_str());
     TEST_ASSERT_EQUAL_STRING("esp32password", settings.devicePassword.c_str());
+    TEST_ASSERT_EQUAL_STRING("AP_MODE", settings.communicationMode.c_str());
     TEST_ASSERT_EQUAL(false, settings.debug);
     TEST_ASSERT_EQUAL_STRING("NO_EFFECT", settings.initialEffect.c_str());
-    TEST_ASSERT_EQUAL_STRING("AP", settings.wirelessMode.c_str());
     TEST_ASSERT_EQUAL_STRING("ESP32_AP", settings.ssidAP.c_str());
     TEST_ASSERT_EQUAL_STRING("ap_password", settings.passwordAP.c_str());
     TEST_ASSERT_EQUAL_STRING("Home_Network", settings.ssidWIFI.c_str());
@@ -40,9 +40,9 @@ void test_settings_model_creation_from_json(void) {
     String json = "{\n"
                   "    \"deviceName\": \"ESP32_Device\",\n"
                   "    \"devicePassword\": \"esp32password\",\n"
+                  "    \"communicationmode\": \"AP_MODE\",\n"
                   "    \"debug\": false,\n"
                   "    \"initialEffect\": \"NO_EFFECT\",\n"
-                  "    \"wirelessMode\": \"AP\",\n"
                   "    \"ssidAP\": \"ESP32_AP\",\n"
                   "    \"passwordAP\": \"ap_password\",\n"
                   "    \"ssidWIFI\": \"Home_Network\",\n"

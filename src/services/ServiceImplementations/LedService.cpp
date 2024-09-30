@@ -28,19 +28,24 @@ boolean LedService::isAvaible()
   return isAttachedLed;
 }
 
+void LedService::onInitServiceCollector()
+{
+  serialService = ((SerialService *)servicesCollector.getService("SerialService"));
+}
+
 boolean LedService::preparePin()
 {
-  logInfoln("prepare pin of ledService");
+  serialService->logInfoln("prepare pin of ledService","LedService");
   String s = "Pins size: {n}";
   s.replace("{n}", String(pins.size()));
-  logInfoln(s);
+  serialService->logInfoln(s,"LedService");
   for (int i = 0; i < pins.size(); ++i)
   {
     s = "Preparing pin: {pin} at position: {i}";
     int pin = pins.at(i);
     s.replace("{pin}", String(pin));
     s.replace("{i}", String(i));
-    logInfoln(s);
+    serialService->logInfoln(s,"LedService");
     if (i == 0)
     {
       ledPin = pin;
@@ -50,18 +55,18 @@ boolean LedService::preparePin()
     {
       s = "Pin {pin} have been ignored, this service has already all the necessary pin";
       s.replace("{pin}", String(pin));
-      logWarning(s, "preparePin");
+      serialService->logWarning(s,"LedService", "preparePin");
     }
 
     if (rgbStript != nullptr)
     {
       rgbStript->setColor(0, 0, 0);
       rgbStep = STEP_LIFE_EFFECT::OFF;
-      logInfoln("rgbStript preparated");
+      serialService->logInfoln("rgbStript preparated","LedService");
     }
     else
     {
-      logInfoln("rgbStript don't passed, is not prepared");
+      serialService->logInfoln("rgbStript don't passed, is not prepared","LedService");
     }
 
     if (ws2811Stript != nullptr)
@@ -69,16 +74,16 @@ boolean LedService::preparePin()
       ws2811Stript->Begin();
       ws2811Stript->Show();
       ws2811Step = STEP_LIFE_EFFECT::OFF;
-      logInfoln("ws2811Stript preparated");
+      serialService->logInfoln("ws2811Stript preparated","LedService");
     }
     else
     {
-      logInfoln("ws2811Stript don't passed, is not prepared");
+      serialService->logInfoln("ws2811Stript don't passed, is not prepared","LedService");
     }
 
     isAttachedLed = true;
   }
-  logInfoln("Pin preparated");
+  serialService->logInfoln("Pin preparated","LedService");
   return isAttachedLed;
 }
 
@@ -87,7 +92,8 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   delay(50);
   if (!isAttachedLed)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "led not attached", "changeLed");
+    //todo throwError(ERROR_CODE::SERVICE_ERROR, "led not attached", "changeLed");
+    serialService->logError("Led not attached","LedService","changeLed");
   }
   if (toggle)
   {
@@ -119,13 +125,14 @@ void LedService::startEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int d
 {
   if (!isAttachedLed)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");
+    //todo throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");3
+    serialService->logError("ws2811 Stript not attached","LedService","changeLed");
     return;
   }
   String colorString = rgbColorToString(colorRgb);
   String effectInputString = WS2811EffectEnomToString(effectInput);
   String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
-  logInfoln(msg);
+  serialService->logInfoln(msg,"LedService");
   // todo create status for stript rgb and stript ws2811
 
   if (actionRgbStript && matchRgbEffect(effectInputString))
@@ -163,7 +170,7 @@ void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int de
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
   String effectInputString = WS2811EffectEnomToString(effectInput);
   String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
-  logInfoln(msg);
+  serialService->logInfoln(msg, "LedService");
   // todo create status for stript rgb and stript ws2811
 
   if (actionRgb && matchRgbEffect(effectInputString))
@@ -183,7 +190,8 @@ void LedService::runEffectRgbLifeCycle()
 {
   if (!isAttachedLed)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "rgb Stript not attached", "runEffectRgb");
+    //todo throwError(ERROR_CODE::SERVICE_ERROR, "rgb Stript not attached", "runEffectRgb");
+    serialService->logError("rgb Stript not attached","LedService","runEffectRgb");
     return;
   }
 
@@ -210,7 +218,8 @@ void LedService::runEffectWs2811LifeCycle()
 {
   if (!isAttachedLed)
   {
-    throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "runEffectWs2811");
+    //todo throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "runEffectWs2811");
+    serialService->logError("ws2811 Stript not attached","LedService","runEffectWs2811LifeCycle");
     return;
   }
 
@@ -240,7 +249,7 @@ void LedService::execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbSt
   String sEffect = rgbEffectEnomToString(rgbEffectInput);
   String sLifeStep = stepLifeEffectEnomToString(rgbStepInput);
   String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-  logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
+  serialService->logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}),"execRgbEffect");
 
   // SWITCH ALL EFFECT
   switch (rgbEffectInput)
@@ -262,7 +271,7 @@ void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFF
   String sEffect = WS2811EffectEnomToString(ws2811EffectInput);
   String sLifeStep = stepLifeEffectEnomToString(ws2811StepInput);
   String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-  logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}));
+  serialService->logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}),"execWs2811Effect");
 
   // SWITCH ALL EFFECT
   switch (ws2811EffectInput)

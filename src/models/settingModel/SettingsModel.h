@@ -8,9 +8,29 @@
 class SettingsModel
 {
 public:
+    // SettingsModel(const SettingsModel &other)
+    // {
+    //     // Copia i campi dell'oggetto `other`
+    //     this->deviceName = other.deviceName;
+    //     this->devicePassword = other.devicePassword;
+    //     this->communicationMode = other.communicationMode;
+    //     this->debug = other.debug;
+    //     this->initialEffect = other.initialEffect;
+    //     this->initialDeltaT = other.initialDeltaT;
+    //     this->initialR = other.initialR;
+    //     this->initialG = other.initialG;
+    //     this->initialB = other.initialB;
+    //     this->ssidAP = other.ssidAP;
+    //     this->passwordAP = other.passwordAP;
+    //     this->ssidWIFI = other.ssidWIFI;
+    //     this->passwordWIFI = other.passwordWIFI;
+    //     this->ledSettings = other.ledSettings;
+    // };
+
     //---- DEVICE SETTINGS -------
     String deviceName;
     String devicePassword;
+    String communicationMode; // AP_MODE, WIFI_MODE, BLUETOOTH_MODE, HYBRID_BLUETOOTH_AP, HYBRID_BLUETOOTH_WIFI
     boolean debug;
 
     //---- Initial Operation -------
@@ -19,9 +39,6 @@ public:
     int initialR;
     int initialG;
     int initialB;
-
-    //---- WIRELESS SETTINGS -------
-    String wirelessMode; // AP or WIFI
 
     //-- SETTINGS FOR AP MODE
     String ssidAP;
@@ -35,18 +52,19 @@ public:
     LedSettingsModel ledSettings;
 
     // Serializzazione in JSON
-    String toJson() const {
+    String toJson() const
+    {
         StaticJsonDocument<768> doc;
 
         doc["deviceName"] = deviceName;
         doc["devicePassword"] = devicePassword;
+        doc["communicationMode"] = communicationMode;
         doc["debug"] = debug;
         doc["initialEffect"] = initialEffect;
         doc["initialDeltaT"] = initialDeltaT;
         doc["initialR"] = initialR;
         doc["initialG"] = initialG;
         doc["initialB"] = initialB;
-        doc["wirelessMode"] = wirelessMode;
         doc["ssidAP"] = ssidAP;
         doc["passwordAP"] = passwordAP;
         doc["ssidWIFI"] = ssidWIFI;
@@ -62,11 +80,13 @@ public:
     }
 
     // Deserializzazione da JSON
-    bool fromJson(const String& json) {
+    bool fromJson(const String &json)
+    {
         StaticJsonDocument<768> doc;
         DeserializationError error = deserializeJson(doc, json);
 
-        if (error) {
+        if (error)
+        {
             Serial.print(F("deserializeJson() failed: "));
             Serial.println(error.f_str());
             return false;
@@ -74,20 +94,21 @@ public:
 
         deviceName = doc["deviceName"].as<String>();
         devicePassword = doc["devicePassword"].as<String>();
+        communicationMode = doc["communicationMode"].as<String>();
         debug = doc["debug"];
         initialEffect = doc["initialEffect"].as<String>();
         initialDeltaT = doc["initialDeltaT"];
         initialR = doc["initialR"];
         initialG = doc["initialG"];
         initialB = doc["initialB"];
-        wirelessMode = doc["wirelessMode"].as<String>();
         ssidAP = doc["ssidAP"].as<String>();
         passwordAP = doc["passwordAP"].as<String>();
         ssidWIFI = doc["ssidWIFI"].as<String>();
         passwordWIFI = doc["passwordWIFI"].as<String>();
 
         // Deserializzazione delle impostazioni LED
-        if (!ledSettings.fromJson(doc["ledSettings"].as<String>())) {
+        if (!ledSettings.fromJson(doc["ledSettings"].as<String>()))
+        {
             return false;
         }
 
@@ -95,17 +116,18 @@ public:
     }
 
     // Metodo statico per ottenere un'istanza di SettingsModel con valori di default
-    static SettingsModel getDefault() {
+    static SettingsModel getDefault()
+    {
         SettingsModel defaultSettings = SettingsModel();
         defaultSettings.deviceName = "ESP32_Device";
         defaultSettings.devicePassword = "esp32password";
+        defaultSettings.communicationMode = "AP_MODE";
         defaultSettings.debug = false;
         defaultSettings.initialEffect = "NO_EFFECT";
         defaultSettings.initialDeltaT = 100;
         defaultSettings.initialR = 0;
         defaultSettings.initialG = 0;
         defaultSettings.initialB = 0;
-        defaultSettings.wirelessMode = "AP";
         defaultSettings.ssidAP = "ESP32_AP";
         defaultSettings.passwordAP = "ap_password";
         defaultSettings.ssidWIFI = "Home_Network";
@@ -114,8 +136,6 @@ public:
 
         return defaultSettings;
     }
-
-    
 };
 
 #endif // SETTINGS_MODEL_H
