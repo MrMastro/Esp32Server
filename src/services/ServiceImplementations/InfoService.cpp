@@ -23,6 +23,12 @@ public:
     String getIp(){
         return getServerByCollector()->getIp();
     }
+
+    String getInfo(){
+        String info = "WIP, info visualizated here";
+        return info;
+    }
+
 protected:
     void onInitServiceCollector() override{};
 };

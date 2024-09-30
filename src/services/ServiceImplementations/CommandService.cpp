@@ -54,8 +54,13 @@ StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
     ((LedService *) getServiceByCollector("LedService"))->stopEffect(WS2811_EFFECT::ACTUAL_EFFECT, RgbColor(0,0,0), 100, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
-  case CMD::INFO:
+  case CMD::INFO_IP:
     content = ((InfoService *) getServiceByCollector("InfoService"))->getIp();
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    result.setDescription(content);
+    break;
+  case CMD::INFO:
+    content = ((InfoService *) getServiceByCollector("InfoService"))->getInfo();
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     result.setDescription(content);
     break;

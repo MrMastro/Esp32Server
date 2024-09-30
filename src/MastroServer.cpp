@@ -155,7 +155,11 @@ String MastroServer::getName()
 
 String MastroServer::getIp()
 {
-    return ip;
+    if(isAvaible()){
+        return ip;        
+    }
+    else return "Server not connected";
+
 }
 
 String MastroServer::getWifiCommunicationMode()
