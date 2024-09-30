@@ -23,6 +23,8 @@ public:
     String getIp(){
         return getServerByCollector()->getIp();
     }
+protected:
+    void onInitServiceCollector() override{};
 };
 
 #endif // InfoService_H

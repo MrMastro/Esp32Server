@@ -9,8 +9,33 @@
 #include <utils/SerialSimple.h>
 
 class Service;
+class ServicesCollector;
 
 typedef std::map<String,Service*> MapService;
+
+// Service interface
+class Service {
+public:
+    virtual boolean isAvaible();
+    boolean attachPin(std::vector<int> values);
+    virtual boolean preparePin();
+    void setNameService(String name);
+    String getNameService();
+    void attachCollector(ServicesCollector* collectorParam);
+    Service* getServiceByCollector(String nameService);
+    String getServerIpByCollector();
+    void setSettings(SettingsModel* s);
+    virtual ~Service() {}
+protected:
+    String nameService = "";
+    std::vector<int> pins;
+    SettingsModel* settings;
+    MastroServer* getServerByCollector();
+    virtual void onInitServiceCollector() = 0; //method pure, this is cause this must be declared into child class
+    friend class ServicesCollector;
+private:
+    ServicesCollector* collector;
+};
 
 class ServicesCollector
 {
@@ -39,28 +64,5 @@ private:
 };
 
 extern ServicesCollector servicesCollector;
-
-// Service interface
-class Service {
-public:
-    virtual boolean isAvaible();
-    boolean attachPin(std::vector<int> values);
-    virtual boolean preparePin();
-    void setNameService(String name);
-    String getNameService();
-    void attachCollector(ServicesCollector* collectorParam);
-    Service* getServiceByCollector(String nameService);
-    String getServerIpByCollector();
-    void setSettings(SettingsModel* s);
-    virtual void onInitServiceCollector();
-    virtual ~Service() {}
-protected:
-    String nameService = "";
-    std::vector<int> pins;
-    SettingsModel* settings;
-    MastroServer* getServerByCollector();
-private:
-    ServicesCollector* collector;
-};
 
 #endif  // Services_H

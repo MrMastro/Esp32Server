@@ -123,7 +123,3 @@ MastroServer *Service::getServerByCollector()
   }
   return pointer;
 }
-
-void Service::onInitServiceCollector()
-{
-}

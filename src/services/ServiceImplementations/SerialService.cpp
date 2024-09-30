@@ -196,3 +196,7 @@ void SerialService::logError(String msg, String subject, String context)
     lastSentMsg = error; // todo integrate in differentSerialPrintln of service (to create)
     differentSerialprintln(error, "\033[31m", serialPointer);
 }
+
+void SerialService::onInitServiceCollector()
+{
+}

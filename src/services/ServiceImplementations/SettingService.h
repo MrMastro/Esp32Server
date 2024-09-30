@@ -22,7 +22,7 @@ public:
 
 protected:
     SettingsModel* settings;
-
+    void onInitServiceCollector() override;
 private:
     boolean isOperative;
     boolean writeFile(fs::File &file, String &path, String& content);

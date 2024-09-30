@@ -15,8 +15,9 @@ class CommandService : public Service
 public:
     CommandService();
     boolean isAvaible() override;
-    void onInitServiceCollector();
     StatusInfo recvMsgAndExecute(String data); // returns the msg received
+protected:
+    void onInitServiceCollector() override;
 private:
     SerialService* serialService;
     boolean isOperative;

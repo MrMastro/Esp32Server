@@ -85,6 +85,10 @@ void SettingService::loadSettings(String path)
     isOperative = true;
 }
 
+void SettingService::onInitServiceCollector()
+{
+}
+
 boolean SettingService::writeFile(fs::File &file, String &path, String &content)
 {
     // Crea e scrivi il contenuto predefinito nel file

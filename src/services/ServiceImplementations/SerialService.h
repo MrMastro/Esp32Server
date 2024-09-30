@@ -37,13 +37,15 @@ public:
     void logInfoln(String msg, String subject);
     void logWarning(String msg, String subject, String context);
     void logError(String msg, String subject, String context);
-
-private:
-    boolean isOperative;
-    String lastSentMsg;
 protected:
     HardwareSerial* serialPointer;
     BluetoothSerial* btSerialPointer;
+    void onInitServiceCollector() override;
+    
+private:
+    boolean isOperative;
+    String lastSentMsg;
+
 };
 
 
