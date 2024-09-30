@@ -42,7 +42,7 @@ String SerialService::getLastSentMsg()
     return lastSentMsg;
 }
 
-void SerialService::attachSerial(HardwareSerial* serial)
+void SerialService::attachSerial(HardwareSerial *serial)
 {
     if (serialPointer != nullptr)
     {
@@ -57,8 +57,7 @@ void SerialService::attachSerial(HardwareSerial* serial)
     }
 }
 
-// WARNING 
-//todo remove
+// WARNING Deprercated
 void SerialService::initSerialBegin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms, uint8_t rxfifo_full_thrhd)
 {
     if (serialPointer != nullptr)
@@ -98,7 +97,7 @@ void SerialService::initSerialBtBegin(String localName, BluetoothSerial *btlPoin
     }
 }
 
-//todo
+// todo
 void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
 {
     // if (webSerialPointer == nullptr)
@@ -155,9 +154,62 @@ String SerialService::getMsgbyBluetooth()
     return String();
 }
 
+void SerialService::print(String msg)
+{
+    if (serialPointer != nullptr)
+    {
+        serialPointer->print(msg);
+    }
+
+    if (btSerialPointer != nullptr)
+    {
+        btSerialPointer->print(msg);
+    }
+}
+
+void SerialService::println(String msg)
+{
+    if (serialPointer != nullptr)
+    {
+        serialPointer->println(msg);
+    }
+
+    if (btSerialPointer != nullptr)
+    {
+        btSerialPointer->println(msg);
+    }
+}
+
+void SerialService::printColored(const String &msg, String colorMsg)
+{
+    String msgColored = colorMsg + msg + "\033[0m";
+    if (serialPointer != nullptr)
+    {
+        colorMsg == "" ? serialPointer->print(msg.c_str()) : serialPointer->print(msgColored.c_str());
+    }
+
+    if (btSerialPointer != nullptr)
+    {
+        colorMsg == "" ? btSerialPointer->print(msg.c_str()) : btSerialPointer->print(msgColored.c_str());
+    }
+}
+
+void SerialService::printlnColored(const String &msg, String colorMsg)
+{
+    String msgColored = colorMsg + msg + "\033[0m";
+    if (serialPointer != nullptr)
+    {
+        colorMsg == "" ? serialPointer->println(msg.c_str()) : serialPointer->println(msgColored.c_str());
+    }
+
+    if (btSerialPointer != nullptr)
+    {
+        colorMsg == "" ? btSerialPointer->println(msg.c_str()) : btSerialPointer->println(msgColored.c_str());
+    }
+}
+
 void SerialService::logInfoln(String msg, String subject)
 {
-    // todo use s.debug
     if (settings != nullptr)
     {
         if (settings->debug)
@@ -165,8 +217,8 @@ void SerialService::logInfoln(String msg, String subject)
             String log = "[ LOG - {subject} ] {msg}";
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
-            lastSentMsg = log; // todo integrate in differentSerialPrintln of service (to create)
-            differentSerialprintln(log, "\033[32m", serialPointer);
+            lastSentMsg = log;
+            printlnColored(log, "\033[32m");
         }
     }
 }
@@ -177,8 +229,8 @@ void SerialService::logWarning(String msg, String subject, String context)
     warn.replace("{nameService}", subject);
     warn.replace("{context}", context);
     warn.replace("{msg}", msg);
-    lastSentMsg = warn; // todo integrate in differentSerialPrintln of service (to create)
-    differentSerialprintln(warn, "\033[33m", serialPointer);
+    lastSentMsg = warn;
+    printlnColored(warn, "\033[33m");
 }
 
 /**
@@ -193,8 +245,8 @@ void SerialService::logError(String msg, String subject, String context)
     error.replace("{nameService}", subject);
     error.replace("{context}", context);
     error.replace("{msg}", msg);
-    lastSentMsg = error; // todo integrate in differentSerialPrintln of service (to create)
-    differentSerialprintln(error, "\033[31m", serialPointer);
+    lastSentMsg = error;
+    printlnColored(error, "\033[31m");
 }
 
 void SerialService::onInitServiceCollector()

@@ -84,12 +84,10 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
   
   StatusInfo result = executeCommand(mapStringToEnum(data), data);
   if(result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage()){
-    //todo create a mechanism to send with SerialService without loginfo, only direct msg
-    differentSerialprintln(formatMsg(UKNOWN_COMMAND, {data}), "", &Serial);
+    serialService->println(formatMsg(UKNOWN_COMMAND, {data}));
   }else
   {
-    //todo create a mechanism to send with SerialService without loginfo, only direct msg
-    differentSerialprintln(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}), "", &Serial);    
+    serialService->println(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}));    
   }
 
   return result;
