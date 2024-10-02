@@ -25,11 +25,12 @@ const std::pair<CMD, String> CMD_PAIR[] = {
     {CMD::OFF_STRIPT, "off_stript"},
     {CMD::INFO, "info"},
     {CMD::INFO_IP, "info_ip"},
-    {CMD::UNKNOWN, "Unknown command"}
+    {CMD::UNKNOWN, "unknown_command"}
     // Add more status codes and information as needed
 };
 
 //FUNCTION FOR MAPPING
 CMD mapStringToEnum(String inputString);
+String mapEnumToString(CMD input);
 
 #endif  // COMMAND_H

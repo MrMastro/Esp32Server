@@ -8,7 +8,9 @@
 #include <models/DataModelling.h>
 #include <utils/SerialSimple.h>
 #include <exceptions/exceptions.h>
+#include "InfoService.cpp"
 #include "SerialService.h"
+
 
 class CommandService : public Service
 {
@@ -21,7 +23,7 @@ protected:
 private:
     SerialService* serialService;
     boolean isOperative;
-    StatusInfo executeCommand(CMD cmd, String cmdString);
+    StatusInfo executeCommand(CMD cmd, std::vector<String> params);
 };
 
 

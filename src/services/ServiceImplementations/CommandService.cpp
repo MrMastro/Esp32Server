@@ -1,5 +1,3 @@
-#include "./services/ServiceImplementations/CommandService.h"
-#include "InfoService.cpp"
 #include "CommandService.h"
 
 CommandService::CommandService()
@@ -19,13 +17,13 @@ void CommandService::onInitServiceCollector()
 }
 
 
-StatusInfo CommandService::executeCommand(CMD cmd, String cmdString)
+StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
 {
   StatusInfo result = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   String content = "";
-  String s = "executeCommand(cmd={cmd}, cmdString={cmdString})";
-  s.replace("{cmd}", cmdString);
-  s.replace("{cmdString}", cmdString);
+  String s = "executeCommand(cmd={cmd}, params={params})";
+  s.replace("{cmd}", mapEnumToString(cmd));
+  s.replace("{params}", vectorStringtoString(params));
   serialService->logInfoln(s,"CommandService");
   if (!isOperative)
   {
@@ -81,13 +79,21 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
     //throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");
     return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   }
+  std::vector<String> dataArray = splitString(data, ',');
+
+  if(dataArray.size() == 0){
+    serialService->logError("Invalid data received",getNameService(),"recvMsgAndExecute");
+    return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
+  }
+
+  String command = stringPop(dataArray);
   
-  StatusInfo result = executeCommand(mapStringToEnum(data), data);
+  StatusInfo result = executeCommand(mapStringToEnum(command), dataArray);
   if(result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage()){
-    serialService->println(formatMsg(UKNOWN_COMMAND, {data}));
+    serialService->println(formatMsg(UKNOWN_COMMAND, {command}));
   }else
   {
-    serialService->println(formatMsg(SUCCESS_COMMAND, {data, result.getDescription()}));    
+    serialService->println(formatMsg(SUCCESS_COMMAND, {command, result.getDescription()}));    
   }
 
   return result;

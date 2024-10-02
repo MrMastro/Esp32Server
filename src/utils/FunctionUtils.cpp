@@ -19,6 +19,42 @@ std::vector<String> splitString(const String &str, char delimiter)
     return tokens;
 }
 
+/**
+ * @brief Removes and returns the first element of a vector.
+ *
+ * Removes the first element from the vector `s` and returns it. 
+ * If the vector is empty, an empty `String` is returned.
+ *
+ * @param s A reference to a `std::vector<String>`.
+ * @return The first element of the vector, or an empty `String` if the vector is empty.
+ */
+String stringPop(std::vector<String> &s)
+{
+    if (s.size() < 1)
+    {
+        return String();
+    }
+    String result = s.at(0);
+    std::vector<String> copy;
+    s.erase(s.begin());
+    return result;
+}
+
+String vectorStringtoString(std::vector<String> s)
+{
+    String res = "[";
+    for (int i = 0; i < s.size(); i++)
+    {
+        res += (s[i]);
+        if (i != s.size()-1)
+        {
+            res += ",";
+        }
+    }
+    res += "]";
+    return res;
+}
+
 uint32_t getColor(int r, int g, int b)
 {
     return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
@@ -26,5 +62,5 @@ uint32_t getColor(int r, int g, int b)
 
 String rgbColorToString(RgbColor color)
 {
-    return formatMsg("[{},{},{}]", {String(color.R),String(color.G),String(color.B)});
+    return formatMsg("[{},{},{}]", {String(color.R), String(color.G), String(color.B)});
 }

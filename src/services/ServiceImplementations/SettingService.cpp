@@ -16,11 +16,16 @@ SettingsModel SettingService::getSettings()
     return *settings;
 }
 
+void SettingService::saveSettings(String path, SettingsModel s)
+{
+    String content = s.toJson();
+    if(!writeFile(path, content)){
+        serialService->logWarning("An Error has occurred while save settings", getNameService(),"saveSettings");
+    }
+}
+
 void SettingService::loadSettings(String path)
 {
-    Serial.println("get Serial Service");
-    SerialService* serialService = ( (SerialService*) getServiceByCollector("SerialService"));
-    Serial.println("getted Serial Service");
     boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
@@ -59,7 +64,7 @@ void SettingService::loadSettings(String path)
         serialService->logWarning("File non trovato, path: " + path , getNameService(),"loadSettings(String path)");
         serialService->logWarning("Carico impostazioni di default" , getNameService(),"loadSettings(String path)");
         String defaultContent =  SettingsModel::getDefault().toJson();
-        writeFile(file, path, defaultContent);
+        writeFile(path, defaultContent);
         fileContent = defaultContent;
     }
 
@@ -78,7 +83,7 @@ void SettingService::loadSettings(String path)
         serialService->logWarning("Errore file json, ripristino json", getNameService(),"loadSettings(String path)");
         SettingsModel defaultSettingsModel = SettingsModel::getDefault();
         String defaultContent =  defaultSettingsModel.toJson();
-        writeFile(file, path, defaultContent);
+        writeFile(path, defaultContent);
         fileContent = defaultContent;
         settings->fromJson(defaultContent);
     }
@@ -87,19 +92,20 @@ void SettingService::loadSettings(String path)
 
 void SettingService::onInitServiceCollector()
 {
+    serialService = ( (SerialService*) getServiceByCollector("SerialService"));
 }
 
-boolean SettingService::writeFile(fs::File &file, String &path, String &content)
+boolean SettingService::writeFile(String &path, String &content)
 {
     // Crea e scrivi il contenuto predefinito nel file
-    file = LittleFS.open(path, "w");
+    File file = LittleFS.open(path, "w");
     if (!file)
     {
-        //todo logWarning("Errore nella creazione del file","loadSettings(String path)");
+        serialService->logWarning("Errore nella creazione del file", getNameService(), "loadSettings(String path)");
         isOperative = false;
         return false;
     }
-
     file.print(content);
+    file.close();
     return true;
 }

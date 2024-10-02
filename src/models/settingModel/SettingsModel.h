@@ -8,24 +8,25 @@
 class SettingsModel
 {
 public:
-    // SettingsModel(const SettingsModel &other)
-    // {
-    //     // Copia i campi dell'oggetto `other`
-    //     this->deviceName = other.deviceName;
-    //     this->devicePassword = other.devicePassword;
-    //     this->communicationMode = other.communicationMode;
-    //     this->debug = other.debug;
-    //     this->initialEffect = other.initialEffect;
-    //     this->initialDeltaT = other.initialDeltaT;
-    //     this->initialR = other.initialR;
-    //     this->initialG = other.initialG;
-    //     this->initialB = other.initialB;
-    //     this->ssidAP = other.ssidAP;
-    //     this->passwordAP = other.passwordAP;
-    //     this->ssidWIFI = other.ssidWIFI;
-    //     this->passwordWIFI = other.passwordWIFI;
-    //     this->ledSettings = other.ledSettings;
-    // };
+
+    void setSettingModel(const SettingsModel &other)
+    {
+        // Copia i campi dell'oggetto `other`
+        this->deviceName = other.deviceName;
+        this->devicePassword = other.devicePassword;
+        this->communicationMode = other.communicationMode;
+        this->debug = other.debug;
+        this->initialEffect = other.initialEffect;
+        this->initialDeltaT = other.initialDeltaT;
+        this->initialR = other.initialR;
+        this->initialG = other.initialG;
+        this->initialB = other.initialB;
+        this->ssidAP = other.ssidAP;
+        this->passwordAP = other.passwordAP;
+        this->ssidWIFI = other.ssidWIFI;
+        this->passwordWIFI = other.passwordWIFI;
+        this->ledSettings = other.ledSettings;
+    };
 
     //---- DEVICE SETTINGS -------
     String deviceName;

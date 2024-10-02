@@ -13,3 +13,16 @@ CMD mapStringToEnum(String inputString)
   // Return a special value or throw an exception if the string is not found
   return CMD::UNKNOWN;
 }
+
+String mapEnumToString(CMD input)
+{
+  for (const auto &entry : CMD_PAIR)
+  {
+    if (entry.first == input)
+    {
+      return entry.second;
+    }
+  }
+  // Return a special value or throw an exception if the string is not found
+  return mapEnumToString(CMD::UNKNOWN);
+}
