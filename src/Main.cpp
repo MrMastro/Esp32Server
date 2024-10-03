@@ -42,12 +42,14 @@ void setup_communication(SettingsModel sm)
   case COMMUNICATION_MODE::AP_MODE:
     serialService.logInfoln("Communication mode is AP, init AP web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    initRoutes(mastroServer);
     infoWebServer();
     break;
 
   case COMMUNICATION_MODE::WIFI_MODE:
     serialService.logInfoln("Communication mode is WIFI, init WIFI web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "WIFI", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    initRoutes(mastroServer);
     infoWebServer();
     break;
 

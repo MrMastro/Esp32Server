@@ -21,6 +21,7 @@ public:
     CommandService();
     boolean isAvaible() override;
     StatusInfo recvMsgAndExecute(String data); // returns the msg received
+    StatusInfo insertDelayedCommand(CMD cmd, std::vector<String> params, unsigned long millsDelayed);
     StatusInfo checkDelyedCmdAndExecute();
 protected:
     void onInitServiceCollector() override;
@@ -32,7 +33,6 @@ private:
     CMD delayedCmdToDo;
     std::vector<String> delayedParams;
     StatusInfo executeCommand(CMD cmd, std::vector<String> params);
-    StatusInfo insertDelayedCommand(CMD cmd, std::vector<String> params, unsigned long millsDelayed);
     // Method for command
     StatusInfo changeCommunicationMode(std::vector<String> params);
     void reboot(std::vector<String> params);

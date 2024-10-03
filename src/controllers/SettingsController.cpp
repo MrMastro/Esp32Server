@@ -4,7 +4,7 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
 {
     servicesCollector.takeExclusiveExecution();
     BasicResponse response;
-
+    Serial.println("saveSettings");
     // Crea una stringa per accumulare il body
     String body = "";
 
@@ -24,7 +24,20 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
         servicesCollector.freeExclusiveExecution();
         return;
     };
+
+    String error = validateSettings(settingModel);
+    if(!error.isEmpty())
+    {
+        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+        s.setDescription("Validation fail, bad request: " + error);
+        response = BasicResponse(s);
+        String jsonResponse = dtoToJson(response);
+        request->send(400, "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
     boolean result = ((SettingService *)servicesCollector.getService("SettingService"))->saveSettings(SETTINGS_FILE_LOCATION_PATH,settingModel);
+    ((CommandService *)servicesCollector.getService("CommandService"))->insertDelayedCommand(CMD::REBOOT, {}, 1000);
     if (!result)
     {
         StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
@@ -36,6 +49,7 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
         return;
     }
     StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    s.setDescription("Impostazioni salvate con successo, il dispositivo verrà riavviato");
     response = BasicResponse(s);
     String jsonResponse = dtoToJson(response);
     request->send(200, "application/json", jsonResponse);
