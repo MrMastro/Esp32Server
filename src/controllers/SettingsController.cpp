@@ -4,7 +4,7 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
 {
     servicesCollector.takeExclusiveExecution();
     BasicResponse response;
-    Serial.println("saveSettings");
+
     // Crea una stringa per accumulare il body
     String body = "";
 
