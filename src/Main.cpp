@@ -34,7 +34,7 @@ void setup_communication(SettingsModel sm)
   serialService.logInfoln("Create SerialCableTaskExecution for comunicate with serial com", "MAIN");
   xTaskCreate(serialCableTask, "SerialCableTaskExecution", 10000, NULL, 0, NULL);
 
-  // Task for communication 
+  // Task for communication
   COMMUNICATION_MODE mode = communicationModeStringToEnum(sm.communicationMode);
   switch (mode)
   {
@@ -46,7 +46,7 @@ void setup_communication(SettingsModel sm)
     break;
 
   case COMMUNICATION_MODE::WIFI_MODE:
-  serialService.logInfoln("Communication mode is WIFI, init WIFI web Server", "MAIN");
+    serialService.logInfoln("Communication mode is WIFI, init WIFI web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "WIFI", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
     infoWebServer();
     break;
@@ -59,17 +59,17 @@ void setup_communication(SettingsModel sm)
 
   // Case WIP or Defaults
   case COMMUNICATION_MODE::UNKNOWN_MODE:
-    serialService.logWarning("Communication mode is UNKNOWN", "MAIN","setup_communication");
+    serialService.logWarning("Communication mode is UNKNOWN", "MAIN", "setup_communication");
     defaultMode = true;
     unknonwMode = true;
     break;
   case COMMUNICATION_MODE::HYBRID_BLUETOOTH_AP:
-    serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_AP, this communication is yet as WIP", "MAIN","setup_communication");
+    serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_AP, this communication is yet as WIP", "MAIN", "setup_communication");
     defaultMode = true;
     unknonwMode = true;
     break;
   case COMMUNICATION_MODE::HYBRID_BLUETOOTH_WIFI:
-    serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_WIFI, this communication is yet as WIP", "MAIN","setup_communication");
+    serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_WIFI, this communication is yet as WIP", "MAIN", "setup_communication");
     defaultMode = true;
     unknonwMode = true;
     break;
@@ -103,8 +103,8 @@ void infoWebServer()
   }
 
   Serial.println("\n");
-  Serial.println("SERVER MODE: "+ mastroServer.getWifiCommunicationMode());
-  Serial.println("IP: "+ infoService.getIp());
+  Serial.println("SERVER MODE: " + mastroServer.getWifiCommunicationMode());
+  Serial.println("IP: " + infoService.getIp());
 }
 
 void initServices(HardwareSerial *serialPointer)
@@ -157,13 +157,14 @@ void setup(void)
   setup_communication(s);
 
   delay(100);
-  
+
   // Thread running
   if (mastroServer.isAvaible())
   {
     xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL);
   }
   xTaskCreate(ledTask, "LedTaskExecution", 10000, NULL, 3, NULL);
+  xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", 10000, NULL, 4, NULL);
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 
   serialService.logInfoln("Init procedure completed", "MAIN");
@@ -172,14 +173,6 @@ void setup(void)
 // loop is used for print debug
 void loop(void)
 {
-  // delay(100);
-  // if (s.debug)
-  // {
-  //   if (!serialService.getLastSentMsg().equals("[ LOG - MAIN (info task) ] Info"))
-  //   {
-  //     serialService.logInfoln("Info", "MAIN (info task)");
-  //   }
-  // }
 }
 
 // Serial bt task check input for bluetooth message
@@ -242,6 +235,23 @@ void webOtaServerTask(void *pvParameters)
   while (true)
   {
     mastroServer.handleOta();
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+}
+
+void commandDelayedTask(void *pvParameters)
+{
+  while (true)
+  {
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      commandService.checkDelyedCmdAndExecute();
+    }
+    else
+    {
+      yield();
+    }
+
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }

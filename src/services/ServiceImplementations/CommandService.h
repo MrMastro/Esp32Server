@@ -12,6 +12,7 @@
 #include "InfoService.cpp"
 #include "SerialService.h"
 #include "SettingService.h"
+#include "./validators/validators.h"
 
 
 class CommandService : public Service
@@ -32,12 +33,9 @@ private:
     std::vector<String> delayedParams;
     StatusInfo executeCommand(CMD cmd, std::vector<String> params);
     StatusInfo insertDelayedCommand(CMD cmd, std::vector<String> params, unsigned long millsDelayed);
-    //Validator for command (if string is empty is valid also is specified the error in the return value)
-    String validateCmd(CMD cmd, std::vector<String> params);
-    String validateChangeCommunicationMode(std::vector<String> params);
     // Method for command
     StatusInfo changeCommunicationMode(std::vector<String> params);
-    void sendRebootRequest();
+    void reboot(std::vector<String> params);
 };
 
 

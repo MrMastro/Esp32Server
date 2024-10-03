@@ -35,6 +35,7 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
 
 //FRONT END CUSTOM MESSAGE
 #define SUCCESS_COMMAND "Comando eseguito: {} - {}"
+#define SUCCESS_DELAYED_COMMAND "Comando delayed eseguito: {} - {}"
 #define UKNOWN_COMMAND "Comando non riconosciuto"
 #define ERROR_COMMAND "ERRORE: {} - {}"
 #define COLOR_OUT_OF_RANGE_ERROR "I valori dei colori devono essere compresi tra 0 e 255"

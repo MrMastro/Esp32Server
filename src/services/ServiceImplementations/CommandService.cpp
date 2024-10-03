@@ -5,6 +5,7 @@
 CommandService::CommandService()
 {
   isOperative = false;
+  delayedCmdToDo = CMD::NONE;
 }
 
 boolean CommandService::isAvaible()
@@ -54,8 +55,13 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     ((LedService *)getServiceByCollector("LedService"))->stopEffect(WS2811_EFFECT::ACTUAL_EFFECT, RgbColor(0, 0, 0), 100, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
+  case CMD::REBOOT:
+    reboot(params);
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    break;
   case CMD::CHANGE_COMMUNICATION_MODE:
     result = changeCommunicationMode(params);
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::INFO_IP:
     content = ((InfoService *)getServiceByCollector("InfoService"))->getIp();
@@ -93,42 +99,7 @@ StatusInfo CommandService::insertDelayedCommand(CMD cmd, std::vector<String> par
   delayedCmdToDo = cmd;
   delayedParams = params;
   triggerTimeCmd = millis() + millsDelayed;
-
   return StatusInfo();
-}
-
-String CommandService::validateCmd(CMD cmd, std::vector<String> params)
-{
-  switch (cmd)
-  {
-  case CMD::CHANGE_COMMUNICATION_MODE:
-    return validateChangeCommunicationMode(params);
-  case CMD::UNKNOWN:
-  case CMD::NONE:
-    return "Command don't allow or unknow";
-  default:
-    return String();
-  }
-}
-
-String CommandService::validateChangeCommunicationMode(std::vector<String> params)
-{
-  String error ="";
-  if (params.size() < 1)
-  {
-    return "insert mode like first param";
-  }
-
-  String newCommunicationMode = params.at(0);
-  COMMUNICATION_MODE cm = communicationModeStringToEnum(newCommunicationMode);
-
-  if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
-  {
-    return ("Communication mode is not valid");
-  }
-
-  return "";
-
 }
 
 StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
@@ -159,8 +130,30 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   }
 
   res = getStatusInfoByHttpCode(HTTP_CODE::OK);
-  res.setDescription("communication mode is setted, please restarting....");
+  res.setDescription("communication mode is setted, restarting....");
+
+  insertDelayedCommand(CMD::REBOOT, {}, 1000);
+
   return res;
+}
+
+void CommandService::reboot(std::vector<String> params)
+{
+  if(params.size()<1)
+  {
+    ESP.restart();
+    return;
+  }
+
+  unsigned long millsDelayed = (unsigned long) params.at(0).toInt();
+  if(millsDelayed == 0)
+  {
+    ESP.restart();
+  }
+  else
+  {
+    insertDelayedCommand(CMD::REBOOT, {}, millsDelayed);
+  }
 }
 
 StatusInfo CommandService::recvMsgAndExecute(String data)
@@ -209,17 +202,12 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
 StatusInfo CommandService::checkDelyedCmdAndExecute()
 {
   unsigned long thisMoment = millis();
-  if (delayedCmdToDo != CMD::NONE && thisMoment > triggerTimeCmd)
+  if (delayedCmdToDo != CMD::NONE && thisMoment >= triggerTimeCmd)
   {
     StatusInfo result = executeCommand(delayedCmdToDo, delayedParams);
     delayedCmdToDo = CMD::NONE;
-    if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
-    {
-      serialService->println(formatMsg(ERROR_COMMAND, {triggerTimeCmd, result.getDescription()}));
-    }
-    else
-    {
-      serialService->println(formatMsg(SUCCESS_COMMAND, {triggerTimeCmd, result.getDescription()}));
-    }
+    serialService->println(formatMsg(SUCCESS_DELAYED_COMMAND, {triggerTimeCmd, result.getDescription()}));
+    return result;
   }
+  return getStatusInfoByHttpCode(HTTP_CODE::OK);
 }
