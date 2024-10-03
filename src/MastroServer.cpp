@@ -378,6 +378,12 @@ void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite metho
     pointWebServer->on(uri, method, onRequest);
 }
 
+void MastroServer::setCustomApi(const char *uri, WebRequestMethodComposite method, ArBodyHandlerFunction onRequest)
+{
+    delay(50);
+    pointWebServer->on(uri, method, [](AsyncWebServerRequest *request) {}).onBody(onRequest);
+}
+
 String processor(const String &var)
 {
     Serial.println(var);

@@ -1,5 +1,7 @@
 #include "CommandService.h"
 
+// This Service works to exec command Serial and exec scheduled cmd of esp32 (Ex: reboot after 5 sec)
+
 CommandService::CommandService()
 {
   isOperative = false;
@@ -73,9 +75,60 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
   return result;
 }
 
-boolean CommandService::validateParams(std::vector<String> params, int minQuantitaty)
+StatusInfo CommandService::insertDelayedCommand(CMD cmd, std::vector<String> params, unsigned long millsDelayed)
 {
-  return params.size() >= minQuantitaty;
+  if (!isOperative)
+  {
+    // throwError(ERROR_CODE::SERVICE_ERROR, "Service not inizializer. attach serial and webSerial pointers with attachSerial method or use constructor with param non null", "recvMsgAndExecute");
+    return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
+  }
+
+  String errorValidation = validateCmd(cmd,params);
+
+  if(!errorValidation.isEmpty())
+  {
+    return getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+  }
+
+  delayedCmdToDo = cmd;
+  delayedParams = params;
+  triggerTimeCmd = millis() + millsDelayed;
+
+  return StatusInfo();
+}
+
+String CommandService::validateCmd(CMD cmd, std::vector<String> params)
+{
+  switch (cmd)
+  {
+  case CMD::CHANGE_COMMUNICATION_MODE:
+    return validateChangeCommunicationMode(params);
+  case CMD::UNKNOWN:
+  case CMD::NONE:
+    return "Command don't allow or unknow";
+  default:
+    return String();
+  }
+}
+
+String CommandService::validateChangeCommunicationMode(std::vector<String> params)
+{
+  String error ="";
+  if (params.size() < 1)
+  {
+    return "insert mode like first param";
+  }
+
+  String newCommunicationMode = params.at(0);
+  COMMUNICATION_MODE cm = communicationModeStringToEnum(newCommunicationMode);
+
+  if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
+  {
+    return ("Communication mode is not valid");
+  }
+
+  return "";
+
 }
 
 StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
@@ -84,7 +137,7 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   if (params.size() < 1)
   {
     res = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
-    res.setDescription("inseret mode like first param");
+    res.setDescription("insert mode like first param");
     return res;
   }
 
@@ -130,7 +183,17 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
 
   String command = stringPop(dataArray);
 
+  String errorValidation = validateCmd(mapStringToEnum(command), dataArray);
+  if(!errorValidation.isEmpty())
+  {
+    StatusInfo result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+    result.setDescription(errorValidation);
+    serialService->println(formatMsg(ERROR_COMMAND, {command, result.getDescription()}));
+    return result;
+  }
+
   StatusInfo result = executeCommand(mapStringToEnum(command), dataArray);
+
   if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
   {
     serialService->println(formatMsg(ERROR_COMMAND, {command, result.getDescription()}));
@@ -141,4 +204,22 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
   }
 
   return result;
+}
+
+StatusInfo CommandService::checkDelyedCmdAndExecute()
+{
+  unsigned long thisMoment = millis();
+  if (delayedCmdToDo != CMD::NONE && thisMoment > triggerTimeCmd)
+  {
+    StatusInfo result = executeCommand(delayedCmdToDo, delayedParams);
+    delayedCmdToDo = CMD::NONE;
+    if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
+    {
+      serialService->println(formatMsg(ERROR_COMMAND, {triggerTimeCmd, result.getDescription()}));
+    }
+    else
+    {
+      serialService->println(formatMsg(SUCCESS_COMMAND, {triggerTimeCmd, result.getDescription()}));
+    }
+  }
 }

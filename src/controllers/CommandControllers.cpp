@@ -17,6 +17,7 @@ void commandController(AsyncWebServerRequest *request)
         StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::OK);
         response = BasicResponse(s, formatMsg(SUCCESS_COMMAND, {command, s.getDescription()}) );
     }
+    
     String jsonResponse = dtoToJson(response);
     request->send(200, "application/json", jsonResponse);
     servicesCollector.freeExclusiveExecution();

@@ -20,6 +20,7 @@ public:
     String getIp();
     String getWifiCommunicationMode();
     void setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
+    void setCustomApi(const char *uri, WebRequestMethodComposite method, ArBodyHandlerFunction onRequest);
     boolean isAvaible();
     AsyncWebServer* getWebServer();
 private:

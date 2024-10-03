@@ -19,4 +19,8 @@ void getOk(AsyncWebServerRequest *request);
 void setEffectWs2811(AsyncWebServerRequest *request);
 void stopEffectWs2811(AsyncWebServerRequest *request);
 
+//SettingsController
+void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+
+
 #endif  // CommandControllers_H
