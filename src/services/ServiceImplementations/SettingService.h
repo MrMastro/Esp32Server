@@ -19,8 +19,8 @@ public:
     SettingService();
     SettingsModel getSettings();
     void loadSettings(String path);
-    void saveSettings(String path, SettingsModel s);
-
+    boolean saveSettings(String path, SettingsModel s);
+    boolean changeSetting(String key, String value);
 protected:
     SettingsModel* settings;
     void onInitServiceCollector() override;

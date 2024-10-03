@@ -9,7 +9,7 @@ void commandController(AsyncWebServerRequest *request)
     if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
     {
         StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
-        s.setDescription(formatMsg(UKNOWN_COMMAND, {command}));
+        s.setDescription(formatMsg(ERROR_COMMAND, {command, result.getDescription()}));
         response = BasicResponse(s);
     }
     else

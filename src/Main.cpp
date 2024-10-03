@@ -112,8 +112,8 @@ void initServices(HardwareSerial *serialPointer)
   serialService.attachSerial(&Serial);
   serialService.logInfoln("Service init", "MAIN");
   servicesCollector.addService(&serialService, "SerialService");
-  servicesCollector.addService(&settingService, "SettingsService");
-  settingService.loadSettings("/settings/settings.json");
+  servicesCollector.addService(&settingService, "SettingService");
+  settingService.loadSettings(SETTINGS_FILE_LOCATION_PATH);
   s = settingService.getSettings();
   serialService.setSettings(&s);
 

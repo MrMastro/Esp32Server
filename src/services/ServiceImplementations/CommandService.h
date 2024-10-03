@@ -7,9 +7,11 @@
 #include "./constants/Constants.h"
 #include <models/DataModelling.h>
 #include <utils/SerialSimple.h>
+#include <constants/CommunicationMode.h>
 #include <exceptions/exceptions.h>
 #include "InfoService.cpp"
 #include "SerialService.h"
+#include "SettingService.h"
 
 
 class CommandService : public Service
@@ -22,8 +24,11 @@ protected:
     void onInitServiceCollector() override;
 private:
     SerialService* serialService;
+    SettingService* settingService;
     boolean isOperative;
     StatusInfo executeCommand(CMD cmd, std::vector<String> params);
+    boolean validateParams(std::vector<String> params, int minQuantitaty);    
+    StatusInfo changeCommunicationMode(std::vector<String> params);
 };
 
 

@@ -12,6 +12,7 @@ enum class CMD
   LED_TOGGLE,
   START_PROGRESS_BAR,
   OFF_STRIPT,
+  CHANGE_COMMUNICATION_MODE,
   INFO,
   INFO_IP,
   UNKNOWN
@@ -23,6 +24,7 @@ const std::pair<CMD, String> CMD_PAIR[] = {
     {CMD::LED_TOGGLE, "led_toggle"},
     {CMD::START_PROGRESS_BAR, "start_progress_bar"},
     {CMD::OFF_STRIPT, "off_stript"},
+    {CMD::CHANGE_COMMUNICATION_MODE, "change_communication_mode"},
     {CMD::INFO, "info"},
     {CMD::INFO_IP, "info_ip"},
     {CMD::UNKNOWN, "unknown_command"}
