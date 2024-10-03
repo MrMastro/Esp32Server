@@ -4,7 +4,7 @@
 #include <vector>
 #include <Arduino.h>
 
-//COMUNICATION MODE OF SYSTEM
+//COMMUNICATION MODE OF SYSTEM
 enum class COMMUNICATION_MODE
 {
   AP_MODE,

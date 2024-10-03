@@ -40,36 +40,36 @@ void setup_communication(SettingsModel sm)
   {
 
   case COMMUNICATION_MODE::AP_MODE:
-    serialService.logInfoln("Comunication mode is AP, init AP web Server", "MAIN");
+    serialService.logInfoln("Communication mode is AP, init AP web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
     infoWebServer();
     break;
 
   case COMMUNICATION_MODE::WIFI_MODE:
-  serialService.logInfoln("Comunication mode is WIFI, init WIFI web Server", "MAIN");
+  serialService.logInfoln("Communication mode is WIFI, init WIFI web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "WIFI", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
     infoWebServer();
     break;
 
   case COMMUNICATION_MODE::BLUETOOTH_MODE:
-    serialService.logInfoln("Comunication mode is BLUETOOTH, init Bluetooth and Bluetooth Serial", "MAIN");
+    serialService.logInfoln("Communication mode is BLUETOOTH, init Bluetooth and Bluetooth Serial", "MAIN");
     serialService.initSerialBtBegin(sm.deviceName, &SerialBT);
     xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", 10000, NULL, 1, NULL);
     break;
 
   // Case WIP or Defaults
   case COMMUNICATION_MODE::UNKNOWN_MODE:
-    serialService.logWarning("Comunication mode is UNKNOWN", "MAIN","setup_communication");
+    serialService.logWarning("Communication mode is UNKNOWN", "MAIN","setup_communication");
     defaultMode = true;
     unknonwMode = true;
     break;
   case COMMUNICATION_MODE::HYBRID_BLUETOOTH_AP:
-    serialService.logWarning("Comunication mode is HYBRID_BLUETOOTH_AP, this communication is yet as WIP", "MAIN","setup_communication");
+    serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_AP, this communication is yet as WIP", "MAIN","setup_communication");
     defaultMode = true;
     unknonwMode = true;
     break;
   case COMMUNICATION_MODE::HYBRID_BLUETOOTH_WIFI:
-    serialService.logWarning("Comunication mode is HYBRID_BLUETOOTH_WIFI, this communication is yet as WIP", "MAIN","setup_communication");
+    serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_WIFI, this communication is yet as WIP", "MAIN","setup_communication");
     defaultMode = true;
     unknonwMode = true;
     break;
@@ -153,7 +153,7 @@ void setup(void)
   Serial.println("Load settings:");
   Serial.println(s.toJson());
 
-  // init comunication (Server wifi/ap or Bluetooth)
+  // init communication (Server wifi/ap or Bluetooth)
   setup_communication(s);
 
   delay(100);

@@ -94,7 +94,7 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
   {
     res = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
-    res.setDescription("Comunication mode is not valid");
+    res.setDescription("Communication mode is not valid");
     return res;
   }
 
@@ -106,7 +106,7 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   }
 
   res = getStatusInfoByHttpCode(HTTP_CODE::OK);
-  res.setDescription("comunication mode is setted, please restarting....");
+  res.setDescription("communication mode is setted, please restarting....");
   return res;
 }
 
