@@ -20,6 +20,9 @@
 // Wait for the deviceready event before using any of Cordova's device APIs.
 // See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
 var host = "";
+var apHost = "192.168.4.1";
+var connected = false;
+
 $('.fieldIp').hide();
 $('.changeIpBtn').hide();
 
@@ -39,25 +42,59 @@ const app = {
         $('.changeIpBtn').on('click', this.changeIp);
         $('.buttonWs2811SetEffect').on('click', this.sendStartEffect);
         $('.buttonWs2811StopEffect').on('click', this.sendStopEffect);
+        $('#APConnection').on('click', this.switchConnection);
+        $('.buttonMemorizeInitialEffect').on('click', this.sendMemorizedInitialEffect);
     },
 
     // deviceready Event Handler
     onDeviceReady() {
         // Cordova is now initialized. Have fun!
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
+        $('.buttonMemorizeInitialEffect').hide(); //todo show when the features is done
         $('.fieldIp').show();
-        $('.changeIpBtn').show();
+        hideIp = $('#APConnection')[0].checked;
+        if (hideIp) {
+            $('.fieldIp').hide();
+            $('.changeIpBtn').hide();
+            host = apHost;
+            $('.label-ip').text("Indirizzo attuale: "+ host);
+        }
+    },
+
+    switchConnection() {
+        let accessPointMode = $('#APConnection')[0].checked;
+        if (accessPointMode) {
+            $('.fieldIp').hide();
+            host = apHost;
+            $('.label-ip').text("Indirizzo attuale: " + host);
+        } else {
+            $('.fieldIp').show();
+            changeIp();
+        }
     },
 
     changeIp() {
         let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test($('.fieldIp')[0].value);
-        if (test) {
+        if (!$('.fieldIp')[0].value) {
+            $('.label-ip').text("Inserisci un indirizzo ip");
+        }
+        else if (test) {
             host = $('.fieldIp')[0].value;
             $('.label-ip').text("Indirizzo attuale: " + host);
         } else {
-            $('.label-ip').text("Errore: Inserisci un ip valido");
+            $('.label-ip').text("Inserisci un ip valido");
         }
     },
+
+    showSettings(){
+        $('#Settings-Modal').modal('show');
+        //$('#Settings-Modal').modal('hide');
+    },
+
+    genericSuccess(){
+        alert("Operazione effettuata");
+    },
+
 
     sendStartEffect() {
         let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
@@ -80,7 +117,7 @@ const app = {
             "&rgbAction=" + encodeURIComponent(rgbAction) +
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
 
-        postCustom(url, queryParam, {});
+        postCustom(url, queryParam, {}, this.genericSuccess());
     },
 
     sendStopEffect() {
@@ -105,9 +142,12 @@ const app = {
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
 
         url += (queryParam != "") ? ("?" + queryParam) : ("");
-        postCustom(url, queryParam, {});
-    }
+        postCustom(url, queryParam, {},this.genericSuccess());
+    },
 
+    sendMemorizedInitialEffect(){
+        console.log("WIP");
+    }
 
 }
 
@@ -135,7 +175,7 @@ function hexToRgb(hex) {
     } : null;
 }
 
-function postCustom(path, queryParam, postData) {
+function postCustom(path, queryParam, postData, callBackFunction) {
     url = host + path;
     let method = "POST";
     let body = queryParam;
@@ -148,76 +188,17 @@ function postCustom(path, queryParam, postData) {
         headers: { "Accept": "application/json" },
         data: postData,
         param: queryParam
-      };
-    // fetch(url, {
-    //     method,
-    //     headers,
-    //     body
-    // }).then((response) => {
-    //     // convert to json
-    //     alert("Success");
-    // }).then((result) => {
-    //     alert(JSON.stringify(result));
-    // });
+    };
 
-    // //url += (queryParam != "") ? ("?" + queryParam) : ("");
-    // url = "http://"+host+url;
-    // cordova.plugin.http.sendRequest(url, {
-    //     method: 'get',
-    //     param: queryParam,
-    //     data: {},
-    //     headers: {
-    //         'Content-Type': 'application/x-www-form-urlencoded'
-    //     }
-    // }, response => {
-    //     console.log(response.status);
-    //     console.log(response.data);
-    //     alert("Success");
-    //     $('#response').text('Response: ' + response.data);
-    // }, response => {
-    //     console.error(response.error);
-    //     alert('Error: ' + response.error);
-    // });
-
-    // cordova.plugin.http.sendRequest(url, {
-    //     method: method,
-    //     param: queryParam,
-    //     data: {},
-    //     headers: headers
-    // }, response => {
-    //     console.log(response.status);
-    //     console.log(response.data);
-    //     alert("Success");
-    //     $('#response').text('Response: ' + response.data);
-    // }, response => {
-    //     console.error(response.error);
-    //     alert('Error: ' + response.error);
-    // });
-
-    // $.ajax({
-    //     type: method,
-    //     url: url+"?"+queryParam,
-    //     data: null, // No data in the request body
-    //     success: function (response) {
-    //         // Handle the success response
-    //         console.log("Request successful:", response);
-    //     },
-    //     error: function (error) {
-    //         // Handle errors
-    //         console.error("Error:", error);
-    //         console.log("Status code:" + error.status);
-    //     }
-    // });
-
-    cordova.plugin.http.sendRequest("http://"+url+"?"+queryParam, options, (response) => {
+    cordova.plugin.http.sendRequest("http://" + url + "?" + queryParam, options, (response) => {
         // success
-        alert("success" + response);
+        alert("Comando Inviato");
+        callBackFunction();
         console.log(response.status);
-      }, (response) => {
+    }, (response) => {
         // error
         alert('Error: ' + response.error);
         console.log(response.status);
         console.log(response.error);
-      });
-
+    });
 }

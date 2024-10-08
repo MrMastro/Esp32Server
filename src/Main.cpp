@@ -243,6 +243,7 @@ void webOtaServerTask(void *pvParameters)
 
 void commandDelayedTask(void *pvParameters)
 {
+  serialService.logInfoln("Delayed Command Task execution", "MAIN");
   while (true)
   {
     if (!servicesCollector.isBusyForServiceApi())
