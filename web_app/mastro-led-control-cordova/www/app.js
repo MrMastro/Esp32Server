@@ -91,10 +91,7 @@ const app = {
         //$('#Settings-Modal').modal('hide');
     },
 
-    genericSuccess(){
-        alert("Operazione effettuata");
-    },
-
+    // METHOD TO API
 
     sendStartEffect() {
         let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
@@ -117,7 +114,7 @@ const app = {
             "&rgbAction=" + encodeURIComponent(rgbAction) +
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
 
-        postCustom(url, queryParam, {}, this.genericSuccess());
+        postCustom(url, queryParam, {}, (response) => this.genericSuccess(response), (err) => this.genericFailure(err));
     },
 
     sendStopEffect() {
@@ -147,7 +144,23 @@ const app = {
 
     sendMemorizedInitialEffect(){
         console.log("WIP");
-    }
+    },
+
+    login(deviceName,devicePassword){
+
+    },
+
+    // SUCCESS AND FAILURE METHOD
+    genericSuccess(param){
+        console.log("GenericSuccess:\n" + param);
+        alert("Operazione effettuata");
+    },
+
+    genericFailure(param){
+        console.log("GenericFailure:\n" + param);
+        alert("Operazione fallita");
+    },
+
 
 }
 
@@ -175,7 +188,7 @@ function hexToRgb(hex) {
     } : null;
 }
 
-function postCustom(path, queryParam, postData, callBackFunction) {
+function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure) {
     url = host + path;
     let method = "POST";
     let body = queryParam;
@@ -190,15 +203,17 @@ function postCustom(path, queryParam, postData, callBackFunction) {
         param: queryParam
     };
 
-    cordova.plugin.http.sendRequest("http://" + url + "?" + queryParam, options, (response) => {
-        // success
-        alert("Comando Inviato");
-        callBackFunction();
-        console.log(response.status);
-    }, (response) => {
-        // error
-        alert('Error: ' + response.error);
-        console.log(response.status);
-        console.log(response.error);
-    });
+    if(cordova.platformId == 'browser'){
+        callBackFailure("Applicazione non disponibile per il browser");
+    }else{
+        cordova.plugin.http.sendRequest("http://" + url + "?" + queryParam, options, (response) => {
+            // success
+            callBackSuccess(response);
+        }, (err) => {
+            // error
+            callBackFailure(err);
+            console.log(err.status);
+            console.log(err.error);
+        });
+    }
 }
