@@ -201,15 +201,15 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
 
     if (cordova.platformId == 'browser') {
         callBackFailure("Applicazione non disponibile per il browser");
-        postWithBrowserCors(url, queryParam, postData, callBackSuccess, callBackFailure); todo
+        postWithBrowserCors(url, options, callBackSuccess, callBackFailure);
     } else {
         postWithAndroid(url, options, callBackSuccess, callBackFailure);
     }
 }
 
 function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
-    if(options.queryParam){
-        url = "http://" + url + "?" + queryParam;
+    if(options.param){
+        url = "http://" + url + "?" + options.param;
     }else{
         url = "http://" + url;
     }
@@ -232,8 +232,8 @@ function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
 
 //Don't work
 function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
-    if(options.queryParam){
-        url = "http://" + url + "?" + queryParam;
+    if(options.param){
+        url = "http://" + url + "?" + options.param;
     }else{
         url = "http://" + url;
     }
@@ -257,12 +257,12 @@ function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
         }
     };
     // Convert the data object to JSON format and send the request
-    xhr.send(JSON.stringify(data));
+    xhr.send(JSON.stringify(options.data));
 }
 
-function postWithBrowserCors(url, queryParam, data, callBackSuccess, callBackFailure) {
-    if(options.queryParam){
-        url = "http://" + url + "?" + queryParam;
+function postWithBrowserCors(url, options, callBackSuccess, callBackFailure) {
+    if(options.param){
+        url = "http://" + url + "?" + options.param;
     }else{
         url = "http://" + url;
     }
@@ -295,5 +295,5 @@ function postWithBrowserCors(url, queryParam, data, callBackSuccess, callBackFai
     };
 
     // Send the request with the postData converted to JSON
-    xhr.send(JSON.stringify(data));
+    xhr.send(JSON.stringify(options.data));
 }
