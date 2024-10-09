@@ -70,7 +70,7 @@ const app = {
             $('.label-ip').text("Indirizzo attuale: " + host);
         } else {
             $('.fieldIp').show();
-            changeIp();
+            this.changeIp();
         }
     },
 
@@ -153,11 +153,17 @@ const app = {
 
     // SUCCESS AND FAILURE METHOD
     genericSuccess(param) {
+        if (debug) {
+            alert("DEBUG SUCCESS: \n" + response);
+        }
         console.log("GenericSuccess:\n" + param);
         alert("Operazione effettuata");
     },
 
     genericFailure(param) {
+        if (debug) {
+            alert("DEBUG ERROR: \n" + err);
+        }
         console.log("GenericFailure:\n" + param);
         alert("Operazione fallita");
     },
@@ -191,10 +197,9 @@ function hexToRgb(hex) {
 
 function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure) {
     url = host + path;
-    //let body = queryParam;
     let options = {
         method: "post",
-        headers: { "Accept": "application/json" },
+        //headers: { "Accept": "application/json" },
         data: postData,
         param: queryParam
     };
@@ -213,20 +218,11 @@ function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
     }else{
         url = "http://" + url;
     }
+
     cordova.plugin.http.sendRequest(url, options, (response) => {
-        // Try to parse the response data as JSON
-        const jsonResponse = JSON.parse(response.data);
-        // success
-        if (debug) {
-            alert("DEBUG SUCCESS: \n" + jsonResponse);
-        }
         callBackSuccess(response);
-        alert("SUCCESS");
     }, (err) => {
         // error
-        if (debug) {
-            alert("DEBUG ERROR: \n" + err);
-        }
         callBackFailure(err);
         console.log(err.status);
         console.log(err.error);
