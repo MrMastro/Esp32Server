@@ -58,7 +58,7 @@ const app = {
             $('.fieldIp').hide();
             $('.changeIpBtn').hide();
             host = apHost;
-            $('.label-ip').text("Indirizzo attuale: "+ host);
+            $('.label-ip').text("Indirizzo attuale: " + host);
         }
     },
 
@@ -87,7 +87,7 @@ const app = {
         }
     },
 
-    showSettings(){
+    showSettings() {
         $('#Settings-Modal').modal('show');
         //$('#Settings-Modal').modal('hide');
     },
@@ -143,21 +143,21 @@ const app = {
         postCustom(url, queryParam, {}, (response) => this.genericSuccess(response), (err) => this.genericFailure(err));
     },
 
-    sendMemorizedInitialEffect(){
+    sendMemorizedInitialEffect() {
         console.log("WIP");
     },
 
-    login(deviceName,devicePassword){
+    login(deviceName, devicePassword) {
         console.log("WIP");
     },
 
     // SUCCESS AND FAILURE METHOD
-    genericSuccess(param){
+    genericSuccess(param) {
         console.log("GenericSuccess:\n" + param);
         alert("Operazione effettuata");
     },
 
-    genericFailure(param){
+    genericFailure(param) {
         console.log("GenericFailure:\n" + param);
         alert("Operazione fallita");
     },
@@ -191,12 +191,7 @@ function hexToRgb(hex) {
 
 function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure) {
     url = host + path;
-    let method = "POST";
-    let body = queryParam;
-    let headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    };
+    //let body = queryParam;
     let options = {
         method: "post",
         headers: { "Accept": "application/json" },
@@ -204,23 +199,89 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
         param: queryParam
     };
 
-    if(cordova.platformId == 'browser'){
+    if (cordova.platformId == 'browser') {
         callBackFailure("Applicazione non disponibile per il browser");
-    }else{
-        cordova.plugin.http.sendRequest("http://" + url + "?" + queryParam, options, (response) => {
-            // success
-            if(debug){
-                alert(response);
-            }
-            callBackSuccess(response);
-        }, (err) => {
-            // error
-            if(debug){
-                alert(err);
-            }
-            callBackFailure(err);
-            console.log(err.status);
-            console.log(err.error);
-        });
+        postWithBrowserCors(url, queryParam, postData, callBackSuccess, callBackFailure); todo
+    } else {
+        postWithAndroid(url, options, callBackSuccess, callBackFailure);
     }
+}
+
+function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
+    url = "http://" + url + "?" + queryParam;
+    cordova.plugin.http.sendRequest(url, options, (response) => {
+        // success
+        if (debug) {
+            alert("DEBUG SUCCESS: \n" + response);
+        }
+        callBackSuccess(response);
+    }, (err) => {
+        // error
+        if (debug) {
+            alert("DEBUG ERROR: \n" + err);
+        }
+        callBackFailure(err);
+        console.log(err.status);
+        console.log(err.error);
+    });
+}
+
+//Don't work
+function postWithBrowser(url, queryParam, data, callBackSuccess, callBackFailure) {
+    const xhr = new XMLHttpRequest();
+    // Construct the full URL with query parameters
+    const fullUrl = "http://" + url + "?" + queryParam;
+    // Initialize the XMLHttpRequest
+    xhr.open('POST', fullUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    // Define the callback for when the request state changes
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            // Check if the request was successful
+            if (xhr.status === 200) {
+                // Parse the response if needed, then call the success callback
+                const response = JSON.parse(xhr.responseText);
+                callBackSuccess(response);
+            } else {
+                // Call the failure callback with an error message
+                callBackFailure(`Error: ${xhr.status} - ${xhr.statusText}`);
+            }
+        }
+    };
+    // Convert the data object to JSON format and send the request
+    xhr.send(JSON.stringify(data));
+}
+
+function postWithBrowserCors(url, queryParam, data, callBackSuccess, callBackFailure) {
+    const fullUrl = "http://" + url + "?" + queryParam;
+    const xhr = new XMLHttpRequest();
+
+    xhr.open('POST', fullUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    // Handle CORS
+    xhr.onload = function () {
+        // Check if the response has the CORS headers
+        const accessControlAllowOrigin = xhr.getResponseHeader('Access-Control-Allow-Origin');
+        if (accessControlAllowOrigin) {
+            console.log("CORS header present:", accessControlAllowOrigin);
+        } else {
+            console.warn("No CORS header present in the response.");
+        }
+
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            callBackSuccess(response); // Call the success callback with the response
+        } else {
+            callBackFailure(`Error: ${xhr.status} - ${xhr.statusText}`); // Call the failure callback
+        }
+    };
+
+    // Handle network errors
+    xhr.onerror = function () {
+        callBackFailure(`Network Error: Unable to reach the server.`);
+    };
+
+    // Send the request with the postData converted to JSON
+    xhr.send(JSON.stringify(data));
 }
