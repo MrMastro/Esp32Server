@@ -22,6 +22,7 @@
 var host = "";
 var apHost = "192.168.4.1";
 var connected = false;
+var debug = true;
 
 $('.fieldIp').hide();
 $('.changeIpBtn').hide();
@@ -139,7 +140,7 @@ const app = {
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
 
         url += (queryParam != "") ? ("?" + queryParam) : ("");
-        postCustom(url, queryParam, {}, this.genericSuccess());
+        postCustom(url, queryParam, {}, (response) => this.genericSuccess(response), (err) => this.genericFailure(err));
     },
 
     sendMemorizedInitialEffect(){
@@ -147,7 +148,7 @@ const app = {
     },
 
     login(deviceName,devicePassword){
-
+        console.log("WIP");
     },
 
     // SUCCESS AND FAILURE METHOD
@@ -208,9 +209,15 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
     }else{
         cordova.plugin.http.sendRequest("http://" + url + "?" + queryParam, options, (response) => {
             // success
+            if(debug){
+                alert(response);
+            }
             callBackSuccess(response);
         }, (err) => {
             // error
+            if(debug){
+                alert(err);
+            }
             callBackFailure(err);
             console.log(err.status);
             console.log(err.error);
