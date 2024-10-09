@@ -209,16 +209,19 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
 
 function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
     if(options.param){
-        url = "http://" + url + "?" + options.param;
+        url = "http://" + url + "?" + encodeURIComponent(options.param);
     }else{
         url = "http://" + url;
     }
     cordova.plugin.http.sendRequest(url, options, (response) => {
+        // Try to parse the response data as JSON
+        const jsonResponse = JSON.parse(response.data);
         // success
         if (debug) {
-            alert("DEBUG SUCCESS: \n" + response);
+            alert("DEBUG SUCCESS: \n" + jsonResponse);
         }
         callBackSuccess(response);
+        alert("SUCCESS");
     }, (err) => {
         // error
         if (debug) {
@@ -233,7 +236,7 @@ function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
 //Don't work
 function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
     if(options.param){
-        url = "http://" + url + "?" + options.param;
+        url = "http://" + url + "?" + encodeURIComponent(options.param);
     }else{
         url = "http://" + url;
     }
@@ -262,7 +265,7 @@ function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
 
 function postWithBrowserCors(url, options, callBackSuccess, callBackFailure) {
     if(options.param){
-        url = "http://" + url + "?" + options.param;
+        url = "http://" + url + "?" + encodeURIComponent(options.param);
     }else{
         url = "http://" + url;
     }
