@@ -40,8 +40,8 @@ const app = {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
         $('.fieldIp').on('input', this.changeIp);
         $('.changeIpBtn').on('click', this.changeIp);
-        $('.buttonWs2811SetEffect').on('click', this.sendStartEffect);
-        $('.buttonWs2811StopEffect').on('click', this.sendStopEffect);
+        $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
+        $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
         $('#APConnection').on('click', this.switchConnection);
         $('.buttonMemorizeInitialEffect').on('click', this.sendMemorizedInitialEffect);
     },
@@ -142,7 +142,7 @@ const app = {
             "&ws2811Action=" + encodeURIComponent(ws2811Action);
 
         url += (queryParam != "") ? ("?" + queryParam) : ("");
-        postCustom(url, queryParam, {},this.genericSuccess());
+        postCustom(url, queryParam, {}, this.genericSuccess());
     },
 
     sendMemorizedInitialEffect(){
