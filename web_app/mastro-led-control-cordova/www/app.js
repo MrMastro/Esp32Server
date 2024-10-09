@@ -208,7 +208,11 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
 }
 
 function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
-    url = "http://" + url + "?" + queryParam;
+    if(options.queryParam){
+        url = "http://" + url + "?" + queryParam;
+    }else{
+        url = "http://" + url;
+    }
     cordova.plugin.http.sendRequest(url, options, (response) => {
         // success
         if (debug) {
@@ -227,12 +231,16 @@ function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
 }
 
 //Don't work
-function postWithBrowser(url, queryParam, data, callBackSuccess, callBackFailure) {
+function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
+    if(options.queryParam){
+        url = "http://" + url + "?" + queryParam;
+    }else{
+        url = "http://" + url;
+    }
     const xhr = new XMLHttpRequest();
-    // Construct the full URL with query parameters
-    const fullUrl = "http://" + url + "?" + queryParam;
+
     // Initialize the XMLHttpRequest
-    xhr.open('POST', fullUrl, true);
+    xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     // Define the callback for when the request state changes
     xhr.onreadystatechange = function () {
@@ -253,10 +261,14 @@ function postWithBrowser(url, queryParam, data, callBackSuccess, callBackFailure
 }
 
 function postWithBrowserCors(url, queryParam, data, callBackSuccess, callBackFailure) {
-    const fullUrl = "http://" + url + "?" + queryParam;
+    if(options.queryParam){
+        url = "http://" + url + "?" + queryParam;
+    }else{
+        url = "http://" + url;
+    }
     const xhr = new XMLHttpRequest();
 
-    xhr.open('POST', fullUrl, true);
+    xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     // Handle CORS
