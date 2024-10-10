@@ -9,7 +9,7 @@
 #include <utils/SerialSimple.h>
 #include <constants/CommunicationMode.h>
 #include <exceptions/exceptions.h>
-#include "InfoService.cpp"
+#include "InfoService.h"
 #include "SerialService.h"
 #include "SettingService.h"
 #include "./validators/validators.h"

@@ -114,7 +114,7 @@ BasicResponse jsonToDto(String &json)
     String dataJson = jsonDocument["data"].as<String>();
 
     // Create and return a BasicResponse object
-    return BasicResponse(message, description, dataJson);
+    return BasicResponse(code, message, description, dataJson);
 }
 
 String dtoToJson(BasicResponse &data)

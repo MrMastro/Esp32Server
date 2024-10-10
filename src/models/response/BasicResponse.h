@@ -16,7 +16,7 @@ public:
     BasicResponse();
     BasicResponse(StatusInfo info);
     BasicResponse(StatusInfo info, const String &dataJson);
-    DEPRECATED BasicResponse(const String &message, const String &description, const String &dataJson);
+    BasicResponse(const int &code, const String &message, const String &description, const String &dataJsonInput);
     BasicResponse(HTTP_CODE code);
     BasicResponse(HTTP_CODE code, String customDescription);
     StatusInfo getStatus();

@@ -3,7 +3,7 @@
 
 #include <ESPAsyncWebServer.h>
 #include "services/ServiceImplementations/CommandService.h"
-#include "services/ServiceImplementations/InfoService.cpp"
+#include "services/ServiceImplementations/InfoService.h"
 #include "models/response/BasicResponse.h"
 #include "constants/Constants.h"
 #include "models/DataModelling.h"
@@ -25,17 +25,6 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
 //------------------------------------------------------------------------------------------------------------
 
 //utils
-
-String getBodyString(uint8_t *data, size_t len){
-        // Crea una stringa per accumulare il body
-    String body = "";
-
-    // Accumula i dati del body
-    for (size_t i = 0; i < len; i++) {
-        body += (char)data[i];
-    }
-
-    return body;
-}
+String getBodyString(uint8_t *data, size_t len);
 
 #endif  // Controllers_H
