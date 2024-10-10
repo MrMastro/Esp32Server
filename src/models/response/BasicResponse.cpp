@@ -12,7 +12,7 @@ BasicResponse::BasicResponse(StatusInfo info, const String &dataJsonInput)
 }
 
 BasicResponse::BasicResponse(const String &message, const String &description, const String &dataJsonInput){
-    status = StatusInfo(message,description);
+    status = StatusInfo(0, message, description);
     dataJson = dataJsonInput;
 }
 

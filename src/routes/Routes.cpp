@@ -7,4 +7,5 @@ void initRoutes(MastroServer &srv)
   srv.setCustomApi("/api/ws2811SetEffect", HTTP_POST, setEffectWs2811);
   srv.setCustomApi("/api/ws2811StopEffect", HTTP_POST, stopEffectWs2811);
   srv.setCustomApi("/api/saveSettings",HTTP_POST, saveSettings);
+  srv.setCustomApi("/api/login",HTTP_POST, login);
 }

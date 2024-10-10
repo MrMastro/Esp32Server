@@ -1,36 +1,46 @@
+#include "InfoService.h"
 
-#ifndef InfoService_H
-#define InfoService_H
-
-#ifndef Services_H
-#include <services/Service.h>
-#endif
-
-class InfoService : public Service
+InfoService::InfoService()
 {
-public:
-    InfoService() 
+  isOperative = false;
+}
+
+StatusInfo InfoService::infoSuccess()
+{
+    return getStatusInfoByHttpCode(HTTP_CODE::OK);
+}
+
+String InfoService::getIp()
+{
+    return getServerByCollector()->getIp();
+}
+
+String InfoService::getInfo()
+{
+    String info = "WIP, info visualizated here";
+    return info;
+}
+
+boolean InfoService::loginValidate(String deviceName, String devicePwd)
+{
+    SettingsModel s = settingService->getSettings();
+    if (s.deviceName == deviceName && s.devicePassword == devicePwd)
     {
-        
-    }  // Constructor
-    ~InfoService() {} // Destructor
-
-    StatusInfo infoSuccess()
+        return true;
+    }
+    else
     {
-        return getStatusInfoByHttpCode(HTTP_CODE::OK);
+        return false;
     }
+}
 
-    String getIp(){
-        return getServerByCollector()->getIp();
-    }
+void InfoService::onInitServiceCollector()
+{
+    settingService = ((SettingService *)servicesCollector.getService("SettingService"));
+    isOperative = true;
+}
 
-    String getInfo(){
-        String info = "WIP, info visualizated here";
-        return info;
-    }
-
-protected:
-    void onInitServiceCollector() override{};
-};
-
-#endif // InfoService_H
+boolean InfoService::isAvaible()
+{
+  return isOperative;
+}
