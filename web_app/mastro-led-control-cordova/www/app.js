@@ -22,7 +22,7 @@
 var host = "";
 var apHost = "192.168.4.1";
 var connected = false;
-var debug = true;
+var debug = false;
 
 $('.fieldIp').hide();
 $('.changeIpBtn').hide();
@@ -154,20 +154,20 @@ const app = {
     // SUCCESS AND FAILURE METHOD
     genericSuccess(param) {
         if (debug) {
-            alert("DEBUG SUCCESS: \n" + response);
+            alert("DEBUG SUCCESS: \n" + param);
+            console.log("GenericSuccess:\n" + param);
         } else {
             alert("Operazione effettuata");
         }
-        console.log("GenericSuccess:\n" + param);
     },
 
     genericFailure(param) {
         if (debug) {
             alert("DEBUG ERROR: \n" + param);
+            console.log("GenericFailure:\n" + param);
         } else {
             alert("Operazione fallita");
         }
-        console.log("GenericFailure:\n" + param);
     },
 
 
