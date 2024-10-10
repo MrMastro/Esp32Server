@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 #include <map>
-#include <models/response/BasicResponse.h>
+#include <models/response/BasicResponse/BasicResponse.h>
 #include "./utils/FunctionUtils.h"
 
 //Enum to represent http_code with additional information

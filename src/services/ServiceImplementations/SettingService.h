@@ -21,6 +21,7 @@ public:
     void loadSettings(String path);
     boolean saveSettings(String path, SettingsModel s);
     boolean changeSetting(String key, String value);
+    String getJsonSettings();
 protected:
     SettingsModel* settings;
     void onInitServiceCollector() override;

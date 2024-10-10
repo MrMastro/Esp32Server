@@ -16,6 +16,16 @@ SettingsModel SettingService::getSettings()
     return *settings;
 }
 
+String SettingService::getJsonSettings()
+{
+    if (!isOperative)
+    {
+        // todo throwError(ERROR_CODE::SERVICE_ERROR, "Service not avaible, error to load settings", "getSettingByName");
+        return String();
+    }
+    return settings->toJson();
+}
+
 boolean SettingService::saveSettings(String path, SettingsModel s)
 {
     String content = s.toJson();

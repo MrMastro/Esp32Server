@@ -4,7 +4,7 @@
 #include <ESPAsyncWebServer.h>
 #include "services/ServiceImplementations/CommandService.h"
 #include "services/ServiceImplementations/InfoService.h"
-#include "models/response/BasicResponse.h"
+#include <models/response/BasicResponse/BasicResponse.h>
 #include "constants/Constants.h"
 #include "models/DataModelling.h"
 
@@ -14,6 +14,7 @@ void commandController(AsyncWebServerRequest *request);
 //InfoController
 void getOk(AsyncWebServerRequest *request);
 void login(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+void getJsonSettings(AsyncWebServerRequest *request);
 
 //LedController
 void setEffectWs2811(AsyncWebServerRequest *request);

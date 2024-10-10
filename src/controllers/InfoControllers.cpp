@@ -1,5 +1,6 @@
 #include "Controllers.h"
 #include <models/loginModel/LoginModel.h>
+#include <models/response/SettingsResponse/SettingsResponse.h>
 
 void getOk(AsyncWebServerRequest *request)
 {
@@ -32,5 +33,29 @@ void login(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t ind
     res = logged ? getStatusInfoByHttpCode(HTTP_CODE::OK) : getStatusInfoByHttpCode(HTTP_CODE::Unauthorized);
 
     request->send(res.getCode(), "application/json", res.toJson());
+    servicesCollector.freeExclusiveExecution();
+}
+
+void getJsonSettings(AsyncWebServerRequest *request)
+{
+    servicesCollector.takeExclusiveExecution();
+    InfoService *infoService = ((InfoService *)servicesCollector.getService("InfoService"));
+    SettingService *settingService = ((SettingService *)servicesCollector.getService("SettingService"));
+    SettingsResponse res;
+    StatusInfo info;
+    if (!infoService->checkAuthorization(""))
+    {
+        info = getStatusInfoByHttpCode(HTTP_CODE::Unauthorized);
+        res = SettingsResponse(info);
+        request->send(res.getStatus().getCode(), "application/json", res.toJson());
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+
+    SettingsModel settings = settingService->getSettings();
+    info = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    res = SettingsResponse(info);
+    res.setDataJson(settings);
+    request->send(res.getStatus().getCode(), "application/json", res.toJson());
     servicesCollector.freeExclusiveExecution();
 }

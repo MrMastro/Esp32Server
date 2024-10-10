@@ -12,9 +12,10 @@ public:
     String getIp();
     String getInfo();
     boolean loginValidate(String deviceName, String devicePwd);
+    boolean checkAuthorization(String ip);
     boolean isAvaible() override;
 protected:
-    void onInitServiceCollector() override;;
+    void onInitServiceCollector() override;
 private:
     SettingService *settingService;
     boolean isOperative;

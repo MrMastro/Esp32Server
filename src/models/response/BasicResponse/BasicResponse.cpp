@@ -49,7 +49,7 @@ String BasicResponse::getDataJson()
 
 void BasicResponse::setDataJson(const String &json)
 {
-    dataJson = dataJson;
+    dataJson = json;
 }
 
 String BasicResponse::toString()

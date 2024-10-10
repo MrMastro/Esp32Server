@@ -1,5 +1,7 @@
 #include "InfoService.h"
 
+// This Service works to manage information about status of system and various information (like ip, authorization, information like communication, etc.)
+
 InfoService::InfoService()
 {
   isOperative = false;
@@ -38,6 +40,10 @@ void InfoService::onInitServiceCollector()
 {
     settingService = ((SettingService *)servicesCollector.getService("SettingService"));
     isOperative = true;
+}
+
+boolean InfoService::checkAuthorization(String ip){
+    return true; //todo authorization with array of logged ip
 }
 
 boolean InfoService::isAvaible()

@@ -116,6 +116,11 @@ public:
         return true;
     }
 
+    String toString()
+    {
+        return toJson();
+    }
+
     // Metodo statico per ottenere un'istanza di SettingsModel con valori di default
     static SettingsModel getDefault()
     {

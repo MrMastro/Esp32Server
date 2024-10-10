@@ -120,7 +120,7 @@ BasicResponse jsonToDto(String &json)
 String dtoToJson(BasicResponse &data)
 {
     // Create a JSON document with enough capacity to store the data
-    StaticJsonDocument<200> jsonDocument;
+    StaticJsonDocument<968> jsonDocument;
     StaticJsonDocument<200> jsonInnerDocument;
     // Add data to the JSON document
     // StatusInfo statusN = data.getStatus();
