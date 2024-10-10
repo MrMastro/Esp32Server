@@ -155,17 +155,19 @@ const app = {
     genericSuccess(param) {
         if (debug) {
             alert("DEBUG SUCCESS: \n" + response);
+        } else {
+            alert("Operazione effettuata");
         }
         console.log("GenericSuccess:\n" + param);
-        alert("Operazione effettuata");
     },
 
     genericFailure(param) {
         if (debug) {
-            alert("DEBUG ERROR: \n" + err);
+            alert("DEBUG ERROR: \n" + param);
+        } else {
+            alert("Operazione fallita");
         }
         console.log("GenericFailure:\n" + param);
-        alert("Operazione fallita");
     },
 
 
@@ -213,27 +215,36 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
 }
 
 function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
-    if(options.param){
-        url = "http://" + url + "?" + encodeURIComponent(options.param);
-    }else{
+    if (options.param) {
+        url = "http://" + url + "?" + options.param;
+    } else {
         url = "http://" + url;
     }
+    cordova.plugin.http.setDataSerializer('urlencoded');
+    cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
+        (response) => {
+            callBackSuccess(response);
+        },
+        (err) => {
+            callBackFailure(err);
+        }
+    );
 
-    cordova.plugin.http.sendRequest(url, options, (response) => {
-        callBackSuccess(response);
-    }, (err) => {
-        // error
-        callBackFailure(err);
-        console.log(err.status);
-        console.log(err.error);
-    });
+    // cordova.plugin.http.sendRequest(url, options, (response) => {
+    //     callBackSuccess(response);
+    // }, (err) => {
+    //     // error
+    //     callBackFailure(err);
+    //     console.log(err.status);
+    //     console.log(err.error);
+    // });
 }
 
 //Don't work
 function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
-    if(options.param){
+    if (options.param) {
         url = "http://" + url + "?" + encodeURIComponent(options.param);
-    }else{
+    } else {
         url = "http://" + url;
     }
     const xhr = new XMLHttpRequest();
@@ -260,9 +271,9 @@ function postWithBrowser(url, options, callBackSuccess, callBackFailure) {
 }
 
 function postWithBrowserCors(url, options, callBackSuccess, callBackFailure) {
-    if(options.param){
+    if (options.param) {
         url = "http://" + url + "?" + encodeURIComponent(options.param);
-    }else{
+    } else {
         url = "http://" + url;
     }
     const xhr = new XMLHttpRequest();
