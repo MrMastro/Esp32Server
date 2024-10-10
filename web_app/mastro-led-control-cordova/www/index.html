@@ -103,19 +103,19 @@
                                 <div id="Settings0" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container d-xl-flex containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title" style="font-size: 15px;text-align: left;">Nome Dispositivo</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input type="text" style="width: 175px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="deviceNameInput" type="text" style="width: 175px;" /></div>
                                     </div>
                                 </div>
                                 <div id="Settings1" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container d-xl-flex containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Password Dispositivo</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input type="password" style="width: 175px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="devicePasswordInput" type="password" style="width: 175px;" /></div>
                                     </div>
                                 </div>
                                 <div id="Settings2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Tipologia di comunicazione</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><select class="border rounded-pill form-select-sm d-flex justify-content-center effectInput" style="font-size: 11px;text-align: center;width: 175px;" value name="comunicationMode" required>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><select id="communicationModeInput" class="border rounded-pill form-select-sm d-flex justify-content-center" style="font-size: 11px;text-align: center;width: 175px;" value name="comunicationMode" required>
                                                 <option value="NONE" selected></option>
                                                 <option value="AP_MODE">Access Point</option>
                                                 <option value="WIFI_MODE">WiFi</option>
@@ -126,7 +126,7 @@
                                 <div id="Settings2-1" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Modalità Debug</label></div>
                                     <div class="text-center d-xl-flex flex-column align-items-xl-center containerOfComponent" style="width: 175px;height: 40px;">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input class="d-xl-flex justify-content-xl-center align-items-xl-start form-check-input" type="checkbox" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="debugInput" class="d-xl-flex justify-content-xl-center align-items-xl-start" type="checkbox" /></div>
                                     </div>
                                 </div>
                             </div>
@@ -135,13 +135,13 @@
                                 <div id="Settings2-2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Nome Access Point</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input type="text" style="width: 175px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="ssidAPInput" type="text" style="width: 175px;" /></div>
                                     </div>
                                 </div>
                                 <div id="Settings2-3" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Password Access Point</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input type="password" style="width: 175px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="passwordAPInput" type="password" style="width: 175px;" /></div>
                                     </div>
                                 </div>
                             </div>
@@ -150,13 +150,13 @@
                                 <div id="Settings1-2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Nome rete a cui connettersi</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input type="text" style="width: 175px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="ssidWIFIInput" type="text" style="width: 175px;" /></div>
                                     </div>
                                 </div>
                                 <div id="Settings2-4" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Password della rete</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input type="password" style="width: 175px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="passwordWIFIInput" type="password" style="width: 175px;" /></div>
                                     </div>
                                 </div>
                             </div>
@@ -170,52 +170,59 @@
                                 <div id="Settings-Panel-RGB" class="d-flex d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction" style="height: 95px;">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Striscia RGB</label></div>
                                     <div id="Settings-panel-RGB" class="text-center d-xl-flex flex-row justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 75px;height: 40px;" /><label class="form-label">Abilitato</label></div>
-                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;" /><label class="form-label">Pin Cin</label></div>
-                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
+                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="enableStripRgbInput" class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 75px;height: 40px;" /><label class="form-label">Abilitato</label></div>
+                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedCinRgbInput" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;" /><label class="form-label">Pin Cin</label></div>
+                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedDinRgbInput" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
                                     </div>
                                 </div>
                                 <div id="Settings-Panel-WS2811" class="d-flex d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction" style="height: 95px;">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Striscia RGB</label></div>
                                     <div id="Settings-panel-RGB-2" class="text-center d-xl-flex flex-row justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 75px;height: 40px;" /><label class="form-label">Abilitato</label></div>
-                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;" /><label class="form-label">Quantità Pixel</label></div>
-                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
+                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="enableStripWs2811Input" class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 75px;height: 40px;" /><label class="form-label">Abilitato</label></div>
+                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="numLedWs2811Input" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;" /><label class="form-label">Quantità Pixel</label></div>
+                                        <div class="d-xl-flex flex-column flex-shrink-1 m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedWs2811Input" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
                                     </div>
                                 </div>
                             </div>
-                            <div id="Settings-Panel-InitialEffects" class="d-flex flex-column" style="margin-top: 10px;margin-bottom: 10px;">
-                                <h4>Impostazioni Effetto iniziale</h4>
+                            <div id="Settings-Panel-InitialEffects" class="border rounded-0 d-flex flex-column visible" style="margin-top: 10px;margin-bottom: 10px;">
+                                <h4>Informazioni effetto iniziale</h4>
+                                <h6 class="text-center">(Effetto iniziale modificabile altrove)</h6>
                                 <div id="Settings2-8" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Effetto iniziale</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><select class="border rounded-pill form-select-sm d-flex justify-content-center effectInput" style="max-width: 250px;font-size: 11px;text-align: center;width: 175px;" value="effect" name="effect select" required>
-                                                <option value="NONE"></option>
-                                                <option value="PROGRESSIVE_BAR_UNIQUE_COLOR" selected>PROGRESSIVE BAR UNIQUE COLOR</option>
-                                                <option value="CONSTANT_UNIQUE_COLOR">CONSTANT UNIQUE COLOR</option>
-                                            </select></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="initialEffectInput" type="text" style="max-width: 250px;font-size: 11px;text-align: center;width: 175px;" value="effect" name="effect select" required readonly /></div>
                                     </div>
                                 </div>
                                 <div id="Settings0-2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Tempo di animazione</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="d-flex flex-row justify-content-xl-center"><input class="d-xl-flex justify-content-xl-center" type="number" style="width: 50px;" /><label class="form-label d-xl-flex align-items-xl-end" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
+                                        <div class="d-flex flex-row justify-content-xl-center"><label id="initialDeltaTInput" class="form-label d-xl-flex align-items-xl-end" style="margin-right: 5px;margin-left: 2px;"></label><label class="form-label d-xl-flex align-items-xl-end" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
                                     </div>
                                 </div>
                                 <div id="Settings1-3" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
                                     <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 15px;text-align: left;">Colore iniziale</label></div>
                                     <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input class="colorInput" type="color" style="width: 50px;height: 40px;" /></div>
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="initialRgbInput" class="colorInput" type="color" style="width: 50px;height: 40px;" disabled /></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Annulla</button><button class="btn btn-primary" type="button">Salva</button></div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Annulla</button><button class="btn btn-primary saveSettingsBtn" type="button">Salva</button></div>
             </div>
         </div>
     </div>
+
+    <div id="LoginViewContainer">
+        <!--todo-->
+        <!-- generated by LoginView and Controller by SettingController  -->
+    </div>
+
+    <div id="WaitViewContainer">
+        <!-- generated by WaitView and Controller by SettingController  -->
+    </div>
+
     <footer class="text-center bg-dark">
         <div class="container text-white py-4 py-lg-5">
             <ul class="list-inline">
@@ -240,7 +247,7 @@
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/controlNumericTimer.js"></script>
     <script src="assets/js/loginForUpdate.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>

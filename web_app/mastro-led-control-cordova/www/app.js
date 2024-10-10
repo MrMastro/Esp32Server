@@ -19,6 +19,11 @@
 
 // Wait for the deviceready event before using any of Cordova's device APIs.
 // See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
+
+//todo Manage MVCS Design Pattern!!!
+
+import SettingController from './js/controllers/SettingController.js';
+
 var host = "";
 var apHost = "192.168.4.1";
 var connected = false;
@@ -31,6 +36,7 @@ const app = {
 
     // Application Constructor
     initialize() {
+        this.settingController = {};
         this.bindEvents();
         host = window.location.host;
         $('.label-ip').text("Indirizzo attuale: " + host);
@@ -43,17 +49,21 @@ const app = {
         $('.changeIpBtn').on('click', this.changeIp);
         $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
         $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
-        $('#APConnection').on('click', this.switchConnection);
+        $('#APConnection').on('click', this.switchConnection.bind(this));
         $('.buttonMemorizeInitialEffect').on('click', this.sendMemorizedInitialEffect);
     },
 
     // deviceready Event Handler
     onDeviceReady() {
+
+        //! Initialize Controller, Model, View e Service
+        this.settingController = new SettingController();
+        
         // Cordova is now initialized. Have fun!
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
         $('.buttonMemorizeInitialEffect').hide(); //todo show when the features is done
         $('.fieldIp').show();
-        hideIp = $('#APConnection')[0].checked;
+        let hideIp = $('#APConnection')[0].checked;
         if (hideIp) {
             $('.fieldIp').hide();
             $('.changeIpBtn').hide();
@@ -89,7 +99,6 @@ const app = {
 
     showSettings() {
         $('#Settings-Modal').modal('show');
-        //$('#Settings-Modal').modal('hide');
     },
 
     // METHOD TO API
