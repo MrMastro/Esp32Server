@@ -1,3 +1,5 @@
+import ColorUtils from '../utils/ColorUtils.js';
+
 export default class SettingView {
     constructor() { //empty cause modify html yet written
         this.modal = $("#Settings-Modal");
@@ -26,7 +28,7 @@ export default class SettingView {
         document.querySelector('#initialDeltaTInput').innerText = settings.initialDeltaT;
     
         // Imposta i valori RGB iniziali
-        this.setRgbInput(settings.initialR, settings.initialG, settings.initialB);
+        ColorUtils.setRgbInput(settings.initialR, settings.initialG, settings.initialB);
         
         // Aggiorna le impostazioni delle luci LED
         document.querySelector('#enableStripRgbInput').checked = settings.ledSettings.enableStripRgb;
@@ -45,20 +47,4 @@ export default class SettingView {
         // Nascondi la modale
         $(this.modal).modal('hide');
     }
-
-    // Metodo ausiliario per impostare i valori RGB nei campi di input
-    setRgbInput(r, g, b) {
-        const rgbHex = this.rgbToHex(r, g, b);
-        document.querySelector('#initialRgbInput').value = rgbHex;
-    }
-
-    // Metodo ausiliario per convertire valori RGB in formato esadecimale
-    rgbToHex(r, g, b) {
-        const toHex = (c) => {
-            const hex = c.toString(16).padStart(2, '0');
-            return hex.length === 2 ? hex : '00';
-        };
-        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-    }
-
 }

@@ -1,15 +1,15 @@
 
 export default class LoginView {
     constructor(rootElement) {
-        this.rootElement = rootElement;
-        if (JSON.stringify(rootElement) === '{}') {
-            console.error('element passed on constuctor not found in DOM');
+        if (!(rootElement instanceof HTMLElement)) {
+            console.error('rootElementModal non è un elemento DOM valido', rootElement);
         }
+        this.rootElement = rootElement;
         this.modalElement = null;
     }
 
     render() {
-        this.rootElement.innerHTML = `
+        this.rootElement.insertAdjacentHTML('beforeend', `
             <div id="Login-Modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -36,7 +36,7 @@ export default class LoginView {
                     </div>
                 </div>
             </div>
-        `;
+        `);
         // Inizializza la modale qui, dopo che è stata renderizzata
         this.modalElement = new bootstrap.Modal(document.getElementById('Login-Modal'));
     }

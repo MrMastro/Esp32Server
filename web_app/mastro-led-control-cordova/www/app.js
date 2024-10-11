@@ -23,6 +23,8 @@
 //todo Manage MVCS Design Pattern!!!
 
 import SettingController from './js/controllers/SettingController.js';
+import AlertMessageView from './js/views/AlertMessageView.js';
+import ColorUtils from './js/utils/ColorUtils.js';
 
 var host = "";
 var apHost = "192.168.4.1";
@@ -58,7 +60,7 @@ const app = {
 
         //! Initialize Controller, Model, View e Service
         this.settingController = new SettingController();
-        
+        this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
         // Cordova is now initialized. Have fun!
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
         $('.buttonMemorizeInitialEffect').hide(); //todo show when the features is done
@@ -107,9 +109,9 @@ const app = {
         let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
         let timing = $(".timingInput")[0].value; //100;
         let color = $(".colorInput")[0].value;
-        let r = hexToRgb(color).r;
-        let g = hexToRgb(color).g;
-        let b = hexToRgb(color).b;
+        let r = ColorUtils.hexToRgb(color).r;
+        let g = ColorUtils.hexToRgb(color).g;
+        let b = ColorUtils.hexToRgb(color).b;
         let rgbAction = $("#rgbCheck")[0].checked;
         let ws2811Action = $("#ws2811Check")[0].checked;
 
@@ -131,9 +133,9 @@ const app = {
         let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
         let timing = $(".timingInput")[0].value; //100;
         let color = $(".colorInput")[0].value;
-        let r = hexToRgb(color).r;
-        let g = hexToRgb(color).g;
-        let b = hexToRgb(color).b;
+        let r = ColorUtils.hexToRgb(color).r;
+        let g = ColorUtils.hexToRgb(color).g;
+        let b = ColorUtils.hexToRgb(color).b;
         let rgbAction = $("#rgbCheck")[0].checked;
         let ws2811Action = $("#ws2811Check")[0].checked;
 
@@ -163,19 +165,20 @@ const app = {
     // SUCCESS AND FAILURE METHOD
     genericSuccess(param) {
         if (debug) {
-            alert("DEBUG SUCCESS: \n" + param);
+            this.alertMessageView.alert("SUCCESS","DEBUG SUCCESS: \n" + param);
+            //alert("DEBUG SUCCESS: \n" + param);
             console.log("GenericSuccess:\n" + param);
         } else {
-            alert("Operazione effettuata");
+            this.alertMessageView.alert("SUCCESS","Operazione effettuata");
         }
     },
 
     genericFailure(param) {
         if (debug) {
-            alert("DEBUG ERROR: \n" + param);
+            this.alertMessageView.alert("ERROR", "DEBUG ERROR: \n" + param);
             console.log("GenericFailure:\n" + param);
         } else {
-            alert("Operazione fallita");
+            this.alertMessageView.alert("ERROR",param);
         }
     },
 
@@ -188,26 +191,8 @@ $(document).ready(() => {
 });
 
 
-
-// UTILS:
-
-function hexToRgb(hex) {
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
-
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
-function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure) {
-    url = host + path;
+function postCustom(url, queryParam, postData, callBackSuccess, callBackFailure) {
+    url = host + url;
     let options = {
         method: "post",
         //headers: { "Accept": "application/json" },
@@ -217,7 +202,7 @@ function postCustom(path, queryParam, postData, callBackSuccess, callBackFailure
 
     if (cordova.platformId == 'browser') {
         callBackFailure("Applicazione non disponibile per il browser");
-        postWithBrowserCors(url, options, callBackSuccess, callBackFailure);
+        //postWithBrowserCors(url, options, callBackSuccess, callBackFailure);
     } else {
         postWithAndroid(url, options, callBackSuccess, callBackFailure);
     }
