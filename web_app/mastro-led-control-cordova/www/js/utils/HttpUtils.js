@@ -1,5 +1,4 @@
 // HttpUtils.js
-
 const HttpUtils = (() => {
     // Funzione principale per inviare una richiesta POST
     const postCustom = async (host, url, queryParam, postData) => {
@@ -36,25 +35,55 @@ const HttpUtils = (() => {
 
     // Funzione per gestire la richiesta POST su Android
     const postWithAndroid = async (url, options) => {
+        let status = "pending"; // Variabile di stato iniziale
+        let postResponse;
         if (options.param && JSON.stringify(options.param) !== '{}') {
             url += `?${options.param}`; // Aggiungere i parametri all'URL
         }
 
         url = "http://" + url;
 
-        return new Promise((resolve, reject) => {
-            cordova.plugin.http.setDataSerializer('urlencoded');
-            cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
-                (response) => {
-                    resolve(response); // Risolvere la promessa con la risposta
-                },
-                (err) => {
-                    console.log(err);
-                    resolve("ERROR");
+        cordova.plugin.http.setDataSerializer('json');
+        cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
+            (response) => {
+                status = "completed";
+                postResponse = response;
+            },
+            (err) => {
+                status = "error";
+                postResponse = err;
+                console.log(err);
+            }
+        );
+
+        // Restituisce una Promise che attende che il valore di status cambi
+        let p = new Promise((resolve, reject) => {
+            const checkStatus = setInterval(() => {
+                if (status !== "pending") {
+                    clearInterval(checkStatus); // Ferma il controllo
+                    resolve(postResponse); // Risolve la Promise con il valore attuale di status
                 }
-            );
+            }, 1000); // Controlla ogni secondo
         });
+
+        // Attendi il risultato della Promise
+        const result = await p; // Attendere il risultato della Promise
+        return result; // Restituisce il risultato finale
     };
+
+
+            // return new Promise((resolve) => {
+        //     cordova.plugin.http.setDataSerializer('urlencoded');
+        //     cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
+        //         (response) => {
+        //             resolve(response);
+        //         },
+        //         (err) => {
+        //             console.log(err);
+        //             resolve("ERROR");
+        //         }
+        //     );
+        // });
 
     // Funzione per gestire la richiesta POST su Android
     const getWithAndroid = async (url, options) => {
@@ -63,9 +92,7 @@ const HttpUtils = (() => {
         }
 
         url = "http://" + url;
-
         return new Promise((resolve, reject) => {
-            cordova.plugin.http.setDataSerializer('urlencoded');
             cordova.plugin.http.get(url, options.param, { "Accept": "application/json" },
                 (response) => {
                     resolve(response); // Risolvere la promessa con la risposta

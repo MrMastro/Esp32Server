@@ -25,6 +25,7 @@
 import SettingController from './js/controllers/SettingController.js';
 import AlertMessageView from './js/views/AlertMessageView.js';
 import ColorUtils from './js/utils/ColorUtils.js';
+import ConstantApiList from './js/constants/apiList.js'
 
 var host = "";
 var apHost = "192.168.4.1";
@@ -73,6 +74,9 @@ const app = {
         this.settingController = new SettingController(host);
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
 
+        if(cordova.platformId == 'android'){
+            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
+        }
     },
 
     switchConnection() {
@@ -219,7 +223,6 @@ function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
     } else {
         url = "http://" + url;
     }
-    cordova.plugin.http.setDataSerializer('urlencoded');
     cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
         (response) => {
             callBackSuccess(response);

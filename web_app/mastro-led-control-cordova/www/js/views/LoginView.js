@@ -61,4 +61,12 @@ export default class LoginView {
     hide() {
         this.modalElement.hide();
     }
+
+    getDeviceName(){
+        return document.querySelector('#deviceNameLogin').value;
+    }
+
+    getDevicePassword(){
+        return document.querySelector('#passwordLogin').value;
+    }
 }

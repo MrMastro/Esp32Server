@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.js';
 import SettingView from '../views/SettingView.js';
 import WaitView from '../views/WaitView.js';
 import AlertMessageView from '../views/AlertMessageView.js';
+import TimeUtils from '../utils/TimeUtils.js'
 
 export default class SettingController {
     constructor(host) {
@@ -75,11 +76,12 @@ export default class SettingController {
                 pinLedWs2811: document.querySelector('#pinLedWs2811Input').value
             }
         };
-
+        this.settingView.hide();
+        this.waitView.show();
         const success = await this.settingService.saveDeviceSettings(this.referenceHost, settings);
+        this.waitView.hide();
         if (success) {
             console.log("Impostazioni salvate con successo");
-            this.settingView.hide();
             this.alertMessageView.alert("Successo", "Impostazioni salvate, il dispositivo sarà riavviato");
         } else {
             console.error("Errore nel salvataggio delle impostazioni");
@@ -92,8 +94,8 @@ export default class SettingController {
         if (this.settingService.isLogged()) {
             this.waitView.show();
             let settings = await this.settingService.getSettings(this.referenceHost);
-            this.waitView.hide();
             this.settingView.render(settings);
+            this.waitView.hide();
             this.settingView.show();
         } else {
             this.loginView.show();
@@ -103,16 +105,18 @@ export default class SettingController {
     async login() {
         this.loginView.hide();
         this.waitView.show();
-        let result = await this.settingService.login("name", "password");
-        this.waitView.hide();
+        let deviceName = this.loginView.getDeviceName();
+        let password = this.loginView.getDevicePassword();
+        let result = await this.settingService.login(this.referenceHost, deviceName, password);
+        await TimeUtils.wait(500);
         if (result) {
-            this.waitView.show();
             let settings = await this.settingService.getSettings(this.referenceHost);
-            this.waitView.hide();
             this.settingView.render(settings);
+            this.waitView.hide();
             this.settingView.show();
         } else {
-            alert("Credenziali non valide");
+            this.waitView.hide();
+            this.alertMessageView.alert("Errore", "Credenziali non valide");
         }
 
     }

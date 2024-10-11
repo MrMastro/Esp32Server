@@ -10,12 +10,16 @@ export default class SettingService {
 
     // Metodo per ottenere le impostazioni del dispositivo
     async getSettings(host) {
-        // Simulazione di una chiamata API
         if (!this.logged) {
-            return this.settingModel;
+            return {};
         } else {
             let result = await HttpUtils.getCustom(host,ConstantApiList.getSettingsApi,{},{});
-            let content = JSON.parse(result.data);
+            let content;
+            if(typeof result.data == 'string'){
+                content = JSON.parse(result.data);
+            }else{
+                content = result.data;
+            }
             //let data = content.data;
             this.settingModel.updateSettings(content.data);
             return this.settingModel;
@@ -25,12 +29,10 @@ export default class SettingService {
     // Metodo per salvare le impostazioni del dispositivo
     async saveDeviceSettings(host, settings) {
         let result = await HttpUtils.postCustom(host,ConstantApiList.saveSettigsApi,{},settings);
-        if(result == "ERROR"){
+        if(result.status != 200){
             return false;
         }
-        let content = JSON.parse(result.data);
-        this.settingModel.updateSettings(content.data);
-        return this.settingModel;
+        return true;
     }
 
     isLogged() {
@@ -38,15 +40,18 @@ export default class SettingService {
     }
 
     // Metodo per salvare le impostazioni del dispositivo
-    async login(deviceName, devicePassword) {
-        // Simulazione di una chiamata API
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                //todo call espserver
+    async login(host, deviceName, devicePassword) {
+        let result = await HttpUtils.postCustom(host, ConstantApiList.loginApi, {}, {deviceName: deviceName,devicePassword: devicePassword});
+        if(result.status != 200){
+            if(result.code == 200){
+                console.warn("result.status != 200 but result.code == 200, is your similation on cordova simulate?");
                 this.logged = true;
-                resolve(true);
-            }, 1000);
-        });
+                return true;
+            }
+            return false;
+        }
+        this.logged = true;
+        return true;
     }
 
 }
