@@ -47,8 +47,8 @@ const app = {
     // Bind Event Listeners
     bindEvents() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
-        $('.fieldIp').on('input', this.changeIp);
-        $('.changeIpBtn').on('click', this.changeIp);
+        $('.fieldIp').on('input', this.changeIp.bind(this));
+        $('.changeIpBtn').on('click', this.changeIp.bind(this));
         $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
         $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
         $('#APConnection').on('click', this.switchConnection.bind(this));
@@ -57,10 +57,6 @@ const app = {
 
     // deviceready Event Handler
     onDeviceReady() {
-
-        //! Initialize Controller, Model, View e Service
-        this.settingController = new SettingController();
-        this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
         // Cordova is now initialized. Have fun!
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
         $('.buttonMemorizeInitialEffect').hide(); //todo show when the features is done
@@ -72,6 +68,11 @@ const app = {
             host = apHost;
             $('.label-ip').text("Indirizzo attuale: " + host);
         }
+
+        //! Initialize Controller, Model, View e Service
+        this.settingController = new SettingController(host);
+        this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
+
     },
 
     switchConnection() {
@@ -94,9 +95,13 @@ const app = {
         else if (test) {
             host = $('.fieldIp')[0].value;
             $('.label-ip').text("Indirizzo attuale: " + host);
+            this.settingController.setReferenceHost(host);
         } else {
             $('.label-ip').text("Inserisci un ip valido");
         }
+
+
+
     },
 
     showSettings() {
@@ -223,15 +228,6 @@ function postWithAndroid(url, options, callBackSuccess, callBackFailure) {
             callBackFailure(err);
         }
     );
-
-    // cordova.plugin.http.sendRequest(url, options, (response) => {
-    //     callBackSuccess(response);
-    // }, (err) => {
-    //     // error
-    //     callBackFailure(err);
-    //     console.log(err.status);
-    //     console.log(err.error);
-    // });
 }
 
 //Don't work
