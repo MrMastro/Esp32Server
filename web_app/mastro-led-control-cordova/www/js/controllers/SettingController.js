@@ -80,16 +80,32 @@ export default class SettingController {
                 pinLedWs2811: document.querySelector('#pinLedWs2811Input').value
             }
         };
+
         this.settingView.hide();
         this.waitView.show();
-        const success = await this.settingService.saveDeviceSettings(this.referenceHost, settings);
-        this.waitView.hide();
-        if (success) {
-            console.log("Impostazioni salvate con successo");
-            this.alertMessageView.alert("Successo", "Impostazioni salvate, il dispositivo sarà riavviato");
-        } else {
-            console.error("Errore nel salvataggio delle impostazioni");
-            this.alertMessageView.alert("Errore", "Si è verificato un problema durante il salvataggio delle impostazioni");
+
+        try{
+            await this.settingService.saveDeviceSettings(this.referenceHost, settings);
+            this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.saveSettingsSuccess);
+            this.waitView.hide();
+        }catch (error) {
+            if (error instanceof UnauthorizedErrorException) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorizedRelogin);
+                this.loginView.show();
+            }
+            else if (error instanceof NoConnectException) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.noConnect);
+            }
+            else if (error instanceof GenericErrorExceptions) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+            }
+            else {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+            }
         }
     }
 
@@ -98,12 +114,14 @@ export default class SettingController {
             this.waitView.show();
             let settings = await this.settingService.getSettings(this.referenceHost);
             this.waitView.hide();
+            await TimeUtils.wait(500);
             this.settingView.render(settings);
             this.settingView.show();
         } catch (error) {
             // Gestione dell'UnauthorizedError
             if (error instanceof UnauthorizedErrorException) {
                 this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorizedRelogin);
                 this.loginView.show();
             }
             // Gestione del NoConnectException
@@ -148,7 +166,7 @@ export default class SettingController {
                 this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.noConnect);
                 break;
             case 401:
-                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorized);
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorizedWrongCredential);
                 break;
             case 200:
                 let settings = await this.settingService.getSettings(this.referenceHost);

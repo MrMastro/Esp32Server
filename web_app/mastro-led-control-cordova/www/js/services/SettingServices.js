@@ -43,8 +43,22 @@ export default class SettingService {
     // Metodo per salvare le impostazioni del dispositivo
     async saveDeviceSettings(host, settings) {
         let result = await HttpUtils.postCustom(host, ConstantApiList.saveSettigsApi, {}, settings);
-        if (result.status != 200) {
-            return false;
+        let content;
+        if (typeof result.data == 'string') {
+            content = JSON.parse(result.data);
+        } else {
+            content = result.data;
+        }
+
+        switch (result.status) {
+            case -4:
+                throw new NoConnectException(FrontEndMessage.noConnect);
+            case 401:
+                throw new UnauthorizedErrorException(FrontEndMessage.unauthorized);
+            case 200:
+                break;
+            default:
+                throw new GenericErrorExceptions(FrontEndMessage.genericError);
         }
         return true;
     }
