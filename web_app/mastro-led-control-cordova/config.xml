@@ -1,11 +1,27 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.mastroconnect.led_espert" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.mastroconnect.led_espert" version="1.0.0" xmlns="http://www.w3.org/ns/widgets"
+    xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>LedEspert</name>
     <description>Control your esp 32 Server with fantastic led games.</description>
-    <author email="" href="">
-        MastroSoft
-    </author>
+    <author email="" href=""> MastroSoft </author>
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+
+    <!-- Preferenze per lo Splash Screen -->
+    <preference name="SplashScreen" value="screen" />
+    
+    <!-- Configurazione dell'icona di splash screen -->
+    <preference name="AndroidWindowSplashScreenIcon" value="resources/android/icon.png" />
+    <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/android/icon.png" /> <!-- Per compatibilità -->
+    <preference name="SplashScreenDelay" value="3000" />
+
+    <platform name="android">
+        <icon src="resources/android/icon.png" density="mdpi" />
+        <icon src="resources/android/icon.png" density="hdpi" />
+        <icon src="resources/android/icon.png" density="xhdpi" />
+        <icon src="resources/android/icon.png" density="xxhdpi" />
+        <icon src="resources/android/icon.png" density="xxxhdpi" />
+        <icon src="resources/android/icon.png" />
+    </platform>
 </widget>

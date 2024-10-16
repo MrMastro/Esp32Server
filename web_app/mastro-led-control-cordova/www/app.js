@@ -22,6 +22,7 @@
 
 //todo Manage MVCS Design Pattern!!!
 
+import MainController from './js/controllers/MainControler.js';
 import SettingController from './js/controllers/SettingController.js';
 import AlertMessageView from './js/views/AlertMessageView.js';
 import ColorUtils from './js/utils/ColorUtils.js';
@@ -39,6 +40,7 @@ const app = {
 
     // Application Constructor
     initialize() {
+        this.mainController = {}
         this.settingController = {};
         this.bindEvents();
         host = window.location.host;
@@ -70,13 +72,18 @@ const app = {
             $('.label-ip').text("Indirizzo attuale: " + host);
         }
 
-        //! Initialize Controller, Model, View e Service
-        this.settingController = new SettingController(host);
-        this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
+        this.createComponent();
 
         if(cordova.platformId == 'android'){
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
+    },
+
+    createComponent(){
+        //! Initialize Controller, Model, View e Service
+        this.mainController = new MainController(host);
+        this.settingController = new SettingController(host);
+        this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
     },
 
     switchConnection() {
@@ -100,6 +107,7 @@ const app = {
             host = $('.fieldIp')[0].value;
             $('.label-ip').text("Indirizzo attuale: " + host);
             this.settingController.setReferenceHost(host);
+            this.mainController.setReferenceHost(host);
         } else {
             $('.label-ip').text("Inserisci un ip valido");
         }

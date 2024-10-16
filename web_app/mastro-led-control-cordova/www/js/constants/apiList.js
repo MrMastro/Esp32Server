@@ -5,7 +5,7 @@ const ConstantApiList = (() => {
     const sendEffectLedApi ="/api/ws2811SetEffect";
     const sendStopEffectApi="/api/ws2811StopEffect";
     const loginApi="/api/login";
-    const timeoutMs = 5000;
+    const timeoutMs = 3;
     
     return {
         saveSettigsApi,
