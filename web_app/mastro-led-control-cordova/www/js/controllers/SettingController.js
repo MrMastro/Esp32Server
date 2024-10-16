@@ -4,6 +4,10 @@ import SettingView from '../views/SettingView.js';
 import WaitView from '../views/WaitView.js';
 import AlertMessageView from '../views/AlertMessageView.js';
 import TimeUtils from '../utils/TimeUtils.js'
+import FrontEndMessage from '../constants/FrontEndMessageItalian.js'
+import UnauthorizedErrorException from '../exceptions/UnauthorizedErrorException.js';
+import NoConnectException from '../exceptions/NoConnectException.js';
+import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 
 export default class SettingController {
     constructor(host) {
@@ -40,7 +44,7 @@ export default class SettingController {
     }
 
     async saveSettings() {
-        
+
         //Gestione colori
         const colorHex = document.querySelector('#initialRgbInput').value;
 
@@ -89,14 +93,41 @@ export default class SettingController {
         }
     }
 
+    async showSettings() {
+        try {
+            this.waitView.show();
+            let settings = await this.settingService.getSettings(this.referenceHost);
+            this.waitView.hide();
+            this.settingView.render(settings);
+            this.settingView.show();
+        } catch (error) {
+            // Gestione dell'UnauthorizedError
+            if (error instanceof UnauthorizedErrorException) {
+                this.waitView.hide();
+                this.loginView.show();
+            }
+            // Gestione del NoConnectException
+            else if (error instanceof NoConnectException) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.noConnect);
+            }
+            // Gestione del GenericError
+            else if (error instanceof GenericErrorExceptions) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+            }
+            // Altri errori inattesi
+            else {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+            }
+        }
+    }
+
 
     async showModal() {
         if (this.settingService.isLogged()) {
-            this.waitView.show();
-            let settings = await this.settingService.getSettings(this.referenceHost);
-            this.settingView.render(settings);
-            this.waitView.hide();
-            this.settingView.show();
+            this.showSettings();
         } else {
             this.loginView.show();
         }
@@ -109,19 +140,30 @@ export default class SettingController {
         let password = this.loginView.getDevicePassword();
         let result = await this.settingService.login(this.referenceHost, deviceName, password);
         await TimeUtils.wait(500);
-        if (result) {
-            let settings = await this.settingService.getSettings(this.referenceHost);
-            this.settingView.render(settings);
-            this.waitView.hide();
-            this.settingView.show();
-        } else {
-            this.waitView.hide();
-            this.alertMessageView.alert("Errore", "Credenziali non valide");
-        }
+        this.waitView.hide();
 
+        //validate result
+        switch (result.status) {
+            case -4:
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.noConnect);
+                break;
+            case 401:
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorized);
+                break;
+            case 200:
+                let settings = await this.settingService.getSettings(this.referenceHost);
+                this.settingView.render(settings);
+                this.waitView.hide();
+                this.settingView.show();
+                break;
+            default:
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+                break;
+        }
     }
 
-    async setReferenceHost(newHost){
+    async setReferenceHost(newHost) {
         this.referenceHost = newHost;
     }
 

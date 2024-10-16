@@ -52,8 +52,8 @@ const app = {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
         $('.fieldIp').on('input', this.changeIp.bind(this));
         $('.changeIpBtn').on('click', this.changeIp.bind(this));
-        $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
-        $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
+        //$('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
+        //$('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
         $('#APConnection').on('click', this.switchConnection.bind(this));
         $('.buttonMemorizeInitialEffect').on('click', this.sendMemorizedInitialEffect);
     },

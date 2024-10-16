@@ -72,27 +72,28 @@ const HttpUtils = (() => {
     };
 
 
-            // return new Promise((resolve) => {
-        //     cordova.plugin.http.setDataSerializer('urlencoded');
-        //     cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
-        //         (response) => {
-        //             resolve(response);
-        //         },
-        //         (err) => {
-        //             console.log(err);
-        //             resolve("ERROR");
-        //         }
-        //     );
-        // });
+    // return new Promise((resolve) => {
+    //     cordova.plugin.http.setDataSerializer('urlencoded');
+    //     cordova.plugin.http.post(url, options.data, { "Accept": "application/json" },
+    //         (response) => {
+    //             resolve(response);
+    //         },
+    //         (err) => {
+    //             console.log(err);
+    //             resolve("ERROR");
+    //         }
+    //     );
+    // });
 
     // Funzione per gestire la richiesta POST su Android
     const getWithAndroid = async (url, options) => {
+        let result;
         if (options.param && JSON.stringify(options.param) !== '{}') {
             url += `?${options.param}`; // Aggiungere i parametri all'URL
         }
 
         url = "http://" + url;
-        return new Promise((resolve, reject) => {
+        const operation = new Promise((resolve, reject) => {
             cordova.plugin.http.get(url, options.param, { "Accept": "application/json" },
                 (response) => {
                     resolve(response); // Risolvere la promessa con la risposta
@@ -102,6 +103,17 @@ const HttpUtils = (() => {
                 }
             );
         });
+
+        await operation
+            .then((response) => {
+                console.log(response); // Questo viene eseguito solo se la Promise viene risolta
+                result = response;
+            })
+            .catch((error) => {
+                console.error('HttpUtils Caught an error:', error); // Questo viene eseguito se la Promise viene rifiutata
+                result = error;
+            });
+        return result;
     };
 
     // Funzione per gestire la richiesta POST nel browser
