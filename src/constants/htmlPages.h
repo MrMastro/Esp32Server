@@ -120,7 +120,7 @@ const char* htmlPage = R"(
             </label>
         <div>
         <p>Link utili:</p>
-        <a href='/webserial'> Seriale </a>
+        <a href='/webConsole'> Seriale </a>
         <p>     
             <div class="character-container">
             <div class="character"></div>

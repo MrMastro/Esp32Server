@@ -38,5 +38,5 @@ src/settings.h
 .pio
 
 #Custom
-/src/profileSettings/*.h
-!/src/profileSettings/settingsDefault.h
+/src/settings/*.h
+!/src/settings/settingsDefault.h
