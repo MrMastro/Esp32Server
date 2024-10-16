@@ -113,8 +113,8 @@ export default class SettingController {
         try {
             this.waitView.show();
             let settings = await this.settingService.getSettings(this.referenceHost);
-            this.waitView.hide();
             await TimeUtils.wait(500);
+            this.waitView.hide();
             this.settingView.render(settings);
             this.settingView.show();
         } catch (error) {
