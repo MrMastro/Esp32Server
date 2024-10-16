@@ -65,13 +65,12 @@ void SettingService::loadSettings(String path)
         return;
     }
 
-    File file;
     String fileContent = "";
 
     // Verifica se il file esiste
     if (LittleFS.exists(path))
     {
-
+        File file;
         // Apri il file in modalità lettura
         file = LittleFS.open(path, "r");
         if (!file)
@@ -87,18 +86,23 @@ void SettingService::loadSettings(String path)
         {
             fileContent += (char)file.read();
         }
+        file.close();
     }
     else
     {
         serialService->logWarning("File non trovato, path: " + path, getNameService(), "loadSettings(String path)");
         serialService->logWarning("Carico impostazioni di default", getNameService(), "loadSettings(String path)");
+        String pathFolder = SETTINGS_FOLDER_LOCATION_PATH;
+        if (!LittleFS.mkdir(pathFolder)) {
+            Serial.println("Errore nella creazione della cartella");
+        } else {
+            Serial.println("Cartella creata con successo");
+        }
         String defaultContent = SettingsModel::getDefault().toJson();
-        writeFile(path, defaultContent);
+        writeFile(path, defaultContent, true);
         fileContent = defaultContent;
     }
 
-    // Chiudi il file
-    file.close();
     Serial.println("Contenuto del file:");
     Serial.println(fileContent);
     if (fileContent.isEmpty())
@@ -109,6 +113,7 @@ void SettingService::loadSettings(String path)
     }
     // carico il contenuto di filecontent dentro loadSettings
     boolean res = settings->fromJson(fileContent);
+    Serial.println(res);
     if (!res)
     {
         serialService->logWarning("Errore file json, ripristino json", getNameService(), "loadSettings(String path)");
@@ -126,10 +131,10 @@ void SettingService::onInitServiceCollector()
     serialService = ((SerialService *)getServiceByCollector("SerialService"));
 }
 
-boolean SettingService::writeFile(String &path, String &content)
+boolean SettingService::writeFile(String &path, String &content, bool create)
 {
     // Crea e scrivi il contenuto predefinito nel file
-    File file = LittleFS.open(path, "w");
+    File file = LittleFS.open(path, "w", create);
     if (!file)
     {
         serialService->logWarning("Errore nella creazione del file", getNameService(), "loadSettings(String path)");

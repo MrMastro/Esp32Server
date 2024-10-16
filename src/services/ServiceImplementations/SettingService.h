@@ -28,7 +28,7 @@ protected:
 private:
     boolean isOperative;
     SerialService* serialService;
-    boolean writeFile(String &path, String& content);
+    boolean writeFile(String &path, String& content, bool create=false);
 };
 
 #endif // SettingService_H

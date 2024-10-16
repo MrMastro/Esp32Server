@@ -32,6 +32,7 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
 //Path
 
 #define SETTINGS_FILE_LOCATION_PATH "/settings/settings.json"
+#define SETTINGS_FOLDER_LOCATION_PATH "/settings"
 
 //FRONT END CUSTOM MESSAGE
 #define SUCCESS_COMMAND "Comando eseguito: {} - {}"
