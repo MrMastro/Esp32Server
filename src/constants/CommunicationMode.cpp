@@ -24,5 +24,5 @@ const String communicationModeEnumToString(COMMUNICATION_MODE inputEnum)
         }
     }
     // Return a special value or throw an exception if the string is not found
-    return "UKNOWN_EFFECT";
+    return communicationModeEnumToString(COMMUNICATION_MODE::UNKNOWN_MODE);
 }

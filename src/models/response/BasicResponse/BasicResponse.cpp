@@ -11,8 +11,8 @@ BasicResponse::BasicResponse(StatusInfo info, const String &dataJsonInput)
         dataJson = dataJsonInput;
 }
 
-BasicResponse::BasicResponse(const String &message, const String &description, const String &dataJsonInput){
-    status = StatusInfo(message,description);
+BasicResponse::BasicResponse(const int &code, const String &message, const String &description, const String &dataJsonInput){
+    status = StatusInfo(code, message, description);
     dataJson = dataJsonInput;
 }
 
@@ -49,7 +49,7 @@ String BasicResponse::getDataJson()
 
 void BasicResponse::setDataJson(const String &json)
 {
-    dataJson = dataJson;
+    dataJson = json;
 }
 
 String BasicResponse::toString()

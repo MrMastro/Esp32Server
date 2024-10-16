@@ -19,13 +19,16 @@ public:
     SettingService();
     SettingsModel getSettings();
     void loadSettings(String path);
-
+    boolean saveSettings(String path, SettingsModel s);
+    boolean changeSetting(String key, String value);
+    String getJsonSettings();
 protected:
     SettingsModel* settings;
     void onInitServiceCollector() override;
 private:
     boolean isOperative;
-    boolean writeFile(fs::File &file, String &path, String& content);
+    SerialService* serialService;
+    boolean writeFile(String &path, String& content);
 };
 
 #endif // SettingService_H

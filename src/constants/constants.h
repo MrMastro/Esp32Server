@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 #include <map>
-#include <models/response/BasicResponse.h>
+#include <models/response/BasicResponse/BasicResponse.h>
 #include "./utils/FunctionUtils.h"
 
 //Enum to represent http_code with additional information
@@ -29,9 +29,15 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
     // Add more status codes and information as needed
 };
 
+//Path
+
+#define SETTINGS_FILE_LOCATION_PATH "/settings/settings.json"
+
 //FRONT END CUSTOM MESSAGE
 #define SUCCESS_COMMAND "Comando eseguito: {} - {}"
-#define UKNOWN_COMMAND "Comando non riconosciuto: {}"
+#define SUCCESS_DELAYED_COMMAND "Comando delayed eseguito: {} - {}"
+#define UKNOWN_COMMAND "Comando non riconosciuto"
+#define ERROR_COMMAND "ERRORE: {} - {}"
 #define COLOR_OUT_OF_RANGE_ERROR "I valori dei colori devono essere compresi tra 0 e 255"
 #define WS2811_EFFECT_UKNOWN "Effetto sconosciuto"
 

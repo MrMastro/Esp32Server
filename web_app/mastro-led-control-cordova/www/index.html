@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html data-bs-theme="dark" lang="en">
+<html data-bs-theme="dark" lang="en" style>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <title>WebServerEsp32</title>
     <meta name="theme-color" content="#94bded">
     <meta property="og:type" content="website">
@@ -16,21 +15,21 @@
     <link rel="stylesheet" href="assets/css/myCss.css">
     <link rel="stylesheet" href="assets/css/Navbar-With-Button-icons.css">
     <link rel="stylesheet" href="assets/css/vanilla-zoom.min.css">
+    <meta property="og:type" content="website" />
 </head>
 
 <body class="bodyContainers clean-form dark">
     <header style="margin-bottom: 0px;">
         <nav class="navbar navbar-expand-md bg-body d-md-flex justify-content-md-center align-items-md-center py-3">
-            <div class="container"><a class="navbar-brand d-flex align-items-center" href="#"><span class="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-bezier">
+            <div class="container"><a class="navbar-brand d-flex align-items-center" href="#"><span class="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"><svg class="bi bi-bezier" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M0 10.5A1.5 1.5 0 0 1 1.5 9h1A1.5 1.5 0 0 1 4 10.5v1A1.5 1.5 0 0 1 2.5 13h-1A1.5 1.5 0 0 1 0 11.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10.5.5A1.5 1.5 0 0 1 13.5 9h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM6 4.5A1.5 1.5 0 0 1 7.5 3h1A1.5 1.5 0 0 1 10 4.5v1A1.5 1.5 0 0 1 8.5 7h-1A1.5 1.5 0 0 1 6 5.5zM7.5 4a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"></path>
                             <path d="M6 4.5H1.866a1 1 0 1 0 0 1h2.668A6.517 6.517 0 0 0 1.814 9H2.5c.123 0 .244.015.358.043a5.517 5.517 0 0 1 3.185-3.185A1.503 1.503 0 0 1 6 5.5zm3.957 1.358A1.5 1.5 0 0 0 10 5.5v-1h4.134a1 1 0 1 1 0 1h-2.668a6.517 6.517 0 0 1 2.72 3.5H13.5c-.123 0-.243.015-.358.043a5.517 5.517 0 0 0-3.185-3.185z"></path>
-                        </svg></span><span>Mastro Connecting</span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navcol-3">
+                        </svg></span><span>Mastro Connecting</span></a><button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+                <div id="navcol-3" class="collapse navbar-collapse">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link active" href="/webConsole">Seriale</a></li>
-                        <li class="nav-item"></li>
-                        <li class="nav-item"></li>
-                    </ul><a class="btn btn-primary" role="button" href="updateLogin">Aggiorna Esp32</a>
+                        <li class="nav-item"><a class="btn" role="button" href hrefcommented="/webConsole">Seriale</a></li>
+                        <li class="nav-item"><a class="btn" role="button" href hrefcommented="updateLogin">Aggiorna Esp32</a></li>
+                    </ul><a class="btn btn-primary settingsBtn" role="button">Impostazioni</a>
                 </div>
             </div>
         </nav>
@@ -40,18 +39,21 @@
             <div>
                 <h1 class="text-uppercase fw-bold text-white mb-3" style="margin-bottom: 0px;">Controller</h1>
                 <form class="mainForm" style="text-align: center;display: flex;position: relative;border-radius: 0;" method="post" target="_self">
-                    <div class="containerInsideForm">
+                    <div class="containerInsideForm"><label class="form-label form-label-title">Indirizzo IP</label>
                         <div id="ContainAction-0" class="ContainAction">
-                            <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title">Indirizzo IP</label></div>
-                            <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
-                                <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"><button class="btn text-center d-xl-flex justify-content-xl-center align-items-xl-center btn-dark changeIpBtn" type="button">Cambia</button></div><small class="label-ip">Indirizzo attuale:&nbsp;</small>
+                            <div class="border rounded-pill d-flex d-md-flex d-xxl-flex justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);">
+                                <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent dark">
+                                    <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center">
+                                        <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center align-self-center flex-wrap justify-content-lg-center align-items-lg-center" style="min-width: auto;margin-right: 5px;margin-top: 2px;margin-left: 5px;/*text-align: center;*/padding: 0;width: auto;padding-top: 0;padding-right: 0;padding-bottom: 0;padding-left: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="APConnection" class="form-check-input" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="APConnection" checked /><label class="form-check-label text-center d-flex flex-fill justify-content-center align-items-center" for="rgbCheck-1" style="position: relative;margin-right: 0px;margin-left: 0px;text-align: center;max-width: initial;min-width: 75px;">Connessione AP</label></div><input class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+                                    </div><small class="label-ip">Indirizzo attuale: </small>
+                                </div>
                             </div>
                         </div>
                         <div id="ContainAction-4" class="ContainAction">
                             <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title">Effetto</label></div>
-                            <div class="containerOfComponent"><select class="border rounded-pill form-select d-flex justify-content-center effectInput" style="max-width: 250px;font-size: 11px;text-align: center;" value="effect" name="effect select" required="">
+                            <div class="containerOfComponent"><select class="border rounded-pill form-select d-flex justify-content-center effectInput" style="max-width: 250px;font-size: 11px;text-align: center;" value="effect" name="effect select" required>
                                     <optgroup label="Effects">
-                                        <option value="PROGRESSIVE_BAR_UNIQUE_COLOR" selected="">PROGRESSIVE BAR UNIQUE COLOR</option>
+                                        <option value="PROGRESSIVE_BAR_UNIQUE_COLOR" selected>PROGRESSIVE BAR UNIQUE COLOR</option>
                                         <option value="CONSTANT_UNIQUE_COLOR">CONSTANT UNIQUE COLOR</option>
                                     </optgroup>
                                 </select></div>
@@ -59,26 +61,26 @@
                         <div id="ContainAction-3" class="ContainAction">
                             <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label componentForm form-label-title">Tempo (ms)</label></div>
                             <div class="d-flex flex-column containerOfComponent" style="overflow: hidden;">
-                                <div class="border rounded-pill d-flex d-md-flex d-xxl-flex justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);"><input class="form-range border-1 border-secondary focus-ring focus-ring-secondary d-flex align-content-center align-self-center justify-content-md-center componentForm rangeForm timingRangeInput" type="range" value="500" name="timingSlide" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="max-width: 420px;" required="">
-                                    <div class="d-flex flex-row justify-content-center align-items-center"><input class="form-control form-control-sm d-md-flex justify-content-md-center timingInput" type="number" name="timing" min="0" max="1000" step="1" style="max-width: 70px;width: auto;margin-bottom: 10px;margin-right: 5px;margin-left: 5px;" value="500"><label class="form-label" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
+                                <div class="border rounded-pill d-flex d-md-flex d-xxl-flex justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);"><input class="form-range border-1 border-secondary focus-ring focus-ring-secondary d-flex align-content-center align-self-center justify-content-md-center componentForm rangeForm timingRangeInput" type="range" value="500" name="timingSlide" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="max-width: 420px;" required />
+                                    <div class="d-flex flex-row justify-content-center align-items-center"><input class="form-control form-control-sm d-md-flex justify-content-md-center timingInput" type="number" name="timing" min="0" max="1000" step="1" style="max-width: 70px;width: auto;margin-bottom: 10px;margin-right: 5px;margin-left: 5px;" value="500" /><label class="form-label" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
                                 </div>
                             </div>
                         </div>
                         <div id="ContainAction-2" class="ContainAction">
                             <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title">Colore</label></div>
-                            <div class="containerOfComponent"><input class="form-control form-control-color colorInput" type="color" style="width: 50px;height: 40px;"></div>
+                            <div class="containerOfComponent"><input class="form-control form-control-color colorInput" type="color" style="width: 50px;height: 40px;" /></div>
                         </div>
                         <div id="ContainAction-1" class="ContainAction">
-                            <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label componentForm form-label-title">Striscia led soggetta all'effetto</label></div>
+                            <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label componentForm form-label-title">Striscia led soggetta all&#39;effetto</label></div>
                             <div class="d-flex flex-column containerOfComponent" style="overflow: hidden;">
                                 <div class="text-center border rounded-pill d-flex d-md-flex d-xxl-flex flex-row justify-content-center align-items-center align-content-center align-self-center m-auto justify-content-lg-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);min-width: 200px;" data-bs-target="#navcol-3">
-                                    <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center align-self-center flex-wrap justify-content-lg-center align-items-lg-center" style="min-width: auto;margin-right: 5px;margin-top: 2px;margin-left: 5px;/*text-align: center;*/padding: 0;width: auto;padding-top: 0;padding-right: 0;padding-bottom: 0;padding-left: 0;margin-bottom: 2px;" data-bs-theme="dark"><input class="form-check-input" type="checkbox" id="rgbCheck" style="margin-left: 0px;width: 30px;height: 30px;" name="RGB" checked=""><label class="form-check-label text-center d-flex flex-fill justify-content-center align-items-center" for="RGB" style="position: relative;margin-right: 0px;margin-left: 0px;text-align: center;max-width: initial;min-width: 75px;">RGB</label></div>
-                                    <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center justify-content-lg-center align-items-lg-center" style="padding: 0;padding-left: 0;padding-right: 0;margin-right: 5px;padding-top: 0;margin-top: 2px;min-width: auto;margin-left: 5px;text-align: center;width: auto;padding-bottom: 0;margin-bottom: 2px;" data-bs-theme="dark"><input class="form-check-input d-flex d-lg-flex justify-content-center align-items-center justify-content-lg-center align-items-lg-center" type="checkbox" id="ws2811Check" style="margin-left: 0px;width: 30px;height: 30px;" name="WS2811" checked=""><label class="form-check-label d-flex d-lg-flex flex-fill justify-content-center align-items-center align-self-center justify-content-lg-center align-items-lg-center" for="WS2811" style="margin-left: 0px;margin-right: 0px;position: relative;text-align: center;max-width: initial;min-width: 75px;">WS2811</label></div>
+                                    <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center align-self-center flex-wrap justify-content-lg-center align-items-lg-center" style="min-width: auto;margin-right: 5px;margin-top: 2px;margin-left: 5px;/*text-align: center;*/padding: 0;width: auto;padding-top: 0;padding-right: 0;padding-bottom: 0;padding-left: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="rgbCheck" class="form-check-input" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="RGB" checked /><label class="form-check-label text-center d-flex flex-fill justify-content-center align-items-center" for="RGB" style="position: relative;margin-right: 0px;margin-left: 0px;text-align: center;max-width: initial;min-width: 75px;">RGB</label></div>
+                                    <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center justify-content-lg-center align-items-lg-center" style="padding: 0;padding-left: 0;padding-right: 0;margin-right: 5px;padding-top: 0;margin-top: 2px;min-width: auto;margin-left: 5px;text-align: center;width: auto;padding-bottom: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="ws2811Check" class="form-check-input d-flex d-lg-flex justify-content-center align-items-center justify-content-lg-center align-items-lg-center" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="WS2811" checked /><label class="form-check-label d-flex d-lg-flex flex-fill justify-content-center align-items-center align-self-center justify-content-lg-center align-items-lg-center" for="WS2811" style="margin-left: 0px;margin-right: 0px;position: relative;text-align: center;max-width: initial;min-width: 75px;">WS2811</label></div>
                                     <div class="d-flex flex-row justify-content-center align-items-center"></div>
                                 </div>
                             </div>
                         </div>
-                    </div><button class="btn btn-dark fs-5 py-2 px-4 buttonForm buttonWs2811SetEffect" type="button">INVIA INIZIO EFFETTO</button><button class="btn btn-dark fs-5 py-2 px-4 buttonForm buttonWs2811StopEffect" type="button">INVIA FINE EFFETTO</button>
+                    </div><button class="btn btn-dark fs-5 py-2 px-4 buttonForm buttonWs2811SetEffect" type="button">INVIA INIZIO EFFETTO</button><button class="btn btn-dark fs-5 py-2 px-4 buttonForm buttonWs2811StopEffect" type="button">INVIA FINE EFFETTO</button><button class="btn btn-dark fs-5 py-2 px-4 buttonForm buttonMemorizeInitialEffect" type="button">MEMORIZZA COME EFFETTO INIZIALE</button>
                 </form>
                 <div id="Character-div" class="character-container">
                     <div class="character"></div>
@@ -86,6 +88,145 @@
             </div>
         </div>
     </section>
+
+    <div id="Settings-Modal" class="modal fade" role="dialog" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header d-flex flex-column justify-content-xl-center align-items-xl-center" style="text-align: center;display: flex;position: relative;"><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                    <h1 class="modal-title d-flex d-xl-flex justify-content-xl-center align-items-xl-center">Impostazioni</h1>
+                </div>
+                <div class="modal-body d-xl-flex flex-column align-self-stretch justify-content-xl-center align-items-xl-center">
+                    <div id="Settings-Card-General" class="card" style="margin-bottom: 10px;margin-top: 10px;min-width: initial;max-width: initial;">
+                        <h2>Impostazioni Dispositivo</h2>
+                        <div class="card-body">
+                            <div id="Settings-Panel-General" class="d-flex flex-column align-items-xl-center" style="margin-top: 10px;margin-bottom: 10px;">
+                                <h4>Impostazioni Principali</h4>
+                                <div id="Settings0" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container d-xl-flex containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Nome Dispositivo</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="deviceNameInput" type="text" style="width: 175px;" /></div>
+                                    </div>
+                                </div>
+                                <div id="Settings1" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container d-xl-flex containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Password Dispositivo</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="devicePasswordInput" type="password" style="width: 175px;" /></div>
+                                    </div>
+                                </div>
+                                <div id="Settings2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Tipologia di comunicazione</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><select id="communicationModeInput" class="border rounded-pill form-select-sm d-flex justify-content-center" style="font-size: 11px;text-align: center;width: 175px;" value name="comunicationMode" required>
+                                                <option value="AP_MODE">Access Point</option>
+                                                <option value="WIFI_MODE">WiFi</option>
+                                                <option value="BLUETOOTH_MODE">Bluetooth</option>
+                                            </select></div>
+                                    </div>
+                                </div>
+                                <div id="Settings2-1" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Modalità Debug</label></div>
+                                    <div class="text-center d-xl-flex flex-column align-items-xl-center containerOfComponent" style="width: 175px;height: 40px;">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="debugInput" class="d-xl-flex justify-content-xl-center align-items-xl-start" type="checkbox" style="width: 30px;height: 30px;" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="Settings-Panel-ApMode" class="d-flex flex-column" style="margin-top: 10px;margin-bottom: 10px;">
+                                <h4>Impostazioni Connessione AP</h4>
+                                <div id="Settings2-2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Nome Access Point</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="ssidAPInput" type="text" style="width: 175px;" /></div>
+                                    </div>
+                                </div>
+                                <div id="Settings2-3" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Password Access Point</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="passwordAPInput" type="password" style="width: 175px;" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="Settings-Panel-WifiMode" class="d-flex flex-column" style="margin-top: 10px;margin-bottom: 10px;">
+                                <h4>Impostazioni Connessione WIFI</h4>
+                                <div id="Settings1-2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;width: 90px;min-width: 90px;">Nome rete</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="ssidWIFIInput" type="text" style="width: 175px;" /></div>
+                                    </div>
+                                </div>
+                                <div id="Settings2-4" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Password rete</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="passwordWIFIInput" type="password" style="width: 175px;" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="Settings-Card-Leds" class="card" style="margin-top: 10px;margin-bottom: 10px;min-width: initial;max-width: initial;">
+                        <h2>Impostazioni Luci Led</h2>
+                        <div class="card-body" style="margin-top: 5px;margin-bottom: 5px;">
+                            <div id="Settings-Panel-LedService" style="margin-top: 10px;margin-bottom: 10px;">
+                                <h4>Impostazioni Strisce led</h4>
+                                <div id="Settings-Panel-RGB" class="d-flex d-xl-flex flex-row justify-content-center align-items-center justify-content-xl-center align-items-xl-center ContainAction" style="height: 95px;">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: initial;">Striscia RGB</label></div>
+                                    <div id="Settings-panel-RGB" class="text-center d-xl-flex flex-row justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="enableStripRgbInput" class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 50px;height: 30px;" /><label class="form-label">Abilitato</label></div>
+                                        <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;"><input id="pinLedCinRgbInput" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;margin-right: 5px;margin-left: 5px;" /><label class="form-label" style="min-width: 72px;">Pin Cin</label></div>
+                                        <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedDinRgbInput" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
+                                    </div>
+                                </div>
+                                <div id="Settings-Panel-WS2811" class="d-flex d-xl-flex flex-row justify-content-center align-items-center justify-content-xl-center align-items-xl-center ContainAction" style="height: 95px;">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: initial;">Striscia RGB</label></div>
+                                    <div id="Settings-panel-RGB-2" class="text-center d-xl-flex flex-row justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="enableStripWs2811Input" class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 50px;height: 30px;" /><label class="form-label">Abilitato</label></div>
+                                        <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;"><input id="numLedWs2811Input" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;" /><label class="form-label" style="min-width: 72px;">Qt Pixel</label></div>
+                                        <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedWs2811Input" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="Settings-Panel-InitialEffects" class="border rounded-0 d-flex flex-column visible" style="margin-top: 10px;margin-bottom: 10px;">
+                                <h4>Informazioni effetto iniziale</h4>
+                                <h6 class="text-center">(Effetto iniziale modificabile altrove)</h6>
+                                <div id="Settings2-8" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Effetto iniziale</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="initialEffectInput" type="text" style="max-width: 150px;font-size: 11px;text-align: center;width: 150px;" value="effect" name="effect select" required readonly /></div>
+                                    </div>
+                                </div>
+                                <div id="Settings0-2" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Tempo di animazione</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="d-flex flex-row justify-content-xl-center"><label id="initialDeltaTInput" class="form-label d-xl-flex align-items-xl-end" style="margin-right: 5px;margin-left: 2px;"></label><label class="form-label d-xl-flex align-items-xl-end" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
+                                    </div>
+                                </div>
+                                <div id="Settings1-3" class="d-xl-flex flex-row justify-content-xl-center align-items-xl-center ContainAction">
+                                    <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Colore iniziale</label></div>
+                                    <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
+                                        <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><input id="initialRgbInput" class="colorInput" type="color" style="width: 50px;height: 40px;" disabled /></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Annulla</button><button class="btn btn-primary saveSettingsBtn" type="button">Salva</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="LoginViewContainer">
+        <!--todo-->
+        <!-- generated by LoginView and Controller by SettingController  -->
+    </div>
+
+    <div id="WaitViewContainer">
+        <!-- generated by WaitView and Controller by SettingController  -->
+    </div>
+
+    <div id="AlertMessageViewContainer">
+        <!-- generated by WaitView and Controller by SettingController  -->
+    </div>
+
     <footer class="text-center bg-dark">
         <div class="container text-white py-4 py-lg-5">
             <ul class="list-inline">
@@ -94,11 +235,11 @@
                 <li class="list-inline-item"><a class="link-light" href="#">Hardware</a></li>
             </ul>
             <ul class="list-inline">
-                <li class="list-inline-item me-4"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-facebook text-light">
+                <li class="list-inline-item me-4"><svg class="bi bi-facebook text-light" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"></path>
                     </svg></li>
                 <li class="list-inline-item me-4"></li>
-                <li class="list-inline-item"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-instagram text-light">
+                <li class="list-inline-item"><svg class="bi bi-instagram text-light" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334"></path>
                     </svg></li>
             </ul>
@@ -110,7 +251,7 @@
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/controlNumericTimer.js"></script>
     <script src="assets/js/loginForUpdate.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 
 </html>

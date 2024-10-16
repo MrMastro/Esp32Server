@@ -1,6 +1,6 @@
 {
-  "name": "com.mastroconnect.mastroled",
-  "displayName": "MastroConnecting",
+  "name": "com.mastroconnect.led_espert",
+  "displayName": "LedEspert",
   "version": "1.0.0",
   "description": "Control your esp 32 Server with fantastic led games.",
   "main": "index.js",
@@ -13,16 +13,15 @@
   "author": "Fabbro",
   "license": "",
   "dependencies": {
-    "cordova-android": "13.0.0",
+    "com.mastroconnect.led_espert": "file:",
     "cordova-browser": "7.0.0"
   },
   "cordova": {
     "platforms": [
-      "android",
-      "browser"
+      "browser",
+      "android"
     ],
     "plugins": {
-      "cordova-plugin-http": {},
       "cordova-plugin-advanced-http": {
         "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
       },
@@ -30,9 +29,9 @@
     }
   },
   "devDependencies": {
+    "cordova-android": "^13.0.0",
     "cordova-plugin-advanced-http": "^3.3.1",
     "cordova-plugin-enable-cleartext-traffic": "^2.1.0",
-    "cordova-plugin-file": "^8.1.0",
-    "cordova-plugin-http": "^1.2.0"
+    "cordova-plugin-file": "^8.1.0"
   }
 }

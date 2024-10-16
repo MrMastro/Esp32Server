@@ -3,7 +3,7 @@
 
 #include <ArduinoJson.h>
 #include <iostream>
-#include "response/BasicResponse.h"
+#include "response/BasicResponse/BasicResponse.h"
 
 boolean jsonToSimpleBoolean(String json);
 String simpleBooleanToJson(boolean paramBool);

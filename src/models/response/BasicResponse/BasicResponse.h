@@ -1,6 +1,8 @@
 #ifndef BasicResponse_H
 #define BasicResponse_H
 
+#define DEPRECATED __attribute__((deprecated))
+
 #include "./models/StatusInfo.h"
 #include <./constants/Constants.h>
 
@@ -14,7 +16,7 @@ public:
     BasicResponse();
     BasicResponse(StatusInfo info);
     BasicResponse(StatusInfo info, const String &dataJson);
-    BasicResponse(const String &message, const String &description, const String &dataJson);
+    BasicResponse(const int &code, const String &message, const String &description, const String &dataJsonInput);
     BasicResponse(HTTP_CODE code);
     BasicResponse(HTTP_CODE code, String customDescription);
     StatusInfo getStatus();
