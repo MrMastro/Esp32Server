@@ -114,13 +114,13 @@ BasicResponse jsonToDto(String &json)
     String dataJson = jsonDocument["data"].as<String>();
 
     // Create and return a BasicResponse object
-    return BasicResponse(message, description, dataJson);
+    return BasicResponse(code, message, description, dataJson);
 }
 
 String dtoToJson(BasicResponse &data)
 {
     // Create a JSON document with enough capacity to store the data
-    StaticJsonDocument<200> jsonDocument;
+    StaticJsonDocument<968> jsonDocument;
     StaticJsonDocument<200> jsonInnerDocument;
     // Add data to the JSON document
     // StatusInfo statusN = data.getStatus();

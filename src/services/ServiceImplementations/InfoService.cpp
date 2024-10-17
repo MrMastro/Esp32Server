@@ -1,35 +1,52 @@
+#include "InfoService.h"
 
-#ifndef InfoService_H
-#define InfoService_H
+// This Service works to manage information about status of system and various information (like ip, authorization, information like communication, etc.)
 
-#ifndef Services_H
-#include <services/Service.h>
-#endif
-
-class InfoService : public Service
+InfoService::InfoService()
 {
-public:
-    InfoService() 
+  isOperative = false;
+}
+
+StatusInfo InfoService::infoSuccess()
+{
+    return getStatusInfoByHttpCode(HTTP_CODE::OK);
+}
+
+String InfoService::getIp()
+{
+    return getServerByCollector()->getIp();
+}
+
+String InfoService::getInfo()
+{
+    String info = "WIP, info visualizated here";
+    return info;
+}
+
+boolean InfoService::loginValidate(String deviceName, String devicePwd)
+{
+    SettingsModel s = settingService->getSettings();
+    if (s.deviceName == deviceName && s.devicePassword == devicePwd)
     {
-        
-    }  // Constructor
-    ~InfoService() {} // Destructor
-
-    String jsonPong()
+        return true;
+    }
+    else
     {
-        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::OK);
-        BasicResponse response = BasicResponse(s);
-        return dtoToJson(response);
+        return false;
     }
+}
 
-    StatusInfo infoSuccess()
-    {
-        return getStatusInfoByHttpCode(HTTP_CODE::OK);
-    }
+void InfoService::onInitServiceCollector()
+{
+    settingService = ((SettingService *)servicesCollector.getService("SettingService"));
+    isOperative = true;
+}
 
-    String getIp(){
-        return getServerByCollector()->getIp();
-    }
-};
+boolean InfoService::checkAuthorization(String ip){
+    return true; //todo authorization with array of logged ip
+}
 
-#endif // InfoService_H
+boolean InfoService::isAvaible()
+{
+  return isOperative;
+}

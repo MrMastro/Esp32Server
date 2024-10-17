@@ -1,0 +1,37 @@
+{
+  "name": "com.mastroconnect.mastroled",
+  "displayName": "MastroConnecting",
+  "version": "1.0.0",
+  "description": "Control your esp 32 Server with fantastic led games.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Fabbro",
+  "license": "",
+  "dependencies": {
+    "com.mastroconnect.mastroled": "file:",
+    "cordova-browser": "7.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "browser"
+    ],
+    "plugins": {
+      "cordova-plugin-http": {},
+      "cordova-plugin-advanced-http": {
+        "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
+      },
+      "cordova-plugin-enable-cleartext-traffic": {}
+    }
+  },
+  "devDependencies": {
+    "cordova-plugin-advanced-http": "^3.3.1",
+    "cordova-plugin-enable-cleartext-traffic": "^2.1.0",
+    "cordova-plugin-file": "^8.1.0",
+    "cordova-plugin-http": "^1.2.0"
+  }
+}

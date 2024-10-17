@@ -1,9 +1,36 @@
 #include "LedEffects.h"
 
+const RGB_EFFECT rgbEffectStringToEnum(String inputString)
+{
+  inputString.toUpperCase();
+  for (const auto &entry : EFFECT_RGB_PAIR)
+  {
+    if (entry.second == inputString)
+    {
+      return entry.first;
+    }
+  }
+  // Return a special value or throw an exception if the string is not found
+  return RGB_EFFECT::UKNOWN_EFFECT;
+}
+
+const String rgbEffectEnomToString(RGB_EFFECT inputEnum)
+{
+  for (const auto &entry : EFFECT_RGB_PAIR)
+  {
+    if (entry.first == inputEnum)
+    {
+      return entry.second;
+    }
+  }
+  // Return a special value or throw an exception if the string is not found
+  return "UKNOWN_EFFECT";
+}
+
 const WS2811_EFFECT WS2811EffectStringToEnum(String inputString)
 {
   inputString.toUpperCase();
-  for (const auto &entry : EFFECT_PAIR)
+  for (const auto &entry : EFFECT_WS2811_PAIR)
   {
     if (entry.second == inputString)
     {
@@ -16,7 +43,7 @@ const WS2811_EFFECT WS2811EffectStringToEnum(String inputString)
 
 const String WS2811EffectEnomToString(WS2811_EFFECT inputEnum)
 {
-  for (const auto &entry : EFFECT_PAIR)
+  for (const auto &entry : EFFECT_WS2811_PAIR)
   {
     if (entry.first == inputEnum)
     {
@@ -24,7 +51,7 @@ const String WS2811EffectEnomToString(WS2811_EFFECT inputEnum)
     }
   }
   // Return a special value or throw an exception if the string is not found
-  return "UKNOWN_EFFECT";
+  return WS2811EffectEnomToString(WS2811_EFFECT::UKNOWN_EFFECT);
 }
 
 const String stepLifeEffectEnomToString(STEP_LIFE_EFFECT inputEnum)
