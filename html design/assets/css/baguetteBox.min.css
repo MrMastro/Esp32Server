@@ -225,19 +225,6 @@ div {
   border-style: solid;
 }
 
-.containerInsideForm {
-  border: 6px solid var(--bs-body-bg) ;
-  border-radius: 19px;
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
-  margin: 6px;
-  padding: 16px;
-  width: auto;
-  height: inherit;
-  max-width: auto;
-}
-
 .ContainAction {
   display: flex;
   position: relative;

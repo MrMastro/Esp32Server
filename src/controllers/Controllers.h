@@ -5,6 +5,7 @@
 #include "services/ServiceImplementations/CommandService.h"
 #include "services/ServiceImplementations/InfoService.h"
 #include <models/response/BasicResponse/BasicResponse.h>
+#include <models/InitialSettingSaveModel/InitialSettingSaveModel.h>
 #include "constants/Constants.h"
 #include "models/DataModelling.h"
 
@@ -22,6 +23,7 @@ void stopEffectWs2811(AsyncWebServerRequest *request);
 
 //SettingsController
 void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+void saveInitialSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 
 //------------------------------------------------------------------------------------------------------------
 

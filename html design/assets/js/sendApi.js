@@ -1,4 +1,7 @@
 var host ="";
+var apHost = "192.168.4.1";
+var connected = true;
+
 var hideIp = true;
 
 function hexToRgb(hex) {
@@ -18,24 +21,35 @@ function hexToRgb(hex) {
 
 function changeIp(){
     let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test($('.fieldIp')[0].value);
-    if(test){
+    if(!$('.fieldIp')[0].value){
+        $('.label-ip').text("Inserisci un indirizzo ip");
+    }
+    else if(test){
         host = $('.fieldIp')[0].value;
         $('.label-ip').text("Indirizzo attuale: "+ host);
     }else{
-        $('.label-ip').text("Errore: Inserisci un ip valido");
+        $('.label-ip').text("Inserisci un ip valido");
     }
+}
+
+function showSettings(){
+    $('#Settings-Modal').modal('show');
+    //$('#Settings-Modal').modal('hide');
 }
 
 
 $(document).ready(function () {
     host = window.location.host;
     $('.label-ip').text("Indirizzo attuale: "+ host);
+    hideIp = $('#APConnection')[0].checked;
     if(hideIp){
         $('.fieldIp').hide();
         $('.changeIpBtn').hide();
+        host = apHost;
+        $('.label-ip').text("Indirizzo attuale: "+ host);
     }
+    
     $('.fieldIp').on('input',changeIp);
-    $('.changeIpBtn').on('click',changeIp);
     
     $('.buttonWs2811SetEffect').on('click', function () {
     let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
@@ -114,4 +128,29 @@ $(document).ready(function () {
       }
     });
   });
+    
+    $('.buttonMemorizeInitialEffect').on('click', function () {
+        console.log("WIP");
+    });
+    
+    $('#APConnection').on('click',function () {
+        let accessPointMode = $('#APConnection')[0].checked;
+        if(accessPointMode){
+            $('.fieldIp').hide();
+            $('.changeIpBtn').hide();
+            host = "192.168.4.1";
+            $('.label-ip').text("Indirizzo attuale: "+ host);
+        }else{
+            $('.fieldIp').show();
+            $('.changeIpBtn').show();
+            changeIp();
+        }
+    });
+    
+    $('.settingsBtn').on('click',function(){
+        showSettings();
+    });
+    
+    $('.buttonMemorizeInitialEffect').hide();
+    
 });

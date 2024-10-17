@@ -55,7 +55,6 @@ const app = {
         //$('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
         //$('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
         $('#APConnection').on('click', this.switchConnection.bind(this));
-        $('.buttonMemorizeInitialEffect').on('click', this.sendMemorizedInitialEffect);
     },
 
     // deviceready Event Handler
@@ -169,14 +168,6 @@ const app = {
 
         url += (queryParam != "") ? ("?" + queryParam) : ("");
         postCustom(url, queryParam, {}, (response) => this.genericSuccess(response), (err) => this.genericFailure(err));
-    },
-
-    sendMemorizedInitialEffect() {
-        console.log("WIP");
-    },
-
-    login(deviceName, devicePassword) {
-        console.log("WIP");
     },
 
     // SUCCESS AND FAILURE METHOD

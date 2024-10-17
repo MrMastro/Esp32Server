@@ -1,4 +1,6 @@
 #include "validators.h"
+#include <models/InitialSettingSaveModel/InitialSettingSaveModel.h>
+#include <constants/LedEffects.h>
 
 String validateCmd(CMD cmd, std::vector<String> params)
 {
@@ -60,6 +62,10 @@ String validateSettings(const SettingsModel &s) {
         return "Error: Initial effect cannot be empty.";
     }
 
+    if( WS2811EffectStringToEnum(s.initialEffect) == WS2811_EFFECT::UKNOWN_EFFECT ){
+      return "Error: Initial effect is not allow";
+    }
+
     // Verifica che i valori di deltaT siano nel range accettabile
     if (s.initialDeltaT < 0) {
         return "Error: Initial deltaT cannot be negative.";
@@ -89,6 +95,38 @@ String validateSettings(const SettingsModel &s) {
     // Se tutte le validazioni sono superate, restituisce una stringa vuota
     return String();
 }
+
+String validateInitialSettings(const InitialSettingSaveModel &s) {
+
+    // Verifica che l'effetto iniziale non sia vuoto
+    if (s.initialEffect.isEmpty()) {
+        return "Error: Initial effect cannot be empty.";
+    }
+
+    if( WS2811EffectStringToEnum(s.initialEffect) == WS2811_EFFECT::UKNOWN_EFFECT ){
+      return "Error: Initial effect is not allow";
+    }
+
+    // Verifica che i valori di deltaT siano nel range accettabile
+    if (s.initialDeltaT < 0) {
+        return "Error: Initial deltaT cannot be negative.";
+    }
+
+    // Verifica che i valori RGB siano nel range [0, 255]
+    if (s.initialR < 0 || s.initialR > 255) {
+        return "Error: Initial R value must be between 0 and 255.";
+    }
+    if (s.initialG < 0 || s.initialG > 255) {
+        return "Error: Initial G value must be between 0 and 255.";
+    }
+    if (s.initialB < 0 || s.initialB > 255) {
+        return "Error: Initial B value must be between 0 and 255.";
+    }
+
+    // Se tutte le validazioni sono superate, restituisce una stringa vuota
+    return String();
+}
+
 
 String validateReboot(std::vector<String> params)
 {

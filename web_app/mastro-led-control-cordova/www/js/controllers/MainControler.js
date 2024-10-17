@@ -3,6 +3,7 @@ import AlertMessageView from '../views/AlertMessageView.js';
 import LedService from '../services/LedService.js';
 import ColorUtils from '../utils/ColorUtils.js';
 import FrontEndMessage from '../constants/FrontEndMessageItalian.js'
+import InitialSettingSaveModel from '../models/InitialSettingSaveModel.js';
 
 export default class MainController {
     constructor(host) {
@@ -22,6 +23,9 @@ export default class MainController {
 
         $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
         $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
+
+        $('.saveInitialEffect').on('click', this.saveInitialEffect.bind(this));
+        $('.clearInitialEffect').on('click', this.clearInitialEffect.bind(this));
 
         // requestAnimationFrame(() => {
         //     document.querySelector('.saveSettingsBtn').addEventListener('click', () => {
@@ -47,9 +51,36 @@ export default class MainController {
         this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
     }
 
+    customAlert(title, content){
+        this.alertMessageView.alert(title, content);
+    }
+
     genericFailureAlert(content) {
         this.alertMessageView.alert(FrontEndMessage.titleError, content);
+    }
 
+    async saveInitialEffect() {
+        //todo create a view, for now this controller get html element
+        let initialEffect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
+        let initialDeltaT = $(".timingInput")[0].value; //100;
+        let color = $(".colorInput")[0].value;
+        let initialR = ColorUtils.hexToRgb(color).r;
+        let initialG = ColorUtils.hexToRgb(color).g;
+        let initialB = ColorUtils.hexToRgb(color).b;
+
+        this.showWait();
+        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel(initialEffect, initialDeltaT, initialR, initialG, initialB));
+        this.hideWait();
+        this.valutateResponseAlertMessage(result);
+        //this.valutateResponseAlert(result);
+    }
+
+    async clearInitialEffect() {
+        this.showWait();
+        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel());
+        this.hideWait();
+        this.valutateResponseAlertMessage(result);
+        //this.valutateResponseAlert(result);
     }
 
     async sendStartEffect() {
@@ -116,6 +147,19 @@ export default class MainController {
                 break;
             case 200:
                 this.genericSuccessAlert();
+                break;
+            default:
+                break;
+        }
+    }
+
+    valutateResponseAlertMessage(response) {
+        switch (response.status) {
+            case -4:
+                this.genericFailureAlert(FrontEndMessage.noConnect);
+                break;
+            case 200:
+                this.customAlert(FrontEndMessage.titleSuccess, response.data.status.description);//todo change data.status.description in data.infoStatus.description
                 break;
             default:
                 break;
