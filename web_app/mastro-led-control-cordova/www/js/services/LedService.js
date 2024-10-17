@@ -6,6 +6,16 @@ export default class LedService {
         this.logged = false;
     }
 
+    async saveInitialEffect(host, initialSettingSaveModel){
+        let result = await HttpUtils.postCustom(host,ConstantApiList.saveInitialEffectApi,{},initialSettingSaveModel);
+        if(typeof result.data == 'string'){
+            result.data = JSON.parse(result.data);
+        }else{
+            result.data = result.data;
+        }
+        return result;
+    }
+
     async postStartEffect(host, queryParam){
         let result = await HttpUtils.postCustom(host,ConstantApiList.sendEffectLedApi,queryParam,{});
         if(typeof result.data == 'string'){
