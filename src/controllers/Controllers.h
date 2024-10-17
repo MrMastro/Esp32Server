@@ -20,6 +20,7 @@ void getJsonSettings(AsyncWebServerRequest *request);
 //LedController
 void setEffectWs2811(AsyncWebServerRequest *request);
 void stopEffectWs2811(AsyncWebServerRequest *request);
+void getAvaibleEffects(AsyncWebServerRequest *request);
 
 //SettingsController
 void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);

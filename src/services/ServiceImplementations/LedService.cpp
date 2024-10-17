@@ -243,6 +243,11 @@ void LedService::runEffectWs2811LifeCycle()
   }
 }
 
+std::vector<String> LedService::getAvaibleEffects()
+{
+  return getAllWS2811EffectNames();
+}
+
 void LedService::execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbStepInput, RgbColor colorInput, int deltaTimeMsInput)
 {
   String s = "\nPlays\nEffect {},\nStep: {},\nRgbColor: {},\ndeltaTimesMs: {}";
