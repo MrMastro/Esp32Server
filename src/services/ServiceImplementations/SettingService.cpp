@@ -1,4 +1,5 @@
 #include "SettingService.h"
+#include <models/InitialSettingSaveModel/InitialSettingSaveModel.h>
 
 SettingService::SettingService()
 {
@@ -29,6 +30,22 @@ String SettingService::getJsonSettings()
 boolean SettingService::saveSettings(String path, SettingsModel s)
 {
     String content = s.toJson();
+    if (!writeFile(path, content))
+    {
+        serialService->logWarning("An Error has occurred while save settings", getNameService(), "saveSettings");
+        return false;
+    }
+    return true;
+}
+
+boolean SettingService::saveInitialSettings(String path, InitialSettingSaveModel s)
+{
+    settings->initialEffect = s.initialEffect;
+    settings->initialDeltaT = s.initialDeltaT;
+    settings->initialR = s.initialR;
+    settings->initialG = s.initialG;
+    settings->initialB = s.initialB;
+    String content = settings->toJson();
     if (!writeFile(path, content))
     {
         serialService->logWarning("An Error has occurred while save settings", getNameService(), "saveSettings");

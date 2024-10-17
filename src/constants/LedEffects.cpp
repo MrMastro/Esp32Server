@@ -51,7 +51,7 @@ const String WS2811EffectEnomToString(WS2811_EFFECT inputEnum)
     }
   }
   // Return a special value or throw an exception if the string is not found
-  return "UKNOWN_EFFECT";
+  return WS2811EffectEnomToString(WS2811_EFFECT::UKNOWN_EFFECT);
 }
 
 const String stepLifeEffectEnomToString(STEP_LIFE_EFFECT inputEnum)
