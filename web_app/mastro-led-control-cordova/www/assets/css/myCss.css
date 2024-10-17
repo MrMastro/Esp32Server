@@ -13,18 +13,6 @@
   max-height: inherit;
 }
 
-.character-container {
-}
-
-.character-container {
-}
-
-.character-container {
-}
-
-.character-container {
-}
-
 .componentForm.rangeForm {
   height: auto;
   min-width: 205px;
@@ -36,18 +24,6 @@
   position: sticky;
 }
 
-.buttonForm {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.navbar-nav {
-  margin-right: 0;
-}
-
-.container-positioning-center {
-}
-
 .form-label-title {
   font-size: 16.5px;
   font-weight: bold;
@@ -55,5 +31,31 @@
 
 .fieldIp {
   text-align: center;
+}
+
+.containerExecutiveLed {
+  /*border: 6px solid var(--bs-body-bg) ;*/
+  /*border-radius: 19px;*/
+  /*justify-content: center;*/
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  margin: 6px;
+  padding: 16px;
+  /*width: auto;*/
+  /*height: inherit;*/
+  /*max-width: auto;*/
+}
+
+.containerSetLedEffect {
+  border: 6px solid var(--bs-body-bg) ;
+  border-radius: 19px;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  margin: 6px;
+  padding: 16px;
+  width: auto;
+  height: inherit;
+  /*max-width: auto;*/
 }
 
