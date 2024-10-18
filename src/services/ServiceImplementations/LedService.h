@@ -31,6 +31,7 @@ public:
   void stopEffect(WS2811_EFFECT effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
   void runEffectRgbLifeCycle();
   void runEffectWs2811LifeCycle();
+  std::vector<String> getAvaibleEffects();
 
 protected:
   void onInitServiceCollector() override;

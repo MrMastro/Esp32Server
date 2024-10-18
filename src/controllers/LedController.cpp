@@ -1,4 +1,5 @@
 #include "Controllers.h"
+#include <models/response/VectorResponse/VectorResponse.h>
 
 void setEffectWs2811(AsyncWebServerRequest *request)
 {
@@ -59,5 +60,17 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
 
     String jsonResponse = dtoToJson(response);
     request->send(200, "application/json", jsonResponse);
+    servicesCollector.freeExclusiveExecution();
+}
+
+void getAvaibleEffects(AsyncWebServerRequest *request)
+{
+    servicesCollector.takeExclusiveExecution();
+    VectorResponse response;
+    response = VectorResponse(HTTP_CODE::OK);
+    std::vector<String> data = ((LedService *)servicesCollector.getService("LedService"))->getAvaibleEffects();
+    response.setData(data);
+
+    request->send(200, "application/json", response.toJson());
     servicesCollector.freeExclusiveExecution();
 }

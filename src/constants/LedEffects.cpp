@@ -54,6 +54,20 @@ const String WS2811EffectEnomToString(WS2811_EFFECT inputEnum)
   return WS2811EffectEnomToString(WS2811_EFFECT::UKNOWN_EFFECT);
 }
 
+std::vector<String> getAllWS2811EffectNames()
+{
+    std::vector<String> effectNames;
+    
+    // Itera attraverso tutte le coppie e aggiungi il secondo valore (la stringa) al vettore
+    for (const auto& effect : EFFECT_WS2811_PAIR) {
+        if(!(effect.first == WS2811_EFFECT::NO_EFFECT || effect.first == WS2811_EFFECT::ACTUAL_EFFECT || effect.first == WS2811_EFFECT::UKNOWN_EFFECT)){
+          effectNames.push_back(effect.second);
+        }
+    }
+    
+    return effectNames;
+}
+
 const String stepLifeEffectEnomToString(STEP_LIFE_EFFECT inputEnum)
 {
   for (const auto &entry : STEP_LIFE_EFFECT_PAIR)

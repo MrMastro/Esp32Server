@@ -62,6 +62,8 @@ const String rgbEffectEnomToString(RGB_EFFECT inputEnum);
 
 const WS2811_EFFECT WS2811EffectStringToEnum(String inputString);
 const String WS2811EffectEnomToString(WS2811_EFFECT inputEnum);
+// Funzione per ottenere un vettore con i nomi degli effetti (le stringhe)
+std::vector<String> getAllWS2811EffectNames();
 
 const String stepLifeEffectEnomToString(STEP_LIFE_EFFECT inputEnum);
 

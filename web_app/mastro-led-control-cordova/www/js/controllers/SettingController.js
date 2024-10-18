@@ -10,9 +10,10 @@ import NoConnectException from '../exceptions/NoConnectException.js';
 import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 
 export default class SettingController {
-    constructor(host) {
+    constructor(host, headerView) {
         this.settingService = new SettingService();
-        this.settingView = new SettingView();
+        this.settingView = new SettingView(document.getElementById('SettingsViewContainer'));
+        this.headerView = headerView;
         this.loginView = new LoginView(document.getElementById('LoginViewContainer'));
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
@@ -27,19 +28,16 @@ export default class SettingController {
         // Event Listener per il salvataggio delle impostazioni
         //? si mettono nelle view o nel controller?
         //? se la view non è completamente HTML si dichiara l'ascoltatore nella view e si usa il metodo della view
+        this.bindEvents();
 
 
+    }
+
+    async bindEvents() {
         requestAnimationFrame(() => {
-            document.querySelector('.saveSettingsBtn').addEventListener('click', () => {
-                this.saveSettings();
-            });
-
-            //! in questo caso non ho la view quindi metto tutto qui
+            this.settingView.bindBtnSaveSettings(this.saveSettings.bind(this));
             this.loginView.bindBtnLogin(this.login.bind(this));
-
-            //!qui invece avendoci la loginView faccio la bind, come gia scritto
-            //document.getElementById('Login-Modal').on('click')
-            $('.settingsBtn').on('click', () => this.showModal());
+            this.headerView.bindBtnSettings(() => this.showModal()); // <-> $('.settingsBtn').on('click', () => this.showModal());
         });
     }
 
@@ -84,11 +82,11 @@ export default class SettingController {
         this.settingView.hide();
         this.waitView.show();
 
-        try{
+        try {
             await this.settingService.saveDeviceSettings(this.referenceHost, settings);
             this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.saveSettingsSuccess);
             this.waitView.hide();
-        }catch (error) {
+        } catch (error) {
             if (error instanceof UnauthorizedErrorException) {
                 this.waitView.hide();
                 this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorizedRelogin);
