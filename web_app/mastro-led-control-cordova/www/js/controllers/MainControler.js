@@ -4,38 +4,92 @@ import LedService from '../services/LedService.js';
 import ColorUtils from '../utils/ColorUtils.js';
 import FrontEndMessage from '../constants/FrontEndMessageItalian.js'
 import InitialSettingSaveModel from '../models/InitialSettingSaveModel.js';
+import HeaderView from '../views/HeaderView.js';
+import FooterView from '../views/FooterView.js';
+import SettingController from './SettingController.js';
+import MainView from '../views/MainView.js';
 
 export default class MainController {
     constructor(host) {
+        //status variable:
+        this.referenceHost = host;
+        this.apHost = "192.168.4.1";
+        this.debug = false;
+
+        //Component
         this.ledService = new LedService();
+
+        this.mainView = new MainView(document.getElementById('MainViewContainer'));
+        this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
+        this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
+        this.settingController = new SettingController(host, this.headerView);
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
-        this.referenceHost = host;
         this.init();
+
+        //todo
+        //$('.label-ip').text("Indirizzo attuale: " + host); //todo
     }
 
     async init() {
+        this.switchConnection();
         this.waitView.render();
         this.bindEvents();
     }
 
     async bindEvents() {
 
-        $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
-        $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
+        this.mainView.bindBtnSetEffect(this.sendStartEffect.bind(this));
+        this.mainView.bindBtnStopEffect(this.sendStopEffect.bind(this));
+        this.mainView.bindBtnSaveInitialEffect(this.saveInitialEffect.bind(this));
+        this.mainView.bindBtnClearInitialEffect(this.clearInitialEffect.bind(this));
+        this.mainView.bindFieldIpInput(this.changeIp.bind(this));
+        this.mainView.bindAPConnectionSwitch(this.switchConnection.bind(this));
+        // $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
+        // $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
 
-        $('.saveInitialEffect').on('click', this.saveInitialEffect.bind(this));
-        $('.clearInitialEffect').on('click', this.clearInitialEffect.bind(this));
+        // $('.saveInitialEffect').on('click', this.saveInitialEffect.bind(this));
+        // $('.clearInitialEffect').on('click', this.clearInitialEffect.bind(this));
 
-        // requestAnimationFrame(() => {
-        //     document.querySelector('.saveSettingsBtn').addEventListener('click', () => {
-        //         this.saveSettings();
-        //     });
-        // });
+        // $('.fieldIp').on('input', this.changeIp.bind(this));
+        // $('#APConnection').on('click', this.switchConnection.bind(this));
+
     }
 
     async setReferenceHost(newHost) {
         this.referenceHost = newHost;
+    }
+
+    switchConnection() {
+        if (this.mainView.isAPconnection()) {
+            this.mainView.hideFieldIp();
+            this.referenceHost = this.apHost;
+            this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
+        } else {
+            this.mainView.showFieldIp();
+            this.changeIp();
+        }
+    }
+
+    changeIp() {
+        let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.mainView.getFieldIp());
+        
+        if (!this.mainView.getFieldIp()) {
+            this.mainView.setLabelIp("Inserisci un indirizzo ip");
+        }
+        else if (test) {
+            this.referenceHost = this.mainView.getFieldIp();
+            this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
+            this.settingController.setReferenceHost(this.referenceHost);
+            this.setReferenceHost(this.referenceHost);
+        } else {
+            this.mainView.setLabelIp("Inserisci un ip valido");
+        }
+    }
+
+    showSettings() {
+        this.settingController.showModal();
+        //$('#SettingsViewContainer').modal('show');
     }
 
     async showWait() {
