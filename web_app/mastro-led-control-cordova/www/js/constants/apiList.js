@@ -5,6 +5,7 @@ const ConstantApiList = (() => {
     const sendEffectLedApi ="/api/ws2811SetEffect";
     const sendStopEffectApi="/api/ws2811StopEffect";
     const saveInitialEffectApi="/api/saveInitialEffect";
+    const getAvaibleEffects = "/api/getAvaibleEffects";
     const loginApi="/api/login";
     const timeoutMs = 3;
     
@@ -15,6 +16,7 @@ const ConstantApiList = (() => {
         sendStopEffectApi,
         saveInitialEffectApi,
         loginApi,
+        getAvaibleEffects,
         timeoutMs
     };
 })();

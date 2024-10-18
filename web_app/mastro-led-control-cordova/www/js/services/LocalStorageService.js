@@ -21,7 +21,7 @@ export default class LocalStorageService {
             }
         }
 
-        localStorage.setItem('ledEffectList', JSON.stringify(arrayDiStringhe));
+        localStorage.setItem('ledEffectList', JSON.stringify(list));
     }
 
     checkExistenceEffectList() {

@@ -1,7 +1,9 @@
+import DefaultConstants from "../constants/DefaultConstants.js";
+
 export default class LedMainModel {
-    constructor(aPConnection = true, actualHost = "", effect = "", deltaT = 500, color = "#000000", rgbCheck = true, ws2811Check = true) {
+    constructor(aPConnection = true, textFieldActualHost = "", effect = DefaultConstants.defaultEffectOption, deltaT = 500, color = "#000000", rgbCheck = true, ws2811Check = true) {
         this.aPConnection = aPConnection;
-        this.actualHost = actualHost;
+        this.textFieldActualHost = textFieldActualHost;
         this.effect = effect;
         this.deltaT = deltaT;
         this.color = color;

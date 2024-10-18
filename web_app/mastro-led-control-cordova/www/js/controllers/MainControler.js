@@ -11,6 +11,10 @@ import MainView from '../views/MainView.js';
 import LocalStorageService from '../services/LocalStorageService.js';
 import LedMainModel from '../models/LedMainModel.js';
 import DefaultConstants from '../constants/DefaultConstants.js';
+import UnauthorizedErrorException from '../exceptions/UnauthorizedErrorException.js';
+import NoConnectException from '../exceptions/NoConnectException.js';
+import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
+import TimeUtils from '../utils/TimeUtils.js';
 
 export default class MainController {
     constructor(host) {
@@ -50,6 +54,8 @@ export default class MainController {
         this.mainView.bindBtnSetEffect(this.sendStartEffect.bind(this));
         this.mainView.bindBtnStopEffect(this.sendStopEffect.bind(this));
         this.mainView.bindBtnSaveInitialEffect(this.saveInitialEffect.bind(this));
+        this.mainView.bindBtnUpdateEffect(this.updateEffectList.bind(this));
+
         this.mainView.bindBtnClearInitialEffect(this.clearInitialEffect.bind(this));
         this.mainView.bindFieldIpInput(this.changeIp.bind(this));
         this.mainView.bindAPConnectionSwitch(this.switchConnection.bind(this));
@@ -90,7 +96,6 @@ export default class MainController {
 
     changeIp() {
         let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.mainView.getFieldIp());
-        
         if (!this.mainView.getFieldIp()) {
             this.mainView.setLabelIp("Inserisci un indirizzo ip");
         }
@@ -101,6 +106,36 @@ export default class MainController {
             this.setReferenceHost(this.referenceHost);
         } else {
             this.mainView.setLabelIp("Inserisci un ip valido");
+        }
+    }
+
+    async updateEffectList(){
+        this.waitView.show();
+        try {
+            let list = await this.ledService.getAvaibleEffects(this.referenceHost);
+            this.localStorageService.setEffectList(list);
+            this.waitView.hide();
+            this.mainView.render( this.mainView.getLedMainModel(), list);
+            this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
+        } catch (error) {
+            if (error instanceof UnauthorizedErrorException) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.unauthorizedRelogin);
+                this.loginView.show();
+            }
+            else if (error instanceof NoConnectException) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.noConnect);
+            }
+            else if (error instanceof GenericErrorExceptions) {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+            }
+            else {
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
+                console.log(error);
+            }
         }
     }
 

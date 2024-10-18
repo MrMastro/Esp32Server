@@ -6,6 +6,7 @@ const FrontEndMessage = (() => {
 
     //Message for front end
     const genericSuccessOperation = "Operazione effettuata con successo";
+    const updateEffectListSuccess = "Hai aggiornato la lista degli effetti con successo";
     const saveSettingsSuccess = "Impostazioni salvate, il dispositivo sarà riavviato";
     const noConnect = "Impossibile stabilire la connessione con il dispositivo, verifica connessione";
     const unauthorized = "Accesso non autorizzato";
@@ -17,6 +18,7 @@ const FrontEndMessage = (() => {
         titleSuccess,
         titleError,
         genericSuccessOperation,
+        updateEffectListSuccess,
         saveSettingsSuccess,
         noConnect,
         unauthorized,

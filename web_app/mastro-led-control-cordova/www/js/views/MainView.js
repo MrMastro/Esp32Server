@@ -11,6 +11,7 @@ export default class MainView {
         this.rootElement = rootElement;
         this.buttonWs2811SetEffect = {};
         this.buttonWs2811StopEffect = {};
+        this.buttonUpdateEffect = {};
         this.saveInitialEffect = {};
         this.clearInitialEffect = {};
         this.fieldIp = {};
@@ -21,6 +22,7 @@ export default class MainView {
 
         this.handlerButtonWs2811SetEffect = {};
         this.handlerButtonWs2811StopEffect = {};
+        this.handleButtonUpdateEffect = {};
         this.handlerSaveInitialEffect = {};
         this.handlerClearInitialEffect = {};
         this.handlerFieldIpInput = {};
@@ -79,7 +81,17 @@ export default class MainView {
                         </div>
                     </div>
                     <div class="d-lg-flex justify-content-lg-center align-items-lg-center containerExecutiveLed">
-                        <div id="ContainAction-6" class="d-flex d-lg-flex flex-column justify-content-center align-items-center"><button class="btn btn-dark fs-5 py-2 px-4 mb-3 buttonForm buttonWs2811SetEffect" type="button">INVIA INIZIO EFFETTO</button><button class="btn btn-dark fs-5 py-2 px-4 mb-3 buttonForm buttonWs2811StopEffect" type="button">INVIA FINE EFFETTO</button></div>
+                        <div id="ContainAction-6" class="d-flex d-lg-flex flex-column justify-content-center align-items-center">
+                            <button class="btn btn-dark fs-5 py-2 px-4 mb-3 buttonForm buttonWs2811SetEffect" type="button">INVIA INIZIO EFFETTO</button>
+                            <button class="btn btn-dark fs-5 py-2 px-4 mb-3 buttonForm buttonWs2811StopEffect" type="button">INVIA FINE EFFETTO</button>
+                            <button id="buttonUpdateEffect" class="buttonUpdateEffect btn btn-dark fs-5 py-2 px-4 mb-3" type="button">
+                                AGGIORNA EFFETTI
+                                <svg class="bi bi-arrow-clockwise" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"></path>
+                                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div id="Character-div" class="character-container">
                         <div class="character"></div>
@@ -93,6 +105,7 @@ export default class MainView {
         this.createOptionEffects(listEffects);
         this.buttonWs2811SetEffect = document.querySelector('.buttonWs2811SetEffect');
         this.buttonWs2811StopEffect = document.querySelector('.buttonWs2811StopEffect');
+        this.buttonUpdateEffect = document.querySelector('.buttonUpdateEffect');
         this.saveInitialEffectBtn = document.querySelector('.saveInitialEffect');
         this.clearInitialEffectBtn = document.querySelector('.clearInitialEffect');
         this.fieldIp = document.querySelector('.fieldIp');
@@ -107,9 +120,9 @@ export default class MainView {
         }
 
         document.querySelector('#APConnection').checked = ledMainModel.aPConnection;
-        document.querySelector('.fieldIp').value = ledMainModel.actualHost;
-        this.setLabelIp("Indirizzo attuale: " + ledMainModel.actualHost);
-        //Effect //todo
+        document.querySelector('.fieldIp').value = ledMainModel.textFieldActualHost;
+        this.setLabelIp("Indirizzo attuale: " + ledMainModel.textFieldActualHost);
+        document.querySelector('.effectInput').value = ledMainModel.effect;
         document.querySelector(".timingRangeInput").value = ledMainModel.deltaT;
         document.querySelector('.timingInput').value = ledMainModel.deltaT;
         document.querySelector('.colorInput').value = ledMainModel.color;
@@ -129,23 +142,23 @@ export default class MainView {
         this.labelIp.textContent = value;
     }
 
-    getLabelIp(){
+    getLabelIp() {
         return this.labelIp.textContent;
     }
 
-    getTimingRangeInput(){
+    getTimingRangeInput() {
         return this.timingRangeInput.value;
     }
 
-    setTimingRangeInput(value){
+    setTimingRangeInput(value) {
         this.timingRangeInput.value = value;
     }
 
-    getTimingInput(){
+    getTimingInput() {
         return this.timingInput.value;
     }
 
-    setTimingInput(value){
+    setTimingInput(value) {
         this.timingInput.value = value;
     }
 
@@ -153,7 +166,17 @@ export default class MainView {
         return document.querySelector('#APConnection').checked;
     }
 
-    hideFieldIp(){
+
+    getLedMainModel(){
+        let color = document.querySelector('.colorInput').value;
+        let rgbCheck = document.querySelector('#rgbCheck').checked;
+        let ws2811Check = document.querySelector('#ws2811Check').checked;
+        let effect = document.querySelector('.effectInput').value;
+        let textFieldActualHost = this.getFieldIp();
+        return new LedMainModel(this.aPConnection.value, textFieldActualHost, effect, this.getTimingInput(), color, rgbCheck, ws2811Check)
+    }
+
+    hideFieldIp() {
         this.fieldIp.style.display = 'none';
     }
 
@@ -161,13 +184,13 @@ export default class MainView {
         this.fieldIp.style.display = 'inline';
     }
 
-    cleanOptionEffects(){
+    cleanOptionEffects() {
         this.selectInputEffect.innerHTML = '';
     }
 
     createOptionEffects(effects) {
         // Crea e aggiungi le nuove opzioni
-        effects.forEach( (e, index) => {
+        effects.forEach((e, index) => {
             const option = document.createElement('option');
             option.value = e;
             option.textContent = TextUtils.convertUnderscoreIntoSpace(e);
@@ -187,6 +210,10 @@ export default class MainView {
             this.bindBtnStopEffect(this.handlerButtonWs2811StopEffect);
         }
 
+        if (typeof this.handleButtonUpdateEffect === 'function') {
+            this.bindBtnUpdateEffect(this.handleButtonUpdateEffect);
+        }
+
         if (typeof this.handlerSaveInitialEffect === 'function') {
             this.bindBtnSaveInitialEffect(this.handlerSaveInitialEffect);
         }
@@ -204,14 +231,14 @@ export default class MainView {
         }
 
         if (typeof this.handelrRangeInputChange === 'function') {
-            this.bind(this.handlerAPConnectionSwitch);
+            this.bindRangeInputChange(this.handelrRangeInputChange);
         }
 
         if (typeof this.handelrInputChange === 'function') {
-            this.bind(this.handelrInputChange);
+            this.bindInputChange(this.handelrInputChange);
         }
 
-        
+
     }
 
     bindBtnSetEffect(handler) {
@@ -228,6 +255,11 @@ export default class MainView {
     bindBtnStopEffect(handler) {
         this.handlerButtonWs2811StopEffect = handler;
         this.buttonWs2811StopEffect.addEventListener('click', this.handlerButtonWs2811StopEffect);
+    }
+
+    bindBtnUpdateEffect(handler){
+        this.handleButtonUpdateEffect = handler;
+        this.buttonUpdateEffect.addEventListener('click', this.handleButtonUpdateEffect);
     }
 
     bindBtnSaveInitialEffect(handler) {
@@ -250,12 +282,12 @@ export default class MainView {
         this.aPConnection.addEventListener('click', this.handlerAPConnectionSwitch);
     }
 
-    bindRangeInputChange(handler){
+    bindRangeInputChange(handler) {
         this.handelrRangeInputChange = handler;
-        this.timingRangeInput.addEventListener('input', this.handelrRangeInputChange );
+        this.timingRangeInput.addEventListener('input', this.handelrRangeInputChange);
     }
 
-    bindInputChange(handler){
+    bindInputChange(handler) {
         this.handelrInputChange = handler;
         this.timingInput.addEventListener('input', this.handelrInputChange);
     }
