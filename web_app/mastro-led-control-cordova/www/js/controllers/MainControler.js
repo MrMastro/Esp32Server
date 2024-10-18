@@ -53,6 +53,8 @@ export default class MainController {
         this.mainView.bindBtnClearInitialEffect(this.clearInitialEffect.bind(this));
         this.mainView.bindFieldIpInput(this.changeIp.bind(this));
         this.mainView.bindAPConnectionSwitch(this.switchConnection.bind(this));
+        this.mainView.bindRangeInputChange(this.rangeInputChange.bind(this));
+        this.mainView.bindInputChange(this.inputChange.bind(this));
     }
 
     async setReferenceHost(newHost) {
@@ -68,6 +70,22 @@ export default class MainController {
             this.mainView.showFieldIp();
             this.changeIp();
         }
+    }
+
+    rangeInputChange(){
+        let valueRange = this.mainView.getTimingRangeInput();
+        this.mainView.setTimingInput(valueRange);
+    }
+
+    inputChange(){
+        let valueTime = this.mainView.getTimingInput();
+        if(valueTime <= 0){
+            valueTime = 0;
+        }else if(valueTime >= 1000){
+            valueTime = 1000;
+        }
+        this.mainView.setTimingInput(valueTime);
+        this.mainView.setTimingRangeInput(valueTime);
     }
 
     changeIp() {

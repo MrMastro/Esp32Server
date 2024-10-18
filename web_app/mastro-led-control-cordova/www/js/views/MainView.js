@@ -16,6 +16,8 @@ export default class MainView {
         this.fieldIp = {};
         this.labelIp = {};
         this.aPConnection = {};
+        this.timingRangeInput = {};
+        this.timingInput = {};
 
         this.handlerButtonWs2811SetEffect = {};
         this.handlerButtonWs2811StopEffect = {};
@@ -23,6 +25,8 @@ export default class MainView {
         this.handlerClearInitialEffect = {};
         this.handlerFieldIpInput = {};
         this.handlerAPConnectionSwitch = {};
+        this.handelrRangeInputChange = {};
+        this.handelrInputChange = {};
 
         this.render(new LedMainModel(), listEffects);
     }
@@ -94,6 +98,8 @@ export default class MainView {
         this.fieldIp = document.querySelector('.fieldIp');
         this.labelIp = document.querySelector('.label-ip');
         this.aPConnection = document.getElementById('APConnection');
+        this.timingRangeInput = document.querySelector(".timingRangeInput");
+        this.timingInput = document.querySelector(".timingInput");
 
         if (ledMainModel.aPConnection) {
             this.hideFieldIp();
@@ -125,6 +131,22 @@ export default class MainView {
 
     getLabelIp(){
         return this.labelIp.textContent;
+    }
+
+    getTimingRangeInput(){
+        return this.timingRangeInput.value;
+    }
+
+    setTimingRangeInput(value){
+        this.timingRangeInput.value = value;
+    }
+
+    getTimingInput(){
+        return this.timingInput.value;
+    }
+
+    setTimingInput(value){
+        this.timingInput.value = value;
     }
 
     isAPconnection() {
@@ -180,6 +202,16 @@ export default class MainView {
         if (typeof this.handlerAPConnectionSwitch === 'function') {
             this.bindAPConnectionSwitch(this.handlerAPConnectionSwitch);
         }
+
+        if (typeof this.handelrRangeInputChange === 'function') {
+            this.bind(this.handlerAPConnectionSwitch);
+        }
+
+        if (typeof this.handelrInputChange === 'function') {
+            this.bind(this.handelrInputChange);
+        }
+
+        
     }
 
     bindBtnSetEffect(handler) {
@@ -217,5 +249,16 @@ export default class MainView {
         this.handlerAPConnectionSwitch = handler;
         this.aPConnection.addEventListener('click', this.handlerAPConnectionSwitch);
     }
+
+    bindRangeInputChange(handler){
+        this.handelrRangeInputChange = handler;
+        this.timingRangeInput.addEventListener('input', this.handelrRangeInputChange );
+    }
+
+    bindInputChange(handler){
+        this.handelrInputChange = handler;
+        this.timingInput.addEventListener('input', this.handelrInputChange);
+    }
+
 
 }
