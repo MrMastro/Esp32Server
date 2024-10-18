@@ -290,7 +290,7 @@ void ledTask(void *pvParameters)
     {
       // myRgbStript.loopLedRgb(); deprecated
       delay(10);
-      ((LedService *)servicesCollector.getService("LedService"))->runEffectWs2811LifeCycle();
+      ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
       //((LedService *)servicesCollector.getService("LedService"))->runEffectRgbLifeCycle(); //for now don't play rgb stript
     }
     else

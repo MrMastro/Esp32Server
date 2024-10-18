@@ -12,6 +12,12 @@ void FadeEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws28
         return;
     }
 
+    if(colorsInput.size() < getColorInputQt())
+    {
+        Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
+        return;
+    }
+
     switch (ws2811StepInput) {
         case STEP_LIFE_EFFECT::BEGIN_STEP:
             increasing = true;
@@ -69,6 +75,11 @@ void FadeEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws28
         default:
             break;
     }
+}
+
+int FadeEffect::getColorInputQt()
+{
+    return 1;
 }
 
 void FadeEffect::off(DriverLed* driver, TYPE_STRIP type) {

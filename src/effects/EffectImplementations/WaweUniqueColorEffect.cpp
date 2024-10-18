@@ -9,8 +9,19 @@ String WaweUniqueColorEffect::getName()
     return "WAWE_UNIQUE_COLOR";
 }
 
+int WaweUniqueColorEffect::getColorInputQt()
+{
+    return 1;
+}
+
 void WaweUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
+    if(colorsInput.size() < getColorInputQt())
+    {
+        Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
+        return;
+    }
+
     RgbColor initialColor = colorsInput[0];
     RgbColor colorVariable = colorsInput[0];
 

@@ -21,6 +21,7 @@ enum class TYPE_STRIP
 class Effect {
 public:
     virtual String getName() = 0;
+    virtual int getColorInputQt() = 0;
     virtual void execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual void off(DriverLed* driver, TYPE_STRIP typeOrchestrator) =0;
 };
@@ -28,7 +29,7 @@ public:
 class EffectOrchestrator{
     public:
         EffectOrchestrator();
-        EffectOrchestrator(DriverLed* driver,TYPE_STRIP typeled);
+        EffectOrchestrator(DriverLed* driver, TYPE_STRIP typeled);
 
         //Method for lifeCycle
         void runLifeCycle();
@@ -63,6 +64,7 @@ class EffectOrchestrator{
 
 class DriverLed{
     public:
+        DriverLed() : ws2811Strip(nullptr), rgbStrip(nullptr) {}
         DriverLed(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip, LEDStripDriver *rgbStrip)
             : ws2811Strip(ws2811Strip), rgbStrip(rgbStrip) {}
         int getMaxNumPixel(TYPE_STRIP type);

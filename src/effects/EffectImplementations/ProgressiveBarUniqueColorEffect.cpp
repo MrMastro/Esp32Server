@@ -9,8 +9,18 @@ String ProgressiveBarUniqueColorEffect::getName()
     return "PROGRESSIVE_BAR_UNIQUE_COLOR";
 }
 
+int ProgressiveBarUniqueColorEffect::getColorInputQt()
+{
+    return 1;
+}
+
 void ProgressiveBarUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
+    if(colorsInput.size() < getColorInputQt()){
+        Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
+        return;
+    }
+
     RgbColor colorInput = colorsInput[0];
     if (ws2811StepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
     {
