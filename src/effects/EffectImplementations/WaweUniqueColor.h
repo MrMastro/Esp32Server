@@ -3,7 +3,7 @@
 #ifndef WAWE_UNIQUE_COLOR_EFFECT_H
 #define WAWE_UNIQUE_COLOR_EFFECT_H
 
-#include "Effect.h"
+#include "../Effect.h"
 
 class WaweUniqueColorEffect : public Effect {
 public:

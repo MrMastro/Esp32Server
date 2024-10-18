@@ -2,7 +2,7 @@
 #ifndef CONSTANT_UNIQUE_COLOR_EFFECT_H
 #define CONSTANT_UNIQUE_COLOR_EFFECT_H
 
-#include "Effect.h"
+#include "../Effect.h"
 
 class ConstantUniqueColorEffect : public Effect {
 public:

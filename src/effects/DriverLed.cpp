@@ -1,5 +1,4 @@
 #include "./Effect.h"
-#include "Effect.h"
 
 int DriverLed::getMaxNumPixel(TYPE_STRIP type)
 {
@@ -13,6 +12,7 @@ int DriverLed::getMaxNumPixel(TYPE_STRIP type)
     default:
         break;
     }
+    return 0;
 }
 
 void DriverLed::sendStriptData(TYPE_STRIP type, RgbColor colorInput, uint16_t indexPixel) 

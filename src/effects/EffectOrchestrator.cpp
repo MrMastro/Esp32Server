@@ -1,4 +1,4 @@
-#include "Effect.h"
+#include "./Effect.h"
 
 void EffectOrchestrator::runLifeCycle()
 {
@@ -8,18 +8,18 @@ Effect* e = getEffectByName("");
 switch (actualStep)
   {
   case STEP_LIFE_EFFECT::BEGIN_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect);
+    e->execStep(effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect);
     actualStep = STEP_LIFE_EFFECT::LOOP_STEP;
     break;
   case STEP_LIFE_EFFECT::LOOP_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect);
+    e->execStep(effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect);
     break;
   case STEP_LIFE_EFFECT::END_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect);
+    e->execStep(effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect);
     actualStep = STEP_LIFE_EFFECT::OFF;
     break;
   default:
-    e->off();
+    e->off(driver, typeLed);
     break;
   }
 

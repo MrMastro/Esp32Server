@@ -2,7 +2,7 @@
 #ifndef PROGRESSIVE_BAR_UNIQUE_COLOR_EFFECT_H
 #define PROGRESSIVE_BAR_UNIQUE_COLOR_EFFECT_H
 
-#include "Effect.h"
+#include "../Effect.h"
 
 class ProgressiveBarUniqueColor : public Effect {
 public:

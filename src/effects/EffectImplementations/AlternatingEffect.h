@@ -1,7 +1,7 @@
 #ifndef ALTERNATING_EFFECT_H
 #define ALTERNATING_EFFECT_H
 
-#include "Effect.h"
+#include "../Effect.h"
 
 class AlternatingEffect : public Effect {
 public:

@@ -20,7 +20,7 @@ enum class TYPE_STRIP
 // Service interface
 class Effect {
 public:
-    virtual String getName() =0;
+    virtual String getName() = 0;
     virtual void execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual void off(DriverLed* driver, TYPE_STRIP typeOrchestrator) =0;
 };
@@ -34,7 +34,7 @@ class EffectOrchestrator{
         void addEffect(Effect* e);
         void setDriver(DriverLed* driver);
     private:
-        TYPE_STRIP typeOrchestrator;
+        TYPE_STRIP typeLed;
         DriverLed* driver;
 
         STEP_LIFE_EFFECT actualStep;
