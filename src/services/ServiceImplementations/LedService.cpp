@@ -284,6 +284,9 @@ void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFF
   case WS2811_EFFECT::CONSTANT_UNIQUE_COLOR:
     effectConstantsUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
     break;
+  case WS2811_EFFECT::WAWE_UNIQUE_COLOR:
+    effectWaweUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
+    break;
   case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
     effectProgressiveBarUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
     break;

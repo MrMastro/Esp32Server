@@ -51,13 +51,14 @@ private:
   STEP_LIFE_EFFECT ws2811Step;
   int deltaTmsEffect;
   RgbColor colorEffect;
+  boolean matchRgbEffect(String effectWS2811);
+  //ExecLifeCycle
   void execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbStepInput, RgbColor colorInput, int deltaTimeMsInput);
   void execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
   // Effect
   void effectConstantsUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
   void effectWaweUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
   void effectProgressiveBarUniqueColor(STRIPT_EXECUTION mode, STEP_LIFE_EFFECT stepInput, RgbColor colorInput, int deltaTimeMsInput);
-  boolean matchRgbEffect(String effectWS2811);
 };
 
 #endif // LedService_H
