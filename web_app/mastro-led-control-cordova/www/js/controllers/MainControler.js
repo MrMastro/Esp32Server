@@ -8,33 +8,41 @@ import HeaderView from '../views/HeaderView.js';
 import FooterView from '../views/FooterView.js';
 import SettingController from './SettingController.js';
 import MainView from '../views/MainView.js';
+import LocalStorageService from '../services/LocalStorageService.js';
+import LedMainModel from '../models/LedMainModel.js';
+import DefaultConstants from '../constants/DefaultConstants.js';
 
 export default class MainController {
     constructor(host) {
         //status variable:
         this.referenceHost = host;
-        this.apHost = "192.168.4.1";
-        this.debug = false;
+        this.apHost = DefaultConstants.defaultApHost;
+        this.debug = DefaultConstants.defaultDebug;
 
         //Component
         this.ledService = new LedService();
-
-        this.mainView = new MainView(document.getElementById('MainViewContainer'));
+        this.localStorageService = new LocalStorageService();
+        this.mainView = new MainView(document.getElementById('MainViewContainer'),[]);
         this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
         this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
         this.settingController = new SettingController(host, this.headerView);
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
         this.init();
-
-        //todo
-        //$('.label-ip').text("Indirizzo attuale: " + host); //todo
     }
 
     async init() {
-        this.switchConnection();
+        this.initilizeStorage();
+        this.mainView.render(new LedMainModel(),this.localStorageService.getLedEffectList());
         this.waitView.render();
+        this.switchConnection();
         this.bindEvents();
+    }
+
+    initilizeStorage(){
+        if(!this.localStorageService.checkExistenceEffectList()){
+            this.localStorageService.formatEffectList();
+        }
     }
 
     async bindEvents() {
@@ -45,15 +53,6 @@ export default class MainController {
         this.mainView.bindBtnClearInitialEffect(this.clearInitialEffect.bind(this));
         this.mainView.bindFieldIpInput(this.changeIp.bind(this));
         this.mainView.bindAPConnectionSwitch(this.switchConnection.bind(this));
-        // $('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
-        // $('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
-
-        // $('.saveInitialEffect').on('click', this.saveInitialEffect.bind(this));
-        // $('.clearInitialEffect').on('click', this.clearInitialEffect.bind(this));
-
-        // $('.fieldIp').on('input', this.changeIp.bind(this));
-        // $('#APConnection').on('click', this.switchConnection.bind(this));
-
     }
 
     async setReferenceHost(newHost) {
@@ -89,7 +88,6 @@ export default class MainController {
 
     showSettings() {
         this.settingController.showModal();
-        //$('#SettingsViewContainer').modal('show');
     }
 
     async showWait() {
@@ -126,7 +124,6 @@ export default class MainController {
         let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel(initialEffect, initialDeltaT, initialR, initialG, initialB));
         this.hideWait();
         this.valutateResponseAlertMessage(result);
-        //this.valutateResponseAlert(result);
     }
 
     async clearInitialEffect() {
@@ -134,7 +131,6 @@ export default class MainController {
         let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel());
         this.hideWait();
         this.valutateResponseAlertMessage(result);
-        //this.valutateResponseAlert(result);
     }
 
     async sendStartEffect() {

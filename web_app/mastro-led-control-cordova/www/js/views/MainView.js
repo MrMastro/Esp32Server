@@ -1,7 +1,9 @@
+import DefaultConstants from "../constants/DefaultConstants.js";
 import LedMainModel from "../models/LedMainModel.js";
+import TextUtils from "../utils/TextUtils.js";
 
 export default class MainView {
-    constructor(rootElement) { //empty cause modify html yet written
+    constructor(rootElement, listEffects) { //empty cause modify html yet written
         if (!(rootElement instanceof HTMLElement)) {
             console.error('rootElement non è un elemento DOM valido', rootElement);
         }
@@ -22,19 +24,10 @@ export default class MainView {
         this.handlerFieldIpInput = {};
         this.handlerAPConnectionSwitch = {};
 
-        this.render(new LedMainModel());
-
-        // $('.fieldIp').show();
-        // let hideIp = $('#APConnection')[0].checked;
-        // if (hideIp) {
-        //     $('.fieldIp').hide();
-        //     $('.changeIpBtn').hide();
-        //     host = apHost;
-        //     $('.label-ip').text("Indirizzo attuale: " + host);
-        // }
+        this.render(new LedMainModel(), listEffects);
     }
 
-    render(ledMainModel) {
+    render(ledMainModel, listEffects) {
         this.rootElement.innerHTML = (`
             <div class="text-white bg-primary border rounded border-0 p-4 py-5" style="margin-right: 10px;margin-left: 10px;margin-top: 0;margin-bottom: 10px;background: rgb(49,94,197);">
                 <div>
@@ -51,10 +44,8 @@ export default class MainView {
                         <div id="ContainAction-4" class="ContainAction">
                             <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title">Effetto</label></div>
                             <div class="containerOfComponent"><select class="border rounded-pill d-flex justify-content-center effectInput form-control" style="max-width: 250px;font-size: 11px;text-align: center;" value="effect" name="effect select" required>
-                                    <optgroup label="Effects">
                                         <option value="PROGRESSIVE_BAR_UNIQUE_COLOR" selected>PROGRESSIVE BAR UNIQUE COLOR</option>
                                         <option value="CONSTANT_UNIQUE_COLOR">CONSTANT UNIQUE COLOR</option>
-                                    </optgroup>
                                 </select></div>
                         </div>
                         <div id="ContainAction-3" class="ContainAction">
@@ -93,6 +84,9 @@ export default class MainView {
             </div>
         `);
 
+        this.selectInputEffect = document.querySelector('.effectInput');
+        this.cleanOptionEffects();
+        this.createOptionEffects(listEffects);
         this.buttonWs2811SetEffect = document.querySelector('.buttonWs2811SetEffect');
         this.buttonWs2811StopEffect = document.querySelector('.buttonWs2811StopEffect');
         this.saveInitialEffectBtn = document.querySelector('.saveInitialEffect');
@@ -103,6 +97,7 @@ export default class MainView {
 
         if (ledMainModel.aPConnection) {
             this.hideFieldIp();
+            document.querySelector('.fieldIp').value = DefaultConstants.defaultDebug;
         }
 
         document.querySelector('#APConnection').checked = ledMainModel.aPConnection;
@@ -144,28 +139,45 @@ export default class MainView {
         this.fieldIp.style.display = 'inline';
     }
 
+    cleanOptionEffects(){
+        this.selectInputEffect.innerHTML = '';
+    }
+
+    createOptionEffects(effects) {
+        // Crea e aggiungi le nuove opzioni
+        effects.forEach( (e, index) => {
+            const option = document.createElement('option');
+            option.value = e;
+            option.textContent = TextUtils.convertUnderscoreIntoSpace(e);
+            if (index === 0) {
+                option.selected = true; // Imposta l'opzione come selezionata
+            }
+            this.selectInputEffect.appendChild(option);
+        });
+    }
+
     reassignHandler() {
-        if (this.handlerButtonWs2811SetEffect) {
+        if (typeof this.handlerButtonWs2811SetEffect === 'function') {
             this.bindbuttonWs2811SetEffect(this.handlerButtonWs2811SetEffect);
         }
 
-        if (this.handlerButtonWs2811StopEffect) {
+        if (typeof this.handlerButtonWs2811StopEffect === 'function') {
             this.bindBtnStopEffect(this.handlerButtonWs2811StopEffect);
         }
 
-        if (this.handlerSaveInitialEffect) {
+        if (typeof this.handlerSaveInitialEffect === 'function') {
             this.bindBtnSaveInitialEffect(this.handlerSaveInitialEffect);
         }
 
-        if (this.handlerClearInitialEffect) {
+        if (typeof this.handlerClearInitialEffect === 'function') {
             this.bindBtnClearInitialEffect(this.handlerClearInitialEffect);
         }
 
-        if (this.handlerFieldIpInput) {
+        if (typeof this.handlerFieldIpInput === 'function') {
             this.bindFieldIpInput(this.handlerFieldIpInput);
         }
 
-        if (this.handlerAPConnectionSwitch) {
+        if (typeof this.handlerAPConnectionSwitch === 'function') {
             this.bindAPConnectionSwitch(this.handlerAPConnectionSwitch);
         }
     }

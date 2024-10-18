@@ -1,5 +1,5 @@
 export default class LedMainModel {
-    constructor(aPConnection = true, actualHost = "192.168.4.1", effect = "", deltaT = 500, color = "#000000", rgbCheck = true, ws2811Check = true) {
+    constructor(aPConnection = true, actualHost = "", effect = "", deltaT = 500, color = "#000000", rgbCheck = true, ws2811Check = true) {
         this.aPConnection = aPConnection;
         this.actualHost = actualHost;
         this.effect = effect;
