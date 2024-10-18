@@ -203,7 +203,7 @@ export default class MainView {
 
     reassignHandler() {
         if (typeof this.handlerButtonWs2811SetEffect === 'function') {
-            this.bindbuttonWs2811SetEffect(this.handlerButtonWs2811SetEffect);
+            this.bindBtnWs2811SetEffect(this.handlerButtonWs2811SetEffect);
         }
 
         if (typeof this.handlerButtonWs2811StopEffect === 'function') {
@@ -241,14 +241,9 @@ export default class MainView {
 
     }
 
-    bindBtnSetEffect(handler) {
+    bindBtnWs2811SetEffect(handler) {
         this.handlerButtonWs2811SetEffect = handler;
         this.buttonWs2811SetEffect.addEventListener('click', this.handlerButtonWs2811SetEffect);
-    }
-
-    bindbuttonWs2811SetEffect(handler) {
-        this.handlerbuttonWs2811SetEffect = handler;
-        this.buttonWs2811SetEffect.addEventListener('click', this.handlerSaveSettingsBtn);
     }
 
 

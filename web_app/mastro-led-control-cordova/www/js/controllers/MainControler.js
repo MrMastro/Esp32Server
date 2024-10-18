@@ -51,7 +51,7 @@ export default class MainController {
 
     async bindEvents() {
 
-        this.mainView.bindBtnSetEffect(this.sendStartEffect.bind(this));
+        this.mainView.bindBtnWs2811SetEffect(this.sendStartEffect.bind(this));
         this.mainView.bindBtnStopEffect(this.sendStopEffect.bind(this));
         this.mainView.bindBtnSaveInitialEffect(this.saveInitialEffect.bind(this));
         this.mainView.bindBtnUpdateEffect(this.updateEffectList.bind(this));
@@ -110,11 +110,14 @@ export default class MainController {
     }
 
     async updateEffectList(){
-        this.waitView.show();
         try {
+            this.waitView.show();
+            await TimeUtils.wait(200);
             let list = await this.ledService.getAvaibleEffects(this.referenceHost);
-            this.localStorageService.setEffectList(list);
+            await TimeUtils.wait(200);
             this.waitView.hide();
+            await TimeUtils.wait(200);
+            this.localStorageService.setEffectList(list);
             this.mainView.render( this.mainView.getLedMainModel(), list);
             this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
         } catch (error) {
