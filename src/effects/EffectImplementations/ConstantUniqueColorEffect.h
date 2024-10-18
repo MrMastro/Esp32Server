@@ -10,7 +10,7 @@ public:
     String getName() override;
     
     void execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, 
-                  std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) override;
+                  const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) override;
 
     void off(DriverLed* driver, TYPE_STRIP type) override;
 };

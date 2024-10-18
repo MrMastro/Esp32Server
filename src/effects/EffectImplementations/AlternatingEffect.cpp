@@ -8,7 +8,7 @@ String AlternatingEffect::getName()
 }
 
 void AlternatingEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,
-                                 std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+                                 const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
     if (driver == nullptr)
     {

@@ -1,21 +1,29 @@
 #include "./Effect.h"
+#include "Effect.h"
+
+EffectOrchestrator::EffectOrchestrator(): driver(nullptr), typeLed() {}
+
+EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled) : driver(driver), typeLed(typeLed) {}
 
 void EffectOrchestrator::runLifeCycle()
 {
+Effect* e = getEffectByName( WS2811EffectEnomToString(effect) );
 
-Effect* e = getEffectByName("");
+if(e == nullptr){
+  Serial.println("ERROR Effetto non trovato");
+  return;
+}
 
 switch (actualStep)
   {
   case STEP_LIFE_EFFECT::BEGIN_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect);
+    e->execStep(effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
     actualStep = STEP_LIFE_EFFECT::LOOP_STEP;
     break;
   case STEP_LIFE_EFFECT::LOOP_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect);
-    break;
+    e->execStep(effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
   case STEP_LIFE_EFFECT::END_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed); //execWs2811Effect(ws2811Effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect);
+    e->execStep(effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
     actualStep = STEP_LIFE_EFFECT::OFF;
     break;
   default:
@@ -23,6 +31,22 @@ switch (actualStep)
     break;
   }
 
+}
+
+void EffectOrchestrator::startEffect(WS2811_EFFECT effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms)
+{
+  actualStep = STEP_LIFE_EFFECT::BEGIN_STEP;
+  effect = effectInput;
+  deltaTmsEffect = deltaTms;
+  colorsEffect = colorsRgb;
+
+}
+void EffectOrchestrator::stopEffect(WS2811_EFFECT effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms)
+{
+  actualStep = STEP_LIFE_EFFECT::END_STEP;
+  effect = effectInput;
+  deltaTmsEffect = deltaTms;
+  colorsEffect = colorsRgb;
 }
 
 void EffectOrchestrator::setEffect(WS2811_EFFECT effect)

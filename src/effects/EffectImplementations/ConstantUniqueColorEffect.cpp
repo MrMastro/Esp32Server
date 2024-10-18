@@ -9,7 +9,7 @@ String ConstantUniqueColorEffect::getName()
     return "CONSTANT_UNIQUE_COLOR";
 }
 
-void ConstantUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void ConstantUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
     for (int i = 0; i < driver->getMaxNumPixel(type); i++)
     {

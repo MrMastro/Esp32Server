@@ -1,15 +1,15 @@
-#include "ProgressiveBarUniqueColor.h"
+#include "ProgressiveBarUniqueColorEffect.h"
 
-ProgressiveBarUniqueColor::ProgressiveBarUniqueColor()
+ProgressiveBarUniqueColorEffect::ProgressiveBarUniqueColorEffect()
 {
 }
 
-String ProgressiveBarUniqueColor::getName()
+String ProgressiveBarUniqueColorEffect::getName()
 {
     return "PROGRESSIVE_BAR_UNIQUE_COLOR";
 }
 
-void ProgressiveBarUniqueColor::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void ProgressiveBarUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
     RgbColor colorInput = colorsInput[0];
     if (ws2811StepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
@@ -44,7 +44,7 @@ void ProgressiveBarUniqueColor::execStep(WS2811_EFFECT ws2811EffectInput, STEP_L
     }
 }
 
-void ProgressiveBarUniqueColor::off(DriverLed *driver, TYPE_STRIP type)
+void ProgressiveBarUniqueColorEffect::off(DriverLed *driver, TYPE_STRIP type)
 {
     driver->clear(type);
 }

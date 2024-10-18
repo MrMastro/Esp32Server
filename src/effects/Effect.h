@@ -21,13 +21,23 @@ enum class TYPE_STRIP
 class Effect {
 public:
     virtual String getName() = 0;
-    virtual void execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
+    virtual void execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual void off(DriverLed* driver, TYPE_STRIP typeOrchestrator) =0;
 };
 
 class EffectOrchestrator{
     public:
+        EffectOrchestrator();
+        EffectOrchestrator(DriverLed* driver,TYPE_STRIP typeled);
+
+        //Method for lifeCycle
         void runLifeCycle();
+
+        //Methods for start and stop lifeCycle
+        void startEffect(WS2811_EFFECT effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms);
+        void stopEffect(WS2811_EFFECT effectInput,const std::vector<RgbColor> &colorsRgb, int deltaTms);
+
+        //Set and get
         void setEffect(WS2811_EFFECT effect);
         void setDeltaTms(int ms);
         void setColors(std::vector<RgbColor> colors);

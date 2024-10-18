@@ -1,4 +1,4 @@
-#include "WaweUniqueColor.h"
+#include "WaweUniqueColorEffect.h"
 
 WaweUniqueColorEffect::WaweUniqueColorEffect()
 {
@@ -9,7 +9,7 @@ String WaweUniqueColorEffect::getName()
     return "WAWE_UNIQUE_COLOR";
 }
 
-void WaweUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, std::vector<RgbColor> colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void WaweUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
     RgbColor initialColor = colorsInput[0];
     RgbColor colorVariable = colorsInput[0];
