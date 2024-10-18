@@ -27,6 +27,8 @@ import SettingController from './js/controllers/SettingController.js';
 import AlertMessageView from './js/views/AlertMessageView.js';
 import ColorUtils from './js/utils/ColorUtils.js';
 import ConstantApiList from './js/constants/apiList.js'
+import HeaderView from './js/views/HeaderView.js';
+import FooterView from './js/views/FooterView.js';
 
 var host = "";
 var apHost = "192.168.4.1";
@@ -52,8 +54,6 @@ const app = {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
         $('.fieldIp').on('input', this.changeIp.bind(this));
         $('.changeIpBtn').on('click', this.changeIp.bind(this));
-        //$('.buttonWs2811SetEffect').on('click', this.sendStartEffect.bind(this));
-        //$('.buttonWs2811StopEffect').on('click', this.sendStopEffect.bind(this));
         $('#APConnection').on('click', this.switchConnection.bind(this));
     },
 
@@ -80,9 +80,12 @@ const app = {
 
     createComponent(){
         //! Initialize Controller, Model, View e Service
-        this.mainController = new MainController(host);
-        this.settingController = new SettingController(host);
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
+        this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
+        this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
+
+        this.mainController = new MainController(host);
+        this.settingController = new SettingController(host, this.headerView);
     },
 
     switchConnection() {
@@ -116,7 +119,7 @@ const app = {
     },
 
     showSettings() {
-        $('#Settings-Modal').modal('show');
+        $('#SettingsViewContainer').modal('show');
     },
 
     // METHOD TO API
