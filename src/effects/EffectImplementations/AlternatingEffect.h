@@ -1,9 +1,10 @@
 #ifndef ALTERNATING_EFFECT_H
 #define ALTERNATING_EFFECT_H
 
-#include "../Effect.h"
+#include <./effects/Effect.h>
 
-class AlternatingEffect : public Effect {
+class AlternatingEffect : public Effect 
+{
 public:
     AlternatingEffect();
     String getName() override;

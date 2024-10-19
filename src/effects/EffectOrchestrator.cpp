@@ -1,4 +1,4 @@
-#include "./Effect.h"
+#include "./EffectOrchestrator.h"
 
 EffectOrchestrator::EffectOrchestrator(): driver(nullptr), typeLed(), operative(false) {}
 EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled): driver(driver), typeLed(typeLed), operative(false) {}

@@ -1,4 +1,4 @@
-#include "./Effect.h"
+#include "./DriverLed.h"
 
 int DriverLed::getMaxNumPixel(TYPE_STRIP type)
 {

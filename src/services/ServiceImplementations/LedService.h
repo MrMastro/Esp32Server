@@ -7,6 +7,7 @@
 #include "constants/LedEffects.h"
 #include "SerialService.h"
 #include "./effects/Effect.h"
+#include <effects/EffectOrchestrator.h>
 
 // numPixel = 32
 // pinStrip = 5
