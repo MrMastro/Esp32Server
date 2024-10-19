@@ -15,10 +15,15 @@ class LedService : public Service
 {
 public:
   LedService();
-  LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput);
+  LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811);
   boolean isAvaible() override;
   boolean preparePin();
   boolean changeLed(boolean active, boolean toggle);
+
+  void setOperativeRgbOrchestrator(boolean enable);
+  void setOperativeWs2811Orchestrator(boolean enable);
+
+
   // Service Methods
   void startEffect(EFFECT_LABEL effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
   void stopEffect(EFFECT_LABEL effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
@@ -35,6 +40,8 @@ private:
   int ledPin;
   bool isLedOn;
 
+  boolean rgbOrchestratorEnabled;
+  boolean ws2811OrchestratorEnabled;
   EffectOrchestrator rgbOrchestrator;
   EffectOrchestrator ws2811Orchestrator;
 };

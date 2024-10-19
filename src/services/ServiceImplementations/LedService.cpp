@@ -6,14 +6,18 @@ LedService::LedService()
   isAttachedLed = false;
   rgbOrchestrator = EffectOrchestrator();
   ws2811Orchestrator = EffectOrchestrator();
+  rgbOrchestratorEnabled = false;
+  ws2811OrchestratorEnabled = false;
 }
 
 //Create a led service
-LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput)
+LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811)
 {
-  DriverLed* driver = new DriverLed(ledStriptInput,rgbLedStriptInput);
+  DriverLed* driver = new DriverLed(ledStriptInput, rgbLedStriptInput);
   rgbOrchestrator = EffectOrchestrator(driver, TYPE_STRIP::RGB);
   ws2811Orchestrator = EffectOrchestrator(driver, TYPE_STRIP::WS2811);
+  setOperativeRgbOrchestrator(enableRgb);
+  setOperativeWs2811Orchestrator(enableWs2811);
 }
 
 boolean LedService::isAvaible()
@@ -90,6 +94,14 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   }
   delay(100);
   return isLedOn;
+}
+
+void LedService::setOperativeRgbOrchestrator(boolean enable){
+  rgbOrchestratorEnabled = enable;
+}
+
+void LedService::setOperativeWs2811Orchestrator(boolean enable){
+  ws2811OrchestratorEnabled = enable;
 }
 
 //Metodo che tramite parametri da le direttive ai due orchestratori su come iniziare un effetto

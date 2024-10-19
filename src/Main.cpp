@@ -120,16 +120,10 @@ void initServices(HardwareSerial *serialPointer)
   serialService.setSettings(&s);
 
   // init LedService
-  if (s.ledSettings.enableStripRgb)
-  {
-    rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
-  }
-  if (s.ledSettings.enableStripWs2811)
-  {
-    ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
-  }
-
-  ledService = LedService(ws2811Strip, rgbStrip);
+  rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
+  ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
+  
+  ledService = LedService(ws2811Strip, rgbStrip,s.ledSettings.enableStripRgb,s.ledSettings.enableStripWs2811);
 
   servicesCollector.attachServer(&mastroServer);
   servicesCollector.addService(&commandService, "CommandService", &s);
