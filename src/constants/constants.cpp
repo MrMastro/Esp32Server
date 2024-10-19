@@ -34,6 +34,6 @@ StatusInfo getStatusInfoByHttpCode(HTTP_CODE code)
 //         }
 //     }
 //     // Return a special value or throw an exception if the string is not found
-//     return WS2811_EFFECT::UKNOWN_EFFECT;
+//     return EFFECT_LABEL::UKNOWN_EFFECT;
 // }
 

@@ -40,7 +40,7 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
 #define UKNOWN_COMMAND "Comando non riconosciuto"
 #define ERROR_COMMAND "ERRORE: {} - {}"
 #define COLOR_OUT_OF_RANGE_ERROR "I valori dei colori devono essere compresi tra 0 e 255"
-#define WS2811_EFFECT_UKNOWN "Effetto sconosciuto"
+#define EFFECT_LABEL_UKNOWN "Effetto sconosciuto"
 
 //FUNCTION FOR MAPPING
 StatusInfo getStatusInfoByHttpCode(HTTP_CODE code);

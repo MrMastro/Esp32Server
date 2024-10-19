@@ -130,8 +130,8 @@ void initServices(HardwareSerial *serialPointer)
   }
 
   ledService = LedService(ws2811Strip, rgbStrip);
-  servicesCollector.attachServer(&mastroServer);
 
+  servicesCollector.attachServer(&mastroServer);
   servicesCollector.addService(&commandService, "CommandService", &s);
   servicesCollector.addService(&ledService, "LedService", &s);
   servicesCollector.addService(&infoService, "InfoService", &s);
@@ -265,14 +265,14 @@ void ledTask(void *pvParameters)
   String msg = "";
 
   // Initial effect (commented for disable initial effect)
-  WS2811_EFFECT firstEffect = WS2811EffectStringToEnum(s.initialEffect);
+  EFFECT_LABEL firstEffect = WS2811EffectStringToEnum(s.initialEffect);
   String firstEffectString = WS2811EffectEnomToString(firstEffect);
 
   switch (firstEffect)
   {
-  case WS2811_EFFECT::NO_EFFECT:
-  case WS2811_EFFECT::UKNOWN_EFFECT:
-  case WS2811_EFFECT::ACTUAL_EFFECT:
+  case EFFECT_LABEL::NO_EFFECT:
+  case EFFECT_LABEL::UKNOWN_EFFECT:
+  case EFFECT_LABEL::ACTUAL_EFFECT:
     msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
     serialService.logInfoln(msg, "MAIN");
     break;
@@ -280,7 +280,7 @@ void ledTask(void *pvParameters)
   default:
     msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
     serialService.logInfoln(msg, "MAIN");
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, true, true);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
     break;
   }
 

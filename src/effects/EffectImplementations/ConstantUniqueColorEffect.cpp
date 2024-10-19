@@ -14,7 +14,7 @@ int ConstantUniqueColorEffect::getColorInputQt()
     return 1;
 }
 
-void ConstantUniqueColorEffect::execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void ConstantUniqueColorEffect::execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
 
     if(colorsInput.size() < getColorInputQt()){

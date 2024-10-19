@@ -22,7 +22,7 @@ class Effect {
 public:
     virtual String getName() = 0;
     virtual int getColorInputQt() = 0;
-    virtual void execStep(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
+    virtual void execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual void off(DriverLed* driver, TYPE_STRIP typeOrchestrator) =0;
 };
 
@@ -35,11 +35,11 @@ class EffectOrchestrator{
         void runLifeCycle();
 
         //Methods for start and stop lifeCycle
-        void startEffect(WS2811_EFFECT effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms);
-        void stopEffect(WS2811_EFFECT effectInput,const std::vector<RgbColor> &colorsRgb, int deltaTms);
+        void startEffect(EFFECT_LABEL effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms);
+        void stopEffect(EFFECT_LABEL effectInput,const std::vector<RgbColor> &colorsRgb, int deltaTms);
 
         //Set and get
-        void setEffect(WS2811_EFFECT effect);
+        void setEffect(EFFECT_LABEL effect);
         void setDeltaTms(int ms);
         void setColors(std::vector<RgbColor> colors);
         void addEffect(Effect* e);
@@ -52,7 +52,7 @@ class EffectOrchestrator{
         std::vector<Effect*> allEffects;
 
         //Params
-        WS2811_EFFECT effect;
+        EFFECT_LABEL effect;
         int deltaTmsEffect;
         std::vector<RgbColor> colorsEffect;
 

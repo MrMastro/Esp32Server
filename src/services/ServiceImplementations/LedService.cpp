@@ -4,18 +4,11 @@ LedService::LedService()
 {
   isLedOn = false;
   isAttachedLed = false;
-
-}
-
-// deprecated
-LedService::LedService(uint16_t countPixels, uint8_t pin)
-{
-  isLedOn = false;
-  isAttachedLed = false;
   rgbOrchestrator = EffectOrchestrator();
   ws2811Orchestrator = EffectOrchestrator();
 }
 
+//Create a led service
 LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput)
 {
   DriverLed* driver = new DriverLed(ledStriptInput,rgbLedStriptInput);
@@ -33,6 +26,7 @@ void LedService::onInitServiceCollector()
   serialService = ((SerialService *)servicesCollector.getService("SerialService"));
 }
 
+//Prepare pin that you have attached with method attach led, for led service prepare one led. this method is executed when you call attachPin.
 boolean LedService::preparePin()
 {
   serialService->logInfoln("prepare pin of ledService","LedService");
@@ -63,6 +57,7 @@ boolean LedService::preparePin()
   return isAttachedLed;
 }
 
+//Turn on, turn off or toggle the single led
 boolean LedService::changeLed(boolean active, boolean toggle)
 {
   delay(50);
@@ -97,7 +92,8 @@ boolean LedService::changeLed(boolean active, boolean toggle)
   return isLedOn;
 }
 
-void LedService::startEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
+//Metodo che tramite parametri da le direttive ai due orchestratori su come iniziare un effetto
+void LedService::startEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
 {
   if (!isAttachedLed)
   {
@@ -121,7 +117,8 @@ void LedService::startEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int d
   }
 }
 
-void LedService::stopEffect(WS2811_EFFECT effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
+//Metodo che tramite parametri da le direttive ai due orchestratori su come finire un effetto
+void LedService::stopEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
 {
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
   String effectInputString = WS2811EffectEnomToString(effectInput);
@@ -163,54 +160,8 @@ void LedService::runWs2811LifeCycle()
   ws2811Orchestrator.runLifeCycle();
 }
 
+//Return all avaible effect that the orchestrator can play
 std::vector<String> LedService::getAvaibleEffects()
 {
   return getAllWS2811EffectNames();
 }
-
-// void LedService::execRgbEffect(RGB_EFFECT rgbEffectInput, STEP_LIFE_EFFECT rgbStepInput, RgbColor colorInput, int deltaTimeMsInput)
-// {
-//   String s = "\nPlays\nEffect {},\nStep: {},\nRgbColor: {},\ndeltaTimesMs: {}";
-//   String sEffect = rgbEffectEnomToString(rgbEffectInput);
-//   String sLifeStep = stepLifeEffectEnomToString(rgbStepInput);
-//   String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-//   serialService->logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}),"execRgbEffect");
-
-//   // SWITCH ALL EFFECT
-//   switch (rgbEffectInput)
-//   {
-//   case RGB_EFFECT::CONSTANT_UNIQUE_COLOR:
-//     effectConstantsUniqueColor(STRIPT_EXECUTION::RGB, rgbStepInput, colorInput, deltaTimeMsInput);
-//     break;
-//   case RGB_EFFECT::WAWE_UNIQUE_COLOR:
-//     effectWaweUniqueColor(STRIPT_EXECUTION::RGB, rgbStepInput, colorInput, deltaTimeMsInput);
-//     break;
-//   default:
-//     break;
-//   }
-// }
-
-// void LedService::execWs2811Effect(WS2811_EFFECT ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, RgbColor colorInput, int deltaTimeMsInput)
-// {
-//   String s = "\nPlays\nEffect {},\nStep: {},\nRgbColor: {},\ndeltaTimesMs: {}";
-//   String sEffect = WS2811EffectEnomToString(ws2811EffectInput);
-//   String sLifeStep = stepLifeEffectEnomToString(ws2811StepInput);
-//   String sColor = formatMsg("[ {} , {} , {} ]", {String(colorInput.R), String(colorInput.G), String(colorInput.B)});
-//   serialService->logInfoln(formatMsg(s, {sEffect, sLifeStep, sColor, String(deltaTimeMsInput)}),"execWs2811Effect");
-
-//   // SWITCH ALL EFFECT
-//   switch (ws2811EffectInput)
-//   {
-//   case WS2811_EFFECT::CONSTANT_UNIQUE_COLOR:
-//     effectConstantsUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
-//     break;
-//   case WS2811_EFFECT::WAWE_UNIQUE_COLOR:
-//     effectWaweUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
-//     break;
-//   case WS2811_EFFECT::PROGRESSIVE_BAR_UNIQUE_COLOR:
-//     effectProgressiveBarUniqueColor(STRIPT_EXECUTION::WS2811, ws2811StepInput, colorInput, deltaTimeMsInput);
-//     break;
-//   default:
-//     break;
-//   }
-// }

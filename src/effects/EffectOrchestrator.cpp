@@ -33,7 +33,7 @@ switch (actualStep)
 
 }
 
-void EffectOrchestrator::startEffect(WS2811_EFFECT effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms)
+void EffectOrchestrator::startEffect(EFFECT_LABEL effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
 {
   actualStep = STEP_LIFE_EFFECT::BEGIN_STEP;
   effect = effectInput;
@@ -41,7 +41,7 @@ void EffectOrchestrator::startEffect(WS2811_EFFECT effectInput,const  std::vecto
   colorsEffect = colorsRgb;
 
 }
-void EffectOrchestrator::stopEffect(WS2811_EFFECT effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms)
+void EffectOrchestrator::stopEffect(EFFECT_LABEL effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
 {
   actualStep = STEP_LIFE_EFFECT::END_STEP;
   effect = effectInput;
@@ -49,7 +49,7 @@ void EffectOrchestrator::stopEffect(WS2811_EFFECT effectInput,const  std::vector
   colorsEffect = colorsRgb;
 }
 
-void EffectOrchestrator::setEffect(WS2811_EFFECT effect)
+void EffectOrchestrator::setEffect(EFFECT_LABEL effect)
 {
     this->effect = effect;
 }
