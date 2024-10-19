@@ -1,6 +1,7 @@
 #include "validators.h"
 #include <models/InitialSettingSaveModel/InitialSettingSaveModel.h>
 #include <constants/LedEffects.h>
+#include <effects/Effect.h>
 
 String validateCmd(CMD cmd, std::vector<String> params)
 {
@@ -62,7 +63,7 @@ String validateSettings(const SettingsModel &s) {
         return "Error: Initial effect cannot be empty.";
     }
 
-    if( WS2811EffectStringToEnum(s.initialEffect) == EFFECT_LABEL::UKNOWN_EFFECT ){
+    if( LabelEffectStringToEnum(s.initialEffect) == EFFECT_LABEL::UKNOWN_EFFECT ){
       return "Error: Initial effect is not allow";
     }
 
@@ -103,7 +104,7 @@ String validateInitialSettings(const InitialSettingSaveModel &s) {
         return "Error: Initial effect cannot be empty.";
     }
 
-    if( WS2811EffectStringToEnum(s.initialEffect) == EFFECT_LABEL::UKNOWN_EFFECT ){
+    if( LabelEffectStringToEnum(s.initialEffect) == EFFECT_LABEL::UKNOWN_EFFECT ){
       return "Error: Initial effect is not allow";
     }
 

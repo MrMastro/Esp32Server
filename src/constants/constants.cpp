@@ -26,7 +26,7 @@ StatusInfo getStatusInfoByHttpCode(HTTP_CODE code)
 //     return StatusInfo{};
 
 //     inputString.toUpperCase();
-//     for (const auto &entry : EFFECT_WS2811_PAIR)
+//     for (const auto &entry : EFFECT_LABEL_REFERENCE_STRING)
 //     {
 //         if (entry.second == inputString)
 //         {

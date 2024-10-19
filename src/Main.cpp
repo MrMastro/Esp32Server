@@ -122,7 +122,7 @@ void initServices(HardwareSerial *serialPointer)
   // init LedService
   rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
   ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
-  
+
   ledService = LedService(ws2811Strip, rgbStrip,s.ledSettings.enableStripRgb,s.ledSettings.enableStripWs2811);
 
   servicesCollector.attachServer(&mastroServer);
@@ -137,7 +137,9 @@ void initServices(HardwareSerial *serialPointer)
 
 void setup(void)
 {
+  delay(1000);
   Serial.begin(9600);
+  delay(1000);
   Serial.println("\n");
   Serial.println("Started");
   delay(10);
@@ -259,8 +261,8 @@ void ledTask(void *pvParameters)
   String msg = "";
 
   // Initial effect (commented for disable initial effect)
-  EFFECT_LABEL firstEffect = WS2811EffectStringToEnum(s.initialEffect);
-  String firstEffectString = WS2811EffectEnomToString(firstEffect);
+  EFFECT_LABEL firstEffect = LabelEffectStringToEnum(s.initialEffect);
+  String firstEffectString = LabelEffectEnumToString(firstEffect);
 
   switch (firstEffect)
   {

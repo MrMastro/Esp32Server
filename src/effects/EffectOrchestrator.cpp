@@ -1,5 +1,4 @@
 #include "./Effect.h"
-#include "Effect.h"
 
 EffectOrchestrator::EffectOrchestrator(): driver(nullptr), typeLed(), operative(false) {}
 EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled): driver(driver), typeLed(typeLed), operative(false) {}
@@ -12,10 +11,15 @@ if(!isOperative()){
   return;
 }
 
-Effect* e = getEffectByName( WS2811EffectEnomToString(effect) );
+String nameEffect =  LabelEffectEnumToString(effect);
+
+Serial.println(nameEffect);
+
+Effect* e = getEffectByName(nameEffect);
 
 if(e == nullptr){
   Serial.println("ERROR Effetto non trovato");
+  delay(1000);
   return;
 }
 

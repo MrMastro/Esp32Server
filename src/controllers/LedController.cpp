@@ -14,7 +14,7 @@ void setEffectWs2811(AsyncWebServerRequest *request)
     int ms = request->arg("timing").toInt();
     boolean actionRgb = request->arg("rgbAction").equalsIgnoreCase("true");
     boolean actionWs2811 = request->arg("ws2811Action").equalsIgnoreCase("true");
-    EFFECT_LABEL effectEnum = WS2811EffectStringToEnum(effect);
+    EFFECT_LABEL effectEnum = LabelEffectStringToEnum(effect);
 
     if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
     {
@@ -44,7 +44,7 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
     int ms = request->arg("timing").toInt();
     boolean actionRgb = request->arg("rgbAction").equalsIgnoreCase("true");
     boolean actionWs2811 = request->arg("ws2811Action").equalsIgnoreCase("true");
-    EFFECT_LABEL effectEnum = WS2811EffectStringToEnum(effect);
+    EFFECT_LABEL effectEnum = LabelEffectStringToEnum(effect);
 
     if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
     {

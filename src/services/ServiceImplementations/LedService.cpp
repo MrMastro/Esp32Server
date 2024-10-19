@@ -114,7 +114,7 @@ void LedService::startEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int de
     return;
   }
   String colorString = rgbColorToString(colorRgb);
-  String effectInputString = WS2811EffectEnomToString(effectInput);
+  String effectInputString = LabelEffectEnumToString(effectInput);
   String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
   serialService->logInfoln(msg, "LedService");
 
@@ -133,7 +133,7 @@ void LedService::startEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int de
 void LedService::stopEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
 {
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
-  String effectInputString = WS2811EffectEnomToString(effectInput);
+  String effectInputString = LabelEffectEnumToString(effectInput);
   String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
   serialService->logInfoln(msg, "LedService");
 
