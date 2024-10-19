@@ -6,7 +6,7 @@ String FadeEffect::getName() {
     return "FADE_EFFECT";
 }
 
-void FadeEffect::execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) {
+void FadeEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) {
     
     if (driver == nullptr) {
         return;
@@ -18,7 +18,7 @@ void FadeEffect::execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws281
         return;
     }
 
-    switch (ws2811StepInput) {
+    switch (stepInput) {
         case STEP_LIFE_EFFECT::BEGIN_STEP:
             increasing = true;
             brightness = 0;

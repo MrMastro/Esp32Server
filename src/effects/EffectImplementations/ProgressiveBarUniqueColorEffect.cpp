@@ -14,7 +14,7 @@ int ProgressiveBarUniqueColorEffect::getColorInputQt()
     return 1;
 }
 
-void ProgressiveBarUniqueColorEffect::execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
 {
     if(colorsInput.size() < getColorInputQt()){
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
@@ -22,7 +22,7 @@ void ProgressiveBarUniqueColorEffect::execStep(EFFECT_LABEL ws2811EffectInput, S
     }
 
     RgbColor colorInput = colorsInput[0];
-    if (ws2811StepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
+    if (stepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
     {
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
@@ -31,7 +31,7 @@ void ProgressiveBarUniqueColorEffect::execStep(EFFECT_LABEL ws2811EffectInput, S
             delay(deltaTimeMsInput);
         }
     }
-    else if (ws2811StepInput == STEP_LIFE_EFFECT::LOOP_STEP)
+    else if (stepInput == STEP_LIFE_EFFECT::LOOP_STEP)
     {
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
@@ -39,7 +39,7 @@ void ProgressiveBarUniqueColorEffect::execStep(EFFECT_LABEL ws2811EffectInput, S
         }
         driver->showData();
     }
-    else if (ws2811StepInput == STEP_LIFE_EFFECT::END_STEP)
+    else if (stepInput == STEP_LIFE_EFFECT::END_STEP)
     {
         //???
         // for (int light = 255; light == 0; --light)

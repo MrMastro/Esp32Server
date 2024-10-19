@@ -9,6 +9,7 @@ BluetoothSerial SerialBT;
 // Deprecated: MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
 NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip = nullptr;
 LEDStripDriver *rgbStrip = nullptr;
+DriverLed *myDriver;
 
 CommandService commandService;
 SettingService settingService;
@@ -122,8 +123,8 @@ void initServices(HardwareSerial *serialPointer)
   // init LedService
   rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
   ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
-
-  ledService = LedService(ws2811Strip, rgbStrip,s.ledSettings.enableStripRgb,s.ledSettings.enableStripWs2811);
+  myDriver = new DriverLed(ws2811Strip, rgbStrip);
+  ledService = LedService(myDriver, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
 
   servicesCollector.attachServer(&mastroServer);
   servicesCollector.addService(&commandService, "CommandService", &s);
@@ -137,9 +138,7 @@ void initServices(HardwareSerial *serialPointer)
 
 void setup(void)
 {
-  delay(1000);
   Serial.begin(9600);
-  delay(1000);
   Serial.println("\n");
   Serial.println("Started");
   delay(10);
@@ -261,23 +260,16 @@ void ledTask(void *pvParameters)
   String msg = "";
 
   // Initial effect (commented for disable initial effect)
-  EFFECT_LABEL firstEffect = LabelEffectStringToEnum(s.initialEffect);
-  String firstEffectString = LabelEffectEnumToString(firstEffect);
-
-  switch (firstEffect)
+  if (!isPresentEffect(s.initialEffect))
   {
-  case EFFECT_LABEL::NO_EFFECT:
-  case EFFECT_LABEL::UKNOWN_EFFECT:
-  case EFFECT_LABEL::ACTUAL_EFFECT:
-    msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
+    msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {s.initialEffect, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
     serialService.logInfoln(msg, "MAIN");
-    break;
-
-  default:
-    msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {firstEffectString, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
+  }
+  else
+  {
+    msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {s.initialEffect, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
     serialService.logInfoln(msg, "MAIN");
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(firstEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
-    break;
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
   }
 
   while (true)

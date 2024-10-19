@@ -8,13 +8,19 @@
 #include "EnviromentEffect.h"
 #include "DriverLed.h"
 
+enum class EFFECT_LABEL;
+enum class STEP_LIFE_EFFECT;
+enum class TYPE_STRIP;
+
+class DriverLed;
+
 // Service interface
 class Effect {
 public:
     virtual String getName() = 0;
     virtual int getColorInputQt() = 0;
-    virtual void execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP typeOrchestrator) = 0;
+    virtual void execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) = 0;
     virtual void off(DriverLed* driver, TYPE_STRIP typeOrchestrator) =0;
 };
 
-#endif  // Effect_H
+#endif  //Effect_H

@@ -1,8 +1,25 @@
 #include "./EffectOrchestrator.h"
 
-EffectOrchestrator::EffectOrchestrator(): driver(nullptr), typeLed(), operative(false) {}
-EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled): driver(driver), typeLed(typeLed), operative(false) {}
-EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled, boolean enable): driver(driver), typeLed(typeLed), operative(enable) {}
+EffectOrchestrator::EffectOrchestrator()
+{
+  driver = nullptr;
+  operative = false;
+
+}
+
+EffectOrchestrator::EffectOrchestrator(DriverLed *driverInput, TYPE_STRIP typeledInput)
+{
+  driver = driverInput;
+  typeLed = typeledInput;
+}
+
+EffectOrchestrator::EffectOrchestrator(DriverLed *driverInput, TYPE_STRIP typeledInput, boolean enable)
+{
+  driver = driverInput;
+  typeLed = typeledInput;
+  operative = enable;
+
+}
 
 void EffectOrchestrator::runLifeCycle()
 {
@@ -11,14 +28,15 @@ if(!isOperative()){
   return;
 }
 
-String nameEffect =  LabelEffectEnumToString(effect);
+if(!running)
+{
+  return;
+}
 
-Serial.println(nameEffect);
-
-Effect* e = getEffectByName(nameEffect);
+Effect* e = getEffectByEffectName(effect);
 
 if(e == nullptr){
-  Serial.println("ERROR Effetto non trovato");
+  Serial.println("ERROR Effetto non trovato: " + effect);
   delay(1000);
   return;
 }
@@ -31,26 +49,28 @@ switch (actualStep)
     break;
   case STEP_LIFE_EFFECT::LOOP_STEP:
     e->execStep(effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+    break;
   case STEP_LIFE_EFFECT::END_STEP:
     e->execStep(effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
     actualStep = STEP_LIFE_EFFECT::OFF;
     break;
   default:
     e->off(driver, typeLed);
+    running = false;
     break;
   }
 
 }
 
-void EffectOrchestrator::startEffect(EFFECT_LABEL effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
+void EffectOrchestrator::startEffect(String effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
 {
   actualStep = STEP_LIFE_EFFECT::BEGIN_STEP;
   effect = effectInput;
   deltaTmsEffect = deltaTms;
   colorsEffect = colorsRgb;
-
+  running = true;
 }
-void EffectOrchestrator::stopEffect(EFFECT_LABEL effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
+void EffectOrchestrator::stopEffect(String effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
 {
   actualStep = STEP_LIFE_EFFECT::END_STEP;
   effect = effectInput;
@@ -68,7 +88,7 @@ void EffectOrchestrator::setOperative(boolean enable)
   operative = enable;
 }
 
-void EffectOrchestrator::setEffect(EFFECT_LABEL effect)
+void EffectOrchestrator::setEffect(String effect)
 {
     this->effect = effect;
 }
@@ -83,22 +103,7 @@ void EffectOrchestrator::setColors(std::vector<RgbColor> colors)
     colorsEffect = colors;
 }
 
-void EffectOrchestrator::addEffect(Effect* e)
-{
-    allEffects.push_back(e);
-}
-
 void EffectOrchestrator::setDriver(DriverLed *d)
 {
     this->driver = d;
-}
-
-Effect* EffectOrchestrator::getEffectByName(String name)
-{
-    for (size_t i = 0; i < allEffects.size(); ++i) {
-        if(allEffects[i]->getName() == name){
-            return allEffects[i];
-        }
-    }
-    return nullptr;
 }

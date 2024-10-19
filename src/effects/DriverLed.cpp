@@ -1,5 +1,20 @@
 #include "./DriverLed.h"
 
+DriverLed::DriverLed()
+{
+    ws2811Strip = nullptr;
+    rgbStrip = nullptr;
+
+}
+
+DriverLed::DriverLed(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811StripInput, LEDStripDriver *rgbStripInput)
+{
+    ws2811Strip = ws2811StripInput;
+    rgbStrip = rgbStripInput;
+    ws2811Strip->Begin();
+    ws2811Strip->Show();
+}
+
 int DriverLed::getMaxNumPixel(TYPE_STRIP type)
 {
     switch (type)

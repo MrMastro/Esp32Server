@@ -63,7 +63,7 @@ String validateSettings(const SettingsModel &s) {
         return "Error: Initial effect cannot be empty.";
     }
 
-    if( LabelEffectStringToEnum(s.initialEffect) == EFFECT_LABEL::UKNOWN_EFFECT ){
+    if(!isPresentEffect(s.initialEffect)){
       return "Error: Initial effect is not allow";
     }
 
@@ -104,7 +104,7 @@ String validateInitialSettings(const InitialSettingSaveModel &s) {
         return "Error: Initial effect cannot be empty.";
     }
 
-    if( LabelEffectStringToEnum(s.initialEffect) == EFFECT_LABEL::UKNOWN_EFFECT ){
+    if(!isPresentEffect(s.initialEffect)){
       return "Error: Initial effect is not allow";
     }
 

@@ -16,32 +16,30 @@ class EffectOrchestrator{
         void runLifeCycle();
 
         //Methods for start and stop lifeCycle
-        void startEffect(EFFECT_LABEL effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms);
-        void stopEffect(EFFECT_LABEL effectInput,const std::vector<RgbColor> &colorsRgb, int deltaTms);
+        void startEffect(String effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms);
+        void stopEffect(String effectInput,const std::vector<RgbColor> &colorsRgb, int deltaTms);
 
         //Set and get
         boolean isOperative();
         void setOperative(boolean enable);
-        void setEffect(EFFECT_LABEL effect);
+        void setEffect(String effect);
         void setDeltaTms(int ms);
         void setColors(std::vector<RgbColor> colors);
-        void addEffect(Effect* e);
+        //void addEffect(Effect* e);
         void setDriver(DriverLed* driver);
     private:
         boolean operative;
+        boolean running;
         TYPE_STRIP typeLed;
         DriverLed* driver;
 
         STEP_LIFE_EFFECT actualStep;
-        std::vector<Effect*> allEffects;
 
         //Params
-        EFFECT_LABEL effect;
+        String effect;
         int deltaTmsEffect;
         std::vector<RgbColor> colorsEffect;
 
-        //utils
-        Effect* getEffectByName(String name);
 };
 
 #endif

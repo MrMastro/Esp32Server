@@ -17,6 +17,7 @@ class LedService : public Service
 public:
   LedService();
   LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811);
+  LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811);
   boolean isAvaible() override;
   boolean preparePin();
   boolean changeLed(boolean active, boolean toggle);
@@ -28,8 +29,8 @@ public:
 
 
   // Service Methods
-  void startEffect(EFFECT_LABEL effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
-  void stopEffect(EFFECT_LABEL effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
+  void startEffect(String effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
+  void stopEffect(String effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
   void runRgbLifeCycle();
   void runWs2811LifeCycle();
   std::vector<String> getAvaibleEffects();

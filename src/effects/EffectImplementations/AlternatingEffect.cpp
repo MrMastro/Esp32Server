@@ -12,8 +12,7 @@ int AlternatingEffect::getColorInputQt()
     return 2;
 }
 
-void AlternatingEffect::execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFECT ws2811StepInput,
-                                 const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void AlternatingEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
 {
 
     if(colorsInput.size() < getColorInputQt()){
@@ -26,7 +25,7 @@ void AlternatingEffect::execStep(EFFECT_LABEL ws2811EffectInput, STEP_LIFE_EFFEC
         return;
     }
 
-    switch (ws2811StepInput)
+    switch (stepInput)
     {
     case STEP_LIFE_EFFECT::BEGIN_STEP:
         // Esegui eventuali inizializzazioni necessarie all'inizio dell'effetto

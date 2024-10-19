@@ -18,6 +18,16 @@ LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptIn
   setOperativeWs2811Orchestrator(enableWs2811);
 }
 
+LedService::LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811)
+{
+  DriverLed *driver = driverInput;
+  rgbOrchestrator = EffectOrchestrator(driver, TYPE_STRIP::RGB);
+  ws2811Orchestrator = EffectOrchestrator(driver, TYPE_STRIP::WS2811);
+  setOperativeRgbOrchestrator(enableRgb);
+  setOperativeWs2811Orchestrator(enableWs2811);
+}
+
+
 boolean LedService::isAvaible()
 {
   return isAttachedLed;
@@ -104,8 +114,18 @@ void LedService::setOperativeWs2811Orchestrator(boolean enable)
   ws2811Orchestrator.setOperative(enable);
 }
 
+boolean LedService::isOperativeRgbOrchestrator()
+{
+    return rgbOrchestrator.isOperative();
+}
+
+boolean LedService::isOperative2811Orchestrator()
+{
+    return ws2811Orchestrator.isOperative();
+}
+
 // Metodo che tramite parametri da le direttive ai due orchestratori su come iniziare un effetto
-void LedService::startEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
+void LedService::startEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
 {
   if (!isAttachedLed)
   {
@@ -114,8 +134,7 @@ void LedService::startEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int de
     return;
   }
   String colorString = rgbColorToString(colorRgb);
-  String effectInputString = LabelEffectEnumToString(effectInput);
-  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
+  String msg = formatMsg("start: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInput, colorString, String(deltaTms), String(actionRgbStript), String(actionWs2811Stript)});
   serialService->logInfoln(msg, "LedService");
 
   if (actionRgbStript)
@@ -130,11 +149,10 @@ void LedService::startEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int de
 }
 
 // Metodo che tramite parametri da le direttive ai due orchestratori su come finire un effetto
-void LedService::stopEffect(EFFECT_LABEL effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
+void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
 {
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
-  String effectInputString = LabelEffectEnumToString(effectInput);
-  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInputString, colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
+  String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInput, colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
   serialService->logInfoln(msg, "LedService");
 
   if (actionRgb)
@@ -168,7 +186,7 @@ void LedService::runWs2811LifeCycle()
     serialService->logError("ws2811 Stript not attached", "LedService", "runEffectWs2811LifeCycle");
     return;
   }
-
+  
   ws2811Orchestrator.runLifeCycle();
 }
 
