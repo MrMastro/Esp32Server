@@ -1,12 +1,17 @@
 #include "./Effect.h"
 #include "Effect.h"
 
-EffectOrchestrator::EffectOrchestrator(): driver(nullptr), typeLed() {}
-
-EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled) : driver(driver), typeLed(typeLed) {}
+EffectOrchestrator::EffectOrchestrator(): driver(nullptr), typeLed(), operative(false) {}
+EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled): driver(driver), typeLed(typeLed), operative(false) {}
+EffectOrchestrator::EffectOrchestrator(DriverLed *driver, TYPE_STRIP typeled, boolean enable): driver(driver), typeLed(typeLed), operative(enable) {}
 
 void EffectOrchestrator::runLifeCycle()
 {
+
+if(!isOperative()){
+  return;
+}
+
 Effect* e = getEffectByName( WS2811EffectEnomToString(effect) );
 
 if(e == nullptr){
@@ -47,6 +52,16 @@ void EffectOrchestrator::stopEffect(EFFECT_LABEL effectInput, const std::vector<
   effect = effectInput;
   deltaTmsEffect = deltaTms;
   colorsEffect = colorsRgb;
+}
+
+boolean EffectOrchestrator::isOperative()
+{
+return operative;
+}
+
+void EffectOrchestrator::setOperative(boolean enable)
+{
+  operative = enable;
 }
 
 void EffectOrchestrator::setEffect(EFFECT_LABEL effect)

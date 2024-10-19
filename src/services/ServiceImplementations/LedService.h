@@ -22,6 +22,8 @@ public:
 
   void setOperativeRgbOrchestrator(boolean enable);
   void setOperativeWs2811Orchestrator(boolean enable);
+  boolean isOperativeRgbOrchestrator();
+  boolean isOperative2811Orchestrator();
 
 
   // Service Methods
@@ -40,8 +42,6 @@ private:
   int ledPin;
   bool isLedOn;
 
-  boolean rgbOrchestratorEnabled;
-  boolean ws2811OrchestratorEnabled;
   EffectOrchestrator rgbOrchestrator;
   EffectOrchestrator ws2811Orchestrator;
 };
