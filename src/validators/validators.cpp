@@ -23,7 +23,7 @@ String validateCmd(CMD cmd, std::vector<String> params)
 
 String validateChangeCommunicationMode(std::vector<String> params)
 {
-  String error ="";
+  String error = "";
   if (params.size() < 1)
   {
     return "insert mode like first param";
@@ -38,102 +38,114 @@ String validateChangeCommunicationMode(std::vector<String> params)
   }
 
   return String();
-
 };
 
-String validateSettings(const SettingsModel &s) {
-    // Verifica che il nome del dispositivo non sia vuoto
-    if (s.deviceName.isEmpty()) {
-        return "Error: Device name cannot be empty.";
-    }
+String validateSettings(const SettingsModel &s)
+{
+  // Verifica che il nome del dispositivo non sia vuoto
+  if (s.deviceName.isEmpty())
+  {
+    return "Error: Device name cannot be empty.";
+  }
 
-    // Verifica che la password del dispositivo non sia vuota
-    if (s.devicePassword.isEmpty()) {
-        return "Error: Device password cannot be empty.";
-    }
+  // Verifica che la password del dispositivo non sia vuota
+  if (s.devicePassword.isEmpty())
+  {
+    return "Error: Device password cannot be empty.";
+  }
 
-    // Verifica che il modo di comunicazione sia valido
-    COMMUNICATION_MODE cm = communicationModeStringToEnum(s.communicationMode);
+  // Verifica che il modo di comunicazione sia valido
+  COMMUNICATION_MODE cm = communicationModeStringToEnum(s.communicationMode);
 
-    if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
-    {
-      return ("communicationMode is not valid");
-    }
+  if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
+  {
+    return ("communicationMode is not valid");
+  }
 
-    // Verifica che l'effetto iniziale non sia vuoto
-    if (s.initialEffect.isEmpty()) {
-        return "Error: Initial effect cannot be empty.";
-    }
+  // Verifica che l'effetto iniziale non sia vuoto
+  if (s.initialEffect.isEmpty())
+  {
+    return "Error: Initial effect cannot be empty.";
+  }
 
-    if(!isPresentEffect(s.initialEffect)){
-      return "Error: Initial effect is not allow";
-    }
+  if (!isPresentEffect(s.initialEffect))
+  {
+    return "Error: Initial effect is not allow";
+  }
 
-    // Verifica che i valori di deltaT siano nel range accettabile
-    if (s.initialDeltaT < 0) {
-        return "Error: Initial deltaT cannot be negative.";
-    }
+  // Verifica che i valori di deltaT siano nel range accettabile
+  if (s.initialDeltaT < 0)
+  {
+    return "Error: Initial deltaT cannot be negative.";
+  }
 
-    // Verifica che i valori RGB siano nel range [0, 255]
-    String errorColors = validateColors(s.initialColors);
-    
-    if(!errorColors.isEmpty())
-    {
-      return("Error: "+errorColors);
-    }
+  // Verifica che i valori RGB siano nel range [0, 255]
+  String errorColors = validateColors(s.initialColors);
 
+  if (!errorColors.isEmpty())
+  {
+    return ("Error: " + errorColors);
+  }
 
-    // Verifica che le credenziali della rete AP non siano vuote
-    if (s.ssidAP.isEmpty() || s.passwordAP.isEmpty()) {
-        return "Error: SSID and password for AP mode cannot be empty.";
-    }
+  // Verifica che le credenziali della rete AP non siano vuote
+  if (s.ssidAP.isEmpty() || s.passwordAP.isEmpty())
+  {
+    return "Error: SSID and password for AP mode cannot be empty.";
+  }
 
-    // Verifica che le credenziali della rete WIFI non siano vuote
-    if (s.ssidWIFI.isEmpty() || s.passwordWIFI.isEmpty()) {
-        return "Error: SSID and password for WIFI mode cannot be empty.";
-    }
+  // Verifica che le credenziali della rete WIFI non siano vuote
+  if (s.ssidWIFI.isEmpty() || s.passwordWIFI.isEmpty())
+  {
+    return "Error: SSID and password for WIFI mode cannot be empty.";
+  }
 
-    // Se tutte le validazioni sono superate, restituisce una stringa vuota
-    return String();
+  // Se tutte le validazioni sono superate, restituisce una stringa vuota
+  return String();
 }
 
-String validateInitialSettings(const InitialSettingSaveModel &s) {
+String validateInitialSettings(const InitialSettingSaveModel &s)
+{
 
-    // Verifica che l'effetto iniziale non sia vuoto
-    if (s.initialEffect.isEmpty()) {
-        return "Error: Initial effect cannot be empty.";
-    }
+  // Verifica che l'effetto iniziale non sia vuoto
+  if (s.initialEffect.isEmpty())
+  {
+    return "Error: Initial effect cannot be empty.";
+  }
 
-    if(!isPresentEffect(s.initialEffect)){
+  if (s.initialEffect != getStringByEffectLabel(LED_EFFECT_LABEL::NO_EFFECT))
+  {
+    if (!isPresentEffect(s.initialEffect))
+    {
       return "Error: Initial effect is not allow";
     }
+  }
 
-    // Verifica che i valori di deltaT siano nel range accettabile
-    if (s.initialDeltaT < 0) {
-        return "Error: Initial deltaT cannot be negative.";
-    }
+  // Verifica che i valori di deltaT siano nel range accettabile
+  if (s.initialDeltaT < 0)
+  {
+    return "Error: Initial deltaT cannot be negative.";
+  }
 
-    // Verifica che i valori RGB siano nel range [0, 255]
-    String errorColors = validateColors(s.initialColors);
-    
-    if(!errorColors.isEmpty())
-    {
-      return("Error: "+errorColors);
-    }
+  // Verifica che i valori RGB siano nel range [0, 255]
+  String errorColors = validateColors(s.initialColors);
 
-    // Se tutte le validazioni sono superate, restituisce una stringa vuota
-    return String();
+  if (!errorColors.isEmpty())
+  {
+    return ("Error: " + errorColors);
+  }
+
+  // Se tutte le validazioni sono superate, restituisce una stringa vuota
+  return String();
 }
-
 
 String validateReboot(std::vector<String> params)
 {
-  if(params.size()<1)
+  if (params.size() < 1)
   {
     return String();
   }
 
-  if(!isUnsignedLong(params.at(0)))
+  if (!isUnsignedLong(params.at(0)))
   {
     return "first param must be a number";
   }
@@ -141,8 +153,9 @@ String validateReboot(std::vector<String> params)
   return String();
 };
 
-bool isUnsignedLong(const String& str) {
-  char* end;
+bool isUnsignedLong(const String &str)
+{
+  char *end;
   unsigned long val = strtoul(str.c_str(), &end, 10);
 
   // Se end non punta alla fine della stringa, ci sono caratteri non validi
@@ -151,7 +164,7 @@ bool isUnsignedLong(const String& str) {
 
 String validateColors(std::vector<LedColorRequest> colors)
 {
-  if(colors.size()<1)
+  if (colors.size() < 1)
   {
     return "colors cannot be empty";
   }
@@ -163,7 +176,6 @@ String validateColors(std::vector<LedColorRequest> colors)
       return COLOR_OUT_OF_RANGE_ERROR;
     }
   }
-  
 
   return String();
 };

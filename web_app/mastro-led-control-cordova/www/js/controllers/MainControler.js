@@ -172,10 +172,9 @@ export default class MainController {
     async saveInitialEffect() {
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
-        console.log(request);
+        let request = new InitialSettingSaveModel(ledModel.effect, ledModel.deltaT, ledModel.colors);
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel(request.effect, request.ms, request.colors));
+        let result = await this.ledService.saveInitialEffect(this.referenceHost, request);
         this.hideWait();
         this.valutateResponseAlertMessage(result);
     }

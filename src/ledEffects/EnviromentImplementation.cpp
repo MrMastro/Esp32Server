@@ -29,18 +29,18 @@ const LED_EFFECT_LABEL getEffectLabelByName(String inputString)
   return LED_EFFECT_LABEL::UKNOWN_EFFECT;
 }
 
-// const String LabelEffectEnumToString(LED_EFFECT_LABEL inputEnum)
-// {
-//   for (const auto &entry : LED_EFFECT_LABEL_REFERENCE_STRING)
-//   {
-//     if (entry.first == inputEnum)
-//     {
-//       return entry.second;
-//     }
-//   }
-//   // Return a special value or throw an exception if the string is not found
-//   return LabelEffectEnumToString(LED_EFFECT_LABEL::UKNOWN_EFFECT);
-// }
+const String getStringByEffectLabel(LED_EFFECT_LABEL inputEnum)
+{
+  for (const auto &entry : LED_EFFECT_LABEL_REFERENCE_STRING)
+  {
+    if (entry.first == inputEnum)
+    {
+      return entry.second;
+    }
+  }
+  // Return a special value or throw an exception if the string is not found
+  return getStringByEffectLabel(LED_EFFECT_LABEL::UKNOWN_EFFECT);
+}
 
 std::vector<String> getAllWS2811EffectNames()
 {

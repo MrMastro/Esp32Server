@@ -46,7 +46,7 @@ const std::pair<LED_EFFECT_LABEL, String> LED_EFFECT_LABEL_REFERENCE_STRING[] = 
 extern const std::vector<Effect*> LED_EFFECT_REFERENCE;
 
 const LED_EFFECT_LABEL getEffectLabelByName(String inputString);
-//const String getStringByEffectLabel(LED_EFFECT_LABEL inputEnum);
+const String getStringByEffectLabel(LED_EFFECT_LABEL inputEnum);
 std::vector<String> getAllWS2811EffectNames();
 std::vector<Effect*> getAllWS2811EffectReference();
 boolean isPresentEffect(String nameEffect);

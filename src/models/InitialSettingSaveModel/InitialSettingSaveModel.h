@@ -38,7 +38,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        StaticJsonDocument<192> doc;
+        StaticJsonDocument<768> doc;
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)
