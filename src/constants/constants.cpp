@@ -26,7 +26,7 @@ StatusInfo getStatusInfoByHttpCode(HTTP_CODE code)
 //     return StatusInfo{};
 
 //     inputString.toUpperCase();
-//     for (const auto &entry : EFFECT_LABEL_REFERENCE_STRING)
+//     for (const auto &entry : LED_EFFECT_LABEL_REFERENCE_STRING)
 //     {
 //         if (entry.second == inputString)
 //         {
@@ -34,6 +34,6 @@ StatusInfo getStatusInfoByHttpCode(HTTP_CODE code)
 //         }
 //     }
 //     // Return a special value or throw an exception if the string is not found
-//     return EFFECT_LABEL::UKNOWN_EFFECT;
+//     return LED_EFFECT_LABEL::UKNOWN_EFFECT;
 // }
 

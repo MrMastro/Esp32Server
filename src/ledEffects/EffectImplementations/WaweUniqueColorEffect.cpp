@@ -14,7 +14,7 @@ int WaweUniqueColorEffect::getColorInputQt()
     return 1;
 }
 
-void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
+void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
 {
     if(colorsInput.size() < getColorInputQt())
     {
@@ -25,7 +25,7 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepIn
     RgbColor initialColor = colorsInput[0];
     RgbColor colorVariable = colorsInput[0];
 
-    if (stepInput == STEP_LIFE_EFFECT::BEGIN_STEP)
+    if (stepInput == STEP_LIFE_LED_EFFECT::BEGIN_STEP)
     {
         while (colorVariable.CalculateBrightness() > 0)
         {
@@ -38,7 +38,7 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepIn
             delay(deltaTimeMsInput);
         }
     }
-    else if (stepInput == STEP_LIFE_EFFECT::LOOP_STEP)
+    else if (stepInput == STEP_LIFE_LED_EFFECT::LOOP_STEP)
     {
         while (colorVariable.CalculateBrightness() < initialColor.CalculateBrightness())
         {
@@ -51,7 +51,7 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepIn
             delay(deltaTimeMsInput);
         }
     }
-    else if (stepInput == STEP_LIFE_EFFECT::END_STEP)
+    else if (stepInput == STEP_LIFE_LED_EFFECT::END_STEP)
     {
         off(driver, type);
     }

@@ -23,7 +23,7 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
         request->send(s.getCode(), "application/json", jsonResponse);
         servicesCollector.freeExclusiveExecution();
         return;
-    };
+    }
 
     String error = validateSettings(settingModel);
     if(!error.isEmpty())

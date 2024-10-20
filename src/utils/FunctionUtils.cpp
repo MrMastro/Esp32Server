@@ -64,3 +64,18 @@ String rgbColorToString(RgbColor color)
 {
     return formatMsg("[{},{},{}]", {String(color.R), String(color.G), String(color.B)});
 }
+
+String vectorRgbColorToString(std::vector<RgbColor> s)
+{
+    String res = "[";
+    for (int i = 0; i < s.size(); i++)
+    {
+        res += (rgbColorToString(s[i]));
+        if (i != s.size()-1)
+        {
+            res += ",";
+        }
+    }
+    res += "]";
+    return res;
+}

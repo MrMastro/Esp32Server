@@ -1,5 +1,6 @@
 #include "Controllers.h"
 #include <models/response/VectorResponse/VectorResponse.h>
+#include <models/LedEffectRequest/LedEffectRequest.h>
 
 void setEffectWs2811(AsyncWebServerRequest *request)
 {
@@ -23,7 +24,7 @@ void setEffectWs2811(AsyncWebServerRequest *request)
     else if (!isPresentEffect(effect))
     {
         response = BasicResponse(HTTP_CODE::BadRequest);
-        response.getStatus().setDescription(EFFECT_LABEL_UKNOWN);
+        response.getStatus().setDescription(LED_EFFECT_LABEL_UKNOWN);
     }
     else
     {
@@ -57,7 +58,7 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
     else if (!isPresentEffect(effect))
     {
         response = BasicResponse(HTTP_CODE::BadRequest);
-        response.getStatus().setDescription(EFFECT_LABEL_UKNOWN);
+        response.getStatus().setDescription(LED_EFFECT_LABEL_UKNOWN);
     }
     else
     {
@@ -65,6 +66,116 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
         ((LedService *)servicesCollector.getService("LedService"))->stopEffect(effect, RgbColor(r, g, b), ms, actionRgb, actionWs2811);
         response = BasicResponse(HTTP_CODE::OK);
     }
+
+    String jsonResponse = dtoToJson(response);
+    request->send(200, "application/json", jsonResponse);
+    servicesCollector.freeExclusiveExecution();
+}
+
+void setEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    servicesCollector.takeExclusiveExecution();
+    BasicResponse response;
+    String body = getBodyString(data, len);
+    LedEffectRequest ledRequest;
+
+    if (!ledRequest.fromJson(body))
+    {
+        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+        s.setDescription("Errore Serializzazione");
+        response = BasicResponse(s);
+        String jsonResponse = dtoToJson(response);
+        request->send(s.getCode(), "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+
+    String errorColor = validateColors(ledRequest.colors);
+    if (!errorColor.isEmpty())
+    {
+        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+        s.setDescription(errorColor);
+        response = BasicResponse(s);
+        String jsonResponse = dtoToJson(response);
+        request->send(s.getCode(), "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+
+    if (!isPresentEffect(ledRequest.effect))
+    {
+        response = BasicResponse(HTTP_CODE::BadRequest);
+        response.getStatus().setDescription(LED_EFFECT_LABEL_UKNOWN);
+        String jsonResponse = dtoToJson(response);
+        request->send(response.getStatus().getCode(), "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+    std::vector<RgbColor> rgbColors;
+
+    for (size_t i = 0; i < ledRequest.colors.size(); i++)
+    {
+        LedColorRequest c = ledRequest.colors.at(i);
+        rgbColors.push_back(RgbColor(c.r, c.g, c.b));
+    }
+
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(ledRequest.effect, rgbColors, ledRequest.ms, ledRequest.rgbAction, ledRequest.ws2811Action);
+    response = BasicResponse(HTTP_CODE::OK);
+
+    String jsonResponse = dtoToJson(response);
+    request->send(200, "application/json", jsonResponse);
+    servicesCollector.freeExclusiveExecution();
+}
+
+void stopEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    servicesCollector.takeExclusiveExecution();
+    BasicResponse response;
+    String body = getBodyString(data, len);
+    LedEffectRequest ledRequest;
+
+    if (!ledRequest.fromJson(body))
+    {
+        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+        s.setDescription("Errore Serializzazione");
+        response = BasicResponse(s);
+        String jsonResponse = dtoToJson(response);
+        request->send(s.getCode(), "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+
+    String errorColor = validateColors(ledRequest.colors);
+    if (!errorColor.isEmpty())
+    {
+        StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+        s.setDescription(errorColor);
+        response = BasicResponse(s);
+        String jsonResponse = dtoToJson(response);
+        request->send(s.getCode(), "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+
+    if (!isPresentEffect(ledRequest.effect))
+    {
+        response = BasicResponse(HTTP_CODE::BadRequest);
+        response.getStatus().setDescription(LED_EFFECT_LABEL_UKNOWN);
+        String jsonResponse = dtoToJson(response);
+        request->send(response.getStatus().getCode(), "application/json", jsonResponse);
+        servicesCollector.freeExclusiveExecution();
+        return;
+    }
+    std::vector<RgbColor> rgbColors;
+
+    for (size_t i = 0; i < ledRequest.colors.size(); i++)
+    {
+        LedColorRequest c = ledRequest.colors.at(i);
+        rgbColors.push_back(RgbColor(c.r, c.g, c.b));
+    }
+
+    ((LedService *)servicesCollector.getService("LedService"))->stopEffect(ledRequest.effect, rgbColors, ledRequest.ms, ledRequest.rgbAction, ledRequest.ws2811Action);
+    response = BasicResponse(HTTP_CODE::OK);
 
     String jsonResponse = dtoToJson(response);
     request->send(200, "application/json", jsonResponse);

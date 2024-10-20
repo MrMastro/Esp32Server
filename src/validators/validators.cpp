@@ -1,7 +1,9 @@
 #include "validators.h"
 #include <models/InitialSettingSaveModel/InitialSettingSaveModel.h>
 #include <constants/LedEffects.h>
-#include <effects/Effect.h>
+#include <ledEffects/Effect.h>
+#include <constants/constants.h>
+#include <models/LedEffectRequest/LedColorRequest.h>
 
 String validateCmd(CMD cmd, std::vector<String> params)
 {
@@ -150,4 +152,23 @@ bool isUnsignedLong(const String& str) {
 
   // Se end non punta alla fine della stringa, ci sono caratteri non validi
   return *end == '\0';
+};
+
+String validateColors(std::vector<LedColorRequest> colors)
+{
+  if(colors.size()<1)
+  {
+    return "colors cannot be empty";
+  }
+
+  for (size_t i = 0; i < colors.size(); i++)
+  {
+    if (colors.at(i).r < 0 || colors.at(i).r > 255 || colors.at(i).g < 0 || colors.at(i).g > 255 || colors.at(i).b < 0 || colors.at(i).b > 255)
+    {
+      return COLOR_OUT_OF_RANGE_ERROR;
+    }
+  }
+  
+
+  return String();
 };

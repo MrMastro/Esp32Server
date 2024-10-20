@@ -2,10 +2,10 @@
 #define ALTERNATING_EFFECT_H
 
 #include <Arduino.h>
-#include <effects/Effect.h>
+#include <ledEffects/Effect.h>
 
-enum class EFFECT_LABEL;
-enum class STEP_LIFE_EFFECT;
+enum class LED_EFFECT_LABEL;
+enum class STEP_LIFE_LED_EFFECT;
 enum class TYPE_STRIP;
 class DriverLed;
 
@@ -15,7 +15,7 @@ public:
     AlternatingEffect();
     String getName() override;
     int getColorInputQt() override;
-    void execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) override;
+    void execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) override;
 
     void off(DriverLed* driver, TYPE_STRIP type) override;
 };

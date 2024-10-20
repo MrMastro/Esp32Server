@@ -1,13 +1,13 @@
 #ifndef LedService_H
 #define LedService_H
 
-#include <./services/Service.h>
+#include <services/Service.h>
 #include <LEDStripDriver.h>
 #include <NeoPixelBus.h>
 #include "constants/LedEffects.h"
 #include "SerialService.h"
-#include "./effects/Effect.h"
-#include <effects/EffectOrchestrator.h>
+#include "ledEffects/Effect.h"
+#include "ledEffects/EffectOrchestrator.h"
 
 // numPixel = 32
 // pinStrip = 5
@@ -31,6 +31,8 @@ public:
   // Service Methods
   void startEffect(String effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
   void stopEffect(String effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
+  void startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
+  void stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
   void runRgbLifeCycle();
   void runWs2811LifeCycle();
   std::vector<String> getAvaibleEffects();

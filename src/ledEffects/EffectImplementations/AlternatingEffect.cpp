@@ -12,7 +12,7 @@ int AlternatingEffect::getColorInputQt()
     return 2;
 }
 
-void AlternatingEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
+void AlternatingEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
 {
 
     if(colorsInput.size() < getColorInputQt()){
@@ -27,7 +27,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput,
 
     switch (stepInput)
     {
-    case STEP_LIFE_EFFECT::BEGIN_STEP:
+    case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
         // Esegui eventuali inizializzazioni necessarie all'inizio dell'effetto
         for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
@@ -36,7 +36,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput,
         }
         break;
 
-    case STEP_LIFE_EFFECT::LOOP_STEP:
+    case STEP_LIFE_LED_EFFECT::LOOP_STEP:
         // Alterna i colori dei LED durante il loop dell'effetto
         for (size_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
@@ -46,7 +46,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput,
         driver->showData();
         break;
 
-    case STEP_LIFE_EFFECT::END_STEP:
+    case STEP_LIFE_LED_EFFECT::END_STEP:
         // Esegui eventuali azioni alla fine dell'effetto
         for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
@@ -55,7 +55,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput,
         driver->showData();
         break;
 
-    case STEP_LIFE_EFFECT::OFF:
+    case STEP_LIFE_LED_EFFECT::OFF:
         // Spegne tutti i LED
         off(driver, type);
         break;

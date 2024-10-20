@@ -6,7 +6,7 @@ String FadeEffect::getName() {
     return "FADE_EFFECT";
 }
 
-void FadeEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) {
+void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) {
     
     if (driver == nullptr) {
         return;
@@ -19,7 +19,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const 
     }
 
     switch (stepInput) {
-        case STEP_LIFE_EFFECT::BEGIN_STEP:
+        case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
             increasing = true;
             brightness = 0;
             // Inizia con la dissolvenza dal nero (tutti spenti)
@@ -30,7 +30,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const 
             driver->showData();
             break;
 
-        case STEP_LIFE_EFFECT::LOOP_STEP:
+        case STEP_LIFE_LED_EFFECT::LOOP_STEP:
             // Fai variare la luminosità dei LED
             for (size_t i = 0; i < driver->getMaxNumPixel(type); i++) {
                 RgbColor baseColor = colorsInput[i % colorsInput.size()];
@@ -58,7 +58,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const 
             }
             break;
 
-        case STEP_LIFE_EFFECT::END_STEP:
+        case STEP_LIFE_LED_EFFECT::END_STEP:
             // Alla fine, imposta tutti i LED su spento
             increasing = false;
             brightness = 0;
@@ -68,7 +68,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_EFFECT stepInput, const 
             driver->showData();
             break;
 
-        case STEP_LIFE_EFFECT::OFF:
+        case STEP_LIFE_LED_EFFECT::OFF:
             off(driver, type);
             break;
 

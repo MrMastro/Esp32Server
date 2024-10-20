@@ -148,6 +148,30 @@ void LedService::startEffect(String effectInput, RgbColor colorRgb, int deltaTms
   }
 }
 
+// Metodo che tramite parametri da le direttive ai due orchestratori su come iniziare un effetto
+void LedService::startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript)
+{
+    if (!isAttachedLed)
+  {
+    // todo throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");3
+    serialService->logError("ws2811 Stript not attached", "LedService", "changeLed");
+    return;
+  }
+  String colorString = vectorRgbColorToString(colorsRgb);
+  String msg = formatMsg("start: {}, colorsRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effect, colorString, String(deltaTmsInput), String(actionRgbStript), String(actionWs2811Stript)});
+  serialService->logInfoln(msg, "LedService");
+
+  if (actionRgbStript)
+  {
+    rgbOrchestrator.startEffect(effect, colorsRgb, deltaTmsInput);
+  }
+
+  if (actionWs2811Stript)
+  {
+    ws2811Orchestrator.startEffect(effect, colorsRgb, deltaTmsInput);
+  }
+}
+
 // Metodo che tramite parametri da le direttive ai due orchestratori su come finire un effetto
 void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
 {
@@ -163,6 +187,30 @@ void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms,
   if (actionWs2811)
   {
     ws2811Orchestrator.stopEffect(effectInput, {colorRgb}, deltaTms);
+  }
+}
+
+// Metodo che tramite parametri da le direttive ai due orchestratori su come finire un effetto
+void LedService::stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript)
+{
+    if (!isAttachedLed)
+  {
+    // todo throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "effectPrograssiveBar");3
+    serialService->logError("ws2811 Stript not attached", "LedService", "changeLed");
+    return;
+  }
+  String colorString = vectorRgbColorToString(colorsRgb);
+  String msg = formatMsg("stop: {}, colorsRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effect, colorString, String(deltaTmsInput), String(actionRgbStript), String(actionWs2811Stript)});
+  serialService->logInfoln(msg, "LedService");
+
+  if (actionRgbStript)
+  {
+    rgbOrchestrator.stopEffect(effect, colorsRgb, deltaTmsInput);
+  }
+
+  if (actionWs2811Stript)
+  {
+    ws2811Orchestrator.stopEffect(effect, colorsRgb, deltaTmsInput);
   }
 }
 

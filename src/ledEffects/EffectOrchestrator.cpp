@@ -1,4 +1,4 @@
-#include "./EffectOrchestrator.h"
+#include "ledEffects/EffectOrchestrator.h"
 
 EffectOrchestrator::EffectOrchestrator()
 {
@@ -43,16 +43,16 @@ if(e == nullptr){
 
 switch (actualStep)
   {
-  case STEP_LIFE_EFFECT::BEGIN_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
-    actualStep = STEP_LIFE_EFFECT::LOOP_STEP;
+  case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
+    e->execStep(effect, STEP_LIFE_LED_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+    actualStep = STEP_LIFE_LED_EFFECT::LOOP_STEP;
     break;
-  case STEP_LIFE_EFFECT::LOOP_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+  case STEP_LIFE_LED_EFFECT::LOOP_STEP:
+    e->execStep(effect, STEP_LIFE_LED_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
     break;
-  case STEP_LIFE_EFFECT::END_STEP:
-    e->execStep(effect, STEP_LIFE_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
-    actualStep = STEP_LIFE_EFFECT::OFF;
+  case STEP_LIFE_LED_EFFECT::END_STEP:
+    e->execStep(effect, STEP_LIFE_LED_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+    actualStep = STEP_LIFE_LED_EFFECT::OFF;
     break;
   default:
     e->off(driver, typeLed);
@@ -64,7 +64,7 @@ switch (actualStep)
 
 void EffectOrchestrator::startEffect(String effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
 {
-  actualStep = STEP_LIFE_EFFECT::BEGIN_STEP;
+  actualStep = STEP_LIFE_LED_EFFECT::BEGIN_STEP;
   effect = effectInput;
   deltaTmsEffect = deltaTms;
   colorsEffect = colorsRgb;
@@ -72,7 +72,7 @@ void EffectOrchestrator::startEffect(String effectInput, const std::vector<RgbCo
 }
 void EffectOrchestrator::stopEffect(String effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)
 {
-  actualStep = STEP_LIFE_EFFECT::END_STEP;
+  actualStep = STEP_LIFE_LED_EFFECT::END_STEP;
   effect = effectInput;
   deltaTmsEffect = deltaTms;
   colorsEffect = colorsRgb;

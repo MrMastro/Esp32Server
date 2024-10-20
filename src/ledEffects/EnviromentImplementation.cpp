@@ -1,24 +1,24 @@
-#include "effects/EnviromentEffect.h"
+#include "ledEffects/EnviromentEffect.h"
 
-#include "effects/Effect.h"
-#include "effects/EffectImplementations/AlternatingEffect.h"
-#include "effects/EffectImplementations/ConstantUniqueColorEffect.h"
-#include "effects/EffectImplementations/FadeEffect.h"
-#include "effects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
-#include "effects/EffectImplementations/WaweUniqueColorEffect.h"
+#include "ledEffects/Effect.h"
+#include "ledEffects/EffectImplementations/AlternatingEffect.h"
+#include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
+#include "ledEffects/EffectImplementations/FadeEffect.h"
+#include "ledEffects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
+#include "ledEffects/EffectImplementations/WaweUniqueColorEffect.h"
 #include "EnviromentEffect.h"
 
-const std::vector<Effect *> EFFECT_REFERENCE = {
+const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new ConstantUniqueColorEffect(),
     new WaweUniqueColorEffect(),
     new ProgressiveBarUniqueColorEffect(),
     new FadeEffect(),
     new AlternatingEffect()};
 
-const EFFECT_LABEL getEffectLabelByName(String inputString)
+const LED_EFFECT_LABEL getEffectLabelByName(String inputString)
 {
   inputString.toUpperCase();
-  for (const auto &entry : EFFECT_LABEL_REFERENCE_STRING)
+  for (const auto &entry : LED_EFFECT_LABEL_REFERENCE_STRING)
   {
     if (entry.second == inputString)
     {
@@ -26,12 +26,12 @@ const EFFECT_LABEL getEffectLabelByName(String inputString)
     }
   }
   // Return a special value or throw an exception if the string is not found
-  return EFFECT_LABEL::UKNOWN_EFFECT;
+  return LED_EFFECT_LABEL::UKNOWN_EFFECT;
 }
 
-// const String LabelEffectEnumToString(EFFECT_LABEL inputEnum)
+// const String LabelEffectEnumToString(LED_EFFECT_LABEL inputEnum)
 // {
-//   for (const auto &entry : EFFECT_LABEL_REFERENCE_STRING)
+//   for (const auto &entry : LED_EFFECT_LABEL_REFERENCE_STRING)
 //   {
 //     if (entry.first == inputEnum)
 //     {
@@ -39,7 +39,7 @@ const EFFECT_LABEL getEffectLabelByName(String inputString)
 //     }
 //   }
 //   // Return a special value or throw an exception if the string is not found
-//   return LabelEffectEnumToString(EFFECT_LABEL::UKNOWN_EFFECT);
+//   return LabelEffectEnumToString(LED_EFFECT_LABEL::UKNOWN_EFFECT);
 // }
 
 std::vector<String> getAllWS2811EffectNames()
@@ -47,7 +47,7 @@ std::vector<String> getAllWS2811EffectNames()
   std::vector<String> effectNames;
 
   // Itera attraverso tutte le coppie e aggiungi il secondo valore (la stringa) al vettore
-  for (const auto &effect : EFFECT_REFERENCE)
+  for (const auto &effect : LED_EFFECT_REFERENCE)
   {
     effectNames.push_back(effect->getName());
   }
@@ -58,7 +58,7 @@ std::vector<String> getAllWS2811EffectNames()
 boolean isPresentEffect(String nameEffect)
 {
   boolean result = false;
-  for (const auto &effect : EFFECT_REFERENCE)
+  for (const auto &effect : LED_EFFECT_REFERENCE)
   {
     if (effect->getName() == nameEffect)
     {
@@ -68,9 +68,9 @@ boolean isPresentEffect(String nameEffect)
   return result;
 }
 
-const String stepLifeEffectEnomToString(STEP_LIFE_EFFECT inputEnum)
+const String stepLifeEffectEnomToString(STEP_LIFE_LED_EFFECT inputEnum)
 {
-  for (const auto &entry : STEP_LIFE_EFFECT_PAIR)
+  for (const auto &entry : STEP_LIFE_LED_EFFECT_PAIR)
   {
     if (entry.first == inputEnum)
     {
@@ -84,7 +84,7 @@ const String stepLifeEffectEnomToString(STEP_LIFE_EFFECT inputEnum)
 Effect *getEffectByEffectName(String inputString)
 {
   inputString.toUpperCase();
-  for (const auto &entry : EFFECT_REFERENCE)
+  for (const auto &entry : LED_EFFECT_REFERENCE)
   {
     if (entry->getName() == inputString)
     {

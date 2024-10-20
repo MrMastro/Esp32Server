@@ -3,7 +3,7 @@
 
 #include "DriverLed.h"
 #include "EnviromentEffect.h"
-#include "effects/Effect.h"
+#include "ledEffects/Effect.h"
 #include <vector>
 
 class EffectOrchestrator{
@@ -33,7 +33,7 @@ class EffectOrchestrator{
         TYPE_STRIP typeLed;
         DriverLed* driver;
 
-        STEP_LIFE_EFFECT actualStep;
+        STEP_LIFE_LED_EFFECT actualStep;
 
         //Params
         String effect;
