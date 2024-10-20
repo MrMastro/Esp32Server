@@ -28,13 +28,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepIn
     switch (stepInput)
     {
     case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
-        // Esegui eventuali inizializzazioni necessarie all'inizio dell'effetto
-        for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
-        {
-            driver->sendStriptData(type, RgbColor(255, 0, 0), i); // Imposta tutti i LED a rosso
-            driver->showData();
-        }
-        break;
+    break;
 
     case STEP_LIFE_LED_EFFECT::LOOP_STEP:
         // Alterna i colori dei LED durante il loop dell'effetto
@@ -47,13 +41,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepIn
         break;
 
     case STEP_LIFE_LED_EFFECT::END_STEP:
-        // Esegui eventuali azioni alla fine dell'effetto
-        for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
-        {
-            driver->sendStriptData(type, RgbColor(0, 255, 0), i); // Imposta tutti i LED a verde per fine
-        }
-        driver->showData();
-        break;
+    break;
 
     case STEP_LIFE_LED_EFFECT::OFF:
         // Spegne tutti i LED
