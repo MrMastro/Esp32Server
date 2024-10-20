@@ -259,17 +259,19 @@ void ledTask(void *pvParameters)
   serialService.logInfoln("Led Task execution", "MAIN");
   String msg = "";
 
+  std::vector<RgbColor> rgbColors = getRgbColorsByRequest(s.initialColors);
+
   // Initial effect (commented for disable initial effect)
   if (!isPresentEffect(s.initialEffect))
   {
-    msg = formatMsg(" {} | time: {} | R: {} | G: {} | B: {}  - None initial effect applied ", {s.initialEffect, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
+    msg = formatMsg(" {} | time: {} | colors: {}  - None initial effect applied ", {s.initialEffect, vectorRgbColorToString(rgbColors)});
     serialService.logInfoln(msg, "MAIN");
   }
   else
   {
-    msg = formatMsg("First effect running: {} | time: {} | R: {} | G: {} | B: {} ", {s.initialEffect, String(s.initialDeltaT), String(s.initialR), String(s.initialG), String(s.initialB)});
+    msg = formatMsg("First effect running: {} | time: {} | colors: {} ", {s.initialEffect, String(s.initialDeltaT), vectorRgbColorToString(rgbColors)});
     serialService.logInfoln(msg, "MAIN");
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, RgbColor(s.initialR, s.initialG, s.initialB), s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, rgbColors, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
   }
 
   while (true)

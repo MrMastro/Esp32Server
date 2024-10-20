@@ -75,15 +75,13 @@ String validateSettings(const SettingsModel &s) {
     }
 
     // Verifica che i valori RGB siano nel range [0, 255]
-    if (s.initialR < 0 || s.initialR > 255) {
-        return "Error: Initial R value must be between 0 and 255.";
+    String errorColors = validateColors(s.initialColors);
+    
+    if(!errorColors.isEmpty())
+    {
+      return("Error: "+errorColors);
     }
-    if (s.initialG < 0 || s.initialG > 255) {
-        return "Error: Initial G value must be between 0 and 255.";
-    }
-    if (s.initialB < 0 || s.initialB > 255) {
-        return "Error: Initial B value must be between 0 and 255.";
-    }
+
 
     // Verifica che le credenziali della rete AP non siano vuote
     if (s.ssidAP.isEmpty() || s.passwordAP.isEmpty()) {
@@ -116,14 +114,11 @@ String validateInitialSettings(const InitialSettingSaveModel &s) {
     }
 
     // Verifica che i valori RGB siano nel range [0, 255]
-    if (s.initialR < 0 || s.initialR > 255) {
-        return "Error: Initial R value must be between 0 and 255.";
-    }
-    if (s.initialG < 0 || s.initialG > 255) {
-        return "Error: Initial G value must be between 0 and 255.";
-    }
-    if (s.initialB < 0 || s.initialB > 255) {
-        return "Error: Initial B value must be between 0 and 255.";
+    String errorColors = validateColors(s.initialColors);
+    
+    if(!errorColors.isEmpty())
+    {
+      return("Error: "+errorColors);
     }
 
     // Se tutte le validazioni sono superate, restituisce una stringa vuota

@@ -11,6 +11,12 @@ public:
     int g;
     int b;
 
+    LedColorRequest(){
+        r = 0;
+        g = 0;
+        b = 0;
+    }
+
     // Serializzazione in JSON
     void toJson(JsonObject &jsonObj) const
     {
