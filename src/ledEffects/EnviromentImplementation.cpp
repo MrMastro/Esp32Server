@@ -55,6 +55,19 @@ std::vector<String> getAllWS2811EffectNames()
   return effectNames;
 }
 
+std::vector<Effect*> getAllWS2811EffectReference()
+{
+  std::vector<Effect*> effectNames;
+
+  // Itera attraverso tutte le coppie e aggiungi il secondo valore (la stringa) al vettore
+  for (const auto &effect : LED_EFFECT_REFERENCE)
+  {
+    effectNames.push_back(effect);
+  }
+
+  return effectNames;
+}
+
 boolean isPresentEffect(String nameEffect)
 {
   boolean result = false;

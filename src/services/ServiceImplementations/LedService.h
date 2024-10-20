@@ -35,7 +35,7 @@ public:
   void stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
   void runRgbLifeCycle();
   void runWs2811LifeCycle();
-  std::vector<String> getAvaibleEffects();
+  std::vector<Effect*> getAvaibleEffects();
 
 protected:
   void onInitServiceCollector() override;

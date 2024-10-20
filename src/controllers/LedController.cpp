@@ -1,5 +1,5 @@
 #include "Controllers.h"
-#include <models/response/VectorResponse/VectorResponse.h>
+#include <models/response/VectorLedEffectResponse/VectorLedEffectResponse.h>
 #include <models/LedEffectRequest/LedEffectRequest.h>
 
 void setEffectWs2811(AsyncWebServerRequest *request)
@@ -185,9 +185,8 @@ void stopEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t l
 void getAvaibleEffects(AsyncWebServerRequest *request)
 {
     servicesCollector.takeExclusiveExecution();
-    VectorResponse response;
-    response = VectorResponse(HTTP_CODE::OK);
-    std::vector<String> data = ((LedService *)servicesCollector.getService("LedService"))->getAvaibleEffects();
+    VectorLedEffectResponse response = VectorLedEffectResponse(HTTP_CODE::OK);
+    std::vector<Effect*> data = ((LedService *)servicesCollector.getService("LedService"))->getAvaibleEffects();
     response.setData(data);
 
     request->send(200, "application/json", response.toJson());

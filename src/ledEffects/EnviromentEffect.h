@@ -48,6 +48,7 @@ extern const std::vector<Effect*> LED_EFFECT_REFERENCE;
 const LED_EFFECT_LABEL getEffectLabelByName(String inputString);
 //const String getStringByEffectLabel(LED_EFFECT_LABEL inputEnum);
 std::vector<String> getAllWS2811EffectNames();
+std::vector<Effect*> getAllWS2811EffectReference();
 boolean isPresentEffect(String nameEffect);
 
 const String stepLifeEffectEnomToString(STEP_LIFE_LED_EFFECT inputEnum);

@@ -241,7 +241,7 @@ void LedService::runWs2811LifeCycle()
 }
 
 // Return all avaible effect that the orchestrator can play
-std::vector<String> LedService::getAvaibleEffects()
+std::vector<Effect*> LedService::getAvaibleEffects()
 {
-  return getAllWS2811EffectNames();
+  return getAllWS2811EffectReference();
 }

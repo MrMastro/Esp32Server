@@ -7,6 +7,7 @@
 #include <vector>
 #include "EnviromentEffect.h"
 #include "DriverLed.h"
+#include <ArduinoJson.h>
 
 enum class LED_EFFECT_LABEL;
 enum class STEP_LIFE_LED_EFFECT;
@@ -21,6 +22,15 @@ public:
     virtual int getColorInputQt() = 0;
     virtual void execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type) = 0;
     virtual void off(DriverLed* driver, TYPE_STRIP typeOrchestrator) =0;
+    virtual String toJson() {
+        StaticJsonDocument<200> doc;
+        doc["name"] = getName();
+        doc["colorInputQt"] = getColorInputQt();
+        
+        String output;
+        serializeJson(doc, output);
+        return output;
+    }
 };
 
 #endif  //Effect_H
