@@ -12,8 +12,8 @@ LedService::LedService()
 LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811)
 {
   DriverLed *driver = new DriverLed(ledStriptInput, rgbLedStriptInput);
-  rgbOrchestrator = EffectOrchestrator(driver, TYPE_STRIP::RGB);
-  ws2811Orchestrator = EffectOrchestrator(driver, TYPE_STRIP::WS2811);
+  rgbOrchestrator = EffectOrchestrator("RGB player", driver, TYPE_STRIP::RGB, serialService);
+  ws2811Orchestrator = EffectOrchestrator("WS2811 player", driver, TYPE_STRIP::WS2811, serialService);
   setOperativeRgbOrchestrator(enableRgb);
   setOperativeWs2811Orchestrator(enableWs2811);
 }
@@ -21,8 +21,8 @@ LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptIn
 LedService::LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811)
 {
   DriverLed *driver = driverInput;
-  rgbOrchestrator = EffectOrchestrator(driver, TYPE_STRIP::RGB);
-  ws2811Orchestrator = EffectOrchestrator(driver, TYPE_STRIP::WS2811);
+  rgbOrchestrator = EffectOrchestrator("RGB player", driver, TYPE_STRIP::RGB, serialService);
+  ws2811Orchestrator = EffectOrchestrator("WS2811 player", driver, TYPE_STRIP::WS2811, serialService);
   setOperativeRgbOrchestrator(enableRgb);
   setOperativeWs2811Orchestrator(enableWs2811);
 }
@@ -36,6 +36,8 @@ boolean LedService::isAvaible()
 void LedService::onInitServiceCollector()
 {
   serialService = ((SerialService *)servicesCollector.getService("SerialService"));
+  rgbOrchestrator.attachSerialService(serialService);
+  ws2811Orchestrator.attachSerialService(serialService);
 }
 
 // Prepare pin that you have attached with method attach led, for led service prepare one led. this method is executed when you call attachPin.
@@ -157,6 +159,7 @@ void LedService::startEffect(String effect, std::vector<RgbColor> colorsRgb, int
     serialService->logError("ws2811 Stript not attached", "LedService", "changeLed");
     return;
   }
+
   String colorString = vectorRgbColorToString(colorsRgb);
   String msg = formatMsg("start: {}, colorsRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effect, colorString, String(deltaTmsInput), String(actionRgbStript), String(actionWs2811Stript)});
   serialService->logInfoln(msg, "LedService");
@@ -234,7 +237,6 @@ void LedService::runWs2811LifeCycle()
     serialService->logError("ws2811 Stript not attached", "LedService", "runEffectWs2811LifeCycle");
     return;
   }
-  
   ws2811Orchestrator.runLifeCycle();
 }
 
