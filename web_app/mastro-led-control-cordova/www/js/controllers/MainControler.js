@@ -39,7 +39,7 @@ export default class MainController {
 
     async init() {
         this.initilizeStorage();
-        this.mainView.render(new LedMainModel(),this.localStorageService.getLedEffectList());
+        this.mainView.render(new LedMainModel(), this.localStorageService.getLedEffectList());
         this.waitView.render();
         this.switchConnection();
         this.bindEvents();
@@ -111,6 +111,31 @@ export default class MainController {
         }
     }
 
+    showSettings() {
+        this.settingController.showModal();
+    }
+
+    async showWait() {
+        this.waitView.show();
+    }
+
+    async hideWait() {
+        this.waitView.hide();
+    }
+
+    // SUCCESS AND FAILURE METHOD
+    genericSuccessAlert() {
+        this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
+    }
+
+    customAlert(title, content){
+        this.alertMessageView.alert(title, content);
+    }
+
+    genericFailureAlert(content) {
+        this.alertMessageView.alert(FrontEndMessage.titleError, content);
+    }
+
     async updateEffectList(){
         try {
             this.waitView.show();
@@ -142,31 +167,6 @@ export default class MainController {
                 console.log(error);
             }
         }
-    }
-
-    showSettings() {
-        this.settingController.showModal();
-    }
-
-    async showWait() {
-        this.waitView.show();
-    }
-
-    async hideWait() {
-        this.waitView.hide();
-    }
-
-    // SUCCESS AND FAILURE METHOD
-    genericSuccessAlert() {
-        this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
-    }
-
-    customAlert(title, content){
-        this.alertMessageView.alert(title, content);
-    }
-
-    genericFailureAlert(content) {
-        this.alertMessageView.alert(FrontEndMessage.titleError, content);
     }
 
     async saveInitialEffect() {

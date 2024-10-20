@@ -57,7 +57,7 @@ export default class LedService {
             case 200:
                 if(typeof result.data === 'string'){
                     result.data = JSON.parse(result.data);
-                    return result.data.data;
+                    return result.data.effects;
                 }
                 break;
             default:

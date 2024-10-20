@@ -10,17 +10,10 @@ export default class LocalStorageService {
     }
 
     setEffectList(list) {
+
         if (!Array.isArray(list)) {
-            throw new Error("L'input deve essere un array di stringhe.");
+            throw new Error("L'input deve essere un array.");
         }
-
-        // Controlla se tutte le voci dell'array sono stringhe
-        for (let i = 0; i < list.length; i++) {
-            if (typeof list[i] !== 'string') {
-                throw new Error("Tutti gli elementi dell'array devono essere stringhe.");
-            }
-        }
-
         localStorage.setItem('ledEffectList', JSON.stringify(list));
     }
 
