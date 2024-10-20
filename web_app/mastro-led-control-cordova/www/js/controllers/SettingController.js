@@ -8,6 +8,7 @@ import FrontEndMessage from '../constants/FrontEndMessageItalian.js'
 import UnauthorizedErrorException from '../exceptions/UnauthorizedErrorException.js';
 import NoConnectException from '../exceptions/NoConnectException.js';
 import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
+import SettingModel from '../models/SettingModel.js'
 
 export default class SettingController {
     constructor(host, headerView) {
@@ -25,9 +26,6 @@ export default class SettingController {
 
         this.loginView.render();
         this.waitView.render();
-        // Event Listener per il salvataggio delle impostazioni
-        //? si mettono nelle view o nel controller?
-        //? se la view non è completamente HTML si dichiara l'ascoltatore nella view e si usa il metodo della view
         this.bindEvents();
 
 
@@ -42,48 +40,11 @@ export default class SettingController {
     }
 
     async saveSettings() {
-
-        //Gestione colori
-        const colorHex = document.querySelector('#initialRgbInput').value;
-
-        // Rimuovi il carattere "#" se presente
-        let hex = colorHex.replace(/^#/, '');
-
-        // Converte l'esadecimale in valori RGB
-        const bigint = parseInt(hex, 16);
-        const r = (bigint >> 16) & 255; // Estrae il valore rosso
-        const g = (bigint >> 8) & 255;  // Estrae il valore verde
-        const b = bigint & 255;         // Estrae il valore blu
-
-        const settings = {
-            deviceName: document.querySelector('#deviceNameInput').value,
-            devicePassword: document.querySelector('#devicePasswordInput').value,
-            communicationMode: document.querySelector('#communicationModeInput').value,
-            debug: document.querySelector('#debugInput').checked,
-            ssidAP: document.querySelector('#ssidAPInput').value,
-            passwordAP: document.querySelector('#passwordAPInput').value,
-            ssidWIFI: document.querySelector('#ssidWIFIInput').value,
-            passwordWIFI: document.querySelector('#passwordWIFIInput').value,
-            initialEffect: document.querySelector('#initialEffectInput').value,
-            initialDeltaT: document.querySelector('#initialDeltaTInput').innerText,
-            initialR: r,
-            initialG: g,
-            initialB: b,
-            ledSettings: {
-                enableStripRgb: document.querySelector('#enableStripRgbInput').checked,
-                pinLedCinRgb: document.querySelector('#pinLedCinRgbInput').value,
-                pinLedDinRgb: document.querySelector('#pinLedDinRgbInput').value,
-                enableStripWs2811: document.querySelector('#enableStripWs2811Input').checked,
-                numLedWs2811: document.querySelector('#numLedWs2811Input').value,
-                pinLedWs2811: document.querySelector('#pinLedWs2811Input').value
-            }
-        };
-
         this.settingView.hide();
         this.waitView.show();
-
         try {
-            await this.settingService.saveDeviceSettings(this.referenceHost, settings);
+            let data = await this.settingView.getSettings();
+            await this.settingService.saveDeviceSettings(this.referenceHost, data);
             this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.saveSettingsSuccess);
             this.waitView.hide();
         } catch (error) {
@@ -110,7 +71,8 @@ export default class SettingController {
     async showSettings() {
         try {
             this.waitView.show();
-            let settings = await this.settingService.getSettings(this.referenceHost);
+            let settings = new SettingModel();
+            settings = await this.settingService.getSettings(this.referenceHost);
             await TimeUtils.wait(500);
             this.waitView.hide();
             this.settingView.render(settings);

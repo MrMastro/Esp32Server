@@ -172,22 +172,10 @@ export default class MainController {
     async saveInitialEffect() {
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let r = ColorUtils.hexToRgb(ledModel.color).r;
-        let g = ColorUtils.hexToRgb(ledModel.color).g;
-        let b = ColorUtils.hexToRgb(ledModel.color).b;
-        let ledColorModel = new LedColorRequest(r,g,b);
-        let request = new LedEffectRequest(ledModel.effect, [ledColorModel], ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
         console.log(request);
-        //todo create a view, for now this controller get html element
-        let initialEffect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
-        let initialDeltaT = $(".timingInput")[0].value; //100;
-        let color = $(".colorInput")[0].value;
-        let initialR = ColorUtils.hexToRgb(color).r;
-        let initialG = ColorUtils.hexToRgb(color).g;
-        let initialB = ColorUtils.hexToRgb(color).b;
-
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel(initialEffect, initialDeltaT, initialR, initialG, initialB));
+        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel(request.effect, request.ms, request.colors));
         this.hideWait();
         this.valutateResponseAlertMessage(result);
     }
@@ -202,11 +190,7 @@ export default class MainController {
     async sendStartEffect() {
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let r = ColorUtils.hexToRgb(ledModel.color).r;
-        let g = ColorUtils.hexToRgb(ledModel.color).g;
-        let b = ColorUtils.hexToRgb(ledModel.color).b;
-        let ledColorModel = new LedColorRequest(r,g,b);
-        let request = new LedEffectRequest(ledModel.effect, [ledColorModel], ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
         this.showWait();
         let result = await this.ledService.postStartEffect(this.referenceHost, request);
         this.hideWait();
@@ -217,11 +201,7 @@ export default class MainController {
     async sendStopEffect() {
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let r = ColorUtils.hexToRgb(ledModel.color).r;
-        let g = ColorUtils.hexToRgb(ledModel.color).g;
-        let b = ColorUtils.hexToRgb(ledModel.color).b;
-        let ledColorModel = new LedColorRequest(r,g,b);
-        let request = new LedEffectRequest(ledModel.effect, [ledColorModel], ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
 
         this.showWait();
         let result = await this.ledService.postStoptEffect(this.referenceHost, request);
