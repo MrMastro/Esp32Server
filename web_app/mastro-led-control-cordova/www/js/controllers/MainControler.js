@@ -17,6 +17,7 @@ import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import TimeUtils from '../utils/TimeUtils.js';
 import LedEffectRequest from '../models/request/LedEffectRequest.js';
 import LedColorRequest from '../models/request/LedColorRequest.js';
+import TextUtils from '../utils/TextUtils.js';
 
 export default class MainController {
     constructor(host) {
@@ -65,8 +66,10 @@ export default class MainController {
         this.mainView.bindInputChange(this.inputChange.bind(this));
     }
 
+    //Imposta a se stesso e agli altri controller il referece host
     async setReferenceHost(newHost) {
         this.referenceHost = newHost;
+        this.settingController.setReferenceHost(newHost);
     }
 
     switchConnection() {
@@ -87,7 +90,9 @@ export default class MainController {
 
     inputChange(){
         let valueTime = this.mainView.getTimingInput();
-        if(valueTime <= 0){
+        valueTime = TextUtils.fixTextNumber(valueTime);
+        valueTime = TextUtils.textToNumber(valueTime);
+        if(valueTime < 0){
             valueTime = 0;
         }else if(valueTime >= 1000){
             valueTime = 1000;

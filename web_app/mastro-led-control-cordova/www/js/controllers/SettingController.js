@@ -23,19 +23,16 @@ export default class SettingController {
     }
 
     async init() {
-
         this.loginView.render();
         this.waitView.render();
         this.bindEvents();
-
-
     }
 
     async bindEvents() {
         requestAnimationFrame(() => {
             this.settingView.bindBtnSaveSettings(this.saveSettings.bind(this));
             this.loginView.bindBtnLogin(this.login.bind(this));
-            this.headerView.bindBtnSettings(() => this.showModal()); // <-> $('.settingsBtn').on('click', () => this.showModal());
+            this.headerView.bindBtnSettings(() => this.showModal());
         });
     }
 

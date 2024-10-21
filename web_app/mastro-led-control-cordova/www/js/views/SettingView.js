@@ -36,18 +36,6 @@ export default class SettingView {
         this.handlerSaveSettingsBtn = {};
         this.groupColorSettingView = {};
         this.render();
-        
-        //new GroupColorView(document.querySelector('#GroupColorViewSettingsContainer'));
-        // this.deviceNameInput = document.querySelector('#deviceNameInput');
-        // this.devicePasswordInput = document.querySelector('#devicePasswordInput');
-        // this.communicationModeInput = document.querySelector('#communicationModeInput');
-        // this.debugInput = document.querySelector('#debugInput');
-        // this.ssidAPInput = document.querySelector('#ssidAPInput');
-        // this.passwordAPInput = document.querySelector('#passwordAPInput');
-        // this.ssidWIFIInput = document.querySelector('#ssidWIFIInput');
-        // this.passwordWIFIInput = document.querySelector('#passwordWIFIInput');
-        // this.initialEffectInput = document.querySelector('#initialEffectInput');
-        // this.groupColorView = new GroupColorView(document.querySelector('#GroupColorViewSettingsContainer'));
     }
 
     render(settings) {
