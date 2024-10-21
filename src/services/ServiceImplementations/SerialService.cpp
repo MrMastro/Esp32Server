@@ -208,6 +208,33 @@ void SerialService::printlnColored(const String &msg, String colorMsg)
     }
 }
 
+void SerialService::logInfoFixed(String msg, String subject) {
+    if (settings != nullptr) {
+        if (settings->debug) {
+            String log = "[ INFO - {subject} ] {msg}";
+            log.replace("{subject}", subject);
+            log.replace("{msg}", msg);
+
+            // Stampa solo se il messaggio è diverso dall'ultimo inviato
+            if (serialPointer != nullptr && lastSentMsg != log) {
+                serialPointer->print("\r"); // Torna all'inizio della riga
+                serialPointer->print("        "); // Sovrascrivi il messaggio precedente con spazi
+                serialPointer->print("\r"); // Torna all'inizio della riga
+                printlnColored(log, "\033[32m"); // Stampa il nuovo messaggio
+                lastSentMsg = log;
+            }
+
+            if (btSerialPointer != nullptr && lastSentMsg != log) {
+                btSerialPointer->print("\r");
+                btSerialPointer->print("        "); // Sovrascrivi il messaggio precedente con spazi
+                btSerialPointer->print("\r");
+                printlnColored(log, "\033[32m");
+                lastSentMsg = log;
+            }
+        }
+    }
+}
+
 void SerialService::logInfoln(String msg, String subject)
 {
     if (settings != nullptr)

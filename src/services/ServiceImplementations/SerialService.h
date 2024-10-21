@@ -38,6 +38,7 @@ public:
     void println(String msg);
     void printColored(const String &msg, String colorMsg);
     void printlnColored(const String &msg, String colorMsg);
+    void logInfoFixed(String msg, String subject);
     void logInfoln(String msg, String subject);
     void logWarning(String msg, String subject, String context);
     void logError(String msg, String subject, String context);
