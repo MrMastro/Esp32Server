@@ -15,6 +15,9 @@ import UnauthorizedErrorException from '../exceptions/UnauthorizedErrorException
 import NoConnectException from '../exceptions/NoConnectException.js';
 import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import TimeUtils from '../utils/TimeUtils.js';
+import LedEffectRequest from '../models/request/LedEffectRequest.js';
+import LedColorRequest from '../models/request/LedColorRequest.js';
+import TextUtils from '../utils/TextUtils.js';
 
 export default class MainController {
     constructor(host) {
@@ -37,7 +40,7 @@ export default class MainController {
 
     async init() {
         this.initilizeStorage();
-        this.mainView.render(new LedMainModel(),this.localStorageService.getLedEffectList());
+        this.mainView.render(new LedMainModel(), this.localStorageService.getLedEffectList());
         this.waitView.render();
         this.switchConnection();
         this.bindEvents();
@@ -63,8 +66,10 @@ export default class MainController {
         this.mainView.bindInputChange(this.inputChange.bind(this));
     }
 
+    //Imposta a se stesso e agli altri controller il referece host
     async setReferenceHost(newHost) {
         this.referenceHost = newHost;
+        this.settingController.setReferenceHost(newHost);
     }
 
     switchConnection() {
@@ -85,7 +90,9 @@ export default class MainController {
 
     inputChange(){
         let valueTime = this.mainView.getTimingInput();
-        if(valueTime <= 0){
+        valueTime = TextUtils.fixTextNumber(valueTime);
+        valueTime = TextUtils.textToNumber(valueTime);
+        if(valueTime < 0){
             valueTime = 0;
         }else if(valueTime >= 1000){
             valueTime = 1000;
@@ -107,6 +114,31 @@ export default class MainController {
         } else {
             this.mainView.setLabelIp("Inserisci un ip valido");
         }
+    }
+
+    showSettings() {
+        this.settingController.showModal();
+    }
+
+    async showWait() {
+        this.waitView.show();
+    }
+
+    async hideWait() {
+        this.waitView.hide();
+    }
+
+    // SUCCESS AND FAILURE METHOD
+    genericSuccessAlert() {
+        this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
+    }
+
+    customAlert(title, content){
+        this.alertMessageView.alert(title, content);
+    }
+
+    genericFailureAlert(content) {
+        this.alertMessageView.alert(FrontEndMessage.titleError, content);
     }
 
     async updateEffectList(){
@@ -142,42 +174,12 @@ export default class MainController {
         }
     }
 
-    showSettings() {
-        this.settingController.showModal();
-    }
-
-    async showWait() {
-        this.waitView.show();
-    }
-
-    async hideWait() {
-        this.waitView.hide();
-    }
-
-    // SUCCESS AND FAILURE METHOD
-    genericSuccessAlert() {
-        this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
-    }
-
-    customAlert(title, content){
-        this.alertMessageView.alert(title, content);
-    }
-
-    genericFailureAlert(content) {
-        this.alertMessageView.alert(FrontEndMessage.titleError, content);
-    }
-
     async saveInitialEffect() {
-        //todo create a view, for now this controller get html element
-        let initialEffect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
-        let initialDeltaT = $(".timingInput")[0].value; //100;
-        let color = $(".colorInput")[0].value;
-        let initialR = ColorUtils.hexToRgb(color).r;
-        let initialG = ColorUtils.hexToRgb(color).g;
-        let initialB = ColorUtils.hexToRgb(color).b;
-
+        let ledModel = new LedMainModel();
+        ledModel =  this.mainView.getLedMainModel();
+        let request = new InitialSettingSaveModel(ledModel.effect, ledModel.deltaT, ledModel.colors);
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel(initialEffect, initialDeltaT, initialR, initialG, initialB));
+        let result = await this.ledService.saveInitialEffect(this.referenceHost, request);
         this.hideWait();
         this.valutateResponseAlertMessage(result);
     }
@@ -190,57 +192,23 @@ export default class MainController {
     }
 
     async sendStartEffect() {
-        //todo create a view, for now this controller get html element
-        let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
-        let timing = $(".timingInput")[0].value; //100;
-        let color = $(".colorInput")[0].value;
-        let r = ColorUtils.hexToRgb(color).r;
-        let g = ColorUtils.hexToRgb(color).g;
-        let b = ColorUtils.hexToRgb(color).b;
-        let rgbAction = $("#rgbCheck")[0].checked;
-        let ws2811Action = $("#ws2811Check")[0].checked;
-
-        //todo subdtitute with model or get Model by View
-        var queryParam =
-            "effect=" + encodeURIComponent(effect) +
-            "&timing=" + encodeURIComponent(timing) +
-            "&color=" + encodeURIComponent(color) +
-            "&r=" + encodeURIComponent(r) +
-            "&g=" + encodeURIComponent(g) +
-            "&b=" + encodeURIComponent(b) +
-            "&rgbAction=" + encodeURIComponent(rgbAction) +
-            "&ws2811Action=" + encodeURIComponent(ws2811Action);
+        let ledModel = new LedMainModel();
+        ledModel =  this.mainView.getLedMainModel();
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
         this.showWait();
-        let result = await this.ledService.postStartEffect(this.referenceHost, queryParam);
+        let result = await this.ledService.postStartEffect(this.referenceHost, request);
         this.hideWait();
         console.log(result);
         this.valutateResponseAlert(result);
     }
 
     async sendStopEffect() {
-        //todo create a view, for now this controller get html element
-        let effect = $(".effectInput")[0].value; //CONSTANTS_UNIQUE_COLOR;
-        let timing = $(".timingInput")[0].value; //100;
-        let color = $(".colorInput")[0].value;
-        let r = ColorUtils.hexToRgb(color).r;
-        let g = ColorUtils.hexToRgb(color).g;
-        let b = ColorUtils.hexToRgb(color).b;
-        let rgbAction = $("#rgbCheck")[0].checked;
-        let ws2811Action = $("#ws2811Check")[0].checked;
-
-        //todo subdtitute with model or get Model by View
-        var queryParam =
-            "effect=" + encodeURIComponent(effect) +
-            "&timing=" + encodeURIComponent(timing) +
-            "&color=" + encodeURIComponent(color) +
-            "&r=" + encodeURIComponent(r) +
-            "&g=" + encodeURIComponent(g) +
-            "&b=" + encodeURIComponent(b) +
-            "&rgbAction=" + encodeURIComponent(rgbAction) +
-            "&ws2811Action=" + encodeURIComponent(ws2811Action);
+        let ledModel = new LedMainModel();
+        ledModel =  this.mainView.getLedMainModel();
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
 
         this.showWait();
-        let result = await this.ledService.postStoptEffect(this.referenceHost, queryParam);
+        let result = await this.ledService.postStoptEffect(this.referenceHost, request);
         this.hideWait();
         console.log(result);
         this.valutateResponseAlert(result);

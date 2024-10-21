@@ -24,6 +24,7 @@
 
 import MainController from './js/controllers/MainControler.js';
 import ConstantApiList from './js/constants/apiList.js'
+import DefaultConstants from './js/constants/DefaultConstants.js';
 
 const app = {
 
@@ -52,7 +53,7 @@ const app = {
     },
 
     createComponent(){
-        this.mainController = new MainController(window.location.host);
+        this.mainController = new MainController(DefaultConstants.defaultApHost);
     },
 }
 

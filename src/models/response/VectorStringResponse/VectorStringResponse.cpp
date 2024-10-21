@@ -1,34 +1,34 @@
-#include "VectorResponse.h"
+#include "VectorStringResponse.h"
 
 // Costruttori
-VectorResponse::VectorResponse() : BasicResponse() {}
+VectorStringResponse::VectorStringResponse() : BasicResponse() {}
 
-VectorResponse::VectorResponse(StatusInfo info) 
+VectorStringResponse::VectorStringResponse(StatusInfo info) 
     : BasicResponse(info) {}
 
-VectorResponse::VectorResponse(const int &code, const String &message, const String &description)
+VectorStringResponse::VectorStringResponse(const int &code, const String &message, const String &description)
     : BasicResponse(code, message, description) {}
 
-VectorResponse::VectorResponse(HTTP_CODE code)
+VectorStringResponse::VectorStringResponse(HTTP_CODE code)
     : BasicResponse(code) {}
 
-VectorResponse::VectorResponse(HTTP_CODE code, String customDescription)
+VectorStringResponse::VectorStringResponse(HTTP_CODE code, String customDescription)
     : BasicResponse(code, customDescription) {}
 
-VectorResponse::VectorResponse(const int &code, const String &message, const String &description, const std::vector<String> &data)
+VectorStringResponse::VectorStringResponse(const int &code, const String &message, const String &description, const std::vector<String> &data)
     : BasicResponse(code, message, description), data(data) {}
 
 // Getter per il vettore data
-std::vector<String> VectorResponse::getData() const {
+std::vector<String> VectorStringResponse::getData() const {
     return data;
 }
 
 // Setter per il vettore data
-void VectorResponse::setData(const std::vector<String> &newData) {
+void VectorStringResponse::setData(const std::vector<String> &newData) {
     data = newData;
 }
 
-String VectorResponse::toJson()
+String VectorStringResponse::toJson()
 {
     // Richiama il metodo toJson di BasicResponse per serializzare i campi base
     String basicResponseJson = BasicResponse::toJson();
@@ -55,7 +55,7 @@ String VectorResponse::toJson()
     return output;
 }
 
-bool VectorResponse::fromJson(const String &json)
+bool VectorStringResponse::fromJson(const String &json)
 {
     // Deserializza l'intero JSON nel documento
     StaticJsonDocument<1024> doc;
@@ -90,7 +90,7 @@ bool VectorResponse::fromJson(const String &json)
 }
 
 // Sovrascrive il metodo toString per includere i dati del vettore
-String VectorResponse::toString() {
+String VectorStringResponse::toString() {
     String baseResponseString = BasicResponse::toString();
     
     // Costruisce la rappresentazione del vettore data

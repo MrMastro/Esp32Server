@@ -1,5 +1,6 @@
 #include "FunctionUtils.h"
 #include "SerialSimple.h"
+#include <models/LedEffectRequest/LedColorRequest.h>
 
 // Function to split a string based on a delimiter
 std::vector<String> splitString(const String &str, char delimiter)
@@ -22,7 +23,7 @@ std::vector<String> splitString(const String &str, char delimiter)
 /**
  * @brief Removes and returns the first element of a vector.
  *
- * Removes the first element from the vector `s` and returns it. 
+ * Removes the first element from the vector `s` and returns it.
  * If the vector is empty, an empty `String` is returned.
  *
  * @param s A reference to a `std::vector<String>`.
@@ -46,13 +47,26 @@ String vectorStringtoString(std::vector<String> s)
     for (int i = 0; i < s.size(); i++)
     {
         res += (s[i]);
-        if (i != s.size()-1)
+        if (i != s.size() - 1)
         {
             res += ",";
         }
     }
     res += "]";
     return res;
+}
+
+const std::vector<RgbColor> getRgbColorsByRequest(const std::vector<LedColorRequest> ledColorRequests)
+{
+    std::vector<RgbColor> rgbColors;
+
+    for (size_t i = 0; i < ledColorRequests.size(); i++)
+    {
+        LedColorRequest c = ledColorRequests.at(i);
+        rgbColors.push_back(RgbColor(c.r, c.g, c.b));
+    }
+
+    return rgbColors;
 }
 
 uint32_t getColor(int r, int g, int b)
@@ -63,4 +77,19 @@ uint32_t getColor(int r, int g, int b)
 String rgbColorToString(RgbColor color)
 {
     return formatMsg("[{},{},{}]", {String(color.R), String(color.G), String(color.B)});
+}
+
+String vectorRgbColorToString(std::vector<RgbColor> s)
+{
+    String res = "[";
+    for (int i = 0; i < s.size(); i++)
+    {
+        res += (rgbColorToString(s[i]));
+        if (i != s.size() - 1)
+        {
+            res += ",";
+        }
+    }
+    res += "]";
+    return res;
 }

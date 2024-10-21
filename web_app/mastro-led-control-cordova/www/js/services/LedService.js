@@ -20,8 +20,8 @@ export default class LedService {
         return result;
     }
 
-    async postStartEffect(host, queryParam){
-        let result = await HttpUtils.postCustom(host,ConstantApiList.sendEffectLedApi,queryParam,{});
+    async postStartEffect(host, requestBody){
+        let result = await HttpUtils.postCustom(host,ConstantApiList.sendEffectLedApi,{},requestBody);
         if(typeof result.data == 'string'){
             result.data = JSON.parse(result.data);
         }else{
@@ -30,8 +30,8 @@ export default class LedService {
         return result; //todo sobtitute with model (genericResponse?)
     }
 
-    async postStoptEffect(host, queryParam){
-        let result = await HttpUtils.postCustom(host,ConstantApiList.sendStopEffectApi,queryParam,{});
+    async postStoptEffect(host, requestBody){
+        let result = await HttpUtils.postCustom(host,ConstantApiList.sendStopEffectApi,{},requestBody);
         if(typeof result.data == 'string'){
             result.data = JSON.parse(result.data);
         }else{
@@ -57,7 +57,7 @@ export default class LedService {
             case 200:
                 if(typeof result.data === 'string'){
                     result.data = JSON.parse(result.data);
-                    return result.data.data;
+                    return result.data.effects;
                 }
                 break;
             default:

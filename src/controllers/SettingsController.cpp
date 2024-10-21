@@ -23,7 +23,7 @@ void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
         request->send(s.getCode(), "application/json", jsonResponse);
         servicesCollector.freeExclusiveExecution();
         return;
-    };
+    }
 
     String error = validateSettings(settingModel);
     if(!error.isEmpty())
@@ -66,6 +66,8 @@ void saveInitialSettings(AsyncWebServerRequest *request, uint8_t *data, size_t l
 
     InitialSettingSaveModel is;
 
+    Serial.println("Received:\n" + body);
+
     if(!is.fromJson(body)){
         StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
         s.setDescription("Errore Serializzazione");
@@ -74,7 +76,7 @@ void saveInitialSettings(AsyncWebServerRequest *request, uint8_t *data, size_t l
         request->send(s.getCode(), "application/json", jsonResponse);
         servicesCollector.freeExclusiveExecution();
         return;
-    };
+    }
 
     String error = validateInitialSettings(is);
     if(!error.isEmpty())
