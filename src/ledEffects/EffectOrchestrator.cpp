@@ -38,7 +38,7 @@ void EffectOrchestrator::runLifeCycle()
       String colorString = vectorRgbColorToString(colorsEffect);
       String msg = formatMsg(s, {sEffect, sLifeStep, colorString, String(deltaTmsEffect)});
       String subject = formatMsg("EffectOrchestrator - {}", {name});
-      serialService->logInfoln(msg, subject);      
+      serialService->logInfoFixed(msg, subject);      
     }
   }
 
