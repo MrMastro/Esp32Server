@@ -1,21 +1,21 @@
-#include "AlternatingEffect.h"
+#include "MulticolorConstantEffect.h"
 
-AlternatingEffect::AlternatingEffect() {}
+MulticolorConstantEffect::MulticolorConstantEffect() {}
 
-String AlternatingEffect::getName()
+String MulticolorConstantEffect::getName()
 {
-    return "ALTERNATING_EFFECT";
+    return "MULTICOLOR_CONSTANT_EFFECT";
 }
 
-int AlternatingEffect::getColorInputQt()
+int MulticolorConstantEffect::getMinColorsNumber()
 {
     return 2;
 }
 
-void AlternatingEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
+void MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
 
-    if(colorsInput.size() < getColorInputQt()){
+    if(colorsInput.size() < getMinColorsNumber()){
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
         return;
     }
@@ -53,7 +53,7 @@ void AlternatingEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepIn
     }
 }
 
-void AlternatingEffect::off(DriverLed *driver, TYPE_STRIP type)
+void MulticolorConstantEffect::off(DriverLed *driver, TYPE_STRIP type)
 {
     if (driver == nullptr)
     {

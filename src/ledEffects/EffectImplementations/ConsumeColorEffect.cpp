@@ -10,14 +10,14 @@ String ConsumeColorEffect::getName()
     return "CONSUME_COLOR";
 }
 
-int ConsumeColorEffect::getColorInputQt()
+int ConsumeColorEffect::getMinColorsNumber()
 {
     return 1;
 }
 
 void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
-    if (colorsInput.size() < getColorInputQt())
+    if (colorsInput.size() < getMinColorsNumber())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
         return;

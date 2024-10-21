@@ -9,14 +9,14 @@ String ProgressiveBarUniqueColorEffect::getName()
     return "PROGRESSIVE_BAR_UNIQUE_COLOR";
 }
 
-int ProgressiveBarUniqueColorEffect::getColorInputQt()
+int ProgressiveBarUniqueColorEffect::getMinColorsNumber()
 {
     return 1;
 }
 
 void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
-    if(colorsInput.size() < getColorInputQt()){
+    if(colorsInput.size() < getMinColorsNumber()){
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
         return;
     }

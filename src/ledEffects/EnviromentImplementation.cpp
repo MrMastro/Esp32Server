@@ -1,7 +1,7 @@
 #include "ledEffects/EnviromentEffect.h"
 
 #include "ledEffects/Effect.h"
-#include "ledEffects/EffectImplementations/AlternatingEffect.h"
+#include "ledEffects/EffectImplementations/MulticolorConstantEffect.h"
 #include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/FadeEffect.h"
 #include "ledEffects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
@@ -13,7 +13,7 @@ const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new ConsumeColorEffect(),
     new ProgressiveBarUniqueColorEffect(),
     new FadeEffect(),
-    new AlternatingEffect()};
+    new MulticolorConstantEffect()};
 
 const LED_EFFECT_LABEL getEffectLabelByName(String inputString)
 {

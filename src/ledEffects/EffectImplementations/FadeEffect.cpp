@@ -15,7 +15,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         return;
     }
 
-    if (colorsInput.size() < getColorInputQt())
+    if (colorsInput.size() < getMinColorsNumber())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
         return;
@@ -51,7 +51,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         // Aggiorna il fattore di luminosità
         if (increasing)
         {
-            brightness += (0.01f * deltaTimeMsInput / 1000.0f); // Aumenta la luminosità
+            brightness += (0.01f / (deltaTimeMsInput / 1000.0f));
             if (brightness >= 1.0f)
             {
                 brightness = 1.0f;
@@ -60,7 +60,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         }
         else
         {
-            brightness -= (0.01f * deltaTimeMsInput / 1000.0f); // Diminuisci la luminosità
+            brightness -= (0.01f / (deltaTimeMsInput / 1000.0f));
             if (brightness <= 0.0f)
             {
                 brightness = 0.0f;
@@ -89,7 +89,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
     }
 }
 
-int FadeEffect::getColorInputQt()
+int FadeEffect::getMinColorsNumber()
 {
     return 1;
 }

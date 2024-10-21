@@ -9,12 +9,12 @@ enum class STEP_LIFE_LED_EFFECT;
 enum class TYPE_STRIP;
 class DriverLed;
 
-class AlternatingEffect : public Effect 
+class MulticolorConstantEffect : public Effect 
 {
 public:
-    AlternatingEffect();
+    MulticolorConstantEffect();
     String getName() override;
-    int getColorInputQt() override;
+    int getMinColorsNumber() override;
     void execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService = nullptr) override;
 
     void off(DriverLed* driver, TYPE_STRIP type) override;
