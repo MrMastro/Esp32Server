@@ -11,7 +11,7 @@ String ProgressiveBarUniqueColorEffect::getName()
 
 int ProgressiveBarUniqueColorEffect::getMaxColorsNumber()
 {
-    return 5;
+    return 1;
 }
 
 int ProgressiveBarUniqueColorEffect::getMinColorsNumber()

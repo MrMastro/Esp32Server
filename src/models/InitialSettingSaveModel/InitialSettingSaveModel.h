@@ -15,7 +15,8 @@ public:
     // Serializzazione in JSON
     String toJson() const
     {
-        DynamicJsonDocument doc(1024); // Usa DynamicJsonDocument per allocare dinamicamente la memoria
+        DynamicJsonDocument doc(1896); // Usa DynamicJsonDocument per allocare dinamicamente la memoria
+        //2048
 
         doc["initialEffect"] = initialEffect;
         doc["initialDeltaT"] = initialDeltaT;
@@ -38,7 +39,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        DynamicJsonDocument doc(1024); // Usa DynamicJsonDocument per la deserializzazione
+        DynamicJsonDocument doc(1896); // Usa DynamicJsonDocument per la deserializzazione
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)

@@ -53,7 +53,8 @@ public:
     // Serializzazione in JSON
     String toJson() const
     {
-        DynamicJsonDocument doc(1024);
+        DynamicJsonDocument doc(2048);
+        //2048
 
         doc["deviceName"] = deviceName;
         doc["devicePassword"] = devicePassword;
@@ -89,7 +90,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        DynamicJsonDocument doc(1024);
+        DynamicJsonDocument doc(2048);
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)
