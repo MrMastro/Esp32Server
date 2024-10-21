@@ -2,6 +2,7 @@
 
 WaweUniqueColorEffect::WaweUniqueColorEffect()
 {
+    inverted = false;
 }
 
 String WaweUniqueColorEffect::getName()
@@ -14,18 +15,55 @@ int WaweUniqueColorEffect::getColorInputQt()
     return 1;
 }
 
-void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type)
+void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
 {
-    if(colorsInput.size() < getColorInputQt())
+    if (colorsInput.size() < getColorInputQt())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
         return;
     }
 
-    RgbColor initialColor = colorsInput[0];
     RgbColor colorVariable = colorsInput[0];
 
     if (stepInput == STEP_LIFE_LED_EFFECT::BEGIN_STEP)
+    {
+        while (colorVariable.CalculateBrightness() < 0)
+        {
+            colorVariable.Lighten(10);
+            for (int i = 0; i < driver->getMaxNumPixel(type); i++)
+            {
+                driver->sendStriptData(type, colorVariable, i);
+            }
+            driver->showData();
+            delay(deltaTimeMsInput);
+        }
+    }
+    else if (stepInput == STEP_LIFE_LED_EFFECT::LOOP_STEP)
+    {
+        //colorVariable = driver->getColorPixel(0, type);
+            while (colorVariable.CalculateBrightness() > 0)
+            {
+                colorVariable.Darken(10);
+                for (int i = 0; i < driver->getMaxNumPixel(type); i++)
+                {
+                    driver->sendStriptData(type, colorVariable, i);
+                }
+                driver->showData();
+                delay(deltaTimeMsInput);
+            }          
+
+            while (colorVariable.CalculateBrightness() < 0)
+            {
+                colorVariable.Lighten(10);
+                for (int i = 0; i < driver->getMaxNumPixel(type); i++)
+                {
+                    driver->sendStriptData(type, colorVariable, i);
+                }
+                driver->showData();
+                delay(deltaTimeMsInput);
+            }           
+    }
+    else if (stepInput == STEP_LIFE_LED_EFFECT::END_STEP)
     {
         while (colorVariable.CalculateBrightness() > 0)
         {
@@ -37,22 +75,6 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
             driver->showData();
             delay(deltaTimeMsInput);
         }
-    }
-    else if (stepInput == STEP_LIFE_LED_EFFECT::LOOP_STEP)
-    {
-        while (colorVariable.CalculateBrightness() < initialColor.CalculateBrightness())
-        {
-            colorVariable.Lighten(10);
-            for (int i = 0; i < driver->getMaxNumPixel(type); i++)
-            {
-                driver->sendStriptData(type, colorVariable, i);
-            }
-            driver->showData();
-            delay(deltaTimeMsInput);
-        }
-    }
-    else if (stepInput == STEP_LIFE_LED_EFFECT::END_STEP)
-    {
         off(driver, type);
     }
 }

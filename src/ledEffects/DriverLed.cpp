@@ -1,10 +1,11 @@
 #include "./DriverLed.h"
+#include "DriverLed.h"
 
 DriverLed::DriverLed()
 {
     ws2811Strip = nullptr;
     rgbStrip = nullptr;
-
+    colorRgbMemorized = RgbColor(0,0,0);
 }
 
 DriverLed::DriverLed(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811StripInput, LEDStripDriver *rgbStripInput)
@@ -30,11 +31,26 @@ int DriverLed::getMaxNumPixel(TYPE_STRIP type)
     return 0;
 }
 
+RgbColor DriverLed::getColorPixel(uint16_t indexPixel, TYPE_STRIP type)
+{
+    switch (type)
+    {
+    case TYPE_STRIP::RGB:
+        return colorRgbMemorized;
+        break;
+    case TYPE_STRIP::WS2811:
+        return ws2811Strip->GetPixelColor(indexPixel);
+    default:
+        break;
+    }
+    return RgbColor();
+}
 void DriverLed::sendStriptData(TYPE_STRIP type, RgbColor colorInput, uint16_t indexPixel) 
 {
     switch (type)
     {
     case TYPE_STRIP::RGB:
+        colorRgbMemorized = colorInput;
         rgbStrip->setColor(colorInput.R, colorInput.G, colorInput.B);
         break;
     case TYPE_STRIP::WS2811:
