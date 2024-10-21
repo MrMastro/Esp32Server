@@ -38,7 +38,7 @@ void EffectOrchestrator::runLifeCycle()
       String colorString = vectorRgbColorToString(colorsEffect);
       String msg = formatMsg(s, {sEffect, sLifeStep, colorString, String(deltaTmsEffect)});
       String subject = formatMsg("EffectOrchestrator - {}", {name});
-      serialService->logInfoFixed(msg, subject);      
+      serialService->logInfoFixed(msg, subject);
     }
   }
 
@@ -64,14 +64,14 @@ void EffectOrchestrator::runLifeCycle()
   switch (actualStep)
   {
   case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
-    e->execStep(effect, STEP_LIFE_LED_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+    e->execStep(effect, STEP_LIFE_LED_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
     actualStep = STEP_LIFE_LED_EFFECT::LOOP_STEP;
     break;
   case STEP_LIFE_LED_EFFECT::LOOP_STEP:
-    e->execStep(effect, STEP_LIFE_LED_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+    e->execStep(effect, STEP_LIFE_LED_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
     break;
   case STEP_LIFE_LED_EFFECT::END_STEP:
-    e->execStep(effect, STEP_LIFE_LED_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed);
+    e->execStep(effect, STEP_LIFE_LED_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
     actualStep = STEP_LIFE_LED_EFFECT::OFF;
     break;
   default:

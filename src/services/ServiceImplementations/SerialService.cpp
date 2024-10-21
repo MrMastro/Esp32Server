@@ -216,7 +216,7 @@ void SerialService::logInfoFixed(String msg, String subject) {
             log.replace("{msg}", msg);
 
             // Stampa solo se il messaggio è diverso dall'ultimo inviato
-            if (serialPointer != nullptr && lastSentMsg != log) {
+            if (serialPointer != nullptr) {
                 serialPointer->print("\r"); // Torna all'inizio della riga
                 serialPointer->print("        "); // Sovrascrivi il messaggio precedente con spazi
                 serialPointer->print("\r"); // Torna all'inizio della riga
@@ -224,7 +224,7 @@ void SerialService::logInfoFixed(String msg, String subject) {
                 lastSentMsg = log;
             }
 
-            if (btSerialPointer != nullptr && lastSentMsg != log) {
+            if (btSerialPointer != nullptr) {
                 btSerialPointer->print("\r");
                 btSerialPointer->print("        "); // Sovrascrivi il messaggio precedente con spazi
                 btSerialPointer->print("\r");

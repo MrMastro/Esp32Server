@@ -1,21 +1,21 @@
-#include "WaweUniqueColorEffect.h"
+#include "ConsumeColorEffect.h"
 
-WaweUniqueColorEffect::WaweUniqueColorEffect()
+ConsumeColorEffect::ConsumeColorEffect()
 {
     inverted = false;
 }
 
-String WaweUniqueColorEffect::getName()
+String ConsumeColorEffect::getName()
 {
-    return "WAWE_UNIQUE_COLOR";
+    return "CONSUME_COLOR";
 }
 
-int WaweUniqueColorEffect::getColorInputQt()
+int ConsumeColorEffect::getColorInputQt()
 {
     return 1;
 }
 
-void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type)
+void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
     if (colorsInput.size() < getColorInputQt())
     {
@@ -34,6 +34,8 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
             {
                 driver->sendStriptData(type, colorVariable, i);
             }
+            // String s = "[" + String(colorVariable.R) + String(colorVariable.G) + String(colorVariable.B) + "]";
+            // serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
             driver->showData();
             delay(deltaTimeMsInput);
         }
@@ -49,6 +51,8 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
                     driver->sendStriptData(type, colorVariable, i);
                 }
                 driver->showData();
+                String s = "[" + String(colorVariable.R) +" , "+ String(colorVariable.G) +" , "+ String(colorVariable.B) + "]";
+                serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
                 delay(deltaTimeMsInput);
             }          
 
@@ -79,7 +83,7 @@ void WaweUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
     }
 }
 
-void WaweUniqueColorEffect::off(DriverLed *driver, TYPE_STRIP type)
+void ConsumeColorEffect::off(DriverLed *driver, TYPE_STRIP type)
 {
     driver->clear(type);
 }

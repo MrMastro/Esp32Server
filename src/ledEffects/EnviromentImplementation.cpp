@@ -5,12 +5,12 @@
 #include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/FadeEffect.h"
 #include "ledEffects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
-#include "ledEffects/EffectImplementations/WaweUniqueColorEffect.h"
+#include "ledEffects/EffectImplementations/ConsumeColorEffect.h"
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new ConstantUniqueColorEffect(),
-    new WaweUniqueColorEffect(),
+    new ConsumeColorEffect(),
     new ProgressiveBarUniqueColorEffect(),
     new FadeEffect(),
     new AlternatingEffect()};
