@@ -22,7 +22,7 @@
 
 //todo Manage MVCS Design Pattern!!!
 
-import MainController from './js/controllers/MainControler.js';
+import MainController from './js/controllers/MainController.js';
 import ConstantApiList from './js/constants/apiList.js'
 import DefaultConstants from './js/constants/DefaultConstants.js';
 

@@ -3,15 +3,8 @@ const DefaultConstants = (() => {
     const defaultEffects = [
         {
             "name": "CONSTANT_UNIQUE_COLOR",
-            "colorInputQt": 5
-        },
-        {
-            "name": "WAWE_UNIQUE_COLOR",
-            "colorInputQt": 1
-        },
-        {
-            "name": "PROGRESSIVE_BAR_UNIQUE_COLOR",
-            "colorInputQt": 1
+            "minColorsNumber": 1,
+            "maxColorsNumber": 1
         }];
 
     const defaultEffectOption = "PROGRESSIVE_BAR_UNIQUE_COLOR";

@@ -202,7 +202,7 @@ export default class SettingView {
             this.initialEffectInput.value = settings.initialEffect;
             this.initialDeltaTInput.innerText = settings.initialDeltaT;
             this.groupColorSettingView = new GroupColorView(document.querySelector('#GroupColorViewSettingsContainer'), "settingColor", true);
-            this.groupColorSettingView.render(settings.initialColors);
+            this.groupColorSettingView.render(settings.initialColors, true);
 
             // Aggiorna le impostazioni delle luci LED
             this.enableStripRgbInput.checked = settings.ledSettings.enableStripRgb

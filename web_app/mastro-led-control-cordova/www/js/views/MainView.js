@@ -203,7 +203,8 @@ export default class MainView {
         effects.forEach((e, index) => {
             const option = document.createElement('option');
             option.value = e.name;
-            option.colorInputQt = e.colorInputQt;
+            option.minColorsNumber = e.minColorsNumber;
+            option.maxColorsNumber = e.maxColorsNumber;
             option.textContent = TextUtils.convertUnderscoreIntoSpace(e.name);
             if (index === 0) {
                 option.selected = true; // Imposta l'opzione come selezionata
@@ -213,16 +214,14 @@ export default class MainView {
 
         this.selectInputEffect.addEventListener('change', (e) =>{
             const selectedOption = e.target.options[e.target.selectedIndex];
-            this.createColorInput(selectedOption.colorInputQt);
+            this.showMinColorsAndSetBound(selectedOption.minColorsNumber, selectedOption.maxColorsNumber);
         })
     }
 
-    createColorInput(numberColor){
-        let colorList = new Array();
-        for (let index = 0; index < numberColor; index++) {
-            colorList.push(new LedColorRequest(0,0,0));
-        }
-        this.groupColorMainView.render(colorList);
+    showMinColorsAndSetBound(min,max){
+        this.groupColorMainView.hideAllColor();
+        this.groupColorMainView.setBound(min,max);
+        this.groupColorMainView.showButton(min);
     }
 
     reassignHandler() {
