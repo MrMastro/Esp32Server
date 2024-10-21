@@ -22,6 +22,7 @@ class Effect
 public:
     virtual String getName() = 0;
     virtual int getMinColorsNumber() = 0;
+    virtual int getMaxColorsNumber() = 0;
     virtual void execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) = 0;
     virtual void off(DriverLed *driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual String toJson()
@@ -29,6 +30,7 @@ public:
         StaticJsonDocument<200> doc;
         doc["name"] = getName();
         doc["minColorsNumber"] = getMinColorsNumber();
+        doc["maxColorsNumber"] = getMaxColorsNumber();
 
         String output;
         serializeJson(doc, output);

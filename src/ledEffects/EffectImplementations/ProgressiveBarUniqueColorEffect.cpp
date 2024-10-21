@@ -9,6 +9,11 @@ String ProgressiveBarUniqueColorEffect::getName()
     return "PROGRESSIVE_BAR_UNIQUE_COLOR";
 }
 
+int ProgressiveBarUniqueColorEffect::getMaxColorsNumber()
+{
+    return 5;
+}
+
 int ProgressiveBarUniqueColorEffect::getMinColorsNumber()
 {
     return 1;

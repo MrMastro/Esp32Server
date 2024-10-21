@@ -89,6 +89,11 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
     }
 }
 
+int FadeEffect::getMaxColorsNumber()
+{
+    return 5;
+}
+
 int FadeEffect::getMinColorsNumber()
 {
     return 1;

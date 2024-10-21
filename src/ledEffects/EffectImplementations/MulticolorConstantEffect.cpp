@@ -7,6 +7,11 @@ String MulticolorConstantEffect::getName()
     return "MULTICOLOR_CONSTANT_EFFECT";
 }
 
+int MulticolorConstantEffect::getMaxColorsNumber()
+{
+    return 5;
+}
+
 int MulticolorConstantEffect::getMinColorsNumber()
 {
     return 2;

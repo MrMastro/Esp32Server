@@ -9,6 +9,11 @@ String ConstantUniqueColorEffect::getName()
     return "CONSTANT_UNIQUE_COLOR";
 }
 
+int ConstantUniqueColorEffect::getMaxColorsNumber()
+{
+    return 1;
+}
+
 int ConstantUniqueColorEffect::getMinColorsNumber()
 {
     return 1;

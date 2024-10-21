@@ -10,6 +10,11 @@ String ConsumeColorEffect::getName()
     return "CONSUME_COLOR";
 }
 
+int ConsumeColorEffect::getMaxColorsNumber()
+{
+    return 1;
+}
+
 int ConsumeColorEffect::getMinColorsNumber()
 {
     return 1;
