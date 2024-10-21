@@ -141,6 +141,7 @@ void setup(void)
   Serial.begin(9600);
   Serial.println("\n");
   Serial.println("Started");
+  Serial.println("HELLOW");
   delay(10);
   Serial.print("\n");
   initServices(&Serial);
@@ -232,7 +233,7 @@ void webOtaServerTask(void *pvParameters)
   while (true)
   {
     mastroServer.handleOta();
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    //vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
 
