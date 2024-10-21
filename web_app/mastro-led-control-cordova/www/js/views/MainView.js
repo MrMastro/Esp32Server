@@ -129,7 +129,7 @@ export default class MainView {
         document.querySelector(".timingRangeInput").value = ledMainModel.deltaT;
         document.querySelector('.timingInput').value = ledMainModel.deltaT;
         this.groupColorMainView = new GroupColorView(document.querySelector('#GroupColorViewMainContainer'), "effectRequestColor", false);
-        this.groupColorMainView.render(ledMainModel.colors);
+        this.groupColorMainView.render(ledMainModel.colors, false, true);
         document.querySelector('#rgbCheck').checked = ledMainModel.rgbCheck;
         document.querySelector('#ws2811Check').checked = ledMainModel.ws2811Check;
         if(Array.isArray(listEffects)){
@@ -221,7 +221,7 @@ export default class MainView {
     showMinColorsAndSetBound(min,max){
         this.groupColorMainView.hideAllColor();
         this.groupColorMainView.setBound(min,max);
-        this.groupColorMainView.showButton(min);
+        this.groupColorMainView.showColors(min);
     }
 
     reassignHandler() {
