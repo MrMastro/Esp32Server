@@ -19,8 +19,8 @@ const TextUtils = (() => {
         return text;
     };
 
-    const textToNumber = (text) => {
-        const num = parseFloat(text);
+    const textToIntegerNumber = (text) => {
+        const num = parseInt(text);
         return (!isNaN(num) && isFinite(num)) ? num : 0;
     };
 
@@ -28,7 +28,7 @@ const TextUtils = (() => {
         convertUnderscoreIntoSpace,
         convertSpaceIntoUnderscore,
         fixTextNumber,
-        textToNumber
+        textToIntegerNumber
     };
 })();
 

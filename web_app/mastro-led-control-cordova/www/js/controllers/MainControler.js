@@ -16,7 +16,6 @@ import NoConnectException from '../exceptions/NoConnectException.js';
 import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import TimeUtils from '../utils/TimeUtils.js';
 import LedEffectRequest from '../models/request/LedEffectRequest.js';
-import LedColorRequest from '../models/request/LedColorRequest.js';
 import TextUtils from '../utils/TextUtils.js';
 
 export default class MainController {
@@ -91,7 +90,7 @@ export default class MainController {
     inputChange(){
         let valueTime = this.mainView.getTimingInput();
         valueTime = TextUtils.fixTextNumber(valueTime);
-        valueTime = TextUtils.textToNumber(valueTime);
+        valueTime = TextUtils.textToIntegerNumber(valueTime);
         if(valueTime < 0){
             valueTime = 0;
         }else if(valueTime >= 1000){
