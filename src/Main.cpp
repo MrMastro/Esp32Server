@@ -141,7 +141,6 @@ void setup(void)
   Serial.begin(9600);
   Serial.println("\n");
   Serial.println("Started");
-  Serial.println("HELLOW");
   delay(10);
   Serial.print("\n");
   initServices(&Serial);

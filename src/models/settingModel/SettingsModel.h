@@ -54,7 +54,6 @@ public:
     String toJson() const
     {
         DynamicJsonDocument doc(2048);
-        //2048
 
         doc["deviceName"] = deviceName;
         doc["devicePassword"] = devicePassword;

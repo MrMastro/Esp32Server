@@ -39,7 +39,7 @@ void MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT
         // Alterna i colori dei LED durante il loop dell'effetto
         for (size_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
-            RgbColor currentColor = (i % 2 == 0) ? colorsInput[0] : colorsInput[1];
+            RgbColor currentColor = colorsInput[i % colorsInput.size()];
             driver->sendStriptData(type, currentColor, i);
         }
         driver->showData();

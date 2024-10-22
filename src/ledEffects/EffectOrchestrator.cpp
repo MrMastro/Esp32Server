@@ -32,7 +32,7 @@ void EffectOrchestrator::runLifeCycle()
   {
     if(actualStep != STEP_LIFE_LED_EFFECT::OFF)
     {
-      String s = "\nPlays\nEffect {},\nStep: {},\nRgbColors: {},\ndeltaTimesMs: {}\n";
+      String s = String(millis()) + ": " + "\nPlays\nEffect {},\nStep: {},\nRgbColors: {},\ndeltaTimesMs: {}\n";
       String sEffect = effect;
       String sLifeStep = stepLifeEffectEnomToString(actualStep);
       String colorString = vectorRgbColorToString(colorsEffect);

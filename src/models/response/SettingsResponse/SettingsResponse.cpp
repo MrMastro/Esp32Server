@@ -2,34 +2,40 @@
 #include <utils/FunctionUtils.h>
 #include "constants/Constants.h"
 
-SettingsResponse::SettingsResponse() : status(), dataJson() {}
-
-SettingsResponse::SettingsResponse(StatusInfo info, const SettingsModel &dataJsonInput)
-{
-    status = info;
-    dataJson = dataJsonInput;
-}
-
-SettingsResponse::SettingsResponse(const int &code, const String &message, const String &description, const SettingsModel &dataJsonInput){
-    status = StatusInfo(code, message, description);
-    dataJson = dataJsonInput;
-}
-
-SettingsResponse::SettingsResponse(HTTP_CODE code)
-{
-    status = getStatusInfoByHttpCode(code);
-}
-
-SettingsResponse::SettingsResponse(HTTP_CODE code, String customDescription)
-{
-    status = getStatusInfoByHttpCode(code);
-    status.setDescription(customDescription);
-}
+SettingsResponse::SettingsResponse() : status(), data() {}
 
 SettingsResponse::SettingsResponse(StatusInfo info)
 {
     status = info;
 }
+
+// SettingsResponse::SettingsResponse(StatusInfo info, const SettingsModel &dataInput)
+// {
+//     status = info;
+//     data = dataInput;
+// }
+
+// SettingsResponse::SettingsResponse(const int &code, const String &message, const String &description, const SettingsModel &dataInput)
+// {
+//     BasicResponse(code, message, description);
+//     data = dataInput;
+// }
+
+// SettingsResponse::SettingsResponse(HTTP_CODE code)
+// {
+//     status = getStatusInfoByHttpCode(code);
+// }
+
+// SettingsResponse::SettingsResponse(HTTP_CODE code, String customDescription)
+// {
+//     status = getStatusInfoByHttpCode(code);
+//     status.setDescription(customDescription);
+// }
+
+// SettingsResponse::SettingsResponse(StatusInfo info)
+// {
+//     status = info;
+// }
 
 StatusInfo SettingsResponse::getStatus()
 {
@@ -43,58 +49,47 @@ void SettingsResponse::setStatus(StatusInfo &newStatus)
 
 SettingsModel SettingsResponse::getDataJson()
 {
-    return dataJson;
+    return data;
 }
 
 void SettingsResponse::setDataJson(const SettingsModel &json)
 {
-    dataJson = json;
+    data = json;
 }
 
 String SettingsResponse::toString()
 {
-    return "{" + status.toString() + ", " + dataJson.toString() + "}";
+    return "{" + status.toString() + ", " + data.toString() + "}";
 }
 
 String SettingsResponse::toJson()
 {
-    // Crea un documento JSON
-    StaticJsonDocument<896> doc;
+    // Crea un nuovo documento JSON per combinare le informazioni
+    DynamicJsonDocument doc(2560);
+    deserializeJson(doc, status.toJson()); // Deserializza il JSON della classe base
 
-    // Crea un oggetto annidato per "status" e usa il metodo toJson di StatusInfo
-    JsonObject statusJson = doc.createNestedObject("status");
-    StaticJsonDocument<128> tempStatusDoc;
-    DeserializationError statusError = deserializeJson(tempStatusDoc, status.toJson());
-    if (!statusError)
+    // Serializza il modello di impostazioni
+    JsonObject dataJson = doc.createNestedObject("data");
+    StaticJsonDocument<2048> dataDoc;
+    DeserializationError statusDataError = deserializeJson(dataDoc, data.toJson());
+    if (!statusDataError)
     {
-        statusJson.set(tempStatusDoc.as<JsonObject>());
-    }
-
-    // Crea un oggetto annidato per "dataJson" e usa il metodo toJson di SettingsModel
-    JsonObject dataJsonObj = doc.createNestedObject("data");
-    StaticJsonDocument<768> tempDataJsonDoc;
-    DeserializationError dataJsonError = deserializeJson(tempDataJsonDoc, dataJson.toJson());
-    if (!dataJsonError)
-    {
-        dataJsonObj.set(tempDataJsonDoc.as<JsonObject>());
+        dataJson.set(dataDoc.as<JsonObject>());
     }
     else
     {
-        doc["dataJson"] = nullptr; // Se c'è un errore, imposta null
-        Serial.println("Error deseralizarion SettingsModel");
-    }
+        Serial.println("Error serializing status");
 
-    // Converte il documento in una stringa JSON
+    }
     String output;
     serializeJson(doc, output);
-    
     return output;
 }
 
 bool SettingsResponse::fromJson(const String &json)
 {
     // Crea un documento JSON per la deserializzazione
-    StaticJsonDocument<896> doc;
+    StaticJsonDocument<2048> doc;
     DeserializationError error = deserializeJson(doc, json);
 
     // Controlla se la deserializzazione ha avuto successo
@@ -123,19 +118,19 @@ bool SettingsResponse::fromJson(const String &json)
     }
 
     // Deserializza dataJson come oggetto JSON
-    JsonObject dataJsonObj = doc["data"].as<JsonObject>();
-    if (!dataJsonObj.isNull())
+    JsonObject dataObj = doc["data"].as<JsonObject>();
+    if (!dataObj.isNull())
     {
-        String dataJsonStr;
-        serializeJson(dataJsonObj, dataJsonStr);
-        if (!dataJson.fromJson(dataJsonStr))
+        String dataStr;
+        serializeJson(dataObj, dataStr);
+        if (!data.fromJson(dataStr))
         {
             return false;
         }
     }
     else
     {
-        Serial.println(F("dataJson is null"));
+        Serial.println(F("data is null"));
         return false;
     }
 

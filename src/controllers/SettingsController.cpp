@@ -66,7 +66,7 @@ void saveInitialSettings(AsyncWebServerRequest *request, uint8_t *data, size_t l
 
     InitialSettingSaveModel is;
 
-    Serial.println("Received:\n" + body);
+    //Serial.println("Received:\n" + body);
 
     if(!is.fromJson(body)){
         StatusInfo s = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);

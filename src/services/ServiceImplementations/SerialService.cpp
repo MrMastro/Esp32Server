@@ -1,11 +1,13 @@
 #include "SerialService.h"
+#include <GeneralUtils.h>
 
 /**
  * Create an empty SerialService with isOperative false
  */
 SerialService::SerialService()
 {
-    lastSentMsg = "";
+    lastLineMsg = std::vector<String>();
+    lastMsgIsFixed = false;
     isOperative = false;
     serialPointer = nullptr;
     btSerialPointer = nullptr;
@@ -17,7 +19,6 @@ SerialService::SerialService()
 SerialService::SerialService(unsigned long baud, String deviceName, BluetoothSerial *btlPointer, bool isMaster)
 {
     SerialService();
-    lastSentMsg = "";
     initSerialBegin(baud);
     initSerialBtBegin(deviceName, btlPointer, isMaster);
     isOperative = true;
@@ -37,9 +38,9 @@ boolean SerialService::isAvaible()
     return isOperative;
 }
 
-String SerialService::getLastSentMsg()
+const std::vector<String> SerialService::getLastSentMsg()
 {
-    return lastSentMsg;
+    return lastLineMsg;
 }
 
 void SerialService::attachSerial(HardwareSerial *serial)
@@ -208,29 +209,68 @@ void SerialService::printlnColored(const String &msg, String colorMsg)
     }
 }
 
-void SerialService::logInfoFixed(String msg, String subject) {
-    if (settings != nullptr) {
-        if (settings->debug) {
+void SerialService::logInfoFixed(String msg, String subject)
+{
+    if (settings != nullptr)
+    {
+        if (false)
+        {
             String log = "[ INFO - {subject} ] {msg}";
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
 
-            // Stampa solo se il messaggio è diverso dall'ultimo inviato
-            if (serialPointer != nullptr) {
-                serialPointer->print("\r"); // Torna all'inizio della riga
-                serialPointer->print("        "); // Sovrascrivi il messaggio precedente con spazi
-                serialPointer->print("\r"); // Torna all'inizio della riga
-                printlnColored(log, "\033[32m"); // Stampa il nuovo messaggio
-                lastSentMsg = log;
+            // Conta il numero di \n nel nuovo messaggio
+            int newLinesInLog = 0;
+            for (int i = 0; i < log.length(); i++)
+            {
+                if (log[i] == '\n')
+                {
+                    newLinesInLog++;
+                }
             }
 
-            if (btSerialPointer != nullptr) {
-                btSerialPointer->print("\r");
-                btSerialPointer->print("        "); // Sovrascrivi il messaggio precedente con spazi
-                btSerialPointer->print("\r");
-                printlnColored(log, "\033[32m");
-                lastSentMsg = log;
+            // Conta il numero di \n nel messaggio precedente solo se era fissato
+            int newLinesInLastMsg = lastLineMsg.size();
+
+            // Sovrascrivi il messaggio precedente se l'ultimo messaggio era fisso
+            if (lastLineMsg.size() > 0 && lastMsgIsFixed)
+            {
+                int linesToClear = newLinesInLastMsg;
+
+                if (serialPointer != nullptr)
+                {
+                    // Cancella ogni linea del messaggio precedente
+                    for (int i = 0; i < linesToClear; i++)
+                    {
+                        serialPointer->print("\033[F");  // Vai alla riga precedente
+                        serialPointer->print("\033[2K"); // Cancella la riga attuale
+                    }
+                }
+
+                if (btSerialPointer != nullptr)
+                {
+                    // Cancella ogni linea del messaggio precedente
+                    for (int i = 0; i < linesToClear; i++)
+                    {
+                        btSerialPointer->print("\033[F");  // Vai alla riga precedente
+                        btSerialPointer->print("\033[2K"); // Cancella la riga attuale
+                    }
+                }
             }
+
+            // Stampa il nuovo messaggio
+            if (serialPointer != nullptr)
+            {
+                serialPointer->print(log); // Stampa il nuovo messaggio
+            }
+
+            if (btSerialPointer != nullptr)
+            {
+                btSerialPointer->print(log); // Stampa il nuovo messaggio
+            }
+
+            setLastMessage(log, false); // Imposta il messaggio e gestisci le righe
+            lastMsgIsFixed = true;     // Imposta che l'ultimo messaggio era fisso
         }
     }
 }
@@ -244,7 +284,8 @@ void SerialService::logInfoln(String msg, String subject)
             String log = "[ LOG - {subject} ] {msg}";
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
-            lastSentMsg = log;
+            setLastMessage(log, true);
+            lastMsgIsFixed = false;
             printlnColored(log, "\033[32m");
         }
     }
@@ -256,7 +297,7 @@ void SerialService::logWarning(String msg, String subject, String context)
     warn.replace("{nameService}", subject);
     warn.replace("{context}", context);
     warn.replace("{msg}", msg);
-    lastSentMsg = warn;
+    setLastMessage(msg, true);
     printlnColored(warn, "\033[33m");
 }
 
@@ -272,8 +313,35 @@ void SerialService::logError(String msg, String subject, String context)
     error.replace("{nameService}", subject);
     error.replace("{context}", context);
     error.replace("{msg}", msg);
-    lastSentMsg = error;
+    setLastMessage(error, true);
     printlnColored(error, "\033[31m");
+}
+
+void SerialService::setLastMessage(const String &msg, bool isLn)
+{
+    lastLineMsg.clear(); // Pulisci il vettore esistente
+
+    int startIndex = 0;
+    int endIndex = msg.indexOf('\n');
+
+    while (endIndex != -1)
+    {
+        lastLineMsg.push_back(msg.substring(startIndex, endIndex));
+        startIndex = endIndex + 1;
+        endIndex = msg.indexOf('\n', startIndex);
+    }
+
+    // Aggiungi l'ultima riga
+    if (startIndex < msg.length())
+    {
+        lastLineMsg.push_back(msg.substring(startIndex));
+    }
+
+    // Se isLn è true, aggiungi una riga vuota
+    if (isLn)
+    {
+        lastLineMsg.push_back(""); // Aggiungi una riga vuota
+    }
 }
 
 void SerialService::onInitServiceCollector()
