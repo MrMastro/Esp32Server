@@ -1,6 +1,5 @@
 import DefaultConstants from "../constants/DefaultConstants.js";
 import LedMainModel from "../models/LedMainModel.js";
-import LedColorRequest from "../models/request/LedColorRequest.js";
 import TextUtils from "../utils/TextUtils.js";
 import GroupColorView from "./GroupColorView.js";
 

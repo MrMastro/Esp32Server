@@ -1,5 +1,6 @@
 import LedColorRequest from "../models/request/LedColorRequest.js";
 import ColorUtils from "../utils/ColorUtils.js";
+import TimeUtils from "../utils/TimeUtils.js";
 
 export default class GroupColorView {
     constructor(rootElement, nameGroup, onlyRead) { //empty cause modify html yet written
@@ -17,6 +18,7 @@ export default class GroupColorView {
         this.colorQtActive = 1;
         this.minColorShowed = 1;
         this.maxColorShowed = 1;
+        this.waitAddColor = false;
     }
 
     createColorsIntoPanel(root, n) {
@@ -130,18 +132,26 @@ export default class GroupColorView {
         this.colorsMemorized[index].style.display = 'block';
     }
 
+    async setWaitAddColorTimer(ms){
+        this.waitAddColor = true;
+        await TimeUtils.wait(ms);
+        this.waitAddColor = false;
+    }
+
     usersAddColor() {
-        if (this.colorQtActive < this.maxColorShowed) {
-            this.colorQtActive++;
-            this.showSingleColor(this.colorQtActive-1);
+        if (this.colorQtActive < this.maxColorShowed && !this.waitAddColor) {
+            this.setWaitAddColorTimer(200);
+            this.showSingleColor(this.colorQtActive);
+            this.colorQtActive = this.getSizeButtonsEnable();
         }
         this.checkBoundAndDisablePlusMinus();
     }
 
     usersRemoveColor() {
-        if (this.colorQtActive > this.minColorShowed) {
-            this.colorQtActive--;
+        if (this.colorQtActive > this.minColorShowed && !this.waitAddColor) {
+            this.setWaitAddColorTimer(200);
             this.hideSingleColor(this.colorQtActive-1);
+            this.colorQtActive = this.getSizeButtonsEnable();
         }
         this.checkBoundAndDisablePlusMinus();
     }
@@ -205,6 +215,16 @@ export default class GroupColorView {
             }
         });
         return colors;
+    }
+
+    getSizeButtonsEnable(){
+        let result = 0;
+        this.colorsMemorized.forEach(element => {
+            if (element.style.display != 'none') {
+                result++;
+            }
+        });
+        return result;
     }
 
     bindPlusAndMinusBtn() {
