@@ -69,6 +69,21 @@ const std::vector<RgbColor> getRgbColorsByRequest(const std::vector<LedColorRequ
     return rgbColors;
 }
 
+void normalizeStringVectors(std::vector<String>& vector1, std::vector<String>& vector2) {
+    // Determine the lengths of the vectors
+    size_t len_v1 = vector1.size();
+    size_t len_v2 = vector2.size();
+    
+    // If the first vector is shorter, add empty strings
+    if (len_v1 < len_v2) {
+        vector1.resize(len_v2, "");  // Resize vector1 to match vector2 and fill with empty strings
+    }
+    // If the second vector is shorter, add empty strings
+    else if (len_v2 < len_v1) {
+        vector2.resize(len_v1, "");  // Resize vector2 to match vector1 and fill with empty strings
+    }
+}
+
 uint32_t getColor(int r, int g, int b)
 {
     return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;

@@ -140,6 +140,7 @@ String SerialService::getMsgbySerial()
     if (availableSerial())
     {
         String msg = serialPointer->readString();
+        lastMsgIsFixed = false;
         return msg;
     }
     return String();
@@ -212,8 +213,8 @@ void SerialService::printlnColored(const String &msg, String colorMsg)
 void SerialService::logInfoFixed(String msg, String subject)
 {
     if (settings != nullptr)
-    {
-        if (false)
+    {   //todo confront newMessageVector with lastMessageVector, print only if there is a change. Fix thread problem
+        if (settings->debug) //settings->debug
         {
             String log = "[ INFO - {subject} ] {msg}";
             log.replace("{subject}", subject);
@@ -229,47 +230,45 @@ void SerialService::logInfoFixed(String msg, String subject)
                 }
             }
 
-            // Conta il numero di \n nel messaggio precedente solo se era fissato
             int newLinesInLastMsg = lastLineMsg.size();
 
-            // Sovrascrivi il messaggio precedente se l'ultimo messaggio era fisso
             if (lastLineMsg.size() > 0 && lastMsgIsFixed)
             {
-                int linesToClear = newLinesInLastMsg;
-
+                std::vector<String> lineLog = splitString(log,'\n');
+                normalizeStringVectors(lineLog,lastLineMsg);
+                int delta = lineLog.size() - lastLineMsg.size();
+                if(delta>0){
+                    for (size_t i = 0; i < delta; i++)
+                    {
+                        serialPointer->println();
+                    }
+                }
+                serialPointer->print("\033[s"); //save position of cursor
+                for (int i = lineLog.size()-1; i >= 0; i--)
+                {
+                    serialPointer->print("\033[F"); 
+                    if(lineLog[i] != lastLineMsg[i]){
+                        serialPointer->print("\033[2K"); // clear actual line
+                        serialPointer->print("\033[32m" + lineLog[i] + "\033[0m"); //sovrascrivi
+                    }
+                }
+                serialPointer->print("\033[u"); //load position of cursor
+                setLastMessage(log, false); // Imposta il messaggio e gestisci le righe
+            }else{
+                // Stampa il nuovo messaggio
                 if (serialPointer != nullptr)
                 {
-                    // Cancella ogni linea del messaggio precedente
-                    for (int i = 0; i < linesToClear; i++)
-                    {
-                        serialPointer->print("\033[F");  // Vai alla riga precedente
-                        serialPointer->print("\033[2K"); // Cancella la riga attuale
-                    }
+                    serialPointer->print("\n\n\n\n\n");
+                    serialPointer->println("\033[32m" + log + "\033[0m");
                 }
 
                 if (btSerialPointer != nullptr)
                 {
-                    // Cancella ogni linea del messaggio precedente
-                    for (int i = 0; i < linesToClear; i++)
-                    {
-                        btSerialPointer->print("\033[F");  // Vai alla riga precedente
-                        btSerialPointer->print("\033[2K"); // Cancella la riga attuale
-                    }
+                    serialPointer->print("\n\n\n\n\n");
+                    serialPointer->println("\033[32m" + log + "\033[0m");
                 }
+                setLastMessage(log, true); // Imposta il messaggio e gestisci le righe                
             }
-
-            // Stampa il nuovo messaggio
-            if (serialPointer != nullptr)
-            {
-                serialPointer->print(log); // Stampa il nuovo messaggio
-            }
-
-            if (btSerialPointer != nullptr)
-            {
-                btSerialPointer->print(log); // Stampa il nuovo messaggio
-            }
-
-            setLastMessage(log, false); // Imposta il messaggio e gestisci le righe
             lastMsgIsFixed = true;     // Imposta che l'ultimo messaggio era fisso
         }
     }
@@ -285,8 +284,8 @@ void SerialService::logInfoln(String msg, String subject)
             log.replace("{subject}", subject);
             log.replace("{msg}", msg);
             setLastMessage(log, true);
-            lastMsgIsFixed = false;
             printlnColored(log, "\033[32m");
+            lastMsgIsFixed = false;
         }
     }
 }
@@ -299,6 +298,7 @@ void SerialService::logWarning(String msg, String subject, String context)
     warn.replace("{msg}", msg);
     setLastMessage(msg, true);
     printlnColored(warn, "\033[33m");
+    lastMsgIsFixed = false;
 }
 
 /**
@@ -315,6 +315,7 @@ void SerialService::logError(String msg, String subject, String context)
     error.replace("{msg}", msg);
     setLastMessage(error, true);
     printlnColored(error, "\033[31m");
+    lastMsgIsFixed = false;
 }
 
 void SerialService::setLastMessage(const String &msg, bool isLn)
@@ -338,7 +339,7 @@ void SerialService::setLastMessage(const String &msg, bool isLn)
     }
 
     // Se isLn è true, aggiungi una riga vuota
-    if (isLn)
+    if (isLn)//isLn
     {
         lastLineMsg.push_back(""); // Aggiungi una riga vuota
     }
