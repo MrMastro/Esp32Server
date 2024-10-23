@@ -118,8 +118,6 @@ void SettingService::loadSettings(String path)
         fileContent = defaultContent;
     }
 
-    Serial.println("Contenuto del file:");
-    Serial.println(fileContent);
     if (fileContent.isEmpty())
     {
         serialService->logWarning("Contenuto del file vuoto", getNameService(), "loadSettings(String path)");
