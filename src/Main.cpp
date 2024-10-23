@@ -158,7 +158,7 @@ void setup(void)
   // Thread running
   if (mastroServer.isAvaible())
   {
-    //xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
+    // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
   }
   xTaskCreate(ledTask, "LedTaskExecution", 10000, NULL, 3, NULL);
   xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", 10000, NULL, 4, NULL);
