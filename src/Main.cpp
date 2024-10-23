@@ -286,8 +286,16 @@ void ledTask(void *pvParameters)
     if (!servicesCollector.isBusyForServiceApi())
     {
       delay(10);
-      ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
-      //((LedService *)servicesCollector.getService("LedService"))->runEffectRgbLifeCycle(); //for now don't play rgb stript
+
+      if (s.ledSettings.enableStripRgb)
+      {
+        ((LedService *)servicesCollector.getService("LedService"))->runRgbLifeCycle();
+      }
+
+      if (s.ledSettings.enableStripWs2811)
+      {
+        ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
+      }
     }
     else
     {
