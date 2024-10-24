@@ -49,7 +49,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
             RgbColor color = RgbColor(0, 0, 0);
-            driver->sendStriptData(type, color, i);
+            driver->sendStripData(type, color, i);
         }
         driver->showData();
         break;
@@ -63,7 +63,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
             RgbColor fadedColor = RgbColor(uint8_t(baseColor.R * brightness),
                                            uint8_t(baseColor.G * brightness),
                                            uint8_t(baseColor.B * brightness));
-            driver->sendStriptData(type, fadedColor, i);
+            driver->sendStripData(type, fadedColor, i);
         }
         driver->showData();
 
@@ -94,7 +94,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         brightness = 0;
         for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
-            driver->sendStriptData(type, RgbColor(0, 0, 0), i);
+            driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
         driver->showData();
         break;

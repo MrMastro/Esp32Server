@@ -45,7 +45,7 @@ RgbColor DriverLed::getColorPixel(uint16_t indexPixel, TYPE_STRIP type)
     }
     return RgbColor();
 }
-void DriverLed::sendStriptData(TYPE_STRIP type, RgbColor colorInput, uint16_t indexPixel) 
+void DriverLed::sendStripData(TYPE_STRIP type, RgbColor colorInput, uint16_t indexPixel) 
 {
     switch (type)
     {

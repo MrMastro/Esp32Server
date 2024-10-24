@@ -48,7 +48,7 @@ void MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT
         for (size_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
             RgbColor currentColor = colorsInput[i % colorsInput.size()];
-            driver->sendStriptData(type, currentColor, i);
+            driver->sendStripData(type, currentColor, i);
         }
         driver->showData();
         break;

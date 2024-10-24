@@ -45,7 +45,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
             colorVariable.Lighten(10);
             for (int i = 0; i < driver->getMaxNumPixel(type); i++)
             {
-                driver->sendStriptData(type, colorVariable, i);
+                driver->sendStripData(type, colorVariable, i);
             }
             // String s = "[" + String(colorVariable.R) + String(colorVariable.G) + String(colorVariable.B) + "]";
             // serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
@@ -61,7 +61,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
                 colorVariable.Darken(10);
                 for (int i = 0; i < driver->getMaxNumPixel(type); i++)
                 {
-                    driver->sendStriptData(type, colorVariable, i);
+                    driver->sendStripData(type, colorVariable, i);
                 }
                 driver->showData();
                 String s = "[" + String(colorVariable.R) +" , "+ String(colorVariable.G) +" , "+ String(colorVariable.B) + "]";
@@ -74,7 +74,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
                 colorVariable.Lighten(10);
                 for (int i = 0; i < driver->getMaxNumPixel(type); i++)
                 {
-                    driver->sendStriptData(type, colorVariable, i);
+                    driver->sendStripData(type, colorVariable, i);
                 }
                 driver->showData();
                 delay(deltaTimeMsInput);
@@ -87,7 +87,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
             colorVariable.Darken(10);
             for (int i = 0; i < driver->getMaxNumPixel(type); i++)
             {
-                driver->sendStriptData(type, colorVariable, i);
+                driver->sendStripData(type, colorVariable, i);
             }
             driver->showData();
             delay(deltaTimeMsInput);

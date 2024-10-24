@@ -37,7 +37,7 @@ void ConstantUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFEC
 
     for (int i = 0; i < driver->getMaxNumPixel(type); i++)
     {
-        driver->sendStriptData(type, colorsInput[0], i);
+        driver->sendStripData(type, colorsInput[0], i);
     }
     driver->showData();
 

@@ -39,7 +39,7 @@ void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED
     {
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
-            driver->sendStriptData(type,colorInput,pixel);
+            driver->sendStripData(type,colorInput,pixel);
             driver->showData();
             delay(deltaTimeMsInput);
         }
@@ -48,7 +48,7 @@ void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED
     {
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
-            driver->sendStriptData(type,colorInput,pixel);
+            driver->sendStripData(type,colorInput,pixel);
         }
         driver->showData();
     }
