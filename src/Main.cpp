@@ -285,16 +285,23 @@ void ledTask(void *pvParameters)
   {
     if (!servicesCollector.isBusyForServiceApi())
     {
-      delay(10);
+
+      boolean executedCorrectly = false;
 
       if (s.ledSettings.enableStripRgb)
       {
-        ((LedService *)servicesCollector.getService("LedService"))->runRgbLifeCycle();
+        executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runRgbLifeCycle();
+        if(!executedCorrectly){
+          delay(TIME_MS_FOR_ERROR_EXECUTION);
+        }
       }
 
       if (s.ledSettings.enableStripWs2811)
       {
-        ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
+        executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
+        if(!executedCorrectly){
+          delay(TIME_MS_FOR_ERROR_EXECUTION);
+        }
       }
     }
     else

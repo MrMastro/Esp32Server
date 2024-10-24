@@ -8,6 +8,7 @@
 #include "ledEffects/EffectImplementations/ConsumeColorEffect.h"
 #include "ledEffects/EffectImplementations/StarDustEffect.h"
 #include "ledEffects/EffectImplementations/LiveFlameColorEffect.h"
+#include "ledEffects/EffectImplementations/ProgresiveBarBreathEffect.h"
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
@@ -16,6 +17,7 @@ const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new ProgressiveBarUniqueColorEffect(),
     new BreathEffect(),
     new MulticolorConstantEffect(),
+    new ProgresiveBarBreathEffect(),
     new StarDustEffect(),
     new LiveFlameColorEffect()
     };

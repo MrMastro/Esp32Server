@@ -25,7 +25,7 @@ public:
     virtual int getMaxColorsNumber() = 0;
     virtual boolean getCompatibilityRgb() = 0;
     virtual boolean getCompatibilityWs2811() = 0;
-    virtual void execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) = 0;
+    virtual boolean execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) = 0;
     virtual void off(DriverLed *driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual String toJson()
     {

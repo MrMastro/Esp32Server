@@ -27,14 +27,14 @@ boolean StarDustEffect::getCompatibilityWs2811() {
     return true;
 }
 
-void StarDustEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService) {
+boolean StarDustEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService) {
     if (driver == nullptr) {
-        return;
+        return false;
     }
 
     if (colorsInput.size() < getMinColorsNumber()) {
         Serial.println("Errore: la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     switch (stepInput) {
@@ -65,6 +65,7 @@ void StarDustEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput
     default:
         break;
     }
+    return true;
 }
 
 void StarDustEffect::initializeStars(const std::vector<RgbColor> &colorsInput, DriverLed *driver, TYPE_STRIP type) {

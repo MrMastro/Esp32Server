@@ -26,18 +26,18 @@ boolean BreathEffect::getCompatibilityWs2811(){
 }
 
 
-void BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
+boolean BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
 {
 
     if (driver == nullptr)
     {
-        return;
+        return false;
     }
 
     if (colorsInput.size() < getMinColorsNumber())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     switch (stepInput)
@@ -109,6 +109,7 @@ void BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, 
     default:
         break;
     }
+    return true;
 }
 
 

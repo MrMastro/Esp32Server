@@ -26,7 +26,7 @@ EffectOrchestrator::EffectOrchestrator(String nameI, DriverLed *driverInput, TYP
   name = nameI;
 }
 
-void EffectOrchestrator::runLifeCycle()
+boolean EffectOrchestrator::runLifeCycle()
 {
   if (serialService != nullptr)
   {
@@ -44,12 +44,12 @@ void EffectOrchestrator::runLifeCycle()
 
   if (!isOperative())
   {
-    return;
+    return false;
   }
 
   if (!running)
   {
-    return;
+    return false;
   }
 
   Effect *e = getEffectByEffectName(effect);
@@ -57,28 +57,31 @@ void EffectOrchestrator::runLifeCycle()
   if (e == nullptr)
   {
     Serial.println("ERROR Effetto non trovato: " + effect);
-    delay(1000);
-    return;
+    return false;
   }
+
+  boolean isExecutedCorrectly = false;
 
   switch (actualStep)
   {
   case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
-    e->execStep(effect, STEP_LIFE_LED_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
+    isExecutedCorrectly = e->execStep(effect, STEP_LIFE_LED_EFFECT::BEGIN_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
     actualStep = STEP_LIFE_LED_EFFECT::LOOP_STEP;
     break;
   case STEP_LIFE_LED_EFFECT::LOOP_STEP:
-    e->execStep(effect, STEP_LIFE_LED_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
+    isExecutedCorrectly = e->execStep(effect, STEP_LIFE_LED_EFFECT::LOOP_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
     break;
   case STEP_LIFE_LED_EFFECT::END_STEP:
-    e->execStep(effect, STEP_LIFE_LED_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
+    isExecutedCorrectly = e->execStep(effect, STEP_LIFE_LED_EFFECT::END_STEP, colorsEffect, deltaTmsEffect, driver, typeLed, serialService);
     actualStep = STEP_LIFE_LED_EFFECT::OFF;
     break;
   default:
     e->off(driver, typeLed);
+    isExecutedCorrectly = true;
     running = false;
     break;
   }
+  return isExecutedCorrectly;
 }
 
 void EffectOrchestrator::startEffect(String effectInput, const std::vector<RgbColor> &colorsRgb, int deltaTms)

@@ -217,27 +217,29 @@ void LedService::stopEffect(String effect, std::vector<RgbColor> colorsRgb, int 
   }
 }
 
-void LedService::runRgbLifeCycle()
+//return true if the effect is played, else false 
+boolean LedService::runRgbLifeCycle()
 {
   if (!isAttachedLed)
   {
     // todo throwError(ERROR_CODE::SERVICE_ERROR, "rgb Stript not attached", "runEffectRgb");
     serialService->logError("rgb Stript not attached", "LedService", "runEffectRgb");
-    return;
+    return false;
   }
 
-  rgbOrchestrator.runLifeCycle();
+  return rgbOrchestrator.runLifeCycle();
 }
 
-void LedService::runWs2811LifeCycle()
+//return true if the effect is played, else false 
+boolean LedService::runWs2811LifeCycle()
 {
   if (!isAttachedLed)
   {
     // todo throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "runEffectWs2811");
     serialService->logError("ws2811 Stript not attached", "LedService", "runEffectWs2811LifeCycle");
-    return;
+    return false;
   }
-  ws2811Orchestrator.runLifeCycle();
+  return ws2811Orchestrator.runLifeCycle();
 }
 
 // Return all avaible effect that the orchestrator can play

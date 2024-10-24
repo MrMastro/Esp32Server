@@ -25,17 +25,17 @@ boolean MulticolorConstantEffect::getCompatibilityWs2811(){
     return true;
 }
 
-void MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
+boolean MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
 
     if(colorsInput.size() < getMinColorsNumber()){
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     if (driver == nullptr)
     {
-        return;
+        return false;
     }
 
     switch (stepInput)
@@ -64,6 +64,7 @@ void MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT
     default:
         break;
     }
+    return true;
 }
 
 void MulticolorConstantEffect::off(DriverLed *driver, TYPE_STRIP type)

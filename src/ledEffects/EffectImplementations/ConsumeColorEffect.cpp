@@ -28,12 +28,12 @@ boolean ConsumeColorEffect::getCompatibilityWs2811(){
     return true;
 }
 
-void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
+boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
     if (colorsInput.size() < getMinColorsNumber())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     RgbColor colorVariable = colorsInput[0];
@@ -94,6 +94,8 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
         }
         off(driver, type);
     }
+
+    return true;
 }
 
 void ConsumeColorEffect::off(DriverLed *driver, TYPE_STRIP type)
