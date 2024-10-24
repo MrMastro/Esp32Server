@@ -4,10 +4,10 @@
 #include "../Effect.h"
 #include <Arduino.h>
 
-class FadeEffect : public Effect
+class BreathEffect : public Effect
 {
 public:
-    FadeEffect();
+    BreathEffect();
     String getName() override;
     int getMaxColorsNumber() override;
     int getMinColorsNumber() override;
@@ -19,6 +19,7 @@ public:
 private:
     float brightness; // Livello di luminosità per il fading
     boolean increasing;
+    float minBrightnessThresholdPercent;
 };
 
 #endif

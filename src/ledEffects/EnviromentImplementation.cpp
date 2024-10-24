@@ -3,17 +3,22 @@
 #include "ledEffects/Effect.h"
 #include "ledEffects/EffectImplementations/MulticolorConstantEffect.h"
 #include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
-#include "ledEffects/EffectImplementations/FadeEffect.h"
+#include "ledEffects/EffectImplementations/BreathEffect.h"
 #include "ledEffects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/ConsumeColorEffect.h"
+#include "ledEffects/EffectImplementations/StarDustEffect.h"
+#include "ledEffects/EffectImplementations/LiveFlameColorEffect.h"
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new ConstantUniqueColorEffect(),
     new ConsumeColorEffect(),
     new ProgressiveBarUniqueColorEffect(),
-    new FadeEffect(),
-    new MulticolorConstantEffect()};
+    new BreathEffect(),
+    new MulticolorConstantEffect(),
+    new StarDustEffect(),
+    new LiveFlameColorEffect()
+    };
 
 const LED_EFFECT_LABEL getEffectLabelByName(String inputString)
 {
