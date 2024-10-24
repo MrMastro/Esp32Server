@@ -62,8 +62,8 @@ export default class MainView {
                         <div id="ContainAction-3" class="ContainAction">
                             <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label componentForm form-label-title">Tempo (ms)</label></div>
                             <div class="d-flex flex-column containerOfComponent" style="overflow: hidden;">
-                                <div class="border rounded-pill d-flex d-md-flex d-xxl-flex justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);"><input class="form-range border-1 border-secondary focus-ring focus-ring-secondary d-flex align-content-center align-self-center justify-content-md-center componentForm rangeForm timingRangeInput" type="range" value="500" name="timingSlide" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="max-width: 420px;" required />
-                                    <div class="d-flex flex-row justify-content-center align-items-center"><input class="form-control-sm d-md-flex justify-content-md-center timingInput" type="number" name="timing" min="0" max="1000" step="1" style="max-width: 70px;width: auto;margin-bottom: 10px;margin-right: 5px;margin-left: 5px;" value="500" /><label class="form-label" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
+                                <div class="border rounded-pill d-flex d-md-flex d-xxl-flex justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);"><input class="form-range border-1 border-secondary focus-ring focus-ring-secondary d-flex align-content-center align-self-center justify-content-md-center componentForm rangeForm timingRangeInput" type="range" value="500" name="timingSlide" min="50" max="1000" step="1" title="Value" data-bs-theme="dark" style="max-width: 420px;" required />
+                                    <div class="d-flex flex-row justify-content-center align-items-center"><input class="form-control-sm d-md-flex justify-content-md-center timingInput" type="number" name="timing" min="50" max="1000" step="1" style="max-width: 70px;width: auto;margin-bottom: 10px;margin-right: 5px;margin-left: 5px;" value="500" /><label class="form-label" style="margin-right: 5px;margin-left: 2px;">ms</label></div>
                                 </div>
                             </div>
                         </div>
@@ -306,7 +306,8 @@ export default class MainView {
 
     bindInputChange(handler) {
         this.handelrInputChange = handler;
-        this.timingInput.addEventListener('input', this.handelrInputChange);
+        this.timingInput.addEventListener('input', this.handelrInputChange.bind(this,false));
+        this.timingInput.addEventListener('blur', this.handelrInputChange.bind(this,true));
     }
 
 

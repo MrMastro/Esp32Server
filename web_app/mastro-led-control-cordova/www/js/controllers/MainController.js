@@ -87,14 +87,17 @@ export default class MainController {
         this.mainView.setTimingInput(valueRange);
     }
 
-    inputChange(){
+    inputChange(alsoMinEdge = false){
         let valueTime = this.mainView.getTimingInput();
         valueTime = TextUtils.fixTextNumber(valueTime);
         valueTime = TextUtils.textToIntegerNumber(valueTime);
-        if(valueTime < 0){
-            valueTime = 0;
-        }else if(valueTime >= 1000){
+        if(valueTime >= 1000){
             valueTime = 1000;
+        }
+        if(alsoMinEdge){
+            if(valueTime < 50){
+                valueTime = 50;
+            }
         }
         this.mainView.setTimingInput(valueTime);
         this.mainView.setTimingRangeInput(valueTime);
