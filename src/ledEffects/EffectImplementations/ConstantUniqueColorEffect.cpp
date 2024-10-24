@@ -19,6 +19,14 @@ int ConstantUniqueColorEffect::getMinColorsNumber()
     return 1;
 }
 
+boolean ConstantUniqueColorEffect::getCompatibilityRgb(){
+    return true;
+}
+
+boolean ConstantUniqueColorEffect::getCompatibilityWs2811(){
+    return true;
+}
+
 void ConstantUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
 

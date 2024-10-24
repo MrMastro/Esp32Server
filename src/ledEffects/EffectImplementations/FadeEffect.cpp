@@ -7,6 +7,25 @@ String FadeEffect::getName()
     return "FADE_EFFECT";
 }
 
+int FadeEffect::getMaxColorsNumber()
+{
+    return 5;
+}
+
+int FadeEffect::getMinColorsNumber()
+{
+    return 1;
+}
+
+boolean FadeEffect::getCompatibilityRgb(){
+    return true;
+}
+
+boolean FadeEffect::getCompatibilityWs2811(){
+    return true;
+}
+
+
 void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
 {
 
@@ -89,15 +108,6 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
     }
 }
 
-int FadeEffect::getMaxColorsNumber()
-{
-    return 5;
-}
-
-int FadeEffect::getMinColorsNumber()
-{
-    return 1;
-}
 
 void FadeEffect::off(DriverLed *driver, TYPE_STRIP type)
 {

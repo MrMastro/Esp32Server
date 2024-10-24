@@ -19,6 +19,14 @@ int ProgressiveBarUniqueColorEffect::getMinColorsNumber()
     return 1;
 }
 
+boolean ProgressiveBarUniqueColorEffect::getCompatibilityRgb(){
+    return false;
+}
+
+boolean ProgressiveBarUniqueColorEffect::getCompatibilityWs2811(){
+    return true;
+}
+
 void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
     if(colorsInput.size() < getMinColorsNumber()){
