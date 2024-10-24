@@ -158,7 +158,7 @@ void setup(void)
   // Thread running
   if (mastroServer.isAvaible())
   {
-    xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL);
+    // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
   }
   xTaskCreate(ledTask, "LedTaskExecution", 10000, NULL, 3, NULL);
   xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", 10000, NULL, 4, NULL);
@@ -231,8 +231,15 @@ void webOtaServerTask(void *pvParameters)
   serialService.logInfoln("Web Task execution (OTA)", "MAIN");
   while (true)
   {
-    mastroServer.handleOta();
-    //vTaskDelay(10 / portTICK_PERIOD_MS);
+    if (!servicesCollector.isBusyForServiceApi())
+    {
+      mastroServer.handleOta();
+    }
+    else
+    {
+      yield();
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
 
@@ -279,8 +286,16 @@ void ledTask(void *pvParameters)
     if (!servicesCollector.isBusyForServiceApi())
     {
       delay(10);
-      ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
-      //((LedService *)servicesCollector.getService("LedService"))->runEffectRgbLifeCycle(); //for now don't play rgb stript
+
+      if (s.ledSettings.enableStripRgb)
+      {
+        ((LedService *)servicesCollector.getService("LedService"))->runRgbLifeCycle();
+      }
+
+      if (s.ledSettings.enableStripWs2811)
+      {
+        ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
+      }
     }
     else
     {
