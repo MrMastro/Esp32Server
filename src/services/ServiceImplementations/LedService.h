@@ -33,8 +33,8 @@ public:
   void stopEffect(String effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
   void startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
   void stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
-  void runRgbLifeCycle();
-  void runWs2811LifeCycle();
+  boolean runRgbLifeCycle();
+  boolean runWs2811LifeCycle();
   std::vector<Effect*> getAvaibleEffects();
 
 protected:
