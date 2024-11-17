@@ -19,11 +19,19 @@ int ProgressiveBarUniqueColorEffect::getMinColorsNumber()
     return 1;
 }
 
-void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
+boolean ProgressiveBarUniqueColorEffect::getCompatibilityRgb(){
+    return false;
+}
+
+boolean ProgressiveBarUniqueColorEffect::getCompatibilityWs2811(){
+    return true;
+}
+
+boolean ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
     if(colorsInput.size() < getMinColorsNumber()){
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     RgbColor colorInput = colorsInput[0];
@@ -31,7 +39,7 @@ void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED
     {
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
-            driver->sendStriptData(type,colorInput,pixel);
+            driver->sendStripData(type,colorInput,pixel);
             driver->showData();
             delay(deltaTimeMsInput);
         }
@@ -40,7 +48,7 @@ void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED
     {
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
-            driver->sendStriptData(type,colorInput,pixel);
+            driver->sendStripData(type,colorInput,pixel);
         }
         driver->showData();
     }
@@ -57,6 +65,7 @@ void ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED
         // }
         off(driver,type);
     }
+    return true;
 }
 
 void ProgressiveBarUniqueColorEffect::off(DriverLed *driver, TYPE_STRIP type)

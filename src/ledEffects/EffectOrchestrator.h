@@ -14,7 +14,7 @@ class EffectOrchestrator{
         EffectOrchestrator(String name, DriverLed* driver, TYPE_STRIP typeled, boolean operative, SerialService* serialService);
 
         //Method for lifeCycle
-        void runLifeCycle();
+        boolean runLifeCycle();
 
         //Methods for start and stop lifeCycle
         void startEffect(String effectInput,const  std::vector<RgbColor> &colorsRgb, int deltaTms);

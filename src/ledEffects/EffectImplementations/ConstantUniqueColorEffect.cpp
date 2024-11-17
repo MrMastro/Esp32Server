@@ -19,17 +19,25 @@ int ConstantUniqueColorEffect::getMinColorsNumber()
     return 1;
 }
 
-void ConstantUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
+boolean ConstantUniqueColorEffect::getCompatibilityRgb(){
+    return true;
+}
+
+boolean ConstantUniqueColorEffect::getCompatibilityWs2811(){
+    return true;
+}
+
+boolean ConstantUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
 
     if(colorsInput.size() < getMinColorsNumber()){
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     for (int i = 0; i < driver->getMaxNumPixel(type); i++)
     {
-        driver->sendStriptData(type, colorsInput[0], i);
+        driver->sendStripData(type, colorsInput[0], i);
     }
     driver->showData();
 
@@ -37,6 +45,8 @@ void ConstantUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFEC
     {
         off(driver, type);
     }
+
+    return true;
 }
 
 void ConstantUniqueColorEffect::off(DriverLed *driver, TYPE_STRIP type)

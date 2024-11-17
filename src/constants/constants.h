@@ -29,8 +29,12 @@ const std::map<HTTP_CODE, String> HTTP_CODE_MAP = {
     // Add more status codes and information as needed
 };
 
-//Path
+#define WAITING_CONNECTION_TIME_MS 100
 
+//Led constants
+#define TIME_MS_FOR_ERROR_EXECUTION 50
+
+//Path
 #define SETTINGS_FILE_LOCATION_PATH "/settings/settings.json"
 #define SETTINGS_FOLDER_LOCATION_PATH "/settings"
 

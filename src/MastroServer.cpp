@@ -86,7 +86,7 @@ boolean MastroServer::initWIFI(String &ssid, String &passwordWiFi)
     // Wait for connection
     for (int i = 0; (WiFi.status() != WL_CONNECTED); i++)
     {
-        delay(1000);
+        delay(WAITING_CONNECTION_TIME_MS);
         logInfo(".");
         activeIndicatorLed(true, true);
         if (i == 10)

@@ -1,24 +1,43 @@
-#include "FadeEffect.h"
+#include "BreathEffect.h"
 
-FadeEffect::FadeEffect() : brightness(255), increasing(false) {} // Inizializza la luminosità massima
+BreathEffect::BreathEffect() : brightness(255), increasing(false), minBrightnessThresholdPercent(0) {} // Inizializza la luminosità massima
 
-String FadeEffect::getName()
+String BreathEffect::getName()
 {
-    return "FADE_EFFECT";
+    return "BREATH_EFFECT";
 }
 
-void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
+int BreathEffect::getMaxColorsNumber()
+{
+    return 5;
+}
+
+int BreathEffect::getMinColorsNumber()
+{
+    return 1;
+}
+
+boolean BreathEffect::getCompatibilityRgb(){
+    return true;
+}
+
+boolean BreathEffect::getCompatibilityWs2811(){
+    return true;
+}
+
+
+boolean BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
 {
 
     if (driver == nullptr)
     {
-        return;
+        return false;
     }
 
     if (colorsInput.size() < getMinColorsNumber())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     switch (stepInput)
@@ -26,13 +45,15 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
     case STEP_LIFE_LED_EFFECT::BEGIN_STEP:
         increasing = true;
         brightness = 0;
+        minBrightnessThresholdPercent = 25;
         // Inizia con la dissolvenza dal nero (tutti spenti)
         for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
             RgbColor color = RgbColor(0, 0, 0);
-            driver->sendStriptData(type, color, i);
+            driver->sendStripData(type, color, i);
         }
         driver->showData();
+        delay(deltaTimeMsInput);
         break;
 
     case STEP_LIFE_LED_EFFECT::LOOP_STEP:
@@ -44,7 +65,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
             RgbColor fadedColor = RgbColor(uint8_t(baseColor.R * brightness),
                                            uint8_t(baseColor.G * brightness),
                                            uint8_t(baseColor.B * brightness));
-            driver->sendStriptData(type, fadedColor, i);
+            driver->sendStripData(type, fadedColor, i);
         }
         driver->showData();
 
@@ -61,9 +82,10 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         else
         {
             brightness -= (0.01f / (deltaTimeMsInput / 1000.0f));
-            if (brightness <= 0.0f)
+            //if (brightness <= 0.0f)
+            if (brightness <= minBrightnessThresholdPercent / 100)
             {
-                brightness = 0.0f;
+                brightness = minBrightnessThresholdPercent / 100;
                 increasing = true; // Inizia a crescere
             }
         }
@@ -75,7 +97,7 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
         brightness = 0;
         for (uint16_t i = 0; i < driver->getMaxNumPixel(type); i++)
         {
-            driver->sendStriptData(type, RgbColor(0, 0, 0), i);
+            driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
         driver->showData();
         break;
@@ -87,19 +109,11 @@ void FadeEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, co
     default:
         break;
     }
+    return true;
 }
 
-int FadeEffect::getMaxColorsNumber()
-{
-    return 5;
-}
 
-int FadeEffect::getMinColorsNumber()
-{
-    return 1;
-}
-
-void FadeEffect::off(DriverLed *driver, TYPE_STRIP type)
+void BreathEffect::off(DriverLed *driver, TYPE_STRIP type)
 {
     // Spegne tutti i LED
     driver->clear(type);

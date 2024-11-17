@@ -20,12 +20,20 @@ int ConsumeColorEffect::getMinColorsNumber()
     return 1;
 }
 
-void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
+boolean ConsumeColorEffect::getCompatibilityRgb(){
+    return true;
+}
+
+boolean ConsumeColorEffect::getCompatibilityWs2811(){
+    return true;
+}
+
+boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
     if (colorsInput.size() < getMinColorsNumber())
     {
         Serial.println("Errore la quantità in input non può essere minore della quantità necessaria");
-        return;
+        return false;
     }
 
     RgbColor colorVariable = colorsInput[0];
@@ -37,7 +45,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
             colorVariable.Lighten(10);
             for (int i = 0; i < driver->getMaxNumPixel(type); i++)
             {
-                driver->sendStriptData(type, colorVariable, i);
+                driver->sendStripData(type, colorVariable, i);
             }
             // String s = "[" + String(colorVariable.R) + String(colorVariable.G) + String(colorVariable.B) + "]";
             // serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
@@ -53,7 +61,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
                 colorVariable.Darken(10);
                 for (int i = 0; i < driver->getMaxNumPixel(type); i++)
                 {
-                    driver->sendStriptData(type, colorVariable, i);
+                    driver->sendStripData(type, colorVariable, i);
                 }
                 driver->showData();
                 String s = "[" + String(colorVariable.R) +" , "+ String(colorVariable.G) +" , "+ String(colorVariable.B) + "]";
@@ -66,7 +74,7 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
                 colorVariable.Lighten(10);
                 for (int i = 0; i < driver->getMaxNumPixel(type); i++)
                 {
-                    driver->sendStriptData(type, colorVariable, i);
+                    driver->sendStripData(type, colorVariable, i);
                 }
                 driver->showData();
                 delay(deltaTimeMsInput);
@@ -79,13 +87,15 @@ void ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
             colorVariable.Darken(10);
             for (int i = 0; i < driver->getMaxNumPixel(type); i++)
             {
-                driver->sendStriptData(type, colorVariable, i);
+                driver->sendStripData(type, colorVariable, i);
             }
             driver->showData();
             delay(deltaTimeMsInput);
         }
         off(driver, type);
     }
+
+    return true;
 }
 
 void ConsumeColorEffect::off(DriverLed *driver, TYPE_STRIP type)

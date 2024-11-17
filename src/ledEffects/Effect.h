@@ -23,7 +23,9 @@ public:
     virtual String getName() = 0;
     virtual int getMinColorsNumber() = 0;
     virtual int getMaxColorsNumber() = 0;
-    virtual void execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) = 0;
+    virtual boolean getCompatibilityRgb() = 0;
+    virtual boolean getCompatibilityWs2811() = 0;
+    virtual boolean execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) = 0;
     virtual void off(DriverLed *driver, TYPE_STRIP typeOrchestrator) = 0;
     virtual String toJson()
     {
@@ -31,6 +33,8 @@ public:
         doc["name"] = getName();
         doc["minColorsNumber"] = getMinColorsNumber();
         doc["maxColorsNumber"] = getMaxColorsNumber();
+        doc["compatibilityRgb"] = getCompatibilityRgb();
+        doc["compatibilityWs2811"] = getCompatibilityWs2811();
 
         String output;
         serializeJson(doc, output);
