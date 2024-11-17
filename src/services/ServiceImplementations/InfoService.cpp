@@ -50,3 +50,11 @@ boolean InfoService::isAvaible()
 {
   return isOperative;
 }
+
+InfoEsp32Model InfoService::getHelloInfo()
+{
+    InfoEsp32Model info = InfoEsp32Model();
+    info.deviceName = getServerByCollector()->getName();
+    info.ip = getIp();
+    return info;
+}
