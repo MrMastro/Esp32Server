@@ -23,6 +23,7 @@ MastroServer::MastroServer(AsyncWebServer *webServer, String mode, String ssid, 
     MastroServer();
     pointWebServer = webServer;
     debug = debugMode;
+    this->deviceName = deviceName;
     logInfo("\n");
 
     initLittleFs();

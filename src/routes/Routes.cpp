@@ -13,5 +13,5 @@ void initRoutes(MastroServer &srv)
   srv.setCustomApi("/api/v1/getSettings",HTTP_GET, getJsonSettings);
   srv.setCustomApi("/api/v1/login",HTTP_POST, login);
   srv.setCustomApi("/api/v1/saveInitialEffect",HTTP_POST, saveInitialSettings);
-  srv.setCustomApi("/api/v1/getInfoHello",HTTP_POST, getInfoHello);
+  srv.setCustomApi("/api/v1/getInfoHello",HTTP_GET, getInfoHello);
 }
