@@ -7,24 +7,29 @@
 class InitialSettingSaveModel
 {
 public:
-
     //---- Initial Operation -------
     String initialEffect;
     int initialDeltaT;
-    int initialR;
-    int initialG;
-    int initialB;
+    std::vector<LedColorRequest> initialColors;
 
     // Serializzazione in JSON
     String toJson() const
     {
-        StaticJsonDocument<768> doc;
+        DynamicJsonDocument doc(1896); // Usa DynamicJsonDocument per allocare dinamicamente la memoria
+        //2048
 
         doc["initialEffect"] = initialEffect;
         doc["initialDeltaT"] = initialDeltaT;
-        doc["initialR"] = initialR;
-        doc["initialG"] = initialG;
-        doc["initialB"] = initialB;
+
+        // Serializzazione del vettore di colori initialColors
+        JsonArray colorsArray = doc.createNestedArray("initialColors");
+        for (const auto &color : initialColors)
+        {
+            JsonObject colorObj = colorsArray.createNestedObject();
+            colorObj["r"] = color.r;
+            colorObj["g"] = color.g;
+            colorObj["b"] = color.b;
+        }
 
         String output;
         serializeJson(doc, output);
@@ -34,7 +39,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        StaticJsonDocument<192> doc;
+        DynamicJsonDocument doc(1896); // Usa DynamicJsonDocument per la deserializzazione
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)
@@ -46,9 +51,18 @@ public:
 
         initialEffect = doc["initialEffect"].as<String>();
         initialDeltaT = doc["initialDeltaT"];
-        initialR = doc["initialR"];
-        initialG = doc["initialG"];
-        initialB = doc["initialB"];
+
+        // Deserializzazione del vettore di colori initialColors
+        initialColors.clear(); // Pulisce il vettore prima di aggiungere nuovi colori
+        JsonArray colorsArray = doc["initialColors"].as<JsonArray>();
+        for (JsonObject colorObj : colorsArray)
+        {
+            LedColorRequest color;
+            color.r = colorObj["r"];
+            color.g = colorObj["g"];
+            color.b = colorObj["b"];
+            initialColors.push_back(color); // Aggiungi il colore al vettore
+        }
 
         return true;
     }
@@ -57,7 +71,6 @@ public:
     {
         return toJson();
     }
-
 };
 
 #endif // INITIAL_SETTINGS_SAVE_MODEL_H

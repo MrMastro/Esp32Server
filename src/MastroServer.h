@@ -15,7 +15,7 @@ class MastroServer
 public:
     MastroServer();
     MastroServer(AsyncWebServer* webServer, String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debug, int ledPin = -1); // Costruttore
-    void handleOta();
+    DEPRECATED void handleOta();
     String getName();
     String getIp();
     String getWifiCommunicationMode();

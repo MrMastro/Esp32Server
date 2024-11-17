@@ -17,7 +17,6 @@ public:
     SerialService(unsigned long baud, String deviceName, BluetoothSerial* btlPointer, bool isMaster = false);   //Serial and SerialBluetooth
     DEPRECATED SerialService(unsigned long baud, BluetoothSerial* btlPointer, String deviceName, AsyncWebServer *server, const char *url = "/webserial"); //All Serials
     boolean isAvaible() override;
-    String getLastSentMsg();
     void initSerialBegin(unsigned long baud, uint32_t config = SERIAL_8N1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
     void initSerialBtBegin(String localName, BluetoothSerial* bluetoothSerialPointer, bool isMaster = false);
     void initSerialWebBegin(AsyncWebServer *server, const char *url);
@@ -38,6 +37,7 @@ public:
     void println(String msg);
     void printColored(const String &msg, String colorMsg);
     void printlnColored(const String &msg, String colorMsg);
+    void logInfoFixed(String msg, String subject);
     void logInfoln(String msg, String subject);
     void logWarning(String msg, String subject, String context);
     void logError(String msg, String subject, String context);
@@ -48,7 +48,10 @@ protected:
     
 private:
     boolean isOperative;
-    String lastSentMsg;
+    std::vector<String> lastLineMsg;
+    boolean lastMsgIsFixed;
+    const std::vector<String> getLastSentMsg();
+    void setLastMessage(const String &msg, bool isLn);
 
 };
 

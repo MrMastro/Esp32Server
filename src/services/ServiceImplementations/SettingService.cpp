@@ -42,9 +42,7 @@ boolean SettingService::saveInitialSettings(String path, InitialSettingSaveModel
 {
     settings->initialEffect = s.initialEffect;
     settings->initialDeltaT = s.initialDeltaT;
-    settings->initialR = s.initialR;
-    settings->initialG = s.initialG;
-    settings->initialB = s.initialB;
+    settings->initialColors = s.initialColors;
     String content = settings->toJson();
     if (!writeFile(path, content))
     {
@@ -120,8 +118,6 @@ void SettingService::loadSettings(String path)
         fileContent = defaultContent;
     }
 
-    Serial.println("Contenuto del file:");
-    Serial.println(fileContent);
     if (fileContent.isEmpty())
     {
         serialService->logWarning("Contenuto del file vuoto", getNameService(), "loadSettings(String path)");

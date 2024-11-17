@@ -5,21 +5,20 @@
 
 #include "./models/StatusInfo.h"
 #include <./constants/Constants.h>
+#include <models/response/BasicResponse/BasicResponse.h>
 #include <models/settingModel/SettingsModel.h>
 
 enum class HTTP_CODE;
 
 class StatusInfo;
 
-class SettingsResponse
+class SettingsResponse : public BasicResponse 
 {
 public:
     SettingsResponse();
     SettingsResponse(StatusInfo info);
-    SettingsResponse(StatusInfo info, const SettingsModel &dataJson);
-    SettingsResponse(const int &code, const String &message, const String &description, const SettingsModel &dataJsonInput);
-    SettingsResponse(HTTP_CODE code);
-    SettingsResponse(HTTP_CODE code, String customDescription);
+    // SettingsResponse(StatusInfo info, const SettingsModel &data);
+    // SettingsResponse(const int &code, const String &message, const String &description, const SettingsModel &dataInput);
     StatusInfo getStatus();
     void setStatus(StatusInfo &status);
     SettingsModel getDataJson();
@@ -30,7 +29,7 @@ public:
 
 private:
     StatusInfo status;
-    SettingsModel dataJson;
+    SettingsModel data;
 };
 
 #endif //SettingsResponse

@@ -1,11 +1,12 @@
 const ConstantApiList = (() => {
     // Funzione principale per inviare una richiesta POST
-    const saveSettigsApi = "/api/saveSettings";
-    const getSettingsApi = "/api/getSettings";
-    const sendEffectLedApi ="/api/ws2811SetEffect";
-    const sendStopEffectApi="/api/ws2811StopEffect";
-    const saveInitialEffectApi="/api/saveInitialEffect";
-    const loginApi="/api/login";
+    const saveSettigsApi =      "/api/v1/saveSettings";
+    const getSettingsApi =      "/api/v1/getSettings";
+    const sendEffectLedApi =    "/api/v2/ws2811SetEffect";
+    const sendStopEffectApi=    "/api/v2/ws2811StopEffect";
+    const saveInitialEffectApi= "/api/v1/saveInitialEffect";
+    const getAvaibleEffects =   "/api/v1/getAvaibleEffects";
+    const loginApi=             "/api/v1/login";
     const timeoutMs = 3;
     
     return {
@@ -15,6 +16,7 @@ const ConstantApiList = (() => {
         sendStopEffectApi,
         saveInitialEffectApi,
         loginApi,
+        getAvaibleEffects,
         timeoutMs
     };
 })();

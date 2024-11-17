@@ -1,26 +1,44 @@
 export default class SettingsModel {
-    constructor() {
-        // Inizializza i valori del dispositivo
-        this.deviceName = "xxx (effettua login)";
-        this.devicePassword = "esp32passwordGeneric";
-        this.communicationMode = "AP_MODE";
-        this.debug = true;
-        this.initialEffect = "NO_EFFECT";
-        this.initialDeltaT = 0;
-        this.initialR = 0;
-        this.initialG = 0;
-        this.initialB = 255;
-        this.ssidAP = "ESP32_AP";
-        this.passwordAP = "ap_passwordGeneric";
-        this.ssidWIFI = "Home_Network";
-        this.passwordWIFI = "wifi_passwordGeneric";
+    constructor(
+        deviceName = "", 
+        devicePassword = "", 
+        communicationMode = "AP_MODE", 
+        debug = false, 
+        initialEffect = "NO_EFFECT", 
+        initialDeltaT = 0, 
+        initialColors = [{r: 0, g: 0, b: 0}],
+        ssidAP = "",
+        passwordAP = "",
+        ssidWIFI = "",
+        passwordWIFI = "",
+        enableStripRgb = false,
+        pinLedDinRgb = 19,
+        pinLedCinRgb = 18,
+        enableStripWs2811 = false,
+        numLedWs2811 = 32,
+        pinLedWs2811 = 5
+    ) {
+        // Inizializza i valori del dispositivo con quelli passati o di default
+        this.deviceName = deviceName;
+        this.devicePassword = devicePassword;
+        this.communicationMode = communicationMode;
+        this.debug = debug;
+        this.initialEffect = initialEffect;
+        this.initialDeltaT = initialDeltaT;
+        this.initialColors = initialColors;
+        this.ssidAP = ssidAP;
+        this.passwordAP = passwordAP;
+        this.ssidWIFI = ssidWIFI;
+        this.passwordWIFI = passwordWIFI;
+        
+        // Impostazioni LED
         this.ledSettings = {
-            enableStripWs2811: true,
-            numLedWs2811: 32,
-            pinLedWs2811: 5,
-            enableStripRgb: true,
-            pinLedDinRgb: 19,
-            pinLedCinRgb: 18
+            enableStripWs2811: enableStripWs2811,
+            numLedWs2811: numLedWs2811,
+            pinLedWs2811: pinLedWs2811,
+            enableStripRgb: enableStripRgb,
+            pinLedDinRgb: pinLedDinRgb,
+            pinLedCinRgb: pinLedCinRgb
         };
     }
 
@@ -31,21 +49,6 @@ export default class SettingsModel {
 
     // Metodo per ottenere la configurazione corrente
     getSettings() {
-        return {
-            deviceName: this.deviceName,
-            devicePassword: this.devicePassword,
-            communicationMode: this.communicationMode,
-            debug: this.debug,
-            initialEffect: this.initialEffect,
-            initialDeltaT: this.initialDeltaT,
-            initialR: this.initialR,
-            initialG: this.initialG,
-            initialB: this.initialB,
-            ssidAP: this.ssidAP,
-            passwordAP: this.passwordAP,
-            ssidWIFI: this.ssidWIFI,
-            passwordWIFI: this.passwordWIFI,
-            ledSettings: this.ledSettings
-        };
+        return this;
     }
 }

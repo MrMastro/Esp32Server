@@ -3,7 +3,9 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <vector>
 #include <models/LedSettingsModel/LedSettingsModel.h>
+#include <models/LedEffectRequest/LedColorRequest.h>
 
 class SettingsModel
 {
@@ -18,9 +20,7 @@ public:
         this->debug = other.debug;
         this->initialEffect = other.initialEffect;
         this->initialDeltaT = other.initialDeltaT;
-        this->initialR = other.initialR;
-        this->initialG = other.initialG;
-        this->initialB = other.initialB;
+        this->initialColors = other.initialColors;
         this->ssidAP = other.ssidAP;
         this->passwordAP = other.passwordAP;
         this->ssidWIFI = other.ssidWIFI;
@@ -37,9 +37,7 @@ public:
     //---- Initial Operation -------
     String initialEffect;
     int initialDeltaT;
-    int initialR;
-    int initialG;
-    int initialB;
+    std::vector<LedColorRequest> initialColors;  // Sostituito initialR, initialG, initialB con initialColors
 
     //-- SETTINGS FOR AP MODE
     String ssidAP;
@@ -55,7 +53,7 @@ public:
     // Serializzazione in JSON
     String toJson() const
     {
-        StaticJsonDocument<768> doc;
+        DynamicJsonDocument doc(2048);
 
         doc["deviceName"] = deviceName;
         doc["devicePassword"] = devicePassword;
@@ -63,15 +61,23 @@ public:
         doc["debug"] = debug;
         doc["initialEffect"] = initialEffect;
         doc["initialDeltaT"] = initialDeltaT;
-        doc["initialR"] = initialR;
-        doc["initialG"] = initialG;
-        doc["initialB"] = initialB;
+
+        // Serializzazione del vettore di colori initialColors
+        JsonArray colorsArray = doc.createNestedArray("initialColors");
+        for (const auto &color : initialColors)
+        {
+            JsonObject colorObj = colorsArray.createNestedObject();
+            colorObj["r"] = color.r;
+            colorObj["g"] = color.g;
+            colorObj["b"] = color.b;
+        }
+
         doc["ssidAP"] = ssidAP;
         doc["passwordAP"] = passwordAP;
         doc["ssidWIFI"] = ssidWIFI;
         doc["passwordWIFI"] = passwordWIFI;
 
-        // Serializzazione diretta delle impostazioni LED nel documento JSON
+        // Serializzazione delle impostazioni LED nel documento JSON
         JsonObject ledSettingsJson = doc.createNestedObject("ledSettings");
         ledSettings.toJson(ledSettingsJson);
 
@@ -83,7 +89,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        StaticJsonDocument<768> doc;
+        DynamicJsonDocument doc(2048);
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)
@@ -99,9 +105,19 @@ public:
         debug = doc["debug"];
         initialEffect = doc["initialEffect"].as<String>();
         initialDeltaT = doc["initialDeltaT"];
-        initialR = doc["initialR"];
-        initialG = doc["initialG"];
-        initialB = doc["initialB"];
+
+        // Deserializzazione del vettore di colori initialColors
+        initialColors.clear(); // Pulisce il vettore prima di aggiungere nuovi colori
+        JsonArray colorsArray = doc["initialColors"].as<JsonArray>();
+        for (JsonObject colorObj : colorsArray)
+        {
+            LedColorRequest color;
+            color.r = colorObj["r"];
+            color.g = colorObj["g"];
+            color.b = colorObj["b"];
+            initialColors.push_back(color); // Aggiungi il colore al vettore
+        }
+
         ssidAP = doc["ssidAP"].as<String>();
         passwordAP = doc["passwordAP"].as<String>();
         ssidWIFI = doc["ssidWIFI"].as<String>();
@@ -131,9 +147,10 @@ public:
         defaultSettings.debug = false;
         defaultSettings.initialEffect = "NO_EFFECT";
         defaultSettings.initialDeltaT = 100;
-        defaultSettings.initialR = 0;
-        defaultSettings.initialG = 0;
-        defaultSettings.initialB = 0;
+
+        // Default color array (es. colore nero)
+        defaultSettings.initialColors.push_back(LedColorRequest());
+
         defaultSettings.ssidAP = "ESP32_AP";
         defaultSettings.passwordAP = "ap_password";
         defaultSettings.ssidWIFI = "Home_Network";
