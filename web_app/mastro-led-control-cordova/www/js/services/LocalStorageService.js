@@ -10,11 +10,22 @@ export default class LocalStorageService {
     }
 
     setEffectList(list) {
-
         if (!Array.isArray(list)) {
             throw new Error("L'input deve essere un array.");
         }
         localStorage.setItem('ledEffectList', JSON.stringify(list));
+    }
+
+    getEsp32InfoDeviceMem() {
+        const value = localStorage.getItem('esp32InfoDeviceMem');
+        return value ? JSON.parse(value) : null;
+    }
+
+    setEsp32InfoDeviceMem(list){
+        if (!Array.isArray(list)) {
+            throw new Error("L'input deve essere un array.");
+        }
+        localStorage.setItem('esp32InfoDeviceMem', JSON.stringify(list));
     }
 
     checkExistenceEffectList() {
@@ -24,6 +35,8 @@ export default class LocalStorageService {
     formatEffectList() {
         localStorage.setItem('ledEffectList' , JSON.stringify(DefaultConstants.defaultEffects));
     }
+
+
 
 
 }

@@ -8,6 +8,7 @@ const ConstantApiList = (() => {
     const getAvaibleEffects =   "/api/v1/getAvaibleEffects";
     const loginApi=             "/api/v1/login";
     const timeoutMs = 3;
+    const timeoutForSearchtMs = 1;
     
     return {
         saveSettigsApi,
@@ -17,7 +18,8 @@ const ConstantApiList = (() => {
         saveInitialEffectApi,
         loginApi,
         getAvaibleEffects,
-        timeoutMs
+        timeoutMs,
+        timeoutForSearchtMs
     };
 })();
 

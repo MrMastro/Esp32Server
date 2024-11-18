@@ -17,6 +17,7 @@ import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import TimeUtils from '../utils/TimeUtils.js';
 import LedEffectRequest from '../models/request/LedEffectRequest.js';
 import TextUtils from '../utils/TextUtils.js';
+import Esp32ConnectionService from '../services/Esp32ConnectionService.js';
 
 export default class MainController {
     constructor(host) {
@@ -28,6 +29,7 @@ export default class MainController {
         //Component
         this.ledService = new LedService();
         this.localStorageService = new LocalStorageService();
+        this.esp32ConnectionService = new Esp32ConnectionService();
         this.mainView = new MainView(document.getElementById('MainViewContainer'),[]);
         this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
         this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
@@ -43,6 +45,7 @@ export default class MainController {
         this.waitView.render();
         this.switchConnection();
         this.bindEvents();
+        this.esp32ConnectionService.setLinkedDeviceSearch(this.referenceHost, (result) => console.log("found: " + result));
     }
 
     initilizeStorage(){
