@@ -11,6 +11,7 @@ public:
     InfoService();
     StatusInfo infoSuccess();
     String getIp();
+    String getMacAdress();
     String getInfo();
     boolean loginValidate(String deviceName, String devicePwd);
     boolean checkAuthorization(String ip);

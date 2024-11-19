@@ -9,15 +9,20 @@ class InfoEsp32Model
 public:
     String deviceName;
     String ip;
+    String macAdress;
 
     String toJson() const
     {
-        StaticJsonDocument<256> doc;
+        JsonDocument doc;
 
         doc["deviceName"] = deviceName;
         doc["ip"] = ip;
+        doc["macAdress"] = macAdress;
 
         String output;
+
+        doc.shrinkToFit();  // optional
+
         serializeJson(doc, output);
         return output;
     }
@@ -25,18 +30,19 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        StaticJsonDocument<256> doc;
+        JsonDocument doc;
+
         DeserializationError error = deserializeJson(doc, json);
 
-        if (error)
-        {
-            Serial.print(F("deserializeJson() failed: "));
-            Serial.println(error.f_str());
-            return false;
+        if (error) {
+        Serial.print("deserializeJson() failed: ");
+        Serial.println(error.c_str());
+        return false;
         }
 
         deviceName = doc["deviceName"].as<String>();
         ip = doc["ip"].as<String>();
+        macAdress = doc["macAdress"].as<String>();
 
         return true;
     }

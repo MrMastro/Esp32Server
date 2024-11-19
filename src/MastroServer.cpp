@@ -167,6 +167,14 @@ String MastroServer::getIp()
 
 }
 
+String MastroServer::getMacAdress()
+{
+    if(isAvaible()){
+        return WiFi.macAddress();
+    }
+    else return "Server not connected";
+}
+
 String MastroServer::getWifiCommunicationMode()
 {
     return wifiCommunicationMode;

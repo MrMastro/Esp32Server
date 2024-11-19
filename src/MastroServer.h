@@ -18,6 +18,7 @@ public:
     DEPRECATED void handleOta();
     String getName();
     String getIp();
+    String getMacAdress();
     String getWifiCommunicationMode();
     void setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
     void setCustomApi(const char *uri, WebRequestMethodComposite method, ArBodyHandlerFunction onRequest);
