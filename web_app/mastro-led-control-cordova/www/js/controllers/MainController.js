@@ -20,16 +20,15 @@ import TextUtils from '../utils/TextUtils.js';
 import Esp32ConnectionService from '../services/Esp32ConnectionService.js';
 
 export default class MainController {
-    constructor(host) {
+    constructor(host="") {
+        this.esp32ConnectionService = new Esp32ConnectionService();
         //status variable:
         this.referenceHost = host;
         this.apHost = DefaultConstants.defaultApHost;
         this.debug = DefaultConstants.defaultDebug;
-
         //Component
         this.ledService = new LedService();
         this.localStorageService = new LocalStorageService();
-        this.esp32ConnectionService = new Esp32ConnectionService();
         this.mainView = new MainView(document.getElementById('MainViewContainer'),[]);
         this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
         this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
@@ -41,11 +40,17 @@ export default class MainController {
 
     async init() {
         this.initilizeStorage();
+        if(this.referenceHost == ""){
+            this.referenceHost = await this.esp32ConnectionService.getIP();
+        }
         this.mainView.render(new LedMainModel(), this.localStorageService.getLedEffectList());
         this.waitView.render();
         this.switchConnection();
         this.bindEvents();
-        this.esp32ConnectionService.setLinkedDeviceSearch(this.referenceHost, (result) => console.log("found: " + result));
+        console.log("wait");
+        await this.esp32ConnectionService.setLinkedDeviceSearch((result) => console.log("found: " + result));
+        console.log("ok");
+        console.log(this.esp32ConnectionService.getLinkedDeviceSearch());
     }
 
     initilizeStorage(){

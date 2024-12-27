@@ -53,7 +53,12 @@ const app = {
     },
 
     createComponent(){
-        this.mainController = new MainController(DefaultConstants.defaultApHost);
+        //this.mainController = new MainController(DefaultConstants.defaultApHost);
+        var networkState = navigator.connection.type;
+        if (networkState !== Connection.WIFI) {
+            console.log("WIFI IS MANDATORY");
+        }
+        this.mainController = new MainController();
     },
 }
 
