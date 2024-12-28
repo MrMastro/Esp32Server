@@ -85,7 +85,7 @@ export default class Esp32ConnectionService {
         }
 
         //todo
-        let initialIndex = IpV4StringUtils.getNumberLastDigit(adressIpV4);
+        let initialIndex = 0;
 
         for (let index = initialIndex; index < 255; index++) {
             let adressI = IpV4StringUtils.getAdressWithIndexHost(adressIpV4, index);
