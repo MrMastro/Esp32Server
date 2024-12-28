@@ -106,11 +106,11 @@ const HttpUtils = (() => {
 
         await operation
             .then((response) => {
-                console.log(response); // Questo viene eseguito solo se la Promise viene risolta
+                //console.log(response); // Questo viene eseguito solo se la Promise viene risolta
                 result = response;
             })
             .catch((error) => {
-                console.error('HttpUtils Caught an error:', error); // Questo viene eseguito se la Promise viene rifiutata
+                //console.error('HttpUtils Caught an error:', error); // Questo viene eseguito se la Promise viene rifiutata
                 result = error;
             });
         return result;

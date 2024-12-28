@@ -24,11 +24,21 @@ const TextUtils = (() => {
         return (!isNaN(num) && isFinite(num)) ? num : 0;
     };
 
+    const isJSON = (str) => {
+        try {
+            JSON.stringify(JSON.parse(str));
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
+
     return {
         convertUnderscoreIntoSpace,
         convertSpaceIntoUnderscore,
         fixTextNumber,
-        textToIntegerNumber
+        textToIntegerNumber,
+        isJSON
     };
 })();
 
