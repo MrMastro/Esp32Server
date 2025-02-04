@@ -1,11 +1,11 @@
-@media  {
+/* @media  {
   .containerLabel {
     display: flex;
     justify-content: center;
     width: auto;
     min-width: 100px;
   }
-}
+} */
 
 .form-label {
   min-height: 30px;
@@ -46,7 +46,7 @@
   /*max-width: auto;*/
 }
 
-.containerSetLedEffect {
+.containerAction {
   border: 6px solid var(--bs-body-bg) ;
   border-radius: 19px;
   justify-content: center;
@@ -59,3 +59,7 @@
   /*max-width: auto;*/
 }
 
+.elementEsp32 {
+  margin-left: 1px;
+  margin-right: 1px;
+}

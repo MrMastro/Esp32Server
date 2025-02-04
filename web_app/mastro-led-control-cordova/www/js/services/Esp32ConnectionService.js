@@ -22,7 +22,8 @@ export default class Esp32ConnectionService {
     }
 
     async setFakeIP() {
-        this.referenceHost = "192.168.1.120";
+        // this.referenceHost = "192.168.1.120";
+        this.referenceHost = "192.168.64.24";
     }
 
     async setLocalIP() {
@@ -72,10 +73,12 @@ export default class Esp32ConnectionService {
     }
 
     //set a list of InfoEsp32Model calling hello api (info of connection to esp32 devices)
-    async setLinkedDeviceSearch(callBackWhenDeviceFound) {
+    async setLinkedDeviceSearch(callBackWhenDeviceFound=null) {
+        this.createFakeVector();
+        this.localStoraceService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
         this.linkedDeviceSearch = [];
         let adressIpV4 = this.referenceHost;
-        console.log("Search device with host: " + adressIpV4);
+        console.log("My ip: "+adressIpV4+" - Search device");
         let memDevices = this.localStoraceService.getEsp32InfoDeviceMem();
 
         if (memDevices == null) {
@@ -104,7 +107,9 @@ export default class Esp32ConnectionService {
                 let esp32Found = InfoEsp32Model.createModel(result);
                 if (esp32Found != null) {
                     this.linkedDeviceSearch.push(esp32Found);
-                    callBackWhenDeviceFound(resultApi);
+                    if(callBackWhenDeviceFound != null){
+                        callBackWhenDeviceFound(resultApi);
+                    }
                 } else {
                     console.log("Scartato in quanto json non valido: " + index);
                 }
@@ -116,7 +121,6 @@ export default class Esp32ConnectionService {
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
-
     }
 
     async getLinkedDeviceSearch() {
@@ -125,6 +129,25 @@ export default class Esp32ConnectionService {
 
     async callHelloEsp32Api(host) {
         console.log("WIP");
+    }
+
+    async createFakeEsp32(name,ip,mac){
+        let json = {
+            "deviceName": name,
+            "ip": ip,
+            "macAdress": mac
+        };
+
+        let esp32Found = InfoEsp32Model.createModel(json);
+        if (esp32Found != null) {
+            this.linkedDeviceSearch.push(esp32Found);
+        }
+    }
+
+    async createFakeVector(){
+        this.createFakeEsp32("MastroDevice","192.168.64.63","08:D1:F9:E1:8C:00");
+        this.createFakeEsp32("MastroDevice2","192.168.64.64","08:D1:F9:E1:8C:22");
+        this.createFakeEsp32("MastroDevice3","192.168.64.65","08:D1:F9:E1:8C:33");
     }
 
 }

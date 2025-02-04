@@ -1,7 +1,6 @@
 import WaitView from '../views/WaitView.js';
 import AlertMessageView from '../views/AlertMessageView.js';
 import LedService from '../services/LedService.js';
-import ColorUtils from '../utils/ColorUtils.js';
 import FrontEndMessage from '../constants/FrontEndMessageItalian.js'
 import InitialSettingSaveModel from '../models/InitialSettingSaveModel.js';
 import HeaderView from '../views/HeaderView.js';
@@ -18,6 +17,7 @@ import TimeUtils from '../utils/TimeUtils.js';
 import LedEffectRequest from '../models/request/LedEffectRequest.js';
 import TextUtils from '../utils/TextUtils.js';
 import Esp32ConnectionService from '../services/Esp32ConnectionService.js';
+import Esp32ConnectionController from './Esp32ConnectionController.js';
 
 export default class MainController {
     constructor(host="") {
@@ -47,10 +47,7 @@ export default class MainController {
         this.waitView.render();
         this.switchConnection();
         this.bindEvents();
-        console.log("wait");
-        await this.esp32ConnectionService.setLinkedDeviceSearch((result) => console.log("found: " + result));
-        console.log("ok");
-        console.log(this.esp32ConnectionService.getLinkedDeviceSearch());
+
     }
 
     initilizeStorage(){
@@ -60,7 +57,6 @@ export default class MainController {
     }
 
     async bindEvents() {
-
         this.mainView.bindBtnWs2811SetEffect(this.sendStartEffect.bind(this));
         this.mainView.bindBtnStopEffect(this.sendStopEffect.bind(this));
         this.mainView.bindBtnSaveInitialEffect(this.saveInitialEffect.bind(this));
@@ -174,6 +170,7 @@ export default class MainController {
             }
             else if (error instanceof GenericErrorExceptions) {
                 this.waitView.hide();
+                this.hideWait();
                 this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
             }
             else {
@@ -233,6 +230,7 @@ export default class MainController {
                 this.genericSuccessAlert();
                 break;
             default:
+                this.genericFailureAlert(FrontEndMessage.noConnect);
                 break;
         }
     }

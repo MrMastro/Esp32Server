@@ -25,6 +25,7 @@
 import MainController from './js/controllers/MainController.js';
 import ConstantApiList from './js/constants/apiList.js'
 import DefaultConstants from './js/constants/DefaultConstants.js';
+import Esp32ConnectionController from './js/controllers/Esp32ConnectionController.js';
 
 const app = {
 
@@ -59,6 +60,7 @@ const app = {
             console.log("WIFI IS MANDATORY");
         }
         this.mainController = new MainController();
+        this.esp32ConnectionController = new Esp32ConnectionController();
     },
 }
 
