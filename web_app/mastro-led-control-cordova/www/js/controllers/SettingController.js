@@ -11,14 +11,13 @@ import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import SettingModel from '../models/SettingModel.js'
 
 export default class SettingController {
-    constructor(host, headerView) {
+    constructor(context, headerView) {
         this.settingService = new SettingService();
         this.settingView = new SettingView(document.getElementById('SettingsViewContainer'));
         this.headerView = headerView;
         this.loginView = new LoginView(document.getElementById('LoginViewContainer'));
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
-        this.referenceHost = host;
         this.init();
     }
 
@@ -41,7 +40,8 @@ export default class SettingController {
         this.waitView.show();
         try {
             let data = await this.settingView.getSettings();
-            await this.settingService.saveDeviceSettings(this.referenceHost, data);
+            //TODO - fix with context
+            await this.settingService.saveDeviceSettings(this.context.espConnectionView.getActiveConnections(), data);
             this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.saveSettingsSuccess);
             this.waitView.hide();
         } catch (error) {

@@ -1,15 +1,17 @@
 export default class Esp32ConnectionView {
-    constructor(rootElement, nameView) {
+    constructor(rootElement, nameView="") {
         if (!(rootElement instanceof HTMLElement)) {
             console.error('rootElement non è un elemento DOM valido', rootElement);
         }
         this.rootElement = rootElement;
         
-        this.nameView = nameView;
+        this.nameView = nameView != "" ? nameView : "connectionGeneric_"+Date.now();
 
         this.buttonSearchEsp32 = {};
 
         this.handlerButtonSearchEsp32 = {};
+
+        this.arrayConnections = [];
 
         this.render();
     }
@@ -47,12 +49,8 @@ export default class Esp32ConnectionView {
 
         `);
 
-        // <div id=${"ConnectionDevices"} class="d-lg-flex flex-column justify-content-lg-center align-items-lg-center" style="margin-top: 5px;margin-bottom: 5px;">
-        //     <!-- esp32Connections -->
-        //     ${htmlList}
-        // </div>
-
         this.buttonSearchEsp32 = document.querySelector('.buttonSearchEsp32');
+        this.getActiveConnections();
 
     }
 
@@ -69,19 +67,21 @@ export default class Esp32ConnectionView {
 
     getEsp32ConnectionElementHtml(list) {
         let html =``;
+        this.arrayConnections = [];
         list.forEach((esp32, count) => {
             let nameView = this.nameView;
             let idCheck = "checkEspConnection-" + count;
             let idIcon = "btnEspConnection-" + count;
             let deviceName = esp32.deviceName;
+            let refCountEsp32 = count;
             html+= `
-                <div class=" esp32PanelConnection d-flex justify-content-between align-items-center esp32PanelConnection" style="min-width: 250px;">
+                <div class="esp32PanelConnection d-flex justify-content-between align-items-center esp32PanelConnection" style="min-width: 250px;">
                     
                     <input id="${idCheck}_${nameView}" class="elementEsp32" type="checkbox" style="width: 25px;height: 25px;" />
                     
                     <span class="text-start" style="min-width: 175px;">${deviceName}</span>
-                    
-                    <svg id="${idIcon}_${nameView}" class="bi bi-gear" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
+
+                    <svg id="${idIcon}_${nameView}" class="bi bi-gear fs-4 btn btn-dark" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bs-toggle="tooltip" data-bss-tooltip style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;width: 25px;height: 25px;" title="Aggiorna effetti">
                         <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"></path>
                         <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"></path>
                     </svg>
@@ -89,8 +89,21 @@ export default class Esp32ConnectionView {
                 </div>
 
             `;
+            this.arrayConnections.push({"refCountEsp32": refCountEsp32, "idHtmlElement": '#'+idCheck+'_'+nameView, "espConnection": esp32});
         });
+
         return html;
+    }
+
+    getActiveConnections(){
+        let array = [];
+        this.arrayConnections.forEach( (el) => {
+            let htmlElement = document.querySelector(el.idHtmlElement);
+            if(htmlElement.checked){
+                array.push(el);
+            }
+        });
+        return array;
     }
 
 }

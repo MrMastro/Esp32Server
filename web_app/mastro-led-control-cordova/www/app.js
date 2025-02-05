@@ -24,10 +24,16 @@
 
 import MainController from './js/controllers/MainController.js';
 import ConstantApiList from './js/constants/apiList.js'
-import DefaultConstants from './js/constants/DefaultConstants.js';
 import Esp32ConnectionController from './js/controllers/Esp32ConnectionController.js';
+import Esp32ConnectionView from './js/views/Esp32ConnectionView.js';
 
 const app = {
+
+    context: { 
+        "espConnectionView": null,
+        "mainController": null,
+        "esp32ConnectionController": null
+    },
 
     // Application Constructor
     initialize() {
@@ -59,11 +65,16 @@ const app = {
         if (networkState !== Connection.WIFI) {
             console.log("WIFI IS MANDATORY");
         }
-        this.mainController = new MainController();
-        this.esp32ConnectionController = new Esp32ConnectionController();
+
+        let context = this.context;
+
+        context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
+        context.mainController = new MainController(context);
+        context.esp32ConnectionController = new Esp32ConnectionController(context);
     },
 }
 
+var a = "";
 // Initialize the app
 $(document).ready(() => {
     app.initialize();

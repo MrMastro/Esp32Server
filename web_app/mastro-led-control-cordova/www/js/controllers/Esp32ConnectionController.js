@@ -4,9 +4,11 @@ import Esp32ConnectionView from '../views/Esp32ConnectionView.js';
 
 
 export default class Esp32ConnectionController {
-    constructor(host, headerView) {
+    constructor(context, headerView) {
 
-        this.esp32ConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'));
+        this.context = context;
+
+        this.esp32ConnectionView = context.espConnectionView; 
         this.localStorageService = new LocalStorageService();
         this.esp32ConnectionService = new Esp32ConnectionService();
         this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());

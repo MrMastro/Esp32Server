@@ -39,7 +39,7 @@ export default class MainView {
 
     render(ledMainModel, listEffects) {
         this.rootElement.innerHTML = (`
-                    <div id="ContainAction-0" class="ContainAction">
+                    <div id="ContainAction-0" class="ContainAction hidden">
                         <div class="border rounded-pill d-flex d-md-flex d-xxl-flex flex-column justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);">
                             <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent dark">
                                 <div class="text-center d-flex d-xl-flex flex-column justify-content-xl-center align-items-xl-center">

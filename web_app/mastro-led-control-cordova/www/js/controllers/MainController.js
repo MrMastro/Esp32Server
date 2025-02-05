@@ -20,19 +20,20 @@ import Esp32ConnectionService from '../services/Esp32ConnectionService.js';
 import Esp32ConnectionController from './Esp32ConnectionController.js';
 
 export default class MainController {
-    constructor(host="") {
+    constructor(context = null) {
+        this.context = context;
         this.esp32ConnectionService = new Esp32ConnectionService();
         //status variable:
-        this.referenceHost = host;
-        this.apHost = DefaultConstants.defaultApHost;
-        this.debug = DefaultConstants.defaultDebug;
+        // this.referenceHost = host;
+        // this.apHost = DefaultConstants.defaultApHost;
+        // this.debug = DefaultConstants.defaultDebug;
         //Component
         this.ledService = new LedService();
         this.localStorageService = new LocalStorageService();
         this.mainView = new MainView(document.getElementById('MainViewContainer'),[]);
         this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
         this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
-        this.settingController = new SettingController(host, this.headerView);
+        this.settingController = new SettingController(context, this.headerView);
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
         this.init();
@@ -40,12 +41,8 @@ export default class MainController {
 
     async init() {
         this.initilizeStorage();
-        if(this.referenceHost == ""){
-            this.referenceHost = await this.esp32ConnectionService.getIP();
-        }
         this.mainView.render(new LedMainModel(), this.localStorageService.getLedEffectList());
         this.waitView.render();
-        this.switchConnection();
         this.bindEvents();
 
     }
@@ -63,28 +60,21 @@ export default class MainController {
         this.mainView.bindBtnUpdateEffect(this.updateEffectList.bind(this));
 
         this.mainView.bindBtnClearInitialEffect(this.clearInitialEffect.bind(this));
-        this.mainView.bindFieldIpInput(this.changeIp.bind(this));
-        this.mainView.bindAPConnectionSwitch(this.switchConnection.bind(this));
         this.mainView.bindRangeInputChange(this.rangeInputChange.bind(this));
         this.mainView.bindInputChange(this.inputChange.bind(this));
     }
 
-    //Imposta a se stesso e agli altri controller il referece host
-    async setReferenceHost(newHost) {
-        this.referenceHost = newHost;
-        this.settingController.setReferenceHost(newHost);
-    }
-
-    switchConnection() {
-        if (this.mainView.isAPconnection()) {
-            this.mainView.hideFieldIp();
-            this.referenceHost = this.apHost;
-            this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
-        } else {
-            this.mainView.showFieldIp();
-            this.changeIp();
-        }
-    }
+    //removed
+    // switchConnection() {
+    //     if (this.mainView.isAPconnection()) {
+    //         this.mainView.hideFieldIp();
+    //         this.referenceHost = this.apHost;
+    //         this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
+    //     } else {
+    //         this.mainView.showFieldIp();
+    //         this.changeIp();
+    //     }
+    // }
 
     rangeInputChange(){
         let valueRange = this.mainView.getTimingRangeInput();
@@ -107,20 +97,21 @@ export default class MainController {
         this.mainView.setTimingRangeInput(valueTime);
     }
 
-    changeIp() {
-        let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.mainView.getFieldIp());
-        if (!this.mainView.getFieldIp()) {
-            this.mainView.setLabelIp("Inserisci un indirizzo ip");
-        }
-        else if (test) {
-            this.referenceHost = this.mainView.getFieldIp();
-            this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
-            this.settingController.setReferenceHost(this.referenceHost);
-            this.setReferenceHost(this.referenceHost);
-        } else {
-            this.mainView.setLabelIp("Inserisci un ip valido");
-        }
-    }
+    //removed
+    // changeIp() {
+    //     let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.mainView.getFieldIp());
+    //     if (!this.mainView.getFieldIp()) {
+    //         this.mainView.setLabelIp("Inserisci un indirizzo ip");
+    //     }
+    //     else if (test) {
+    //         this.referenceHost = this.mainView.getFieldIp();
+    //         this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
+    //         this.settingController.setReferenceHost(this.referenceHost);
+    //         this.setReferenceHost(this.referenceHost);
+    //     } else {
+    //         this.mainView.setLabelIp("Inserisci un ip valido");
+    //     }
+    // }
 
     showSettings() {
         this.settingController.showModal();
@@ -135,8 +126,8 @@ export default class MainController {
     }
 
     // SUCCESS AND FAILURE METHOD
-    genericSuccessAlert() {
-        this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
+    genericSuccessAlert(nameEsp32) {
+        this.alertMessageView.alert(nameEsp32 + FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
     }
 
     customAlert(title, content){
@@ -151,7 +142,8 @@ export default class MainController {
         try {
             this.waitView.show();
             await TimeUtils.wait(200);
-            let list = await this.ledService.getAvaibleEffects(this.referenceHost);
+            let firstConnection = this.context.espConnectionView.getActiveConnections()[0];
+            let list = await this.ledService.getAvaibleEffects(firstConnection);
             await TimeUtils.wait(200);
             this.waitView.hide();
             await TimeUtils.wait(200);
@@ -199,14 +191,17 @@ export default class MainController {
     }
 
     async sendStartEffect() {
-        let ledModel = new LedMainModel();
-        ledModel =  this.mainView.getLedMainModel();
-        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
-        this.showWait();
-        let result = await this.ledService.postStartEffect(this.referenceHost, request);
-        this.hideWait();
-        console.log(result);
-        this.valutateResponseAlert(result);
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
+        activeConnections.forEach( async (connection) => {
+            let ledModel = new LedMainModel();
+            ledModel =  this.mainView.getLedMainModel();
+            let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+            this.showWait();
+            let result = await this.ledService.postStartEffect(connection.espConnection.ip, request);
+            this.hideWait();
+            console.log(result);
+            this.valutateResponseAlert(result, connection.espConnection.deviceName);
+        });
     }
 
     async sendStopEffect() {
@@ -221,16 +216,17 @@ export default class MainController {
         this.valutateResponseAlert(result);
     }
 
-    valutateResponseAlert(response) {
+    valutateResponseAlert(response, nameEsp32 = "") {
+        nameEsp32+= nameEsp32 != ""? ": " : "";
         switch (response.status) {
             case -4:
-                this.genericFailureAlert(FrontEndMessage.noConnect);
+                this.genericFailureAlert(nameEsp32 + FrontEndMessage.noConnect);
                 break;
             case 200:
-                this.genericSuccessAlert();
+                this.genericSuccessAlert(nameEsp32);
                 break;
             default:
-                this.genericFailureAlert(FrontEndMessage.noConnect);
+                this.genericFailureAlert(nameEsp32 + FrontEndMessage.noConnect);
                 break;
         }
     }
