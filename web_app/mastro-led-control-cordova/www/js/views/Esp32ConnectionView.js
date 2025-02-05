@@ -1,10 +1,12 @@
 export default class Esp32ConnectionView {
-    constructor(rootElement) {
+    constructor(rootElement, nameView) {
         if (!(rootElement instanceof HTMLElement)) {
             console.error('rootElement non è un elemento DOM valido', rootElement);
         }
         this.rootElement = rootElement;
         
+        this.nameView = nameView;
+
         this.buttonSearchEsp32 = {};
 
         this.handlerButtonSearchEsp32 = {};
@@ -36,8 +38,8 @@ export default class Esp32ConnectionView {
                 </svg>
             </div>
 
-            <div class="border rounded-pill d-flex d-md-flex d-xxl-flex flex-column justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);">
-                <div id="whiteTextInside" class="d-lg-flex flex-column justify-content-lg-center align-items-lg-center">
+            <div class="panelConnections d-flex dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);min-width: auto;">
+                <div class="d-flex d-lg-flex flex-column align-items-center justify-content-lg-center align-items-lg-center">
                     ${htmlList}
                 </div>
             </div>
@@ -71,21 +73,22 @@ export default class Esp32ConnectionView {
     getEsp32ConnectionElementHtml(list) {
         let html =``;
         list.forEach((esp32, count) => {
-            let idCheck = "espConnection-" + count;
-            let idInfo = "infoEspConnection-" + count;
+            let nameView = this.nameView;
+            let idCheck = "checkEspConnection-" + count;
+            let idIcon = "btnEspConnection-" + count;
             let deviceName = esp32.deviceName;
             html+= `
-                <div class="d-flex d-print-flex d-sm-flex d-md-flex d-lg-flex d-xl-flex d-xxl-flex flex-row justify-content-center align-items-center justify-content-xl-center align-items-xl-center">
-                
-                    <input id="${idCheck}" class="elementEsp32" type="checkbox" style="width: 25px;height: 25px;" />
+                <div class=" esp32PanelConnection d-flex justify-content-between align-items-center esp32PanelConnection" style="min-width: 250px;">
                     
-                    <span class="fs-5 elementEsp32" style="min-width: 150px;">${deviceName}</span>
+                    <input id="${idCheck}_${nameView}" class="elementEsp32" type="checkbox" style="width: 25px;height: 25px;" />
                     
-                    <svg id="${idInfo}" class="bi bi-info-circle elementEsp32" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
-                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"></path>
+                    <span class="text-start" style="min-width: 175px;">${deviceName}</span>
+                    
+                    <svg id="${idIcon}_${nameView}" class="bi bi-gear" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
+                        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"></path>
+                        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"></path>
                     </svg>
-
+                    
                 </div>
 
             `;
@@ -93,24 +96,4 @@ export default class Esp32ConnectionView {
         return html;
     }
 
-    createEsp32IntoPanel(root, list) {
-        list.forEach((esp32, count) => {
-            let id = "espConnection-" + count;
-            this.appendSingleEsp32(root, id, esp32);//todo insert into object esp32ListInView => this.esp32ListInView = this.appendSingleEsp32(...)
-        });
-    }
-
-    appendSingleEsp32(root, id, esp32) {
-
-        // Crea un elemento <input>
-        let inputElement = document.createElement('<p>' + esp32.ip + '</p>');
-
-        // Imposta gli attributi dell'elemento
-        inputElement.id = id;
-        inputElement.className = "d-lg-flex m-auto justify-content-lg-center align-items-lg-center";
-
-        // Aggiungi l'elemento creato al nodo root
-        root.appendChild(inputElement);
-        return inputElement;
-    }
 }

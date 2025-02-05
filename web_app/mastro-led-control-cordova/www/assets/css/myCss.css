@@ -63,3 +63,16 @@
   margin-left: 1px;
   margin-right: 1px;
 }
+
+.panelConnections {
+  border: 5px;
+  border-radius: 30px;
+}
+
+.esp32PanelConnection {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+
