@@ -67,9 +67,6 @@ export default class Esp32ConnectionView {
         this.buttonSearchEsp32.addEventListener('click', this.handlerBtnSearchEsp32);
     }
 
-
-
-
     getEsp32ConnectionElementHtml(list) {
         let html =``;
         list.forEach((esp32, count) => {
