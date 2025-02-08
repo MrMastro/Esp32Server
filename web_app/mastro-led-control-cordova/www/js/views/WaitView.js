@@ -35,7 +35,9 @@ export default class WaitView {
     // Nasconde il modale con lo spinner
     hide() {
         if (this.modalElement) {
-            this.modalElement.hide();
+            setTimeout(() => {
+                this.modalElement.hide(); // questo verrà eseguito dopo 5 secondi
+            }, 1000); // 1000 millisecondi = 1 secondo
         }
     }
 }

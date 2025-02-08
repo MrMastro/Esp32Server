@@ -1,3 +1,5 @@
+import { ConnectionInfo } from "../models/Esp32Model.js";
+
 export default class Esp32ConnectionView {
     constructor(rootElement, nameView="") {
         if (!(rootElement instanceof HTMLElement)) {
@@ -9,7 +11,11 @@ export default class Esp32ConnectionView {
 
         this.buttonSearchEsp32 = {};
 
+        this.buttonUpdateStatusEsp32 = {};
+
         this.handlerButtonSearchEsp32 = {};
+
+        this.handlerBtnUpdateStatusEsp32 = {};
 
         this.arrayConnections = [];
 
@@ -26,7 +32,7 @@ export default class Esp32ConnectionView {
                 htmlList = this.getEsp32ConnectionElementHtml(listOfConnection);
             }
         } else {
-            htmlList = "Errore: Nessun Dispositivo disponibile";
+            htmlList = `<label class="form-label">Errore: Nessun Dispositivo disponibile.<br/>Cerca dispositivi cliccando sulla lente di ingrandimento</label>`;
         }
 
         // let button = <button class='searchEsp32'> Cerca dispositivi </button>
@@ -37,6 +43,11 @@ export default class Esp32ConnectionView {
                 <label class="form-label form-label-title" style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">Connessioni Esp32</label>
                 <svg class="bi bi-search fs-4 border rounded-circle buttonSearchEsp32 btn btn-dark" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bs-toggle="tooltip" data-bss-tooltip style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;" title="Cerca dispositivi">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                </svg>
+
+                <svg class="bi bi-arrow-clockwise fs-4 border rounded-circle updateSatusEsp32 btn btn-dark" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bs-toggle="tooltip" data-bss-tooltip style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;" title="Aggiorna effetti">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"></path>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"></path>
                 </svg>
             </div>
 
@@ -49,15 +60,34 @@ export default class Esp32ConnectionView {
 
         `);
 
+        this.arrayConnections.forEach( (el) => {
+            let htmlElement = document.querySelector(el.idHtmlElement);
+            htmlElement.checked = el.espConnection.active;
+            if(el.espConnection.connectionState == ConnectionInfo.OFFLINE){
+                htmlElement.checked = false;
+                htmlElement.disabled = true;
+            }
+        });
+
         this.buttonSearchEsp32 = document.querySelector('.buttonSearchEsp32');
-        this.getActiveConnections();
+        this.buttonUpdateStatusEsp32 = document.querySelector('.updateSatusEsp32');
+        this.reassignHandler();
 
     }
 
     reassignHandler() {
-        if (typeof this.handlerButtonSearchEsp32 === 'function') {
-            this.bindButtonSearchEsp32(this.handlerButtonSearchEsp32);
+        if (typeof this.handlerBtnSearchEsp32 === 'function') {
+            this.bindButtonSearchEsp32(this.handlerBtnSearchEsp32);
         }
+
+        if (typeof this.handlerBtnUpdateStatusEsp32=== 'function') {
+            this.bindButtonUpdateStatusEsp32(this.handlerBtnUpdateStatusEsp32);
+        }
+    }
+
+    bindButtonUpdateStatusEsp32(handler){
+        this.handlerBtnUpdateStatusEsp32 = handler;
+        this.buttonUpdateStatusEsp32.addEventListener('click', this.handlerBtnUpdateStatusEsp32);
     }
 
     bindButtonSearchEsp32(handler){
@@ -72,12 +102,17 @@ export default class Esp32ConnectionView {
             let nameView = this.nameView;
             let idCheck = "checkEspConnection-" + count;
             let idIcon = "btnEspConnection-" + count;
-            let deviceName = esp32.deviceName;
+            let statusIndicator = "statusIndicator-"+count;
+            let deviceName = esp32.infoConnection.deviceName;
             let refCountEsp32 = count;
+            let statusConnection = esp32.connectionState;
+            
             html+= `
                 <div class="esp32PanelConnection d-flex justify-content-between align-items-center esp32PanelConnection" style="min-width: 250px;">
                     
                     <input id="${idCheck}_${nameView}" class="elementEsp32" type="checkbox" style="width: 25px;height: 25px;" />
+
+                    <span id="${statusIndicator}_${nameView}" class="ms-2 elementEsp32 indicator-${statusConnection}" style="width: 15px; height: 15px; border-radius: 50%; margin-right: 5px;"></span>
                     
                     <span class="text-start" style="min-width: 175px;">${deviceName}</span>
 

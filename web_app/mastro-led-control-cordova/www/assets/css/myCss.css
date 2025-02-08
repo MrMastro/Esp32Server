@@ -78,5 +78,18 @@
   display: none;
 }
 
+.indicator-UNKNOWN{
+  background-color: gray;
+}
+
+.indicator-OFFLINE{
+  background-color: rgb(82, 0, 7);
+}
+
+.indicator-ONLINE{
+  background-color: rgb(5, 141, 39);
+}
+
+
 
 

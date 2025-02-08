@@ -35,8 +35,4 @@ export default class LocalStorageService {
     formatEffectList() {
         localStorage.setItem('ledEffectList' , JSON.stringify(DefaultConstants.defaultEffects));
     }
-
-
-
-
 }

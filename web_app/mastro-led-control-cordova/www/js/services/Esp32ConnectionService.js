@@ -4,17 +4,19 @@ import LocalStorageService from './LocalStorageService.js';
 import IpV4StringUtils from '../utils/IpV4StringUtils.js';
 import InfoEsp32Model from '../models/InfoEsp32Model.js';
 import TextUtils from '../utils/TextUtils.js';
+import { ConnectionInfo, Esp32Model } from '../models/Esp32Model.js';
+import NoConnectException from '../exceptions/NoConnectException.js';
 
 export default class Esp32ConnectionService {
     constructor() {
         this.referenceHost = "";
         this.linkedDeviceSearch = [];
-        this.localStoraceService = new LocalStorageService();
+        this.localStorageService = new LocalStorageService();
         this.init();
     }
 
     async init() {
-        await this.setFakeIP();
+        await this.setLocalIP();
     }
 
     getIP() {
@@ -46,7 +48,7 @@ export default class Esp32ConnectionService {
                 .then(offer => pc.setLocalDescription(offer))
                 .catch(() => {
                     console.error("Errore durante la creazione dell'offerta WebRTC.");
-                    this.referenceHost = "";
+                    this.referenceHost = null;
                     resolve(); // Restituisci stringa vuota in caso di errore
                 });
 
@@ -66,65 +68,197 @@ export default class Esp32ConnectionService {
             // Timeout nel caso in cui non venga trovato un candidato
             setTimeout(() => {
                 console.log("Errore: timeout nel recupero dell'IP locale.");
-                this.referenceHost = "";
+                this.referenceHost = null;
                 resolve(); // Restituisci stringa vuota
             }, 5000);
         });
     }
 
     //set a list of InfoEsp32Model calling hello api (info of connection to esp32 devices)
-    async setLinkedDeviceSearch(callBackWhenDeviceFound=null) {
-        this.createFakeVector();
-        this.localStoraceService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
-        this.linkedDeviceSearch = [];
-        let adressIpV4 = this.referenceHost;
-        console.log("My ip: "+adressIpV4+" - Search device");
-        let memDevices = this.localStoraceService.getEsp32InfoDeviceMem();
+    // async setLinkedDeviceSearch(callBackWhenDeviceFound=null) {
+    //     this.createFakeVector();
 
-        if (memDevices == null) {
-            memDevices = [];
+    //     if (cordova.platformId == 'android') {
+    //         cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
+    //     }
+
+    //     this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
+    //     this.linkedDeviceSearch = [];
+    //     let adressIpV4 = this.referenceHost;
+    //     console.log("My ip: "+adressIpV4+" - Search device");
+    //     let memDevices = this.localStorageService.getEsp32InfoDeviceMem();
+
+    //     if (memDevices == null) {
+    //         memDevices = [];
+    //     }
+
+    //     if (cordova.platformId == 'android') {
+    //         cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
+    //     }
+
+    //     //todo
+    //     let initialIndex = 0;
+
+    //     for (let index = initialIndex; index < 255; index++) {
+    //         let adressI = IpV4StringUtils.getAdressWithIndexHost(adressIpV4, index);
+    //         let resultApi = await HttpUtils.getCustom(adressI, ConstantApiList.getInfoEsp32Hello, {}, {});
+    //         if (resultApi.status == 200 && resultApi.hasOwnProperty('data')) {
+    //             let result = resultApi;
+    //             if (typeof resultApi.data == "string") {
+    //                 if (TextUtils.isJSON(resultApi.data)) {
+    //                     result = JSON.parse(resultApi.data);
+    //                 }
+    //             } else {
+    //                 result = resultApi.data;
+    //             }
+    //             let esp32InfoFound = InfoEsp32Model.createModel(result);
+    //             if (esp32InfoFound != null) {
+    //                 let esp32Found = new Esp32Model(ConnectionInfo.ONLINE, esp32InfoFound);
+    //                 this.linkedDeviceSearch.push(esp32Found);
+    //                 if(callBackWhenDeviceFound != null){
+    //                     callBackWhenDeviceFound(resultApi);
+    //                 }
+    //             } else {
+    //                 console.log("Scartato in quanto json non valido: " + index);
+    //             }
+    //         } else {
+    //             console.log("Scartato: " + index);
+    //         }
+    //     }
+
+    //     if (cordova.platformId == 'android') {
+    //         cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
+    //     }
+    // }
+
+    async setLinkedDeviceSearch(callBackWhenDeviceFound = null) {
+        this.linkedDeviceSearch = [];
+        this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
+
+        let adressIpV4 = this.referenceHost;
+
+        if(adressIpV4 == null){
+            this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
+            return;
         }
+        
+        // console.log("My ip: " + adressIpV4 + " - Search device");
 
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
         }
-
-        //todo
+    
         let initialIndex = 0;
-
-        for (let index = initialIndex; index < 255; index++) {
+    
+        // Crea un array vuoto per raccogliere tutte le promesse
+        let requests = [];
+    
+        // Aggiungiamo le promesse per ogni richiesta HTTP all'array
+        for (let i = initialIndex; i < 255; i++) {
+            let index = i;
             let adressI = IpV4StringUtils.getAdressWithIndexHost(adressIpV4, index);
-            let resultApi = await HttpUtils.getCustom(adressI, ConstantApiList.getInfoEsp32Hello, {}, {});
-            if (resultApi.status == 200 && resultApi.hasOwnProperty('data')) {
-                let result = resultApi;
-                if (typeof resultApi.data == "string") {
-                    if (TextUtils.isJSON(resultApi.data)) {
-                        result = JSON.parse(resultApi.data);
+    
+            // Aggiungiamo la promise all'array requests
+            requests.push(
+                (async () => {
+                    try {
+                        let resultApi = await HttpUtils.getCustom(adressI, ConstantApiList.getInfoEsp32Hello, {}, {});
+                        if (resultApi.status == 200 && resultApi.hasOwnProperty('data')) {
+                            let result = resultApi.data;
+                            if (typeof result === "string" && TextUtils.isJSON(result)) {
+                                result = JSON.parse(result);
+                            }
+    
+                            let esp32InfoFound = InfoEsp32Model.createModel(result);
+                            if (esp32InfoFound != null) {
+                                let esp32Found = new Esp32Model(ConnectionInfo.ONLINE, esp32InfoFound);
+                                this.linkedDeviceSearch.push(esp32Found);
+                                if (callBackWhenDeviceFound != null) {
+                                    callBackWhenDeviceFound(resultApi);
+                                }
+                            } else {
+                                console.log("Scartato in quanto json non valido: " + index);
+                            }
+                        } else {
+                            console.log("Scartato: " + index);
+                        }
+                    } catch (error) {
+                        console.log(`Errore nella richiesta per l'indirizzo ${adressI}:`, error);
                     }
-                } else {
-                    result = resultApi.data;
-                }
-                let esp32Found = InfoEsp32Model.createModel(result);
-                if (esp32Found != null) {
-                    this.linkedDeviceSearch.push(esp32Found);
-                    if(callBackWhenDeviceFound != null){
-                        callBackWhenDeviceFound(resultApi);
-                    }
-                } else {
-                    console.log("Scartato in quanto json non valido: " + index);
-                }
-            } else {
-                console.log("Scartato: " + index);
-            }
+                })() // Eseguiamo subito la funzione asincrona
+            );
         }
-
+    
+        // Aspettiamo che tutte le richieste siano completate
+        await Promise.all(requests);
+    
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
+        this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
     }
 
     async getLinkedDeviceSearch() {
         return this.linkedDeviceSearch;
+    }
+
+    setSingleDeviceOffline(esp32Connection){
+        let updateList = this.localStorageService.getEsp32InfoDeviceMem();
+        updateList.forEach( (esp32, i) => {
+            if(esp32.infoConnection.macAdress == esp32Connection.infoConnection.macAdress){//confronto su mac adress perchè è univoco
+                esp32.connectionState = ConnectionInfo.OFFLINE;
+                esp32.active = false;
+            }
+        });
+        this.linkedDeviceSearch = updateList;
+        this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
+    }
+
+    async updateStatusDevices() {
+        if (cordova.platformId == 'android') {
+            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
+        }
+    
+        let updateList = this.localStorageService.getEsp32InfoDeviceMem();
+    
+        // Creiamo un array di Promise per tutte le chiamate HTTP
+        let requests = updateList.map(async (esp32, i) => {
+            try {
+                let resultApi = await HttpUtils.getCustom(esp32.infoConnection.ip, ConstantApiList.getInfoEsp32Hello, {}, {});
+                if (resultApi.status == 200 && resultApi.hasOwnProperty('data')) {
+                    let result = resultApi.data;
+                    if (typeof result === "string" && TextUtils.isJSON(result)) {
+                        result = JSON.parse(result);
+                    }
+    
+                    let esp32InfoFound = InfoEsp32Model.createModel(result);
+                    if (esp32InfoFound != null) {
+                        esp32.active = true;
+                        esp32.connectionState = ConnectionInfo.ONLINE;
+                    } else {
+                        esp32.active = false;
+                        esp32.connectionState = ConnectionInfo.OFFLINE;
+                    }
+                } else {
+                    esp32.active = false;
+                    esp32.connectionState = ConnectionInfo.OFFLINE;
+                }
+            } catch (error) {
+                console.log(`Errore nella richiesta per il dispositivo ${i}:`, error);
+                esp32.active = false;
+                esp32.connectionState = ConnectionInfo.OFFLINE;
+            }
+        });
+    
+        // Aspettiamo che tutte le richieste siano completate
+        await Promise.all(requests);
+
+        this.linkedDeviceSearch = updateList;
+        this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
+
+        if (cordova.platformId == 'android') {
+            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
+        }
     }
 
     async callHelloEsp32Api(host) {
@@ -138,8 +272,9 @@ export default class Esp32ConnectionService {
             "macAdress": mac
         };
 
-        let esp32Found = InfoEsp32Model.createModel(json);
-        if (esp32Found != null) {
+        let esp32InfoFound = InfoEsp32Model.createModel(json);
+        if (esp32InfoFound != null) {
+            let esp32Found = new Esp32Model(ConnectionInfo.ONLINE,esp32InfoFound);
             this.linkedDeviceSearch.push(esp32Found);
         }
     }
