@@ -35,10 +35,13 @@ export default class SettingView {
         this.saveSettingsBtn = {};
         this.handlerSaveSettingsBtn = {};
         this.groupColorSettingView = {};
+
+        this.esp32Selected = null;
         this.render();
     }
 
-    render(settings) {
+    render(settings, esp32Model) {
+        this.esp32Selected = esp32Model;
         this.modal.innerHTML = (`
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -249,17 +252,25 @@ export default class SettingView {
         return model;
     }
 
+    getEsp32Selected(){
+        return this.esp32Selected;
+    }
+
     bindBtnSaveSettings(handler){
         this.handlerSaveSettingsBtn = handler;
         this.saveSettingsBtn.addEventListener('click', this.handlerSaveSettingsBtn);
     }
 
-    show() {
+    show(esp32Model = "") {
         $(this.modal).modal('show');
-        this.render(this.settings);
+        if(esp32Model == ""){
+            esp32Model = this.esp32Selected;
+        }
+        this.render(this.settings, esp32Model);
     }
 
     hide() {
+        this.esp32Selected = null;
         // Nascondi la modale
         $(this.modal).modal('hide');
     }

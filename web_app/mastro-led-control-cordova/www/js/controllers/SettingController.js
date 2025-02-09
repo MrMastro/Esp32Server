@@ -11,10 +11,10 @@ import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import SettingModel from '../models/SettingModel.js'
 
 export default class SettingController {
-    constructor(context, headerView) {
-        this.settingService = new SettingService();
+    constructor(context) {
+        this.settingService = context.settingService;
         this.settingView = new SettingView(document.getElementById('SettingsViewContainer'));
-        this.headerView = headerView;
+        //this.headerView = headerView;
         this.loginView = new LoginView(document.getElementById('LoginViewContainer'));
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
@@ -30,8 +30,8 @@ export default class SettingController {
     async bindEvents() {
         requestAnimationFrame(() => {
             this.settingView.bindBtnSaveSettings(this.saveSettings.bind(this));
-            this.loginView.bindBtnLogin(this.login.bind(this));
-            this.headerView.bindBtnSettings(() => this.showModal());
+            //this.loginView.bindBtnLogin(this.login.bind(this));
+            //this.headerView.bindBtnSettings(() => this.showModal());
         });
     }
 
@@ -65,7 +65,7 @@ export default class SettingController {
         }
     }
 
-    async showSettings() {
+    async showSettings(esp32Model) {
         try {
             this.waitView.show();
             let settings = new SettingModel();

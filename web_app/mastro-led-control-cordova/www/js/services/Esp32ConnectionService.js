@@ -146,10 +146,10 @@ export default class Esp32ConnectionService {
         return this.linkedDeviceSearch;
     }
 
-    setSingleDeviceOffline(esp32Connection){
+    setSingleDeviceOffline(espConnection){
         let updateList = this.localStorageService.getEsp32InfoDeviceMem();
         updateList.forEach( (esp32, i) => {
-            if(esp32.infoConnection.macAdress == esp32Connection.infoConnection.macAdress){//confronto su mac adress perchè è univoco
+            if(esp32.infoConnection.macAdress == espConnection.infoConnection.macAdress){//confronto su mac adress perchè è univoco
                 esp32.connectionState = ConnectionInfo.OFFLINE;
                 esp32.active = false;
             }
@@ -160,7 +160,7 @@ export default class Esp32ConnectionService {
 
     async updateStatusDevices() {
         if (cordova.platformId == 'android') {
-            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
+            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs); //essendo pochi posso usare i timeout normali
         }
     
         let updateList = this.localStorageService.getEsp32InfoDeviceMem();
@@ -179,6 +179,8 @@ export default class Esp32ConnectionService {
                     if (esp32InfoFound != null) {
                         esp32.active = true;
                         esp32.connectionState = ConnectionInfo.ONLINE;
+                        esp32.infoConnection = esp32InfoFound; // aggiorno l'esp 32 se ha cambiato le info di connessione
+                
                     } else {
                         esp32.active = false;
                         esp32.connectionState = ConnectionInfo.OFFLINE;
@@ -203,10 +205,6 @@ export default class Esp32ConnectionService {
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
-    }
-
-    async callHelloEsp32Api(host) {
-        console.log("WIP");
     }
 
     async createFakeEsp32(name,ip,mac){

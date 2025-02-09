@@ -34,7 +34,7 @@ export default class MainController {
         this.mainView = new MainView(document.getElementById('MainViewContainer'),[]);
         this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
         this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
-        this.settingController = new SettingController(context, this.headerView);
+        this.settingController = context.settingController;
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
         this.init();
@@ -65,18 +65,6 @@ export default class MainController {
         this.mainView.bindInputChange(this.inputChange.bind(this));
     }
 
-    //removed
-    // switchConnection() {
-    //     if (this.mainView.isAPconnection()) {
-    //         this.mainView.hideFieldIp();
-    //         this.referenceHost = this.apHost;
-    //         this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
-    //     } else {
-    //         this.mainView.showFieldIp();
-    //         this.changeIp();
-    //     }
-    // }
-
     rangeInputChange(){
         let valueRange = this.mainView.getTimingRangeInput();
         this.mainView.setTimingInput(valueRange);
@@ -97,22 +85,6 @@ export default class MainController {
         this.mainView.setTimingInput(valueTime);
         this.mainView.setTimingRangeInput(valueTime);
     }
-
-    //removed
-    // changeIp() {
-    //     let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.mainView.getFieldIp());
-    //     if (!this.mainView.getFieldIp()) {
-    //         this.mainView.setLabelIp("Inserisci un indirizzo ip");
-    //     }
-    //     else if (test) {
-    //         this.referenceHost = this.mainView.getFieldIp();
-    //         this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
-    //         this.settingController.setReferenceHost(this.referenceHost);
-    //         this.setReferenceHost(this.referenceHost);
-    //     } else {
-    //         this.mainView.setLabelIp("Inserisci un ip valido");
-    //     }
-    // }
 
     showSettings() {
         this.settingController.showModal();

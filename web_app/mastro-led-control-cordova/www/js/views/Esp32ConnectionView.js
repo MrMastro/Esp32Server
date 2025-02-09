@@ -13,6 +13,8 @@ export default class Esp32ConnectionView {
 
         this.buttonUpdateStatusEsp32 = {};
 
+        this.buttonInfoEsp32List = [];
+
         this.handlerButtonSearchEsp32 = {};
 
         this.handlerBtnUpdateStatusEsp32 = {};
@@ -60,6 +62,8 @@ export default class Esp32ConnectionView {
 
         `);
 
+        this.buttonInfoEsp32List = [];
+
         this.arrayConnections.forEach( (el) => {
             let htmlElement = document.querySelector(el.idHtmlElement);
             htmlElement.checked = el.espConnection.active;
@@ -67,12 +71,12 @@ export default class Esp32ConnectionView {
                 htmlElement.checked = false;
                 htmlElement.disabled = true;
             }
+            this.buttonInfoEsp32List.push(document.querySelector(el.idBtnElement));
         });
 
         this.buttonSearchEsp32 = document.querySelector('.buttonSearchEsp32');
         this.buttonUpdateStatusEsp32 = document.querySelector('.updateSatusEsp32');
         this.reassignHandler();
-
     }
 
     reassignHandler() {
@@ -83,6 +87,7 @@ export default class Esp32ConnectionView {
         if (typeof this.handlerBtnUpdateStatusEsp32=== 'function') {
             this.bindButtonUpdateStatusEsp32(this.handlerBtnUpdateStatusEsp32);
         }
+        this.bindButtonInfoEsp32(this.handlerBtnInfoEsp32)
     }
 
     bindButtonUpdateStatusEsp32(handler){
@@ -93,6 +98,18 @@ export default class Esp32ConnectionView {
     bindButtonSearchEsp32(handler){
         this.handlerBtnSearchEsp32 = handler;
         this.buttonSearchEsp32.addEventListener('click', this.handlerBtnSearchEsp32);
+    }
+
+    bindButtonInfoEsp32(handler){
+        if(typeof handler === 'function'){
+            this.handlerBtnInfoEsp32 = handler;
+            let list = this.arrayConnections;
+            list.forEach((esp32, count) => {
+                this.buttonInfoEsp32List.at(count).addEventListener('click', () => {
+                this.handlerBtnInfoEsp32(esp32) 
+                });
+            });
+        }
     }
 
     getEsp32ConnectionElementHtml(list) {
@@ -116,15 +133,14 @@ export default class Esp32ConnectionView {
                     
                     <span class="text-start" style="width: 140px;">${deviceName}</span>
 
-                    <svg id="${idIcon}_${nameView}" class="bi bi-gear fs-4 btn btn-dark" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bs-toggle="tooltip" data-bss-tooltip style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;width: 25px;height: 25px;" title="Aggiorna effetti">
-                        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"></path>
-                        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"></path>
+                    <svg id="${idIcon}_${nameView}" class="bi bi-tools border rounded-circle" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
+                        <path d="M1 0 0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.27 3.27a.997.997 0 0 0 1.414 0l1.586-1.586a.997.997 0 0 0 0-1.414l-3.27-3.27a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3c0-.269-.035-.53-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 0 0-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 0 1-.293-.707v-.071a1 1 0 0 0-.419-.814zm9.646 10.646a.5.5 0 0 1 .708 0l2.914 2.915a.5.5 0 0 1-.707.707l-2.915-2.914a.5.5 0 0 1 0-.708M3 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026z"></path>
                     </svg>
                     
                 </div>
 
             `;
-            this.arrayConnections.push({"refCountEsp32": refCountEsp32, "idHtmlElement": '#'+idCheck+'_'+nameView, "espConnection": esp32});
+            this.arrayConnections.push({"refCountEsp32": refCountEsp32, "idBtnElement": '#'+idIcon+'_'+nameView, "idHtmlElement": '#'+idCheck+'_'+nameView, "espConnection": esp32});
         });
 
         return html;

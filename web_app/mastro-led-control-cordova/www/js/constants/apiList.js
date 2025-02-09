@@ -8,8 +8,9 @@ const ConstantApiList = (() => {
     const getAvaibleEffects =   "/api/v1/getAvaibleEffects";
     const loginApi =            "/api/v1/login";
     const getInfoEsp32Hello =   "/api/v1/getInfoHello";
-    const timeoutMs = 3;
-    const timeoutForSearchtMs = 3;
+    const timeoutMs = 15;
+    const timeoutForSearchtMs = 10;
+    const waitWhileEsp32Rebooting = 5000;
     
     return {
         saveSettigsApi,
@@ -21,7 +22,8 @@ const ConstantApiList = (() => {
         getInfoEsp32Hello,
         getAvaibleEffects,
         timeoutMs,
-        timeoutForSearchtMs
+        timeoutForSearchtMs,
+        waitWhileEsp32Rebooting
     };
 })();
 

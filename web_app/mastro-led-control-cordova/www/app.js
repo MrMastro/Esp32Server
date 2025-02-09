@@ -27,14 +27,22 @@ import ConstantApiList from './js/constants/apiList.js'
 import Esp32ConnectionController from './js/controllers/Esp32ConnectionController.js';
 import Esp32ConnectionView from './js/views/Esp32ConnectionView.js';
 import Esp32ConnectionService from './js/services/Esp32ConnectionService.js';
+import SettingController from './js/controllers/SettingController.js';
+import LoginView from './js/views/LoginView.js';
+import SettingService from './js/services/SettingServices.js';
+import SettingView from './js/views/SettingView.js';
 
 const app = {
 
     context: { 
         "espConnectionView": null,
+        "loginView": null,
+        "settingView": null,
         "mainController": null,
         "esp32ConnectionController": null,
-        "espConnectionService" : null
+        "settingController": null,
+        "espConnectionService" : null,
+        "settingService": null
     },
 
     // Application Constructor
@@ -52,8 +60,6 @@ const app = {
     onDeviceReady() {
         // Cordova is now initialized. Have fun!
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-        
-        console.log('Create MainController');
         this.createComponent();
 
         if(cordova.platformId == 'android'){
@@ -71,9 +77,13 @@ const app = {
         let context = this.context;
 
         context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
+        context.loginView = new LoginView(document.getElementById('LoginViewContainer'));
+        context.settingView = new SettingView(document.getElementById('SettingsViewContainer'));
 
         context.espConnectionService = new Esp32ConnectionService();
+        context.settingService = new SettingService();
         
+        context.settingController = new SettingController(context);
         context.esp32ConnectionController = new Esp32ConnectionController(context);
         context.mainController = new MainController(context);
     },
