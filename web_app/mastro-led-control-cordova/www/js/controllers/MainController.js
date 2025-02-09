@@ -135,8 +135,8 @@ export default class MainController {
         this.alertMessageView.alert(title, content);
     }
 
-    genericFailureAlert(content) {
-        this.alertMessageView.alert(FrontEndMessage.titleError, content);
+    genericFailureAlert(infoTitle, content) {
+        this.alertMessageView.alert(infoTitle + FrontEndMessage.titleError, content);
     }
 
     async updateEffectList(){
@@ -175,20 +175,30 @@ export default class MainController {
     }
 
     async saveInitialEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
         let request = new InitialSettingSaveModel(ledModel.effect, ledModel.deltaT, ledModel.colors);
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, request);
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.saveInitialEffect(connectionInfo.ip, request);
+            this.valutateResponseAlertMessage(result,esp32Model);
+        });
         this.hideWait();
-        this.valutateResponseAlertMessage(result);
     }
 
     async clearInitialEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel());
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.saveInitialEffect(connectionInfo.ip, new InitialSettingSaveModel());
+            this.valutateResponseAlertMessage(result,esp32Model);
+        });
         this.hideWait();
-        this.valutateResponseAlertMessage(result);
     }
 
     async sendStartEffect() {
@@ -196,56 +206,63 @@ export default class MainController {
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
         let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        this.showWait();
         activeConnections.forEach( async (esp32SingleReference) => {
             let esp32Model = esp32SingleReference.espConnection;
             let connectionInfo = esp32SingleReference.espConnection.infoConnection;
-            this.showWait();
             let result = await this.ledService.postStartEffect(connectionInfo.ip, request);
-            this.hideWait();
-            console.log(result);
             this.valutateResponseAlert(result, esp32Model);
         });
+        this.hideWait();
     }
 
     async sendStopEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
         let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
-
         this.showWait();
-        let result = await this.ledService.postStoptEffect(this.referenceHost, request);
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.postStoptEffect(connectionInfo.ip, request);
+            this.valutateResponseAlert(result, esp32Model);
+        });
         this.hideWait();
-        console.log(result);
-        this.valutateResponseAlert(result);
     }
 
     valutateResponseAlert(response, esp32Model = "") {
         let nameEsp32 = "";
         if(typeof esp32Model.infoConnection.deviceName == 'string'){
-            nameEsp32 = esp32Model.infoConnection.deviceName+" ";
+            nameEsp32 = esp32Model.infoConnection.deviceName+" - ";
         }
         switch (response.status) {
             case -4:
-                this.genericFailureAlert(nameEsp32 + FrontEndMessage.noConnect);
+                this.genericFailureAlert(nameEsp32, FrontEndMessage.noConnect);
                 this.setOfflineDevice(esp32Model);
                 break;
             case 200:
                 this.genericSuccessAlert(nameEsp32);
                 break;
             default:
-                this.genericFailureAlert(nameEsp32 + FrontEndMessage.noConnect);
+                this.genericFailureAlert(nameEsp32, FrontEndMessage.noConnect);
                 this.setOfflineDevice(esp32Model);
                 break;
         }
     }
 
-    valutateResponseAlertMessage(response) {
+    valutateResponseAlertMessage(response, esp32Model = "") {
+        let nameEsp32 = "";
+        if(typeof esp32Model.infoConnection.deviceName == 'string'){
+            nameEsp32 = esp32Model.infoConnection.deviceName+" - ";
+        }
         switch (response.status) {
             case -4:
-                this.genericFailureAlert(FrontEndMessage.noConnect);
+                this.genericFailureAlert(nameEsp32, FrontEndMessage.noConnect);
+                this.setOfflineDevice(esp32Model);
                 break;
             case 200:
-                this.customAlert(FrontEndMessage.titleSuccess, response.data.status.description);//todo change data.status.description in data.infoStatus.description
+                this.customAlert(nameEsp32 + FrontEndMessage.titleSuccess, response.data.status.description);//todo change data.status.description in data.infoStatus.description
                 break;
             default:
                 break;
