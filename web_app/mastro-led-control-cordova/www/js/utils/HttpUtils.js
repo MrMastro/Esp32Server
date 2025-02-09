@@ -91,29 +91,24 @@ const HttpUtils = (() => {
         if (options.param && JSON.stringify(options.param) !== '{}') {
             url += `?${options.param}`; // Aggiungere i parametri all'URL
         }
-
+    
+        var headers = {
+        };
+    
         url = "http://" + url;
+    
         const operation = new Promise((resolve, reject) => {
-            cordova.plugin.http.get(url, options.param, { "Accept": "application/json" },
+            cordova.plugin.http.get(url, null, headers,
                 (response) => {
-                    resolve(response); // Risolvere la promessa con la risposta
+                    resolve(response);
                 },
                 (err) => {
-                    reject(err); // Rifiutare la promessa in caso di errore
+                    reject(err);
                 }
             );
         });
-
-        await operation
-            .then((response) => {
-                //console.log(response); // Questo viene eseguito solo se la Promise viene risolta
-                result = response;
-            })
-            .catch((error) => {
-                //console.error('HttpUtils Caught an error:', error); // Questo viene eseguito se la Promise viene rifiutata
-                result = error;
-            });
-        return result;
+    
+        return operation;
     };
 
     // Funzione per gestire la richiesta POST nel browser

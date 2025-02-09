@@ -28,6 +28,18 @@ export default class LocalStorageService {
         localStorage.setItem('esp32InfoDeviceMem', JSON.stringify(list));
     }
 
+    setLocalIp(ip){
+        if (typeof ip != "string") {
+            throw new Error("L'input deve essere un array.");
+        }
+        localStorage.setItem('localIp', ip);
+    }
+
+    getLocalIp() {
+        const value = localStorage.getItem('localIp');
+        return value ? value : null;
+    }
+
     checkExistenceEffectList() {
         return localStorage.getItem('ledEffectList') !== null;
     }

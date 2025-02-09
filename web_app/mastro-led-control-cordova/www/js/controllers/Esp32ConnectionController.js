@@ -14,7 +14,7 @@ export default class Esp32ConnectionController {
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
 
         this.localStorageService = new LocalStorageService();
-        this.esp32ConnectionService = new Esp32ConnectionService();
+        this.esp32ConnectionService = context.espConnectionService;
         this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
         this.init();
     }
@@ -33,10 +33,11 @@ export default class Esp32ConnectionController {
     }
 
     async runLinkedDeviceSearch(){
+        this.waitView.show();
+        await this.esp32ConnectionService.setLocalIP();
         if(this.esp32ConnectionService.getIP() == null){
             this.alertMessageView.alert("Non connesso","Sembra tu non sia connesso ad una rete wireless o il dispositivo non sia collegato in modalità hot spot.");
         }
-        this.waitView.show();
         await this.esp32ConnectionService.setLinkedDeviceSearch();
         this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
         this.waitView.hide();
@@ -44,6 +45,10 @@ export default class Esp32ConnectionController {
 
     async updateStatusEsp32(){
         this.waitView.show();
+        await this.esp32ConnectionService.setLocalIP();
+        if(this.esp32ConnectionService.getIP() == null){
+            this.alertMessageView.alert("Non connesso","Sembra tu non sia connesso ad una rete wireless o il dispositivo non sia collegato in modalità hot spot.");
+        }
         await this.esp32ConnectionService.updateStatusDevices();
         this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
         this.waitView.hide();

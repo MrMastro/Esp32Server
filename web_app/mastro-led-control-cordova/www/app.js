@@ -26,13 +26,15 @@ import MainController from './js/controllers/MainController.js';
 import ConstantApiList from './js/constants/apiList.js'
 import Esp32ConnectionController from './js/controllers/Esp32ConnectionController.js';
 import Esp32ConnectionView from './js/views/Esp32ConnectionView.js';
+import Esp32ConnectionService from './js/services/Esp32ConnectionService.js';
 
 const app = {
 
     context: { 
         "espConnectionView": null,
         "mainController": null,
-        "esp32ConnectionController": null
+        "esp32ConnectionController": null,
+        "espConnectionService" : null
     },
 
     // Application Constructor
@@ -69,8 +71,11 @@ const app = {
         let context = this.context;
 
         context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
-        context.mainController = new MainController(context);
+
+        context.espConnectionService = new Esp32ConnectionService();
+        
         context.esp32ConnectionController = new Esp32ConnectionController(context);
+        context.mainController = new MainController(context);
     },
 }
 

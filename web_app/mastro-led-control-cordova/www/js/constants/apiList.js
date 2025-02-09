@@ -9,7 +9,7 @@ const ConstantApiList = (() => {
     const loginApi =            "/api/v1/login";
     const getInfoEsp32Hello =   "/api/v1/getInfoHello";
     const timeoutMs = 3;
-    const timeoutForSearchtMs = 1;
+    const timeoutForSearchtMs = 3;
     
     return {
         saveSettigsApi,

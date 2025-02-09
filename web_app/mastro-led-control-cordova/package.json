@@ -22,12 +22,12 @@
       "android"
     ],
     "plugins": {
-      "cordova-plugin-advanced-http": {
-        "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
-      },
       "cordova-plugin-enable-cleartext-traffic": {},
       "cordova-plugin-splashscreen": {},
-      "cordova-plugin-network-information": {}
+      "cordova-plugin-network-information": {},
+      "cordova-plugin-advanced-http": {
+        "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
+      }
     }
   },
   "devDependencies": {

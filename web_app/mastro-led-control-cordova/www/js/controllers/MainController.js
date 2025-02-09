@@ -22,7 +22,7 @@ import Esp32ConnectionController from './Esp32ConnectionController.js';
 export default class MainController {
     constructor(context = null) {
         this.context = context;
-        this.esp32ConnectionService = new Esp32ConnectionService();
+        this.esp32ConnectionService = context.espConnectionService;
         this.espConnectionView = this.context.espConnectionView;
         //status variable:
         // this.referenceHost = host;

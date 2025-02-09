@@ -5,7 +5,6 @@ import IpV4StringUtils from '../utils/IpV4StringUtils.js';
 import InfoEsp32Model from '../models/InfoEsp32Model.js';
 import TextUtils from '../utils/TextUtils.js';
 import { ConnectionInfo, Esp32Model } from '../models/Esp32Model.js';
-import NoConnectException from '../exceptions/NoConnectException.js';
 
 export default class Esp32ConnectionService {
     constructor() {
@@ -20,7 +19,7 @@ export default class Esp32ConnectionService {
     }
 
     getIP() {
-        return this.referenceHost;
+        return this.localStorageService.getLocalIp();
     }
 
     async setFakeIP() {
@@ -41,7 +40,7 @@ export default class Esp32ConnectionService {
                 return resolve(); // Restituisci stringa vuota
             }
 
-            const pc = new RTCPeerConnection({ iceServers: [] });
+            let pc = new RTCPeerConnection({ iceServers: [] });
             pc.createDataChannel(""); // Creazione di un canale dati fittizio
 
             pc.createOffer()
@@ -60,76 +59,21 @@ export default class Esp32ConnectionService {
 
                 if (ipMatch) {
                     this.referenceHost = ipMatch[1];
+                    this.localStorageService.setLocalIp(ipMatch[1]);
                     pc.onicecandidate = null; // Disabilita ulteriori eventi
+                    pc = null;
                     resolve();
                 }
             };
 
             // Timeout nel caso in cui non venga trovato un candidato
-            setTimeout(() => {
-                console.log("Errore: timeout nel recupero dell'IP locale.");
-                this.referenceHost = null;
-                resolve(); // Restituisci stringa vuota
-            }, 5000);
+            // setTimeout(() => {
+            //     console.log("Errore: timeout nel recupero dell'IP locale.");
+            //     this.referenceHost = null;
+            //     resolve(); // Restituisci stringa vuota
+            // }, 5000);
         });
     }
-
-    //set a list of InfoEsp32Model calling hello api (info of connection to esp32 devices)
-    // async setLinkedDeviceSearch(callBackWhenDeviceFound=null) {
-    //     this.createFakeVector();
-
-    //     if (cordova.platformId == 'android') {
-    //         cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
-    //     }
-
-    //     this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
-    //     this.linkedDeviceSearch = [];
-    //     let adressIpV4 = this.referenceHost;
-    //     console.log("My ip: "+adressIpV4+" - Search device");
-    //     let memDevices = this.localStorageService.getEsp32InfoDeviceMem();
-
-    //     if (memDevices == null) {
-    //         memDevices = [];
-    //     }
-
-    //     if (cordova.platformId == 'android') {
-    //         cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
-    //     }
-
-    //     //todo
-    //     let initialIndex = 0;
-
-    //     for (let index = initialIndex; index < 255; index++) {
-    //         let adressI = IpV4StringUtils.getAdressWithIndexHost(adressIpV4, index);
-    //         let resultApi = await HttpUtils.getCustom(adressI, ConstantApiList.getInfoEsp32Hello, {}, {});
-    //         if (resultApi.status == 200 && resultApi.hasOwnProperty('data')) {
-    //             let result = resultApi;
-    //             if (typeof resultApi.data == "string") {
-    //                 if (TextUtils.isJSON(resultApi.data)) {
-    //                     result = JSON.parse(resultApi.data);
-    //                 }
-    //             } else {
-    //                 result = resultApi.data;
-    //             }
-    //             let esp32InfoFound = InfoEsp32Model.createModel(result);
-    //             if (esp32InfoFound != null) {
-    //                 let esp32Found = new Esp32Model(ConnectionInfo.ONLINE, esp32InfoFound);
-    //                 this.linkedDeviceSearch.push(esp32Found);
-    //                 if(callBackWhenDeviceFound != null){
-    //                     callBackWhenDeviceFound(resultApi);
-    //                 }
-    //             } else {
-    //                 console.log("Scartato in quanto json non valido: " + index);
-    //             }
-    //         } else {
-    //             console.log("Scartato: " + index);
-    //         }
-    //     }
-
-    //     if (cordova.platformId == 'android') {
-    //         cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
-    //     }
-    // }
 
     async setLinkedDeviceSearch(callBackWhenDeviceFound = null) {
         this.linkedDeviceSearch = [];
@@ -180,7 +124,7 @@ export default class Esp32ConnectionService {
                                 console.log("Scartato in quanto json non valido: " + index);
                             }
                         } else {
-                            console.log("Scartato: " + index);
+                            console.log(`Scartato: ${index} - ${adressI}`);
                         }
                     } catch (error) {
                         console.log(`Errore nella richiesta per l'indirizzo ${adressI}:`, error);

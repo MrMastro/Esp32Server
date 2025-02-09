@@ -51,8 +51,8 @@ export default class Esp32ConnectionView {
                 </svg>
             </div>
 
-            <div class="panelConnections d-flex dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);min-width: auto;">
-                <div class="d-flex d-lg-flex flex-column align-items-center justify-content-lg-center align-items-lg-center">
+            <div class="panelConnections d-flex dark justify-content-center" style="width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);min-width: auto;">
+                <div class="d-flex d-lg-flex flex-column align-items-center justify-content-center align-items-center" style="margin: 10px;">
                     ${htmlList}
                 </div>
             </div>
@@ -108,13 +108,13 @@ export default class Esp32ConnectionView {
             let statusConnection = esp32.connectionState;
             
             html+= `
-                <div class="esp32PanelConnection d-flex justify-content-between align-items-center esp32PanelConnection" style="min-width: 250px;">
+                <div class="esp32PanelConnection d-flex justify-content-between align-items-center esp32PanelConnection" style="">
                     
                     <input id="${idCheck}_${nameView}" class="elementEsp32" type="checkbox" style="width: 25px;height: 25px;" />
 
                     <span id="${statusIndicator}_${nameView}" class="ms-2 elementEsp32 indicator-${statusConnection}" style="width: 15px; height: 15px; border-radius: 50%; margin-right: 5px;"></span>
                     
-                    <span class="text-start" style="min-width: 175px;">${deviceName}</span>
+                    <span class="text-start" style="width: 140px;">${deviceName}</span>
 
                     <svg id="${idIcon}_${nameView}" class="bi bi-gear fs-4 btn btn-dark" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bs-toggle="tooltip" data-bss-tooltip style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;width: 25px;height: 25px;" title="Aggiorna effetti">
                         <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"></path>
