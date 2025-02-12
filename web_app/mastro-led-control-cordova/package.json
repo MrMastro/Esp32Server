@@ -23,11 +23,11 @@
     ],
     "plugins": {
       "cordova-plugin-enable-cleartext-traffic": {},
-      "cordova-plugin-splashscreen": {},
       "cordova-plugin-network-information": {},
       "cordova-plugin-advanced-http": {
         "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
-      }
+      },
+      "cordova-plugin-networkinterface": {}
     }
   },
   "devDependencies": {
@@ -36,6 +36,6 @@
     "cordova-plugin-enable-cleartext-traffic": "^2.1.0",
     "cordova-plugin-file": "^8.1.0",
     "cordova-plugin-network-information": "^3.0.0",
-    "cordova-plugin-splashscreen": "^6.0.1"
+    "cordova-plugin-networkinterface": "^2.2.0"
   }
 }
