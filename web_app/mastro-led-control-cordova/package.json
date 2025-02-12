@@ -38,6 +38,7 @@
     "cordova-plugin-enable-cleartext-traffic": "^2.1.0",
     "cordova-plugin-file": "^8.1.0",
     "cordova-plugin-network-information": "^3.0.0",
-    "cordova-plugin-networkinterface": "^2.2.0"
+    "cordova-plugin-networkinterface": "^2.2.0",
+    "es6-promise-plugin": "^4.1.0"
   }
 }
