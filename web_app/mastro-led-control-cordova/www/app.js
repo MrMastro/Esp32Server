@@ -44,7 +44,8 @@ const app = {
         "espConnectionService" : null,
         "settingService": null,
         "networkInterface": null,
-        "networkState": null
+        "networkState": null,
+        "permissions" : null
     },
 
     // Application Constructor
@@ -67,10 +68,14 @@ const app = {
         if(cordova.platformId == 'android'){
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
+
+        this.requestPermissions();
     },
 
     createComponent(){
         //this.mainController = new MainController(DefaultConstants.defaultApHost);
+
+        var permissions = null; //cordova.plugins.permissions;        
         var networkState = navigator.connection.type;
         if (networkState !== Connection.WIFI) {
             console.log("WIFI IS MANDATORY");
@@ -80,6 +85,7 @@ const app = {
 
         context.networkInterface = networkinterface;
         context.networkState = networkState;
+        context.permissions = cordova.plugins.permissions;
 
         context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
         context.loginView = new LoginView(document.getElementById('LoginViewContainer'));
@@ -92,9 +98,30 @@ const app = {
         context.esp32ConnectionController = new Esp32ConnectionController(context);
         context.mainController = new MainController(context);
     },
+
+    requestPermissions() {
+        if(this.context.permissions == null){
+            console.log("Warning: errore caricamento permessi");
+            return;
+        }
+        this.context.permissions.requestPermission(
+            this.context.permissions.ACCESS_NETWORK_STATE,
+            function(status) {
+                if (status.hasPermission) {
+                    console.log("Permesso per accedere allo stato della rete concesso!");
+                } else {
+                    console.error("Permesso per accedere allo stato della rete negato!");
+                }
+            },
+            function(error) {
+                console.error("Errore nella richiesta dei permessi:", error);
+            }
+        );
+    }
+
 }
 
 // Initialize the app
-$(document).ready(() => {
+document.addEventListener("deviceready", function () {
     app.initialize();
 });

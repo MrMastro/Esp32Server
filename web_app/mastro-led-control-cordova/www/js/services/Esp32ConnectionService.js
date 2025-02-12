@@ -31,7 +31,9 @@ export default class Esp32ConnectionService {
 
     async setLocalIP() {
         await this.setLocalIpV2();
-        return ;
+    }
+
+    async setLocalIpOldMethod(){
         return new Promise((resolve) => {
             const RTCPeerConnection =
                 window.RTCPeerConnection ||
@@ -52,7 +54,7 @@ export default class Esp32ConnectionService {
                 .catch(() => {
                     console.error("Errore durante la creazione dell'offerta WebRTC.");
                     this.referenceHost = null;
-                    resolve(); // Restituisci stringa vuota in caso di errore
+                    resolve(""); // Restituisci stringa vuota in caso di errore
                 });
 
             pc.onicecandidate = (ice) => {
@@ -66,7 +68,7 @@ export default class Esp32ConnectionService {
                     this.localStorageService.setLocalIp(ipMatch[1]);
                     pc.onicecandidate = null; // Disabilita ulteriori eventi
                     pc = null;
-                    resolve();
+                    resolve(ipMatch[1]);
                 }
             };
 
@@ -107,12 +109,14 @@ export default class Esp32ConnectionService {
                         } else {
                             this.referenceHost = "";
                             this.localStorageService.setLocalIp("");
-                            resolve(null);
+                            resolve("");
                         }
                     },
-                    (error) => {
+                    async (error) => {
                         console.error("Errore nel recupero IP:", error);
-                        reject(error);
+                        resolve(await setLocalIpOldMethod());
+                        //reject(error);
+                        resolve();
                     }
                 );
             }
