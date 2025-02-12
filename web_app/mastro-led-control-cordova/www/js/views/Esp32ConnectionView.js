@@ -1,4 +1,5 @@
 import { ConnectionInfo } from "../models/Esp32Model.js";
+import DefaultConstants from "../constants/DefaultConstants.js";
 
 export default class Esp32ConnectionView {
     constructor(rootElement, nameView="") {
@@ -27,7 +28,7 @@ export default class Esp32ConnectionView {
     // Metodo render per creare la struttura del pannello delle connession (WIP DA FARE)
     render(listOfConnection = [], message = "") { //todo
         let htmlList = "";
-        let debugMsg = message != "" ? "<label class='labelWrong'>" + message + "</label>" : "";
+        let debugMsg = (message != "" && DefaultConstants.debugApp) ? "<label class='labelWrong'>" + message + "</label>" : "";
         if (Array.isArray(listOfConnection)) {
             if (listOfConnection.length < 1) {
                 htmlList = `    <label class="form-label">Nessun Dispositivo disponibile.<br/>Cerca dispositivi cliccando sulla lente di ingrandimento</label>

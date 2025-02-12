@@ -13,6 +13,7 @@ export default class Esp32ConnectionService {
         this.context = context;
         this.linkedDeviceSearch = [];
         this.localStorageService = new LocalStorageService();
+        this.hotSpotIp = "192.168.78.1";
         this.init();
     }
 
@@ -33,7 +34,7 @@ export default class Esp32ConnectionService {
         await this.setLocalIpV2();
     }
 
-    async setLocalIpOldMethod(){
+    async getLocalIpOldMethod() {
         return new Promise((resolve) => {
             const RTCPeerConnection =
                 window.RTCPeerConnection ||
@@ -43,7 +44,7 @@ export default class Esp32ConnectionService {
             if (!RTCPeerConnection) {
                 console.error("RTCPeerConnection non è supportato nel tuo browser.");
                 this.referenceHost = "";
-                return resolve(); // Restituisci stringa vuota
+                return resolve(""); // Restituisci stringa vuota
             }
 
             let pc = new RTCPeerConnection({ iceServers: [] });
@@ -83,8 +84,8 @@ export default class Esp32ConnectionService {
     }
 
     async setLocalIpV2() {
-        return new Promise( async (resolve, reject) => {
-            if(this.context.networkState === Connection.WIFI){
+        return new Promise(async (resolve, reject) => {
+            if (this.context.networkState === Connection.WIFI) {
                 networkinterface.getWiFiIPAddress(
                     (data) => {
                         this.referenceHost = data.ip;
@@ -97,75 +98,36 @@ export default class Esp32ConnectionService {
                         reject(error); // Rifiuta la Promise in caso di errore
                     }
                 );
-            }else{
-                let ipHotSpot = await this.getHotspotIP(); 
-                networkinterface.getIPAddress(
-                    (data) => {                
+            } else {
+                await networkinterface.getCarrierIPAddress(
+                    async (data) => {
                         // Verifica se l'IP inizia con "192.168."
                         if (data.ip.startsWith("192.168.")) {
                             this.referenceHost = data.ip;
                             this.localStorageService.setLocalIp(data.ip);
                             resolve(data.ip);
                         } else {
-                            this.referenceHost = "";
-                            this.localStorageService.setLocalIp("");
-                            resolve("");
+                            let manualHotSpotIp = this.getHotspotIP();
+                            this.referenceHost = manualHotSpotIp;
+                            this.localStorageService.setLocalIp(manualHotSpotIp);
+                            resolve(manualHotSpotIp);
                         }
                     },
                     async (error) => {
                         console.error("Errore nel recupero IP:", error);
-                        resolve(await setLocalIpOldMethod());
+                        resolve(await this.getLocalIpOldMethod()());
                         //reject(error);
-                        resolve();
+                        resolve("");
                     }
                 );
             }
         });
     }
 
-    async getHotspotIP() {
-        return new Promise((resolve, reject) => {
-            // Verifica se l'hotspot è abilitato
-            if(cordova.plugins.wifiManager == null){
-                console.error("not wifiManager");
-                return "";
-            }
-            cordova.plugins.wifiManager.isWifiApEnabled( (err, isEnabled) => {
-                if (err) {
-                    console.error("Errore nel controllo dello stato dell'hotspot:", err);
-                    return reject("Errore nel controllo dello stato dell'hotspot");
-                }
-    
-                if (!isEnabled) {
-                    // L'hotspot non è abilitato
-                    reject("Hotspot non abilitato");
-                }
-    
-                console.log("Hotspot abilitato");
-    
-                // Ottieni la configurazione dell'hotspot
-                cordova.plugins.wifiManager.getWifiApConfiguration( (err, wifiConfig) => {
-                    if (err) {
-                        console.error("Errore nel recupero della configurazione dell'hotspot:", err);
-                        reject("Errore nel recupero della configurazione dell'hotspot");
-                    }
-    
-                    console.log("Configurazione hotspot:", wifiConfig);
-                    
-                    // L'IP dell'hotspot è presente nella configurazione
-                    const ipAddress = wifiConfig.ipAddress;  // Questo è solo un esempio
-                    if (ipAddress) {
-                        console.log("Indirizzo IP dell'hotspot:", ipAddress);
-                        resolve(ipAddress);  // Risolvi la promessa con l'IP
-                    } else {
-                        console.error("Indirizzo IP non trovato nella configurazione dell'hotspot");
-                        reject("Indirizzo IP non trovato nella configurazione dell'hotspot");
-                    }
-                });
-            });
-        });
+    getHotspotIP() {
+        return this.hotSpotIp;
     }
-    
+
 
     async setLinkedDeviceSearch(callBackWhenDeviceFound = null) {
         let noConnection = false;
@@ -175,27 +137,27 @@ export default class Esp32ConnectionService {
 
         let adressIpV4 = this.referenceHost;
 
-        if(adressIpV4 == null || adressIpV4 == ''){
+        if (adressIpV4 == null || adressIpV4 == '') {
             this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
             throw new NoConnectException();
         }
-        
+
         // console.log("My ip: " + adressIpV4 + " - Search device");
 
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
         }
-    
+
         let initialIndex = 0;
-    
+
         // Crea un array vuoto per raccogliere tutte le promesse
         let requests = [];
-    
+
         // Aggiungiamo le promesse per ogni richiesta HTTP all'array
         for (let i = initialIndex; i < 255; i++) {
             let index = i;
             let adressI = IpV4StringUtils.getAdressWithIndexHost(adressIpV4, index);
-    
+
             // Aggiungiamo la promise all'array requests
             requests.push(
                 (async () => {
@@ -206,7 +168,7 @@ export default class Esp32ConnectionService {
                             if (typeof result === "string" && TextUtils.isJSON(result)) {
                                 result = JSON.parse(result);
                             }
-    
+
                             let esp32InfoFound = InfoEsp32Model.createModel(result);
                             if (esp32InfoFound != null) {
                                 let esp32Found = new Esp32Model(ConnectionInfo.ONLINE, esp32InfoFound);
@@ -222,21 +184,21 @@ export default class Esp32ConnectionService {
                         }
                     } catch (error) {
                         console.log(`Errore nella richiesta per l'indirizzo ${adressI}:`, error);
-                        if(error.status == -6){
+                        if (error.status == -6) {
                             noConnection = true;
                         }
                     }
                 })() // Eseguiamo subito la funzione asincrona
             );
         }
-    
+
         // Aspettiamo che tutte le richieste siano completate
         await Promise.all(requests);
 
-        if(noConnection){
+        if (noConnection) {
             throw new NoConnectException();
         }
-    
+
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
@@ -247,10 +209,10 @@ export default class Esp32ConnectionService {
         return this.linkedDeviceSearch;
     }
 
-    setSingleDeviceOffline(espConnection){
+    setSingleDeviceOffline(espConnection) {
         let updateList = this.localStorageService.getEsp32InfoDeviceMem();
-        updateList.forEach( (esp32, i) => {
-            if(esp32.infoConnection.macAdress == espConnection.infoConnection.macAdress){//confronto su mac adress perchè è univoco
+        updateList.forEach((esp32, i) => {
+            if (esp32.infoConnection.macAdress == espConnection.infoConnection.macAdress) {//confronto su mac adress perchè è univoco
                 esp32.connectionState = ConnectionInfo.OFFLINE;
                 esp32.active = false;
             }
@@ -264,9 +226,9 @@ export default class Esp32ConnectionService {
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs); //essendo pochi posso usare i timeout normali
         }
-    
+
         let updateList = this.localStorageService.getEsp32InfoDeviceMem();
-    
+
         // Creiamo un array di Promise per tutte le chiamate HTTP
         let requests = updateList.map(async (esp32, i) => {
             try {
@@ -276,13 +238,13 @@ export default class Esp32ConnectionService {
                     if (typeof result === "string" && TextUtils.isJSON(result)) {
                         result = JSON.parse(result);
                     }
-    
+
                     let esp32InfoFound = InfoEsp32Model.createModel(result);
                     if (esp32InfoFound != null) {
                         esp32.active = true;
                         esp32.connectionState = ConnectionInfo.ONLINE;
                         esp32.infoConnection = esp32InfoFound; // aggiorno l'esp 32 se ha cambiato le info di connessione
-                
+
                     } else {
                         esp32.active = false;
                         esp32.connectionState = ConnectionInfo.OFFLINE;
@@ -297,7 +259,7 @@ export default class Esp32ConnectionService {
                 esp32.connectionState = ConnectionInfo.OFFLINE;
             }
         });
-    
+
         // Aspettiamo che tutte le richieste siano completate
         await Promise.all(requests);
 
@@ -309,7 +271,7 @@ export default class Esp32ConnectionService {
         }
     }
 
-    async createFakeEsp32(name,ip,mac){
+    async createFakeEsp32(name, ip, mac) {
         let json = {
             "deviceName": name,
             "ip": ip,
@@ -318,15 +280,15 @@ export default class Esp32ConnectionService {
 
         let esp32InfoFound = InfoEsp32Model.createModel(json);
         if (esp32InfoFound != null) {
-            let esp32Found = new Esp32Model(ConnectionInfo.ONLINE,esp32InfoFound);
+            let esp32Found = new Esp32Model(ConnectionInfo.ONLINE, esp32InfoFound);
             this.linkedDeviceSearch.push(esp32Found);
         }
     }
 
-    async createFakeVector(){
-        this.createFakeEsp32("MastroDevice","192.168.64.63","08:D1:F9:E1:8C:00");
-        this.createFakeEsp32("MastroDevice2","192.168.64.64","08:D1:F9:E1:8C:22");
-        this.createFakeEsp32("MastroDevice3","192.168.64.65","08:D1:F9:E1:8C:33");
+    async createFakeVector() {
+        this.createFakeEsp32("MastroDevice", "192.168.64.63", "08:D1:F9:E1:8C:00");
+        this.createFakeEsp32("MastroDevice2", "192.168.64.64", "08:D1:F9:E1:8C:22");
+        this.createFakeEsp32("MastroDevice3", "192.168.64.65", "08:D1:F9:E1:8C:33");
     }
 
 }

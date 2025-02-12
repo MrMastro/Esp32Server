@@ -119,7 +119,7 @@ export default class MainView {
 
         if (ledMainModel.aPConnection) {
             this.hideFieldIp();
-            document.querySelector('.fieldIp').value = DefaultConstants.defaultDebug;
+            document.querySelector('.fieldIp').value = DefaultConstants.debugApp;
         }
 
         document.querySelector('#APConnection').checked = ledMainModel.aPConnection;

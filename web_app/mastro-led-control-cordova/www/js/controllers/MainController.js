@@ -27,7 +27,7 @@ export default class MainController {
         //status variable:
         // this.referenceHost = host;
         // this.apHost = DefaultConstants.defaultApHost;
-        // this.debug = DefaultConstants.defaultDebug;
+        // this.debug = DefaultConstants.debugApp;
         //Component
         this.ledService = new LedService();
         this.localStorageService = new LocalStorageService();
