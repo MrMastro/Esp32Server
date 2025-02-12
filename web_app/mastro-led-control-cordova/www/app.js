@@ -60,8 +60,20 @@ const app = {
     },
 
     // deviceready Event Handler
-    onDeviceReady() {
-        // Cordova is now initialized. Have fun!
+    async onDeviceReady() {
+
+        let context = this.context;
+
+        context.networkInterface = networkinterface;
+        context.networkState = navigator.connection.type;
+        context.permissions = cordova.plugins.permissions;
+
+        let permission = await this.requestPermissions();
+
+        if(!permission){
+            return;
+        }
+
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
         this.createComponent();
 
@@ -69,23 +81,15 @@ const app = {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
 
-        this.requestPermissions();
     },
 
     createComponent(){
         //this.mainController = new MainController(DefaultConstants.defaultApHost);
-
-        var permissions = null; //cordova.plugins.permissions;        
-        var networkState = navigator.connection.type;
-        if (networkState !== Connection.WIFI) {
+        let context = this.context;
+      
+        if (context.networkState !== Connection.WIFI) {
             console.log("WIFI IS MANDATORY");
         }
-
-        let context = this.context;
-
-        context.networkInterface = networkinterface;
-        context.networkState = networkState;
-        context.permissions = cordova.plugins.permissions;
 
         context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
         context.loginView = new LoginView(document.getElementById('LoginViewContainer'));
@@ -100,23 +104,30 @@ const app = {
     },
 
     requestPermissions() {
-        if(this.context.permissions == null){
-            console.log("Warning: errore caricamento permessi");
-            return;
-        }
-        this.context.permissions.requestPermission(
-            this.context.permissions.ACCESS_NETWORK_STATE,
-            function(status) {
-                if (status.hasPermission) {
-                    console.log("Permesso per accedere allo stato della rete concesso!");
-                } else {
-                    console.error("Permesso per accedere allo stato della rete negato!");
-                }
-            },
-            function(error) {
-                console.error("Errore nella richiesta dei permessi:", error);
+        return new Promise((resolve, reject) => {
+            if (this.context.permissions == null) {
+                console.log("Warning: errore caricamento permessi");
+                reject("Errore nel caricamento dei permessi");
+                return;
             }
-        );
+    
+            this.context.permissions.requestPermission(
+                this.context.permissions.ACCESS_NETWORK_STATE,
+                function(status) {
+                    if (status.hasPermission) {
+                        console.log("Permesso per accedere allo stato della rete concesso!");
+                        resolve(true);
+                    } else {
+                        console.error("Permesso per accedere allo stato della rete negato!");
+                        resolve(false);
+                    }
+                },
+                function(error) {
+                    console.error("Errore nella richiesta dei permessi:", error);
+                    resolve(error);
+                }
+            );
+        });
     }
 
 }

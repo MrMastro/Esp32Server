@@ -124,43 +124,46 @@ export default class Esp32ConnectionService {
     }
 
     async getHotspotIP() {
-        return "";
-        // return new Promise((resolve, reject) => {
-        //     // Verifica se l'hotspot è abilitato
-        //     cordova.plugins.wifiManager.isWifiApEnabled( (err, isEnabled) => {
-        //         if (err) {
-        //             console.error("Errore nel controllo dello stato dell'hotspot:", err);
-        //             return reject("Errore nel controllo dello stato dell'hotspot");
-        //         }
+        return new Promise((resolve, reject) => {
+            // Verifica se l'hotspot è abilitato
+            if(cordova.plugins.wifiManager == null){
+                console.error("not wifiManager");
+                return "";
+            }
+            cordova.plugins.wifiManager.isWifiApEnabled( (err, isEnabled) => {
+                if (err) {
+                    console.error("Errore nel controllo dello stato dell'hotspot:", err);
+                    return reject("Errore nel controllo dello stato dell'hotspot");
+                }
     
-        //         if (!isEnabled) {
-        //             // L'hotspot non è abilitato
-        //             reject("Hotspot non abilitato");
-        //         }
+                if (!isEnabled) {
+                    // L'hotspot non è abilitato
+                    reject("Hotspot non abilitato");
+                }
     
-        //         console.log("Hotspot abilitato");
+                console.log("Hotspot abilitato");
     
-        //         // Ottieni la configurazione dell'hotspot
-        //         cordova.plugins.wifiManager.getWifiApConfiguration( (err, wifiConfig) => {
-        //             if (err) {
-        //                 console.error("Errore nel recupero della configurazione dell'hotspot:", err);
-        //                 reject("Errore nel recupero della configurazione dell'hotspot");
-        //             }
+                // Ottieni la configurazione dell'hotspot
+                cordova.plugins.wifiManager.getWifiApConfiguration( (err, wifiConfig) => {
+                    if (err) {
+                        console.error("Errore nel recupero della configurazione dell'hotspot:", err);
+                        reject("Errore nel recupero della configurazione dell'hotspot");
+                    }
     
-        //             console.log("Configurazione hotspot:", wifiConfig);
+                    console.log("Configurazione hotspot:", wifiConfig);
                     
-        //             // L'IP dell'hotspot è presente nella configurazione
-        //             const ipAddress = wifiConfig.ipAddress;  // Questo è solo un esempio
-        //             if (ipAddress) {
-        //                 console.log("Indirizzo IP dell'hotspot:", ipAddress);
-        //                 resolve(ipAddress);  // Risolvi la promessa con l'IP
-        //             } else {
-        //                 console.error("Indirizzo IP non trovato nella configurazione dell'hotspot");
-        //                 reject("Indirizzo IP non trovato nella configurazione dell'hotspot");
-        //             }
-        //         });
-        //     });
-        // });
+                    // L'IP dell'hotspot è presente nella configurazione
+                    const ipAddress = wifiConfig.ipAddress;  // Questo è solo un esempio
+                    if (ipAddress) {
+                        console.log("Indirizzo IP dell'hotspot:", ipAddress);
+                        resolve(ipAddress);  // Risolvi la promessa con l'IP
+                    } else {
+                        console.error("Indirizzo IP non trovato nella configurazione dell'hotspot");
+                        reject("Indirizzo IP non trovato nella configurazione dell'hotspot");
+                    }
+                });
+            });
+        });
     }
     
 
