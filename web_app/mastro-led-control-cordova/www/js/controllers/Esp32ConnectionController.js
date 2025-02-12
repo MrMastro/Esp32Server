@@ -49,9 +49,10 @@ export default class Esp32ConnectionController {
         this.waitView.show();
         try {
             await this.esp32ConnectionService.setLinkedDeviceSearch();
-            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
+            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem(), "ip: " + this.localStorageService.getLocalIp() );
         } catch (error) {
             console.log("err: " + error);
+            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem(), "ip: " + error );
         }
         this.waitView.hide();
     }

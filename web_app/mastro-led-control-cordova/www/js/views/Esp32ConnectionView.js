@@ -25,16 +25,22 @@ export default class Esp32ConnectionView {
     }
 
     // Metodo render per creare la struttura del pannello delle connession (WIP DA FARE)
-    render(listOfConnection = []) { //todo
+    render(listOfConnection = [], message = "") { //todo
         let htmlList = "";
+        let debugMsg = message != "" ? "<label class='labelWrong'>" + message + "</label>" : "";
         if (Array.isArray(listOfConnection)) {
             if (listOfConnection.length < 1) {
-                htmlList = `<label class="form-label">Nessun Dispositivo disponibile.<br/>Cerca dispositivi cliccando sulla lente di ingrandimento</label>`;
+                htmlList = `    <label class="form-label">Nessun Dispositivo disponibile.<br/>Cerca dispositivi cliccando sulla lente di ingrandimento</label>
+                                ${debugMsg}    
+                            `;
             }else{
                 htmlList = this.getEsp32ConnectionElementHtml(listOfConnection);
             }
         } else {
-            htmlList = `<label class="form-label">Errore: Nessun Dispositivo disponibile.<br/>Cerca dispositivi cliccando sulla lente di ingrandimento</label>`;
+            htmlList =  `
+                            <label class="form-label">Errore: Nessun Dispositivo disponibile.<br/>Cerca dispositivi cliccando sulla lente di ingrandimento</label>
+                            ${debugMsg}
+                        `;
         }
 
         // let button = <button class='searchEsp32'> Cerca dispositivi </button>
