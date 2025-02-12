@@ -5,10 +5,12 @@ import IpV4StringUtils from '../utils/IpV4StringUtils.js';
 import InfoEsp32Model from '../models/InfoEsp32Model.js';
 import TextUtils from '../utils/TextUtils.js';
 import { ConnectionInfo, Esp32Model } from '../models/Esp32Model.js';
+import NoConnectException from '../exceptions/NoConnectException.js';
 
 export default class Esp32ConnectionService {
-    constructor() {
+    constructor(context) {
         this.referenceHost = "";
+        this.context = context;
         this.linkedDeviceSearch = [];
         this.localStorageService = new LocalStorageService();
         this.init();
@@ -28,6 +30,8 @@ export default class Esp32ConnectionService {
     }
 
     async setLocalIP() {
+        await this.setLocalIpV2();
+        return ;
         return new Promise((resolve) => {
             const RTCPeerConnection =
                 window.RTCPeerConnection ||
@@ -72,18 +76,60 @@ export default class Esp32ConnectionService {
             //     this.referenceHost = null;
             //     resolve(); // Restituisci stringa vuota
             // }, 5000);
+
         });
     }
 
+    async setLocalIpV2() {
+        return new Promise( async (resolve, reject) => {
+            if(this.context.networkState === Connection.WIFI){
+                networkinterface.getWiFiIPAddress(
+                    (data) => {
+                        this.referenceHost = data.ip;
+                        this.localStorageService.setLocalIp(data.ip);
+                        resolve(data.ip); // Risolvi la Promise con l'IP
+                    },
+                    (error) => {
+                        this.referenceHost = "";
+                        console.error("Errore nel recupero dell'IP:", error);
+                        reject(error); // Rifiuta la Promise in caso di errore
+                    }
+                );
+            }else{
+                networkinterface.getIPAddress(
+                    (data) => {                
+                        // Verifica se l'IP inizia con "192.168."
+                        if (data.ip.startsWith("192.168.")) {
+                            this.referenceHost = data.ip;
+                            this.localStorageService.setLocalIp(data.ip);
+                            resolve(data.ip);
+                        } else {
+                            this.referenceHost = "";
+                            this.localStorageService.setLocalIp("");
+                            resolve(null);
+                        }
+                    },
+                    (error) => {
+                        console.error("Errore nel recupero IP:", error);
+                        reject(error);
+                    }
+                );
+            }
+        });
+    }
+    
+
     async setLinkedDeviceSearch(callBackWhenDeviceFound = null) {
+        let noConnection = false;
+        await this.setLocalIP();
         this.linkedDeviceSearch = [];
         this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
 
         let adressIpV4 = this.referenceHost;
 
-        if(adressIpV4 == null){
+        if(adressIpV4 == null || adressIpV4 == ''){
             this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
-            return;
+            throw new NoConnectException();
         }
         
         // console.log("My ip: " + adressIpV4 + " - Search device");
@@ -128,6 +174,9 @@ export default class Esp32ConnectionService {
                         }
                     } catch (error) {
                         console.log(`Errore nella richiesta per l'indirizzo ${adressI}:`, error);
+                        if(error.status == -6){
+                            noConnection = true;
+                        }
                     }
                 })() // Eseguiamo subito la funzione asincrona
             );
@@ -135,6 +184,10 @@ export default class Esp32ConnectionService {
     
         // Aspettiamo che tutte le richieste siano completate
         await Promise.all(requests);
+
+        if(noConnection){
+            throw new NoConnectException();
+        }
     
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
@@ -159,6 +212,7 @@ export default class Esp32ConnectionService {
     }
 
     async updateStatusDevices() {
+        await this.setLocalIP();
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs); //essendo pochi posso usare i timeout normali
         }

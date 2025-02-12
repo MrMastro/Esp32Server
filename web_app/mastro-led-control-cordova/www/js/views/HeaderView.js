@@ -20,7 +20,7 @@ export default class HeaderView {
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item"><a class="btn" role="button" href hrefcommented="/webConsole">Seriale</a></li>
                             <li class="nav-item"><a class="btn" role="button" href hrefcommented="updateLogin">Aggiorna Esp32</a></li>
-                        </ul><a id=settingsBtnHeader class="btn btn-primary settingsBtn" role="button">Impostazioni</a>
+                        </ul> <a id=settingsBtnHeader class="btn btn-primary settingsBtn hidden" role="button">Impostazioni</a>
                     </div>
                 </div>
             </nav>
