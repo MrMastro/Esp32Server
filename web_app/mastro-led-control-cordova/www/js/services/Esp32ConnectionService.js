@@ -96,6 +96,7 @@ export default class Esp32ConnectionService {
                     }
                 );
             }else{
+                let ipHotSpot = await this.getHotspotIP(); 
                 networkinterface.getIPAddress(
                     (data) => {                
                         // Verifica se l'IP inizia con "192.168."
