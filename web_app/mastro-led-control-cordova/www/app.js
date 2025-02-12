@@ -42,7 +42,9 @@ const app = {
         "esp32ConnectionController": null,
         "settingController": null,
         "espConnectionService" : null,
-        "settingService": null
+        "settingService": null,
+        "networkInterface": null,
+        "networkState": null
     },
 
     // Application Constructor
@@ -76,20 +78,22 @@ const app = {
 
         let context = this.context;
 
+        context.networkInterface = networkinterface;
+        context.networkState = networkState;
+
         context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
         context.loginView = new LoginView(document.getElementById('LoginViewContainer'));
         context.settingView = new SettingView(document.getElementById('SettingsViewContainer'));
 
-        context.espConnectionService = new Esp32ConnectionService();
+        context.espConnectionService = new Esp32ConnectionService(context);
         context.settingService = new SettingService();
         
-        context.settingController = new SettingController(context);
+        //context.settingController = new SettingController(context);
         context.esp32ConnectionController = new Esp32ConnectionController(context);
         context.mainController = new MainController(context);
     },
 }
 
-var a = "";
 // Initialize the app
 $(document).ready(() => {
     app.initialize();
