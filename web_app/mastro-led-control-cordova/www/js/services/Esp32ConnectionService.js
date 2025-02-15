@@ -18,7 +18,6 @@ export default class Esp32ConnectionService {
     }
 
     async init() {
-        await this.setLocalIP();
     }
 
     getIP() {

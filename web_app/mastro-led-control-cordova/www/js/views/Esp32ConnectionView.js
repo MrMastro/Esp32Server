@@ -28,6 +28,7 @@ export default class Esp32ConnectionView {
     // Metodo render per creare la struttura del pannello delle connession (WIP DA FARE)
     render(listOfConnection = [], message = "") { //todo
         let htmlList = "";
+        let groupSearchIp = "";
         let debugMsg = (message != "" && DefaultConstants.debugApp) ? "<label class='labelWrong'>" + message + "</label>" : "";
         if (Array.isArray(listOfConnection)) {
             if (listOfConnection.length < 1) {
@@ -43,6 +44,8 @@ export default class Esp32ConnectionView {
                             ${debugMsg}
                         `;
         }
+
+        groupSearchIp = this.getEsp32AdvancedSearch(true,"");
 
         // let button = <button class='searchEsp32'> Cerca dispositivi </button>
         // this.rootElement.innerHTML = button + htmlList;
@@ -63,6 +66,7 @@ export default class Esp32ConnectionView {
             <div class="panelConnections d-flex dark justify-content-center" style="width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);min-width: auto;">
                 <div class="d-flex d-lg-flex flex-column align-items-center justify-content-center align-items-center" style="margin: 10px;">
                     ${htmlList}
+                    ${groupSearchIp}
                 </div>
             </div>
 
@@ -84,6 +88,34 @@ export default class Esp32ConnectionView {
         this.buttonSearchEsp32 = document.querySelector('.buttonSearchEsp32');
         this.buttonUpdateStatusEsp32 = document.querySelector('.updateSatusEsp32');
         this.reassignHandler();
+    }
+
+    getEsp32AdvancedSearch(show=false, msgAlert="") {
+        let html =``;
+        this.arrayConnections = [];
+        let nameView = this.nameView;
+
+        if(show){
+            html = `
+                    <div class="d-flex flex-column justify-content-center">
+                        <div class="border rounded d-flex justify-content-between align-items-center esp32PanelConnection" style="margin: 10px 10px 0px 0px;">
+                        
+                            <input id="inputIp_${nameView}" class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+                            
+                            <svg id="idIcon_nameView-1" class="bi bi-search" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                            </svg>
+
+                        </div>
+                        <small class="label-ip labelIpWrong">Inserisci un indirizzo ip valido</small>
+                    </div>
+                    `;
+        }
+
+        this.fieldIp = document.querySelector('.fieldIp');
+        this.labelIp = document.querySelector('.label-ip');
+
+        return html;
     }
 
     reassignHandler() {
@@ -163,5 +195,26 @@ export default class Esp32ConnectionView {
         });
         return array;
     }
+
+    hideFieldIp() {
+        this.fieldIp.style.display = 'none';
+    }
+
+    showFieldIp() {
+        this.fieldIp.style.display = 'inline';
+    }
+
+    setLabelIp(value) {
+        this.labelIp.textContent = value;
+    }
+
+    getLabelIp() {
+        return this.labelIp.textContent;
+    }
+
+        // if (ledMainModel.aPConnection) {
+        //     this.hideFieldIp();
+        //     document.querySelector('.fieldIp').value = DefaultConstants.debugApp;
+        // }
 
 }

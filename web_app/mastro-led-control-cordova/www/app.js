@@ -45,7 +45,8 @@ const app = {
         "settingService": null,
         "networkInterface": null,
         "networkState": null,
-        "permissions" : null
+        "permissions" : null,
+        "havePermission":null
     },
 
     // Application Constructor
@@ -69,10 +70,7 @@ const app = {
         context.permissions = cordova.plugins.permissions;
 
         let permission = await this.requestPermissions();
-
-        if(!permission){
-            return;
-        }
+        context.havePermission = permission;
 
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
         this.createComponent();
@@ -108,7 +106,7 @@ const app = {
             if (this.context.permissions == null) {
                 console.log("Warning: errore caricamento permessi");
                 reject("Errore nel caricamento dei permessi");
-                return;
+                return false;
             }
     
             this.context.permissions.requestPermission(
@@ -124,7 +122,7 @@ const app = {
                 },
                 function(error) {
                     console.error("Errore nella richiesta dei permessi:", error);
-                    resolve(error);
+                    resolve(false);
                 }
             );
         });

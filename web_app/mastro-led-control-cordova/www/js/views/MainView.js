@@ -16,7 +16,6 @@ export default class MainView {
         this.buttonUpdateEffect = {};
         this.saveInitialEffect = {};
         this.clearInitialEffect = {};
-        this.fieldIp = {};
         this.labelIp = {};
         this.aPConnection = {};
         this.timingRangeInput = {};
@@ -39,17 +38,7 @@ export default class MainView {
 
     render(ledMainModel, listEffects) {
         this.rootElement.innerHTML = (`
-                    <div id="ContainAction-0" class="ContainAction hidden">
-                        <div class="border rounded-pill d-flex d-md-flex d-xxl-flex flex-column justify-content-center align-items-center align-content-center justify-content-md-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);">
-                            <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent dark">
-                                <div class="text-center d-flex d-xl-flex flex-column justify-content-xl-center align-items-xl-center">
-                                    <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center align-self-center flex-wrap justify-content-lg-center align-items-lg-center" style="min-width: auto;margin-right: 5px;margin-top: 2px;margin-left: 5px;/*text-align: center;*/padding: 0;width: auto;padding-top: 0;padding-right: 0;padding-bottom: 0;padding-left: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="APConnection" class="form-check-input" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="APConnection" checked /><label class="form-check-label text-center d-flex flex-fill justify-content-center align-items-center" for="rgbCheck-1" style="position: relative;margin-right: 0px;margin-left: 0px;text-align: center;max-width: initial;min-width: 75px;">Connessione AP</label></div><input class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
-                                    </div>
-                                    <small class="label-ip">Indirizzo attuale: </small>
-                            </div>
-                        </div>
-                    </div>
-
+            
                     <div id="ContainAction-4" class="d-lg-flex justify-content-lg-center ContainAction">
                         <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label form-label-title" style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;">Effetto</label><svg class="bi bi-arrow-clockwise fs-4 border rounded-circle buttonUpdateEffect btn btn-dark" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bs-toggle="tooltip" data-bss-tooltip style="padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;" title="Aggiorna effetti">
                                 <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"></path>
@@ -111,20 +100,10 @@ export default class MainView {
         this.buttonUpdateEffect = document.querySelector('.buttonUpdateEffect');
         this.saveInitialEffectBtn = document.querySelector('.saveInitialEffect');
         this.clearInitialEffectBtn = document.querySelector('.clearInitialEffect');
-        this.fieldIp = document.querySelector('.fieldIp');
-        this.labelIp = document.querySelector('.label-ip');
-        this.aPConnection = document.getElementById('APConnection');
+        // this.aPConnection = document.getElementById('APConnection');
         this.timingRangeInput = document.querySelector(".timingRangeInput");
         this.timingInput = document.querySelector(".timingInput");
-
-        if (ledMainModel.aPConnection) {
-            this.hideFieldIp();
-            document.querySelector('.fieldIp').value = DefaultConstants.debugApp;
-        }
-
-        document.querySelector('#APConnection').checked = ledMainModel.aPConnection;
-        document.querySelector('.fieldIp').value = ledMainModel.textFieldActualHost;
-        this.setLabelIp("Indirizzo attuale: " + ledMainModel.textFieldActualHost);
+        // document.querySelector('.fieldIp').value = ledMainModel.textFieldActualHost;
         document.querySelector('.effectInput').value = ledMainModel.effect;
         document.querySelector(".timingRangeInput").value = ledMainModel.deltaT;
         document.querySelector('.timingInput').value = ledMainModel.deltaT;
@@ -146,14 +125,6 @@ export default class MainView {
 
     getFieldIp() {
         return document.querySelector('.fieldIp').value;
-    }
-
-    setLabelIp(value) {
-        this.labelIp.textContent = value;
-    }
-
-    getLabelIp() {
-        return this.labelIp.textContent;
     }
 
     getTimingRangeInput() {
@@ -184,14 +155,6 @@ export default class MainView {
         let effect = document.querySelector('.effectInput').value;
         let textFieldActualHost = this.getFieldIp();
         return new LedMainModel(this.aPConnection.value, textFieldActualHost, effect, this.getTimingInput(), colors, rgbCheck, ws2811Check)
-    }
-
-    hideFieldIp() {
-        this.fieldIp.style.display = 'none';
-    }
-
-    showFieldIp() {
-        this.fieldIp.style.display = 'inline';
     }
 
     cleanOptionEffects() {
@@ -313,3 +276,10 @@ export default class MainView {
 
 
 }
+
+// <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center align-self-center flex-wrap justify-content-lg-center align-items-lg-center" style="min-width: auto;margin-right: 5px;margin-top: 2px;margin-left: 5px;/*text-align: center;*/padding: 0;width: auto;padding-top: 0;padding-right: 0;padding-bottom: 0;padding-left: 0;margin-bottom: 2px;" data-bs-theme="dark">
+// <input id="APConnection" class="form-check-input" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="APConnection" checked /><label class="form-check-label text-center d-flex flex-fill justify-content-center align-items-center" for="rgbCheck-1" style="position: relative;margin-right: 0px;margin-left: 0px;text-align: center;max-width: initial;min-width: 75px;">Connessione AP</label>
+// </div>
+// <input class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+// </div>
+// <small class="label-ip">Indirizzo attuale: </small>

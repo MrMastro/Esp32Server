@@ -99,5 +99,14 @@
   font-size: 15px;
 }
 
+.labelIpWrong {
+  margin-top: 5px;
+  color: rgb(82, 0, 7);
+  background-color: rgba(95,93,93,0.93);
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
 
 
