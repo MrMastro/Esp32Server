@@ -221,12 +221,17 @@ export default class Esp32ConnectionService {
     }
 
     async updateStatusDevices() {
-        await this.setLocalIP();
+        
+        let updateList = this.localStorageService.getEsp32InfoDeviceMem();
+        
+        if(!Array.isArray(updateList)){
+            return;
+        }
+
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs); //essendo pochi posso usare i timeout normali
         }
 
-        let updateList = this.localStorageService.getEsp32InfoDeviceMem();
 
         // Creiamo un array di Promise per tutte le chiamate HTTP
         let requests = updateList.map(async (esp32, i) => {

@@ -41,6 +41,7 @@ export default class Esp32ConnectionController {
         this.esp32ConnectionView.bindButtonSearchEsp32(this.runLinkedDeviceSearch.bind(this));
         this.esp32ConnectionView.bindButtonUpdateStatusEsp32(this.updateStatusEsp32.bind(this));
         this.esp32ConnectionView.bindButtonInfoEsp32(this.showInfo.bind(this));
+        this.esp32ConnectionView.bindButtonAdvancedSearchEsp32(this.runLinkedDeviceAdvancedSearch.bind(this));
         this.loginView.bindBtnLogin(this.showSettings.bind(this));
         this.settingView.bindBtnSaveSettings(this.saveSettings.bind(this))
     }
@@ -55,6 +56,12 @@ export default class Esp32ConnectionController {
             this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem(), "ip: " + error );
         }
         this.waitView.hide();
+    }
+
+    async runLinkedDeviceAdvancedSearch(){
+        console.log("advanced");
+        let valueIp = this.esp32ConnectionView.getFieldIp();
+        console.log(valueIp);
     }
 
     async updateStatusEsp32(){

@@ -12,13 +12,17 @@ export default class Esp32ConnectionView {
 
         this.buttonSearchEsp32 = {};
 
+        this.buttonAdvancedSearchEsp32 = {};
+
         this.buttonUpdateStatusEsp32 = {};
 
         this.buttonInfoEsp32List = [];
 
-        this.handlerButtonSearchEsp32 = {};
-
         this.handlerBtnUpdateStatusEsp32 = {};
+
+        this.handlerBtnSearchEsp32 = {};
+
+        this.handlerBtnAdvancedSearchEsp32 = {};
 
         this.arrayConnections = [];
 
@@ -87,6 +91,11 @@ export default class Esp32ConnectionView {
 
         this.buttonSearchEsp32 = document.querySelector('.buttonSearchEsp32');
         this.buttonUpdateStatusEsp32 = document.querySelector('.updateSatusEsp32');
+
+        this.fieldIp = document.querySelector('.fieldIp');
+        this.labelIp = document.querySelector('.label-ip');
+        this.fieldIp = document.querySelector('.fieldIp');
+        this.buttonAdvancedSearchEsp32 = document.querySelector('.searchAdvanceEsp32');
         this.reassignHandler();
     }
 
@@ -94,6 +103,7 @@ export default class Esp32ConnectionView {
         let html =``;
         this.arrayConnections = [];
         let nameView = this.nameView;
+        let idIconSearch = "btnAdvancedSearch-"+nameView;
 
         if(show){
             html = `
@@ -102,7 +112,7 @@ export default class Esp32ConnectionView {
                         
                             <input id="inputIp_${nameView}" class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
                             
-                            <svg id="idIcon_nameView-1" class="bi bi-search" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
+                            <svg id="${idIconSearch}" class="bi bi-search btn searchAdvanceEsp32 btn_svg_icon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
                                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
                             </svg>
 
@@ -112,15 +122,16 @@ export default class Esp32ConnectionView {
                     `;
         }
 
-        this.fieldIp = document.querySelector('.fieldIp');
-        this.labelIp = document.querySelector('.label-ip');
-
         return html;
     }
 
     reassignHandler() {
         if (typeof this.handlerBtnSearchEsp32 === 'function') {
             this.bindButtonSearchEsp32(this.handlerBtnSearchEsp32);
+        }
+
+        if (typeof this.handlerBtnAdvancedSearchEsp32 === 'function') {
+            this.bindButtonAdvancedSearchEsp32(this.handlerBtnAdvancedSearchEsp32);
         }
 
         if (typeof this.handlerBtnUpdateStatusEsp32=== 'function') {
@@ -148,6 +159,13 @@ export default class Esp32ConnectionView {
                 this.handlerBtnInfoEsp32(esp32) 
                 });
             });
+        }
+    }
+
+    bindButtonAdvancedSearchEsp32(handler){
+        if(typeof handler === 'function'){
+            this.handlerBtnAdvancedSearchEsp32 = handler;
+            this.buttonAdvancedSearchEsp32.addEventListener('click', this.handlerBtnAdvancedSearchEsp32);
         }
     }
 
@@ -210,6 +228,10 @@ export default class Esp32ConnectionView {
 
     getLabelIp() {
         return this.labelIp.textContent;
+    }
+
+    getFieldIp(){ 
+        return this.fieldIp.value
     }
 
         // if (ledMainModel.aPConnection) {
