@@ -115,14 +115,19 @@ export default class MainController {
         try {
             this.waitView.show();
             await TimeUtils.wait(200);
-            let firstConnection = this.context.espConnectionView.getActiveConnections()[0];
-            let list = await this.ledService.getAvaibleEffects(firstConnection);
-            await TimeUtils.wait(200);
-            this.waitView.hide();
-            await TimeUtils.wait(200);
-            this.localStorageService.setEffectList(list);
-            this.mainView.render( this.mainView.getLedMainModel(), list);
-            this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
+            let activeConnections = this.context.espConnectionView.getActiveConnections();
+            if(Array.isArray(activeConnections) && activeConnections.length > 0){
+                let firstConnection = this.context.espConnectionView.getActiveConnections()[0];
+                let list = await this.ledService.getAvaibleEffects(firstConnection.espConnection.infoConnection.ip);
+                await TimeUtils.wait(200);
+                this.waitView.hide();
+                await TimeUtils.wait(200);
+                this.localStorageService.setEffectList(list);
+                this.mainView.render( this.mainView.getLedMainModel(), list);
+                this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
+            }else{
+                this.alertMessageView.alert(FrontEndMessage.genericError, "Devi prima avere un dispositivo online, aggiungi un dispositivo o collegalo");
+            }
         } catch (error) {
             if (error instanceof UnauthorizedErrorException) {
                 this.waitView.hide();
