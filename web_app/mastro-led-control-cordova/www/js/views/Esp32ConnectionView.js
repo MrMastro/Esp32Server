@@ -93,12 +93,16 @@ export default class Esp32ConnectionView {
 
         this.arrayConnections.forEach( (el) => {
             let htmlElement = document.querySelector(el.idHtmlElement);
-            htmlElement.checked = el.espConnection.active;
-            if(el.espConnection.connectionState == ConnectionInfo.OFFLINE){
-                htmlElement.checked = false;
-                htmlElement.disabled = true;
+            if(htmlElement != null){ //fix di controllo 
+                htmlElement.checked = el.espConnection.active;
+                if(el.espConnection.connectionState == ConnectionInfo.OFFLINE){
+                    htmlElement.checked = false;
+                    htmlElement.disabled = true;
+                }
+                this.buttonInfoEsp32List.push(document.querySelector(el.idBtnElement));
+            }else{
+                this.arrayConnections = [];
             }
-            this.buttonInfoEsp32List.push(document.querySelector(el.idBtnElement));
         });
 
         this.buttonSearchEsp32 = document.querySelector('.buttonSearchEsp32');
@@ -191,8 +195,8 @@ export default class Esp32ConnectionView {
         this.buttonSearchEsp32.addEventListener('pointerup', (event) => {
             clearTimeout(this.pressTimer);  // Cancella il timer se il click viene rilasciato prima di un secondo
             if (!this.isLongPress) {
-                this.advancedSearchMode = true;
-                this.panelAdvancedSearch.classList.remove("hidden");
+                this.advancedSearchMode = false;
+                this.panelAdvancedSearch.classList.add("hidden");
             }
         });
         

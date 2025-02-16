@@ -124,9 +124,11 @@ export default class MainController {
                 await TimeUtils.wait(200);
                 this.localStorageService.setEffectList(list);
                 this.mainView.render( this.mainView.getLedMainModel(), list);
+                this.waitView.hide();
                 this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
             }else{
-                this.alertMessageView.alert(FrontEndMessage.genericError, "Devi prima avere un dispositivo online, aggiungi un dispositivo o collegalo");
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, "Devi prima avere un dispositivo online, aggiungi un dispositivo o collegalo");
             }
         } catch (error) {
             if (error instanceof UnauthorizedErrorException) {

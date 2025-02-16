@@ -7,8 +7,16 @@ const TimeUtils = (() => {
         });
     };
 
+    const processAndWait = async (callback, ...param) => {
+        return new Promise(async (resolve) => {
+            await callback(...param);
+            resolve();
+        });
+    }
+
     return {
-        wait
+        wait,
+        processAndWait
     };
 })();
 
