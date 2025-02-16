@@ -84,7 +84,7 @@ const app = {
 
     async onDeviceResume(){
         console.log('Resume cordova-' + cordova.platformId + '@' + cordova.version);
-        this.context.esp32ConnectionController.firstUpdateStatusDevices();
+        // this.context.esp32ConnectionController.firstUpdateStatusDevices();
     },
 
     createComponent(){
