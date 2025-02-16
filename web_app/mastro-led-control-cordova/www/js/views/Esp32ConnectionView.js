@@ -6,14 +6,23 @@ export default class Esp32ConnectionView {
         if (!(rootElement instanceof HTMLElement)) {
             console.error('rootElement non è un elemento DOM valido', rootElement);
         }
+
+        this.advancedSearchMode = false;
+
+        this.ipForAdvancedSearch = null;
+
         this.rootElement = rootElement;
         
         this.nameView = nameView != "" ? nameView : "connectionGeneric_"+Date.now();
 
+        this.panelAdvancedSearch = {};
+
         this.buttonSearchEsp32 = {};
 
         this.buttonAdvancedSearchEsp32 = {};
-
+        
+        this.buttonAdvancedSearchEsp32Disabled = {};
+        
         this.buttonUpdateStatusEsp32 = {};
 
         this.buttonInfoEsp32List = [];
@@ -24,6 +33,8 @@ export default class Esp32ConnectionView {
 
         this.handlerBtnAdvancedSearchEsp32 = {};
 
+        this.handlerFieldIpInput = this.changeIp.bind(this);
+
         this.arrayConnections = [];
 
         this.render();
@@ -31,6 +42,7 @@ export default class Esp32ConnectionView {
 
     // Metodo render per creare la struttura del pannello delle connession (WIP DA FARE)
     render(listOfConnection = [], message = "") { //todo
+        this.advancedSearchMode = false;
         let htmlList = "";
         let groupSearchIp = "";
         let debugMsg = (message != "" && DefaultConstants.debugApp) ? "<label class='labelWrong'>" + message + "</label>" : "";
@@ -49,7 +61,7 @@ export default class Esp32ConnectionView {
                         `;
         }
 
-        groupSearchIp = this.getEsp32AdvancedSearch(true,"");
+        groupSearchIp = this.getEsp32AdvancedSearch();
 
         // let button = <button class='searchEsp32'> Cerca dispositivi </button>
         // this.rootElement.innerHTML = button + htmlList;
@@ -95,32 +107,43 @@ export default class Esp32ConnectionView {
         this.fieldIp = document.querySelector('.fieldIp');
         this.labelIp = document.querySelector('.label-ip');
         this.fieldIp = document.querySelector('.fieldIp');
+
+        this.panelAdvancedSearch = document.querySelector('.panelAdvancedSearch');
         this.buttonAdvancedSearchEsp32 = document.querySelector('.searchAdvanceEsp32');
+        this.buttonAdvancedSearchEsp32Disabled = document.querySelector('.searchAdvanceEsp32_Disabled');
+
+        if(!this.advancedSearchMode){
+            this.panelAdvancedSearch.classList.add("hidden");
+        }
+
         this.reassignHandler();
     }
 
-    getEsp32AdvancedSearch(show=false, msgAlert="") {
+    getEsp32AdvancedSearch() {
         let html =``;
-        this.arrayConnections = [];
         let nameView = this.nameView;
         let idIconSearch = "btnAdvancedSearch-"+nameView;
-
-        if(show){
-            html = `
-                    <div class="d-flex flex-column justify-content-center">
-                        <div class="border rounded d-flex justify-content-between align-items-center esp32PanelConnection" style="margin: 10px 10px 0px 0px;">
+        
+        html = `
+                <div class="panelAdvancedSearch d-flex flex-column justify-content-center align-items-center">
+                    <div class="border rounded d-flex justify-content-between align-items-center esp32PanelConnection" style="margin: 10px 10px 0px 0px;">
+                    
+                        <input id="inputIp_${nameView}" class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
                         
-                            <input id="inputIp_${nameView}" class="fieldIp" type="text" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
-                            
-                            <svg id="${idIconSearch}" class="bi bi-search btn searchAdvanceEsp32 btn_svg_icon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
-                            </svg>
+                        <svg id="${idIconSearch}" class="bi bi-search btn searchAdvanceEsp32 btn_svg_icon hidden" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" style="width: 25px;height: 25px;">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                        </svg>
 
-                        </div>
-                        <small class="label-ip labelIpWrong">Inserisci un indirizzo ip valido</small>
+                        <svg id="${idIconSearch}_disabled" class="bi bi-search btn disabled searchAdvanceEsp32_Disabled btn_svg_icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width: 25px;height: 25px;">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                            <line x1="2" y1="2" x2="11" y2="11" stroke="white" stroke-width="1"/>
+                            <line x1="2" y1="11" x2="11" y2="2" stroke="white" stroke-width="1"/>
+                        </svg>
+
                     </div>
-                    `;
-        }
+                    <small class="label-ip labelIpNeutral">Inserisci un indirizzo ip della rete wifi</small>
+                </div>
+                `;
 
         return html;
     }
@@ -137,7 +160,12 @@ export default class Esp32ConnectionView {
         if (typeof this.handlerBtnUpdateStatusEsp32=== 'function') {
             this.bindButtonUpdateStatusEsp32(this.handlerBtnUpdateStatusEsp32);
         }
-        this.bindButtonInfoEsp32(this.handlerBtnInfoEsp32)
+
+        this.bindLongButtonSearchEsp32();
+        
+        this.bindButtonInfoEsp32(this.handlerBtnInfoEsp32);
+
+        this.bindFieldIpInput(this.handlerFieldIpInput);
     }
 
     bindButtonUpdateStatusEsp32(handler){
@@ -148,6 +176,29 @@ export default class Esp32ConnectionView {
     bindButtonSearchEsp32(handler){
         this.handlerBtnSearchEsp32 = handler;
         this.buttonSearchEsp32.addEventListener('click', this.handlerBtnSearchEsp32);
+    }
+
+    bindLongButtonSearchEsp32(){
+        this.pressTimer = {};
+        this.buttonSearchEsp32.addEventListener('pointerdown', (event) => {
+            this.isLongPress = false;  // Resetta il flag per ogni nuovo click
+            this.pressTimer = setTimeout(() => {
+                this.isLongPress = true;
+                this.panelAdvancedSearch.classList.remove("hidden");
+            }, 1000); // 1000ms = 1 secondo
+        });
+        
+        this.buttonSearchEsp32.addEventListener('pointerup', (event) => {
+            clearTimeout(this.pressTimer);  // Cancella il timer se il click viene rilasciato prima di un secondo
+            if (!this.isLongPress) {
+                this.advancedSearchMode = true;
+                this.panelAdvancedSearch.classList.remove("hidden");
+            }
+        });
+        
+        this.buttonSearchEsp32.addEventListener('pointerleave', (event) => {
+            clearTimeout(this.pressTimer); // Cancella il timer se il mouse esce dal bottone prima di un secondo
+        });
     }
 
     bindButtonInfoEsp32(handler){
@@ -165,7 +216,16 @@ export default class Esp32ConnectionView {
     bindButtonAdvancedSearchEsp32(handler){
         if(typeof handler === 'function'){
             this.handlerBtnAdvancedSearchEsp32 = handler;
-            this.buttonAdvancedSearchEsp32.addEventListener('click', this.handlerBtnAdvancedSearchEsp32);
+            if(this.buttonAdvancedSearchEsp32 != null){
+                this.buttonAdvancedSearchEsp32.addEventListener('click', this.handlerBtnAdvancedSearchEsp32);
+            }
+        }
+    }
+
+    bindFieldIpInput(handler) {
+        this.handlerFieldIpInput = handler;
+        if(this.fieldIp != null){
+            this.fieldIp.addEventListener('input', this.handlerFieldIpInput);
         }
     }
 
@@ -230,10 +290,44 @@ export default class Esp32ConnectionView {
         return this.labelIp.textContent;
     }
 
-    getFieldIp(){ 
-        return this.fieldIp.value
+    getIpForAdvancedSearch(){ 
+        return this.ipForAdvancedSearch;
     }
 
+    getFieldIp(){
+        return document.querySelector('.fieldIp').value;
+    }
+
+    changeIp() {
+        let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.getFieldIp());
+        if (!this.getFieldIp()) {
+            this.setLabelIp("Inserisci un indirizzo ip della rete wifi");
+            this.ipForAdvancedSearch = null;
+            this.buttonAdvancedSearchEsp32Disabled.classList.remove("hidden");
+            this.buttonAdvancedSearchEsp32.classList.add("hidden");
+            this.labelIp.classList.remove("labelIpWrong");
+            this.labelIp.classList.remove("labelIpRight");
+            this.labelIp.classList.add("labelIpNeutral");
+        }
+        else if (test) {
+            this.ipForAdvancedSearch = this.getFieldIp();
+            this.setLabelIp("Clicca sulla lente per iniziare la ricerca");
+            this.buttonAdvancedSearchEsp32Disabled.classList.add("hidden");
+            this.buttonAdvancedSearchEsp32.classList.remove("hidden");
+            this.labelIp.classList.add("labelIpRight");
+            this.labelIp.classList.remove("labelIpWrong");
+            this.labelIp.classList.remove("labelIpNeutral");
+            
+        } else {
+            this.setLabelIp("Inserisci un indirizzo ip della rete wifi valido");
+            this.buttonAdvancedSearchEsp32Disabled.classList.remove("hidden");
+            this.buttonAdvancedSearchEsp32.classList.add("hidden");
+            this.labelIp.classList.remove("labelIpRight");
+            this.labelIp.classList.remove("labelIpNeutral");
+            this.labelIp.classList.add("labelIpWrong");
+        }
+    }
+    
         // if (ledMainModel.aPConnection) {
         //     this.hideFieldIp();
         //     document.querySelector('.fieldIp').value = DefaultConstants.debugApp;

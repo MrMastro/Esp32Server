@@ -14,7 +14,7 @@
     <!-- Configurazione dell'icona di splash screen -->
     <preference name="AndroidWindowSplashScreenIcon" value="resources/android/icon.png" />
     <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/android/icon.png" /> <!-- Per compatibilità -->
-    <preference name="SplashScreenDelay" value="3000" />
+    <preference name="SplashScreenDelay" value="4000" />
 
     <!-- Permessi necessari -->
     <platform name="android">

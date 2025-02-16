@@ -58,6 +58,7 @@ const app = {
     // Bind Event Listeners
     bindEvents() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+        document.addEventListener("resume", this.onDeviceReady.bind(this), false);
     },
 
     // deviceready Event Handler
@@ -79,6 +80,11 @@ const app = {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
 
+    },
+
+    async onDeviceResume(){
+        console.log('Resume cordova-' + cordova.platformId + '@' + cordova.version);
+        this.context.esp32ConnectionController.firstUpdateStatusDevices();
     },
 
     createComponent(){

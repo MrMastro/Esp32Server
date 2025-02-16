@@ -1,4 +1,5 @@
 import ConstantApiList from '../constants/apiList.js';
+import DefaultConstants from '../constants/DefaultConstants.js';
 import FrontEndMessage from '../constants/FrontEndMessageItalian.js';
 import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import NoConnectException from '../exceptions/NoConnectException.js';
@@ -34,7 +35,15 @@ export default class Esp32ConnectionController {
 
     async init() {
         this.waitView.render();
+        this.firstUpdateStatusDevices();
         this.bindEvents();
+    }
+
+    async firstUpdateStatusDevices(){
+        await this.esp32ConnectionService.updateStatusDevices();
+        setTimeout(() => {
+            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
+        }, 1000); // 1000 millisecondi = 1 secondo
     }
 
     async bindEvents() {
@@ -50,18 +59,24 @@ export default class Esp32ConnectionController {
         this.waitView.show();
         try {
             await this.esp32ConnectionService.setLinkedDeviceSearch();
-            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem(), "ip: " + this.localStorageService.getLocalIp() );
+            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
         } catch (error) {
             console.log("err: " + error);
-            this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem(), "ip: " + error );
+            if(DefaultConstants.debugApp){
+                this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
+            }else{
+                this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
+            }
         }
         this.waitView.hide();
     }
 
     async runLinkedDeviceAdvancedSearch(){
-        console.log("advanced");
-        let valueIp = this.esp32ConnectionView.getFieldIp();
-        console.log(valueIp);
+        this.waitView.show();
+        let valueIp = this.esp32ConnectionView.getIpForAdvancedSearch();
+        await this.esp32ConnectionService.searchLinkedDevice(valueIp, true, null);
+        this.waitView.hide();
+        this.esp32ConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
     }
 
     async updateStatusEsp32(){

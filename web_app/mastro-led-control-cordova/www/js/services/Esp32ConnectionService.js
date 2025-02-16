@@ -13,7 +13,6 @@ export default class Esp32ConnectionService {
         this.context = context;
         this.linkedDeviceSearch = [];
         this.localStorageService = new LocalStorageService();
-        this.hotSpotIp = "192.168.78.1";
         this.init();
     }
 
@@ -64,11 +63,18 @@ export default class Esp32ConnectionService {
                 const ipMatch = ipRegex.exec(ice.candidate.candidate);
 
                 if (ipMatch) {
-                    this.referenceHost = ipMatch[1];
-                    this.localStorageService.setLocalIp(ipMatch[1]);
+                    let ip = ipMatch[1];
                     pc.onicecandidate = null; // Disabilita ulteriori eventi
                     pc = null;
-                    resolve(ipMatch[1]);
+                    if (ip.startsWith("192.168.")) {
+                        this.referenceHost = ip;
+                        this.localStorageService.setLocalIp(ip);
+                        resolve(ip);
+                    } else {
+                        this.referenceHost = null;
+                        this.localStorageService.setLocalIp(null);
+                        resolve(null);
+                    }
                 }
             };
 
@@ -87,12 +93,20 @@ export default class Esp32ConnectionService {
             if (this.context.networkState === Connection.WIFI) {
                 networkinterface.getWiFiIPAddress(
                     (data) => {
-                        this.referenceHost = data.ip;
-                        this.localStorageService.setLocalIp(data.ip);
-                        resolve(data.ip); // Risolvi la Promise con l'IP
+                        if (data.ip.startsWith("192.168.")) {
+                            this.referenceHost = data.ip;
+                            this.localStorageService.setLocalIp(data.ip);
+                            resolve(data.ip);
+                        } else {
+                            this.referenceHost = null;
+                            this.localStorageService.setLocalIp(null);
+                            resolve(null);
+                        } // Risolvi la Promise con l'IP
                     },
                     (error) => {
-                        this.referenceHost = "";
+                        this.referenceHost = null;
+                        this.localStorageService.setLocalIp(null);
+                        resolve(null);
                         console.error("Errore nel recupero dell'IP:", error);
                         reject(error); // Rifiuta la Promise in caso di errore
                     }
@@ -106,56 +120,51 @@ export default class Esp32ConnectionService {
                             this.localStorageService.setLocalIp(data.ip);
                             resolve(data.ip);
                         } else {
-                            let manualHotSpotIp = this.getHotspotIP();
-                            this.referenceHost = manualHotSpotIp;
-                            this.localStorageService.setLocalIp(manualHotSpotIp);
-                            resolve(manualHotSpotIp);
+                            this.referenceHost = null;
+                            this.localStorageService.setLocalIp(null);
+                            resolve(null);
                         }
                     },
                     async (error) => {
                         console.error("Errore nel recupero IP:", error);
                         resolve(await this.getLocalIpOldMethod()());
-                        //reject(error);
-                        resolve("");
                     }
                 );
             }
         });
     }
 
-    getHotspotIP() {
-        return this.hotSpotIp;
-    }
-
 
     async setLinkedDeviceSearch(callBackWhenDeviceFound = null) {
-        let noConnection = false;
         await this.setLocalIP();
+        let adressIpV4 = this.referenceHost;
+        if (!adressIpV4) { // Prova le reti conosciute
+            let ipKnows = this.localStorageService.getIpListKnown() || [];
+            for (let ip of ipKnows) {
+                await this.searchLinkedDevice(ip, true, callBackWhenDeviceFound);
+                if (this.linkedDeviceSearch != []) { //ho trovato almeno 1 dispositivo nella rete, interrompo
+                    break; 
+                }
+            }
+        } else {
+            await this.searchLinkedDevice(adressIpV4, false, callBackWhenDeviceFound);
+        }
+    }
+
+    async searchLinkedDevice(ipV4, addIpToListKnown, callBackWhenDeviceFound = null){
         this.linkedDeviceSearch = [];
         this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
-
-        let adressIpV4 = this.referenceHost;
-
-        if (adressIpV4 == null || adressIpV4 == '') {
-            this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
-            throw new NoConnectException();
-        }
-
-        // console.log("My ip: " + adressIpV4 + " - Search device");
+        let noConnection = false;
+        let initialIndex = 0;
+        let requests = [];
 
         if (cordova.platformId == 'android') {
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs);
         }
 
-        let initialIndex = 0;
-
-        // Crea un array vuoto per raccogliere tutte le promesse
-        let requests = [];
-
         // Aggiungiamo le promesse per ogni richiesta HTTP all'array
         for (let i = initialIndex; i < 255; i++) {
-            let index = i;
-            let adressI = IpV4StringUtils.getAdressWithIndexHost(adressIpV4, index);
+            let adressI = IpV4StringUtils.getAdressWithIndexHost(ipV4, i);
 
             // Aggiungiamo la promise all'array requests
             requests.push(
@@ -172,14 +181,17 @@ export default class Esp32ConnectionService {
                             if (esp32InfoFound != null) {
                                 let esp32Found = new Esp32Model(ConnectionInfo.ONLINE, esp32InfoFound);
                                 this.linkedDeviceSearch.push(esp32Found);
+                                if(addIpToListKnown){
+                                    this.updateIpListKnown(ipV4);
+                                }
                                 if (callBackWhenDeviceFound != null) {
                                     callBackWhenDeviceFound(resultApi);
                                 }
                             } else {
-                                console.log("Scartato in quanto json non valido: " + index);
+                                console.log("Scartato in quanto json non valido: " + i);
                             }
                         } else {
-                            console.log(`Scartato: ${index} - ${adressI}`);
+                            console.log(`Scartato: ${i} - ${adressI}`);
                         }
                     } catch (error) {
                         console.log(`Errore nella richiesta per l'indirizzo ${adressI}:`, error);
@@ -194,14 +206,37 @@ export default class Esp32ConnectionService {
         // Aspettiamo che tutte le richieste siano completate
         await Promise.all(requests);
 
+        if (cordova.platformId == 'android') {
+            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
+        }
+
         if (noConnection) {
             throw new NoConnectException();
         }
 
-        if (cordova.platformId == 'android') {
-            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
-        }
         this.localStorageService.setEsp32InfoDeviceMem(this.linkedDeviceSearch);
+    }
+
+    updateIpListKnown(ip){
+        let list = this.localStorageService.getIpListKnown();
+        let found = false;
+        if(!Array.isArray(list)){
+            list = [];
+        }
+
+        list.forEach(ipEl => {
+            if(ip == ipEl){
+                found = true;
+                return;
+            }            
+        });
+
+        if(!found){
+            list.push(ip);
+        }
+
+        this.localStorageService.setIpListKnown(list);
+
     }
 
     async getLinkedDeviceSearch() {
@@ -229,7 +264,7 @@ export default class Esp32ConnectionService {
         }
 
         if (cordova.platformId == 'android') {
-            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs); //essendo pochi posso usare i timeout normali
+            cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutForSearchtMs); //essendo pochi posso usare i timeout normali
         }
 
 

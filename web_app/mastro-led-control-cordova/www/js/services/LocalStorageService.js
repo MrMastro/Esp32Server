@@ -29,6 +29,8 @@ export default class LocalStorageService {
     }
 
     setLocalIp(ip){
+        ip = (ip === null) ? "" : ip;
+
         if (typeof ip != "string") {
             throw new Error("L'input deve essere un array.");
         }
@@ -38,6 +40,18 @@ export default class LocalStorageService {
     getLocalIp() {
         const value = localStorage.getItem('localIp');
         return value ? value : null;
+    }
+
+    setIpListKnown(list){
+        if (!Array.isArray(list)) {
+            throw new Error("L'input deve essere un array.");
+        }
+        localStorage.setItem('ipListKnown', JSON.stringify(list));
+    }
+
+    getIpListKnown(){
+        const value = localStorage.getItem('ipListKnown');
+        return value ? JSON.parse(value) : null;
     }
 
     checkExistenceEffectList() {

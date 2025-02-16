@@ -9,7 +9,7 @@ const ConstantApiList = (() => {
     const loginApi =            "/api/v1/login";
     const getInfoEsp32Hello =   "/api/v1/getInfoHello";
     const timeoutMs = 15;
-    const timeoutForSearchtMs = 10;
+    const timeoutForSearchtMs = 2;
     const waitWhileEsp32Rebooting = 5000;
     
     return {
