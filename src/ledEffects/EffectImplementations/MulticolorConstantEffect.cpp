@@ -25,6 +25,10 @@ boolean MulticolorConstantEffect::getCompatibilityWs2811(){
     return true;
 }
 
+boolean MulticolorConstantEffect::getCompatibilityWs2811Matrix(){
+    return true;
+}
+
 boolean MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
 

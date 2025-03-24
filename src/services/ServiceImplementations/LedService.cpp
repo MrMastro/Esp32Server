@@ -9,14 +9,14 @@ LedService::LedService()
 }
 
 // Create a led service
-LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811)
-{
-  DriverLed *driver = new DriverLed(ledStriptInput, rgbLedStriptInput);
-  rgbOrchestrator = EffectOrchestrator("RGB player", driver, TYPE_STRIP::RGB, serialService);
-  ws2811Orchestrator = EffectOrchestrator("WS2811 player", driver, TYPE_STRIP::WS2811, serialService);
-  setOperativeRgbOrchestrator(enableRgb);
-  setOperativeWs2811Orchestrator(enableWs2811);
-}
+//LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811)
+// {
+//   DriverLed *driver = new DriverLed(ledStriptInput, rgbLedStriptInput);
+//   rgbOrchestrator = EffectOrchestrator("RGB player", driver, TYPE_STRIP::RGB, serialService);
+//   ws2811Orchestrator = EffectOrchestrator("WS2811 player", driver, TYPE_STRIP::WS2811, serialService);
+//   setOperativeRgbOrchestrator(enableRgb);
+//   setOperativeWs2811Orchestrator(enableWs2811);
+// }
 
 LedService::LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811)
 {

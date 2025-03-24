@@ -27,6 +27,10 @@ boolean ConstantUniqueColorEffect::getCompatibilityWs2811(){
     return true;
 }
 
+boolean ConstantUniqueColorEffect::getCompatibilityWs2811Matrix(){
+    return true;
+}
+
 boolean ConstantUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
 

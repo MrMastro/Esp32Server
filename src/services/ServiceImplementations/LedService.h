@@ -16,7 +16,7 @@ class LedService : public Service
 {
 public:
   LedService();
-  LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811);
+  //LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811);
   LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811);
   boolean isAvaible() override;
   boolean preparePin();

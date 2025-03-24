@@ -9,6 +9,7 @@
 #include "ledEffects/EffectImplementations/StarDustEffect.h"
 #include "ledEffects/EffectImplementations/LiveFlameColorEffect.h"
 #include "ledEffects/EffectImplementations/ProgresiveBarBreathEffect.h"
+#include "ledEffects/EffectImplementations/EyeMidEfffect.h"
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
@@ -19,7 +20,8 @@ const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new MulticolorConstantEffect(),
     new ProgresiveBarBreathEffect(),
     new StarDustEffect(),
-    new LiveFlameColorEffect()
+    new LiveFlameColorEffect(),
+    new EyeMidEffect()
     };
 
 const LED_EFFECT_LABEL getEffectLabelByName(String inputString)

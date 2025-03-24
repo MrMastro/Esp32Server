@@ -7,6 +7,7 @@ AsyncWebServer webServer(80);
 BluetoothSerial SerialBT;
 
 // Deprecated: MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
+NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Matrix = nullptr;
 NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip = nullptr;
 LEDStripDriver *rgbStrip = nullptr;
 DriverLed *myDriver;
@@ -123,7 +124,8 @@ void initServices(HardwareSerial *serialPointer)
   // init LedService
   rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
   ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
-  myDriver = new DriverLed(ws2811Strip, rgbStrip);
+  ws2811Matrix = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(64,15);
+  myDriver = new DriverLed(ws2811Matrix, ws2811Strip, rgbStrip);
   ledService = LedService(myDriver, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
 
   servicesCollector.attachServer(&mastroServer);
