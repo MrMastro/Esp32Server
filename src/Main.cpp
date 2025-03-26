@@ -26,6 +26,27 @@ SerialService serialService;
 // other baud rate: 115200
 // baud rate: 9600
 
+// Definizione delle priorità
+#define PRIORITY_SERVER               (configMAX_PRIORITIES - 3)
+#define PRIORITY_BLUETOOTH_SERVER     (configMAX_PRIORITIES - 3)
+#define PRIORITY_LED_EFFECTS          (configMAX_PRIORITIES - 5)
+#define PRIORITY_DELAYED_TASK         (configMAX_PRIORITIES - 7)
+#define PRIORITY_SERIAL               (configMAX_PRIORITIES - 10)
+
+#define STACK_SIZE_SERVER             8192
+#define STACK_SIZE_BLUETOOTH_SERVER   8192
+#define STACK_SIZE_LED_EFFECTS        4096
+#define STACK_SIZE_DELAYED_TASK       4096
+#define STACK_SIZE_SERIAL             2048
+
+// #define STACK_SIZE_SERVER             10000
+// #define STACK_SIZE_BLUETOOTH_SERVER   10000
+// #define STACK_SIZE_LED_EFFECTS        10000
+// #define STACK_SIZE_DELAYED_TASK       10000
+// #define STACK_SIZE_SERIAL             10000
+
+
+
 void setup_communication(SettingsModel sm)
 {
   serialService.logInfoln("setup_communication method", "MAIN");
@@ -34,7 +55,7 @@ void setup_communication(SettingsModel sm)
 
   // Task for serial COM
   serialService.logInfoln("Create SerialCableTaskExecution for comunicate with serial com", "MAIN");
-  xTaskCreate(serialCableTask, "SerialCableTaskExecution", 10000, NULL, 0, NULL);
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
 
   // Task for communication
   COMMUNICATION_MODE mode = communicationModeStringToEnum(sm.communicationMode);
@@ -58,7 +79,7 @@ void setup_communication(SettingsModel sm)
   case COMMUNICATION_MODE::BLUETOOTH_MODE:
     serialService.logInfoln("Communication mode is BLUETOOTH, init Bluetooth and Bluetooth Serial", "MAIN");
     serialService.initSerialBtBegin(sm.deviceName, &SerialBT);
-    xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", 10000, NULL, 1, NULL);
+    xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", STACK_SIZE_BLUETOOTH_SERVER, NULL, PRIORITY_BLUETOOTH_SERVER, NULL);
     break;
 
   // Case WIP or Defaults
@@ -148,12 +169,15 @@ void setup(void)
   initServices(&Serial);
   delay(10);
 
+  delay(1000);
+
   Serial.println("");
   Serial.println("Load settings:");
   Serial.println(s.toJson());
 
   // init communication (Server wifi/ap or Bluetooth)
-  setup_communication(s);
+  xTaskCreate(apiServerTask, "apiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
+  //setup_communication(s);
 
   delay(100);
 
@@ -162,8 +186,8 @@ void setup(void)
   {
     // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
   }
-  xTaskCreate(ledTask, "LedTaskExecution", 10000, NULL, 3, NULL);
-  xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", 10000, NULL, 4, NULL);
+  xTaskCreate(ledTask, "LedTaskExecution", STACK_SIZE_LED_EFFECTS, NULL, PRIORITY_LED_EFFECTS, NULL);
+  xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
   // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 
   serialService.logInfoln("Init procedure completed", "MAIN");
@@ -172,6 +196,19 @@ void setup(void)
 // loop is used for print debug
 void loop(void)
 {
+}
+
+void apiServerTask(void *pvParameters) {
+  setup_communication(s);
+
+  // Il task può restare in esecuzione finché il sistema non è spento o resetta
+  while (true) {
+      // Puoi mettere qui del codice per monitorare o gestire il server, se necessario.
+      // Ma questo task non termina mai a meno che non venga fermato o reset.
+
+      // FreeRTOS richiede che i task chiamino vTaskDelay() periodicamente
+      vTaskDelay(1); // Questo fa "pausare" il task per un breve periodo, lasciando spazio ad altri task
+  }
 }
 
 // Serial bt task check input for bluetooth message
@@ -283,32 +320,37 @@ void ledTask(void *pvParameters)
     ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, rgbColors, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
   }
 
+  // Loop principale del task
   while (true)
   {
     if (!servicesCollector.isBusyForServiceApi())
     {
-
       boolean executedCorrectly = false;
 
+      // Controllo e gestione per RGB
       if (s.ledSettings.enableStripRgb)
       {
         executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runRgbLifeCycle();
-        if(!executedCorrectly){
-          delay(TIME_MS_FOR_ERROR_EXECUTION);
+        if (!executedCorrectly)
+        {
+          // Gestisci eventuali errori con un delay
+          vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico
         }
       }
 
       if (s.ledSettings.enableStripWs2811)
       {
         executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
-        if(!executedCorrectly){
-          delay(TIME_MS_FOR_ERROR_EXECUTION);
+        if (!executedCorrectly)
+        {
+          vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico
         }
       }
     }
     else
     {
-      yield();
+      // Se il servizio è occupato, sospendiamo temporaneamente il task senza bloccare la CPU
+      yield();  // Cede il controllo al sistema operativo per altri task
     }
 
     vTaskDelay(10 / portTICK_PERIOD_MS);

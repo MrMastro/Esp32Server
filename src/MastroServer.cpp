@@ -65,7 +65,7 @@ MastroServer::MastroServer(AsyncWebServer *webServer, String mode, String ssid, 
     //init default route
     logInfoln("Set Route");
     setRoutes();
-    beginListFiles("/www");
+    //beginListFiles("/www");
 
     //Init web server
     logInfoln("Starting web server...");

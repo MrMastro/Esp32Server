@@ -22,6 +22,7 @@ void initServices(HardwareSerial* serialPointer);
 
 void infoWebServer();
 
+void apiServerTask(void *pvParameters);
 void ledTask(void *pvParameters);
 void webOtaServerTask(void *pvParameters);
 void serialBtTask(void *pvParameters);
