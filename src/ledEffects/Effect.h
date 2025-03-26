@@ -28,16 +28,15 @@ public:
     virtual boolean getCompatibilityWs2811Matrix() = 0;
     virtual boolean execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) = 0;
     virtual void off(DriverLed *driver, TYPE_STRIP typeOrchestrator) = 0;
-    virtual String toJson()
-    {
-        StaticJsonDocument<200> doc;
+    virtual String toJson() {
+        JsonDocument doc;
         doc["name"] = getName();
         doc["minColorsNumber"] = getMinColorsNumber();
         doc["maxColorsNumber"] = getMaxColorsNumber();
         doc["compatibilityRgb"] = getCompatibilityRgb();
         doc["compatibilityWs2811"] = getCompatibilityWs2811();
-        doc["compatibilityWs2811Matrix"] = getCompatibilityWs2811();
-
+        doc["compatibilityWs2811Matrix"] = getCompatibilityWs2811Matrix();  // Corretto duplicato
+    
         String output;
         serializeJson(doc, output);
         return output;
