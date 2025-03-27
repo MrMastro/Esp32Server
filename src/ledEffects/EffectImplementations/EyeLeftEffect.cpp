@@ -31,6 +31,17 @@ boolean EyeLeftEffect::getCompatibilityWs2811Matrix(){
 
 boolean EyeLeftEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
 {
+    std::vector<std::vector<int>> ledMatrix = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 1, 0, 0, 0, 0, 0},
+        {0, 1, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0}
+    };
+
 
     if (driver == nullptr)
     {
@@ -51,36 +62,11 @@ boolean EyeLeftEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInp
 
     case STEP_LIFE_LED_EFFECT::LOOP_STEP:
         if(driver->getMaxNumPixel(type) >= 64){
-            // Ciclo per i LED da 0 a 63
-            for (int i = 0; i < 64; i++) {
-                // Imposta il colore (0, 0, 0) per i LED da 0 a 62
-                if (i <= 62) {
-                    driver->sendStripData(type, RgbColor(0, 0, 0), i);
-                }
-                // Imposta il colore (255, 255, 255) per i LED 63
-                else if (i == 63) {
-                    driver->sendStripData(type, RgbColor(255, 255, 255), i);
-                }
-            }
+            displayLedMatrix(ledMatrix, 8, 8, 0, driver, type);
         }
         if (driver->getMaxNumPixel(type) >= 128) {
-            // Ciclo per i LED da 64 a 167
-            for (int i = 64; i <= 167; i++) {
-                // Imposta il colore (0, 0, 0) per i LED da 64 a 126
-                if (i <= 126) {
-                    driver->sendStripData(type, RgbColor(0, 0, 0), i);
-                }
-                // Imposta il colore (255, 255, 255) per i LED 127 e 128
-                else if (i == 127 || i == 128) {
-                    driver->sendStripData(type, RgbColor(255, 255, 255), i);
-                }
-                // Imposta il colore (0, 0, 0) per gli altri LED
-                else {
-                    driver->sendStripData(type, RgbColor(0, 0, 0), i);
-                }
-            }
+            displayLedMatrix(ledMatrix, 8, 8, 64, driver, type);
         }
-        driver->showData();
         break;
 
     case STEP_LIFE_LED_EFFECT::END_STEP:
@@ -108,4 +94,40 @@ void EyeLeftEffect::off(DriverLed *driver, TYPE_STRIP type)
 {
     // Spegne tutti i LED
     driver->clear(type);
+}
+
+void EyeLeftEffect::displayLedMatrix(std::vector<std::vector<int>>& matrix, int rows, int cols,int offset, DriverLed *driver, TYPE_STRIP type)
+{
+
+    std::vector<std::vector<int>> positions = {
+        {56, 55, 40, 39, 24, 23, 8, 7}, 
+        {57, 54, 41, 38, 25, 22, 9, 6}, 
+        {58, 53, 42, 37, 26, 21, 10, 5}, 
+        {59, 52, 43, 36, 27, 20, 11, 4}, 
+        {60, 51, 44, 35, 28, 19, 12, 3}, 
+        {61, 50, 45, 34, 29, 18, 13, 2}, 
+        {62, 49, 46, 33, 30, 17, 14, 1}, 
+        {63, 48, 47, 32, 31, 16, 15, 0}
+    };
+
+    int linearIndex = 0;
+    int valueMatrix = 0;
+    int i=0;
+    int j=0;
+    for (i = 0; i < rows; i++)
+    {
+        for (j = 0; j < cols; j++)
+        {
+            linearIndex = positions[i][j];
+            valueMatrix = matrix[i][j];
+            if(valueMatrix == 1){
+                driver->sendStripData(type, RgbColor(255, 255, 255), linearIndex+offset);
+            }else{
+                driver->sendStripData(type, RgbColor(0, 0, 0), linearIndex+offset);
+            }
+        }
+        
+    }
+    
+    driver->showData();
 }

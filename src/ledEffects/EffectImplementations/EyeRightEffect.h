@@ -16,6 +16,7 @@ public:
     boolean getCompatibilityWs2811Matrix();
     boolean execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService = nullptr) override;
     void off(DriverLed *driver, TYPE_STRIP type) override;
+    void displayLedMatrix(std::vector<std::vector<int>>& matrix, int rows, int cols,int offset, DriverLed *driver, TYPE_STRIP type);
 
 private:
     float brightness; // Livello di luminosità per il fading

@@ -14,6 +14,7 @@
 #include "ledEffects/EffectImplementations/EyeLeftEffect.h"
 #include "ledEffects/EffectImplementations/EyeUpEffect.h"
 #include "ledEffects/EffectImplementations/EyeDownEffect.h"
+//#include "ledEffects/EffectImplementations/EyeHungryEffect.h"
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
