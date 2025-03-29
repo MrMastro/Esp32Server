@@ -1,5 +1,5 @@
 #include "EyeRightEffect.h"
-
+#include "../CommonEffectObject.h"
 EyeRightEffect::EyeRightEffect() : brightness(255), increasing(false) {} // Inizializza la luminosità massima
 
 String EyeRightEffect::getName()
@@ -98,18 +98,6 @@ void EyeRightEffect::off(DriverLed *driver, TYPE_STRIP type)
 
 void EyeRightEffect::displayLedMatrix(std::vector<std::vector<int>>& matrix, int rows, int cols,int offset, DriverLed *driver, TYPE_STRIP type)
 {
-
-    std::vector<std::vector<int>> positions = {
-        {56, 55, 40, 39, 24, 23, 8, 7}, 
-        {57, 54, 41, 38, 25, 22, 9, 6}, 
-        {58, 53, 42, 37, 26, 21, 10, 5}, 
-        {59, 52, 43, 36, 27, 20, 11, 4}, 
-        {60, 51, 44, 35, 28, 19, 12, 3}, 
-        {61, 50, 45, 34, 29, 18, 13, 2}, 
-        {62, 49, 46, 33, 30, 17, 14, 1}, 
-        {63, 48, 47, 32, 31, 16, 15, 0}
-    };
-
     int linearIndex = 0;
     int valueMatrix = 0;
     int i=0;
@@ -118,7 +106,7 @@ void EyeRightEffect::displayLedMatrix(std::vector<std::vector<int>>& matrix, int
     {
         for (j = 0; j < cols; j++)
         {
-            linearIndex = positions[i][j];
+            linearIndex = LED_MATRIX_POSITIONS[i][j];
             valueMatrix = matrix[i][j];
             if(valueMatrix == 1){
                 driver->sendStripData(type, RgbColor(255, 255, 255), linearIndex+offset);

@@ -161,7 +161,7 @@ void initServices(HardwareSerial *serialPointer)
 
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("\n");
   Serial.println("Started");
   delay(10);

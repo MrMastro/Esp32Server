@@ -1,4 +1,5 @@
 #include "EyeMidEffect.h"
+//#include "../CommonEffectObject.h"
 
 EyeMidEffect::EyeMidEffect() : brightness(255), increasing(false) {} // Inizializza la luminosità massima
 

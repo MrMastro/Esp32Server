@@ -2,7 +2,7 @@
 
 #include "ledEffects/Effect.h"
 #include "ledEffects/EffectImplementations/MulticolorConstantEffect.h"
-#include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
+//#include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/BreathEffect.h"
 #include "ledEffects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/ConsumeColorEffect.h"
@@ -18,7 +18,7 @@
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
-    new ConstantUniqueColorEffect(),
+    //new ConstantUniqueColorEffect(),
     new ConsumeColorEffect(),
     new ProgressiveBarUniqueColorEffect(),
     new BreathEffect(),

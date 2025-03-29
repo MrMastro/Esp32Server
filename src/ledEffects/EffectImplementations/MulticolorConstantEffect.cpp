@@ -14,7 +14,7 @@ int MulticolorConstantEffect::getMaxColorsNumber()
 
 int MulticolorConstantEffect::getMinColorsNumber()
 {
-    return 2;
+    return 1;
 }
 
 boolean MulticolorConstantEffect::getCompatibilityRgb(){
