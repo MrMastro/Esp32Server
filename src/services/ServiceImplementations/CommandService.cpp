@@ -133,7 +133,9 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
     return res;
   }
 
-  if (!settingService->changeSetting("communicationMode", newCommunicationMode))
+  boolean operationDone = ((SettingService *)servicesCollector.getService("SettingService"))->changeSetting("communicationMode", newCommunicationMode);
+
+  if (!operationDone)
   {
     res = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
     res.setDescription("Error while set new communication");
