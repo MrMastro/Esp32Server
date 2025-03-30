@@ -208,7 +208,7 @@ void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms,
 
   if (actionWs2811Matrix)
   {
-    ws2811Orchestrator.stopEffect(effectInput, {colorRgb}, deltaTms);
+    ws2811MatrixOrchestrator.stopEffect(effectInput, {colorRgb}, deltaTms);
   }
 }
 

@@ -57,7 +57,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::STOP_EFFECT:
-    ((LedService *)getServiceByCollector("LedService"))->stopEffect(params.at(0), RgbColor(0, 0, 0), 100, false, false, true);
+    ((LedService *)getServiceByCollector("LedService"))->stopEffect(params.at(0), {RgbColor(0, 0, 0)}, 100, false, false, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::OFF_STRIPT:
