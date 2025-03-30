@@ -184,7 +184,7 @@ export default class MainController {
         let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check, ledModel.ws2811MatrixCheck);
         this.showWait();
         activeConnections.forEach( async (esp32SingleReference) => {
             let esp32Model = esp32SingleReference.espConnection;
@@ -199,7 +199,7 @@ export default class MainController {
         let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check, ledModel.ws2811MatrixCheck);
         this.showWait();
         activeConnections.forEach( async (esp32SingleReference) => {
             let esp32Model = esp32SingleReference.espConnection;

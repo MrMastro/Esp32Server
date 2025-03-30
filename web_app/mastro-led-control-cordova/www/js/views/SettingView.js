@@ -29,8 +29,11 @@ export default class SettingView {
         this.pinLedCinRgbInput = {};
         this.pinLedDinRgbInput = {};
         this.enableStripWs2811Input = {};
+        this.enableStripWs2811MatrixInput = {};
         this.numLedWs2811Input = {};
+        this.numLedWs2811MatrixInput = {};
         this.pinLedWs2811Input = {};
+        this.pinLedWs2811MatrixInput = {};
         //element btn and handling
         this.saveSettingsBtn = {};
         this.handlerSaveSettingsBtn = {};
@@ -137,6 +140,14 @@ export default class SettingView {
                                             <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-lg-center align-items-lg-center justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedWs2811Input" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
                                         </div>
                                     </div>
+                                    <div id="Settings-Panel-WS2811Matrix" class="d-flex d-xl-flex flex-row align-items-center justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center ContainAction" style="height: 95px;">
+                                        <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: initial;">Matrice WS2811</label></div>
+                                        <div id="Settings-panel-RGB-1" class="text-center d-flex d-lg-flex d-xl-flex flex-row justify-content-lg-center align-items-lg-center justify-content-xl-center align-items-xl-center containerOfComponent">
+                                            <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-lg-center align-items-lg-center justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="enableStripWs2811MatrixInput" class="d-xl-flex justify-content-xl-center" type="checkbox" style="width: 50px;height: 30px;" /><label class="form-label">Abilitato</label></div>
+                                            <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-lg-center align-items-lg-center justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;"><input id="numLedWs2811MatrixInput" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 55px;" /><label class="form-label" style="min-width: 72px;">Qt Pixel</label></div>
+                                            <div class="d-flex d-xl-flex flex-column flex-shrink-1 justify-content-center align-items-center m-auto justify-content-lg-center align-items-lg-center justify-content-xl-end align-items-xl-center" style="width: 88px;height: 65px;margin: initial;margin-top: initial;margin-left: initial;margin-right: 0px;"><input id="pinLedWs2811MatrixInput" class="d-xl-flex justify-content-xl-center" type="number" style="max-width: 53px;" /><label class="form-label">Pin Din</label></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div id="Settings-Panel-InitialEffects" class="border rounded-0 d-flex flex-column visible" style="margin-top: 10px;margin-bottom: 10px;">
                                     <h4>Informazioni effetto iniziale</h4>
@@ -185,8 +196,11 @@ export default class SettingView {
         this.pinLedCinRgbInput = document.querySelector('#pinLedCinRgbInput');
         this.pinLedDinRgbInput = document.querySelector('#pinLedDinRgbInput');
         this.enableStripWs2811Input = document.querySelector('#enableStripWs2811Input');
+        this.enableStripWs2811MatrixInput = document.querySelector('#enableStripWs2811MatrixInput');
         this.numLedWs2811Input = document.querySelector('#numLedWs2811Input');
+        this.numLedWs2811MatrixInput = document.querySelector('#numLedWs2811MatrixInput');
         this.pinLedWs2811Input = document.querySelector('#pinLedWs2811Input');
+        this.pinLedWs2811MatrixInput = document.querySelector('#pinLedWs2811MatrixInput');
 
         this.saveSettingsBtn = document.querySelector('.saveSettingsBtn');
 
@@ -215,15 +229,11 @@ export default class SettingView {
             this.pinLedCinRgbInput.value = settings.ledSettings.pinLedCinRgb;
             this.pinLedDinRgbInput.value = settings.ledSettings.pinLedDinRgb;
             this.enableStripWs2811Input.checked = settings.ledSettings.enableStripWs2811;
+            this.enableStripWs2811MatrixInput.checked = settings.ledSettings.enableStripWs2811Matrix;
             this.numLedWs2811Input.value = settings.ledSettings.numLedWs2811;
+            this.numLedWs2811MatrixInput.value = settings.ledSettings.numLedWs2811Matrix;
             this.pinLedWs2811Input.value = settings.ledSettings.pinLedWs2811;
-
-            // document.querySelector('#enableStripRgbInput').checked = settings.ledSettings.enableStripRgb;
-            // document.querySelector('#pinLedCinRgbInput').value = settings.ledSettings.pinLedCinRgb;
-            // document.querySelector('#pinLedDinRgbInput').value = settings.ledSettings.pinLedDinRgb;
-            // document.querySelector('#enableStripWs2811Input').checked = settings.ledSettings.enableStripWs2811;
-            // document.querySelector('#numLedWs2811Input').value = settings.ledSettings.numLedWs2811;
-            // document.querySelector('#pinLedWs2811Input').value = settings.ledSettings.pinLedWs2811;
+            this.pinLedWs2811MatrixInput.value = settings.ledSettings.pinLedWs2811Matrix;
         }
     }
 
@@ -246,8 +256,11 @@ export default class SettingView {
             document.querySelector('#pinLedDinRgbInput').value,
             document.querySelector('#pinLedCinRgbInput').value,
             document.querySelector('#enableStripWs2811Input').checked,
+            document.querySelector('#enableStripWs2811MatrixInput').checked,
             document.querySelector('#numLedWs2811Input').value,
-            document.querySelector('#pinLedWs2811Input').value
+            document.querySelector('#numLedWs2811MatrixInput').value,
+            document.querySelector('#pinLedWs2811Input').value,
+            document.querySelector('#pinLedWs2811MatrixInput').value
         );
         return model;
     }

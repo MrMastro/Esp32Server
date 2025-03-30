@@ -74,7 +74,7 @@ export default class MainView {
                             <div class="text-center border rounded-pill d-flex d-md-flex d-xxl-flex flex-row justify-content-center align-items-center align-content-center align-self-center m-auto justify-content-lg-center justify-content-xxl-center componentForm rangeForm dark" value="timing" name="timing" min="0" max="1000" step="1" title="Value" data-bs-theme="dark" style="padding: 0px;padding-right: 12px;padding-left: 12px;padding-top: 10px;width: auto;--bs-body-bg: #2b3035;background: var(--bs-body-bg);min-width: 200px;" data-bs-target="#navcol-3">
                                 <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center align-self-center flex-wrap justify-content-lg-center align-items-lg-center" style="min-width: auto;margin-right: 5px;margin-top: 2px;margin-left: 5px;/*text-align: center;*/padding: 0;width: auto;padding-top: 0;padding-right: 0;padding-bottom: 0;padding-left: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="rgbCheck" class="form-check-input" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="RGB" checked /><label class="form-check-label text-center d-flex flex-fill justify-content-center align-items-center" for="RGB" style="position: relative;margin-right: 0px;margin-left: 0px;text-align: center;max-width: initial;min-width: 75px;">RGB</label></div>
                                 <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center justify-content-lg-center align-items-lg-center" style="padding: 0;padding-left: 0;padding-right: 0;margin-right: 5px;padding-top: 0;margin-top: 2px;min-width: auto;margin-left: 5px;text-align: center;width: auto;padding-bottom: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="ws2811Check" class="form-check-input d-flex d-lg-flex justify-content-center align-items-center justify-content-lg-center align-items-lg-center" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="WS2811" checked /><label class="form-check-label d-flex d-lg-flex flex-fill justify-content-center align-items-center align-self-center justify-content-lg-center align-items-lg-center" for="WS2811" style="margin-left: 0px;margin-right: 0px;position: relative;text-align: center;max-width: initial;min-width: 75px;">WS2811</label></div>
-                                <div class="d-flex flex-row justify-content-center align-items-center"></div>
+                                <div class="form-check text-center d-flex d-lg-flex flex-column justify-content-center align-items-center align-content-center justify-content-lg-center align-items-lg-center" style="padding: 0;padding-left: 0;padding-right: 0;margin-right: 5px;padding-top: 0;margin-top: 2px;min-width: auto;margin-left: 5px;text-align: center;width: auto;padding-bottom: 0;margin-bottom: 2px;" data-bs-theme="dark"><input id="ws2811MatrixCheck" class="form-check-input d-flex d-lg-flex justify-content-center align-items-center justify-content-lg-center align-items-lg-center" type="checkbox" style="margin-left: 0px;width: 30px;height: 30px;" name="WS2811" checked /><label class="form-check-label d-flex d-lg-flex flex-fill justify-content-center align-items-center align-self-center justify-content-lg-center align-items-lg-center" for="ws2811MatrixCheck" style="margin-left: 0px;margin-right: 0px;position: relative;text-align: center;max-width: initial;min-width: 75px;">Matrice</label></div>
                             </div>
                         </div>
                     </div>
@@ -111,6 +111,7 @@ export default class MainView {
         this.groupColorMainView.render(ledMainModel.colors, false, true);
         document.querySelector('#rgbCheck').checked = ledMainModel.rgbCheck;
         document.querySelector('#ws2811Check').checked = ledMainModel.ws2811Check;
+        document.querySelector('#ws2811MatrixCheck').checked = ledMainModel.ws2811MAtrixCheck;
         if (Array.isArray(listEffects)) {
             if (listEffects.length > 0) {
                 this.createOptionEffects(listEffects);
@@ -152,9 +153,10 @@ export default class MainView {
         let colors = this.groupColorMainView.getColors();
         let rgbCheck = document.querySelector('#rgbCheck').checked;
         let ws2811Check = document.querySelector('#ws2811Check').checked;
+        let ws2811MatrixCheck = document.querySelector('#ws2811MatrixCheck').checked;
         let effect = document.querySelector('.effectInput').value;
         let textFieldActualHost = this.getFieldIp();
-        return new LedMainModel(this.aPConnection.value, textFieldActualHost, effect, this.getTimingInput(), colors, rgbCheck, ws2811Check)
+        return new LedMainModel(this.aPConnection.value, textFieldActualHost, effect, this.getTimingInput(), colors, rgbCheck, ws2811Check, ws2811MatrixCheck)
     }
 
     cleanOptionEffects() {

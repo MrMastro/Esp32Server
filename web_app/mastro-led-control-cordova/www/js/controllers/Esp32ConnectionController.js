@@ -59,7 +59,7 @@ export default class Esp32ConnectionController {
         this.waitView.show();
         try {
             await this.esp32ConnectionService.setLinkedDeviceSearch();
-            await TimeUtils.processAndWait(this.esp32ConnectionView.render, this.localStorageService.getEsp32InfoDeviceMem());
+            await TimeUtils.processAndWait(this.esp32ConnectionView.render.bind(this.esp32ConnectionView), this.localStorageService.getEsp32InfoDeviceMem());
         } catch (error) {
             console.log("err: " + error);
             if(DefaultConstants.debugApp){
