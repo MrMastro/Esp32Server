@@ -73,7 +73,6 @@ export default class SettingView {
                                         <div class="container containerLabel" style="height: auto;max-height: 25px;"><label class="form-label text-center form-label-title" style="font-size: 12px;text-align: left;min-width: 90px;">Tipologia di comunicazione</label></div>
                                         <div class="text-center d-xl-flex flex-column justify-content-xl-center align-items-xl-center containerOfComponent">
                                             <div class="text-center d-xl-flex justify-content-xl-center align-items-xl-center"><select id="communicationModeInput" class="border rounded-pill form-select-sm d-flex justify-content-center" style="font-size: 11px;text-align: center;width: 175px;" value name="comunicationMode" required>
-                                                    <option value="NONE" selected></option>
                                                     <option value="AP_MODE">Access Point</option>
                                                     <option value="WIFI_MODE">WiFi</option>
                                                     <option value="BLUETOOTH_MODE">Bluetooth</option>
