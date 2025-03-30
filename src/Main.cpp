@@ -7,7 +7,7 @@ AsyncWebServer webServer(80);
 BluetoothSerial SerialBT;
 
 // Deprecated: MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
-NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Matrix = nullptr;
+NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> *ws2811Matrix = nullptr;
 NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip = nullptr;
 LEDStripDriver *rgbStrip = nullptr;
 DriverLed *myDriver;
@@ -145,9 +145,9 @@ void initServices(HardwareSerial *serialPointer)
   // init LedService
   rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
   ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
-  ws2811Matrix = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(64,15);
+  ws2811Matrix = new NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811Matrix, s.ledSettings.pinLedWs2811Matrix);
   myDriver = new DriverLed(ws2811Matrix, ws2811Strip, rgbStrip);
-  ledService = LedService(myDriver, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
+  ledService = LedService(myDriver, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
 
   servicesCollector.attachServer(&mastroServer);
   servicesCollector.addService(&commandService, "CommandService", &s);
@@ -317,7 +317,7 @@ void ledTask(void *pvParameters)
   {
     msg = formatMsg("First effect running: {} | time: {} | colors: {} ", {s.initialEffect, String(s.initialDeltaT), vectorRgbColorToString(rgbColors)});
     serialService.logInfoln(msg, "MAIN");
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, rgbColors, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, rgbColors, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
   }
 
   // Loop principale del task
@@ -341,6 +341,14 @@ void ledTask(void *pvParameters)
       if (s.ledSettings.enableStripWs2811)
       {
         executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
+        if (!executedCorrectly)
+        {
+          vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico
+        }
+      }
+      if (s.ledSettings.enableStripWs2811Matrix)
+      {
+        executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runWs2811MatrixLifeCycle();
         if (!executedCorrectly)
         {
           vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico

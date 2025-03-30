@@ -15,6 +15,7 @@ void setEffectWs2811(AsyncWebServerRequest *request)
     int ms = request->arg("timing").toInt();
     boolean actionRgb = request->arg("rgbAction").equalsIgnoreCase("true");
     boolean actionWs2811 = request->arg("ws2811Action").equalsIgnoreCase("true");
+    boolean actionWs2811Matrix = request->arg("ws2811MatrixAction").equalsIgnoreCase("true");//TODO - portare in app
 
     if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
     {
@@ -29,7 +30,7 @@ void setEffectWs2811(AsyncWebServerRequest *request)
     else
     {
         RgbColor(r, g, b);
-        ((LedService *)servicesCollector.getService("LedService"))->startEffect(effect, RgbColor(r, g, b), ms, actionRgb, actionWs2811);
+        ((LedService *)servicesCollector.getService("LedService"))->startEffect(effect, RgbColor(r, g, b), ms, actionRgb, actionWs2811, actionWs2811Matrix);
         response = BasicResponse(HTTP_CODE::OK);
     }
 
@@ -49,6 +50,7 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
     int ms = request->arg("timing").toInt();
     boolean actionRgb = request->arg("rgbAction").equalsIgnoreCase("true");
     boolean actionWs2811 = request->arg("ws2811Action").equalsIgnoreCase("true");
+    boolean actionWs2811Matrix = request->arg("ws2811MatrixAction").equalsIgnoreCase("true");//TODO - portare in app
 
     if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
     {
@@ -63,7 +65,7 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
     else
     {
         RgbColor(r, g, b);
-        ((LedService *)servicesCollector.getService("LedService"))->stopEffect(effect, RgbColor(r, g, b), ms, actionRgb, actionWs2811);
+        ((LedService *)servicesCollector.getService("LedService"))->stopEffect(effect, RgbColor(r, g, b), ms, actionRgb, actionWs2811, actionWs2811Matrix);
         response = BasicResponse(HTTP_CODE::OK);
     }
 
@@ -119,7 +121,7 @@ void setEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t le
         rgbColors.push_back(RgbColor(c.r, c.g, c.b));
     }
 
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(ledRequest.effect, rgbColors, ledRequest.ms, ledRequest.rgbAction, ledRequest.ws2811Action);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(ledRequest.effect, rgbColors, ledRequest.ms, ledRequest.rgbAction, ledRequest.ws2811Action, ledRequest.ws2811MatrixAction);
     response = BasicResponse(HTTP_CODE::OK);
 
     String jsonResponse = dtoToJson(response);
@@ -174,7 +176,7 @@ void stopEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t l
         rgbColors.push_back(RgbColor(c.r, c.g, c.b));
     }
 
-    ((LedService *)servicesCollector.getService("LedService"))->stopEffect(ledRequest.effect, rgbColors, ledRequest.ms, ledRequest.rgbAction, ledRequest.ws2811Action);
+    ((LedService *)servicesCollector.getService("LedService"))->stopEffect(ledRequest.effect, rgbColors, ledRequest.ms, ledRequest.rgbAction, ledRequest.ws2811Action, ledRequest.ws2811MatrixAction);
     response = BasicResponse(HTTP_CODE::OK);
 
     String jsonResponse = dtoToJson(response);

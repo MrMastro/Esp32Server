@@ -54,7 +54,7 @@ boolean MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFF
             RgbColor currentColor = colorsInput[i % colorsInput.size()];
             driver->sendStripData(type, currentColor, i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::END_STEP:

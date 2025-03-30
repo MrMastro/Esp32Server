@@ -6,25 +6,18 @@ LedService::LedService()
   isAttachedLed = false;
   rgbOrchestrator = EffectOrchestrator();
   ws2811Orchestrator = EffectOrchestrator();
+  ws2811MatrixOrchestrator = EffectOrchestrator();
 }
 
-// Create a led service
-//LedService::LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811)
-// {
-//   DriverLed *driver = new DriverLed(ledStriptInput, rgbLedStriptInput);
-//   rgbOrchestrator = EffectOrchestrator("RGB player", driver, TYPE_STRIP::RGB, serialService);
-//   ws2811Orchestrator = EffectOrchestrator("WS2811 player", driver, TYPE_STRIP::WS2811, serialService);
-//   setOperativeRgbOrchestrator(enableRgb);
-//   setOperativeWs2811Orchestrator(enableWs2811);
-// }
-
-LedService::LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811)
+LedService::LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811, boolean enableWs2811Matrix)
 {
   DriverLed *driver = driverInput;
   rgbOrchestrator = EffectOrchestrator("RGB player", driver, TYPE_STRIP::RGB, serialService);
   ws2811Orchestrator = EffectOrchestrator("WS2811 player", driver, TYPE_STRIP::WS2811, serialService);
+  ws2811MatrixOrchestrator = EffectOrchestrator("WS2811 Matrix player", driver, TYPE_STRIP::WS2811_MATRIX, serialService);
   setOperativeRgbOrchestrator(enableRgb);
   setOperativeWs2811Orchestrator(enableWs2811);
+  setOperativeWs2811MatrixOrchestrator(enableWs2811Matrix);
 }
 
 
@@ -38,6 +31,7 @@ void LedService::onInitServiceCollector()
   serialService = ((SerialService *)servicesCollector.getService("SerialService"));
   rgbOrchestrator.attachSerialService(serialService);
   ws2811Orchestrator.attachSerialService(serialService);
+  ws2811MatrixOrchestrator.attachSerialService(serialService);
 }
 
 // Prepare pin that you have attached with method attach led, for led service prepare one led. this method is executed when you call attachPin.
@@ -116,6 +110,11 @@ void LedService::setOperativeWs2811Orchestrator(boolean enable)
   ws2811Orchestrator.setOperative(enable);
 }
 
+void LedService::setOperativeWs2811MatrixOrchestrator(boolean enable)
+{
+  ws2811MatrixOrchestrator.setOperative(enable);
+}
+
 boolean LedService::isOperativeRgbOrchestrator()
 {
     return rgbOrchestrator.isOperative();
@@ -126,8 +125,13 @@ boolean LedService::isOperative2811Orchestrator()
     return ws2811Orchestrator.isOperative();
 }
 
+boolean LedService::isOperative2811MatrixOrchestrator()
+{
+    return ws2811MatrixOrchestrator.isOperative();
+}
+
 // Metodo che tramite parametri da le direttive ai due orchestratori su come iniziare un effetto
-void LedService::startEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript)
+void LedService::startEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript, boolean actionWs2811Matrix)
 {
   if (!isAttachedLed)
   {
@@ -148,10 +152,15 @@ void LedService::startEffect(String effectInput, RgbColor colorRgb, int deltaTms
   {
     ws2811Orchestrator.startEffect(effectInput, {colorRgb}, deltaTms);
   }
+
+  if (actionWs2811Matrix)
+  {
+    ws2811MatrixOrchestrator.startEffect(effectInput, {colorRgb}, deltaTms);
+  }
 }
 
 // Metodo che tramite parametri da le direttive ai due orchestratori su come iniziare un effetto
-void LedService::startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript)
+void LedService::startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript, boolean actionWs2811Matrix)
 {
     if (!isAttachedLed)
   {
@@ -173,10 +182,15 @@ void LedService::startEffect(String effect, std::vector<RgbColor> colorsRgb, int
   {
     ws2811Orchestrator.startEffect(effect, colorsRgb, deltaTmsInput);
   }
+
+  if (actionWs2811Matrix)
+  {
+    ws2811MatrixOrchestrator.startEffect(effect, colorsRgb, deltaTmsInput);
+  }
 }
 
 // Metodo che tramite parametri da le direttive ai due orchestratori su come finire un effetto
-void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811)
+void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811, boolean actionWs2811Matrix)
 {
   String colorString = formatMsg("[{},{},{}]", {String(colorRgb.R), String(colorRgb.G), String(colorRgb.B)});
   String msg = formatMsg("stop: {}, colorRgb: {}, deltaTms: {}, actionRgb: {}, actionWs2811: {}", {effectInput, colorString, String(deltaTms), String(actionRgb), String(actionWs2811)});
@@ -191,10 +205,15 @@ void LedService::stopEffect(String effectInput, RgbColor colorRgb, int deltaTms,
   {
     ws2811Orchestrator.stopEffect(effectInput, {colorRgb}, deltaTms);
   }
+
+  if (actionWs2811Matrix)
+  {
+    ws2811Orchestrator.stopEffect(effectInput, {colorRgb}, deltaTms);
+  }
 }
 
 // Metodo che tramite parametri da le direttive ai due orchestratori su come finire un effetto
-void LedService::stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript)
+void LedService::stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript, boolean actionWs2811Matrix)
 {
     if (!isAttachedLed)
   {
@@ -214,6 +233,11 @@ void LedService::stopEffect(String effect, std::vector<RgbColor> colorsRgb, int 
   if (actionWs2811Stript)
   {
     ws2811Orchestrator.stopEffect(effect, colorsRgb, deltaTmsInput);
+  }
+
+  if (actionWs2811Matrix)
+  {
+    ws2811MatrixOrchestrator.stopEffect(effect, colorsRgb, deltaTmsInput);
   }
 }
 
@@ -241,6 +265,19 @@ boolean LedService::runWs2811LifeCycle()
   }
   return ws2811Orchestrator.runLifeCycle();
 }
+
+//return true if the effect is played, else false 
+boolean LedService::runWs2811MatrixLifeCycle()
+{
+  if (!isAttachedLed)
+  {
+    // todo throwError(ERROR_CODE::SERVICE_ERROR, "ws2811 Stript not attached", "runEffectWs2811");
+    serialService->logError("ws2811 Matrix not attached", "LedService", "runWs2811MatrixLifeCycle");
+    return false;
+  }
+  return ws2811MatrixOrchestrator.runLifeCycle();
+}
+
 
 // Return all avaible effect that the orchestrator can play
 std::vector<Effect*> LedService::getAvaibleEffects()

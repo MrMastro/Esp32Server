@@ -54,7 +54,7 @@ boolean StarDustEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepIn
 
     case STEP_LIFE_LED_EFFECT::LOOP_STEP:
         updateStars(driver, type);
-        driver->showData();  // Mostra i cambiamenti
+        driver->showData(type);  // Mostra i cambiamenti
         delay(deltaTimeMsInput);
         break;
 

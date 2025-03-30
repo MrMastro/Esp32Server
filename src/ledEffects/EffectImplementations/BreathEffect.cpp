@@ -56,7 +56,7 @@ boolean BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInpu
             RgbColor color = RgbColor(0, 0, 0);
             driver->sendStripData(type, color, i);
         }
-        driver->showData();
+        driver->showData(type);
         delay(deltaTimeMsInput);
         break;
 
@@ -71,7 +71,7 @@ boolean BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInpu
                                            uint8_t(baseColor.B * brightness));
             driver->sendStripData(type, fadedColor, i);
         }
-        driver->showData();
+        driver->showData(type);
 
         // Aggiorna il fattore di luminosità
         if (increasing)
@@ -103,7 +103,7 @@ boolean BreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInpu
         {
             driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::OFF:

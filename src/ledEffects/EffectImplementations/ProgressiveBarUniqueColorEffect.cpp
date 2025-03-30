@@ -44,7 +44,7 @@ boolean ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
             driver->sendStripData(type,colorInput,pixel);
-            driver->showData();
+            driver->showData(type);
             delay(deltaTimeMsInput);
         }
     }
@@ -54,7 +54,7 @@ boolean ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_
         {
             driver->sendStripData(type,colorInput,pixel);
         }
-        driver->showData();
+        driver->showData(type);
     }
     else if (stepInput == STEP_LIFE_LED_EFFECT::END_STEP)
     {

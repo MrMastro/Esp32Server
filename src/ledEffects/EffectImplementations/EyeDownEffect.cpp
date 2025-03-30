@@ -77,7 +77,7 @@ boolean EyeDownEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInp
         {
             driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::OFF:
@@ -119,5 +119,5 @@ void EyeDownEffect::displayLedMatrix(std::vector<std::vector<int>>& matrix, int 
         
     }
     
-    driver->showData();
+    driver->showData(type);
 }

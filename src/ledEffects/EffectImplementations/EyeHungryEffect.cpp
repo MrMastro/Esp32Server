@@ -117,7 +117,7 @@ boolean EyeHungryEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepI
         {
             driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::OFF:
@@ -154,5 +154,5 @@ void EyeHungryEffect::displayLedMatrix(std::vector<std::vector<RgbColor>>& matri
         
     }
     
-    driver->showData();
+    driver->showData(type);
 }

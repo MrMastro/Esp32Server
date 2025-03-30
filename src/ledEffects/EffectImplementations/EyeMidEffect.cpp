@@ -183,7 +183,7 @@ boolean EyeMidEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInpu
             driver->sendStripData(type, RgbColor(0,0,0),62+64);
             driver->sendStripData(type, RgbColor(0,0,0),63+64);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::END_STEP:
@@ -193,7 +193,7 @@ boolean EyeMidEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInpu
         {
             driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::OFF:

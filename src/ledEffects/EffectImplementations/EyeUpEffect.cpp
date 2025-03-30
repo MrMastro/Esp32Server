@@ -77,7 +77,7 @@ boolean EyeUpEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput
         {
             driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::OFF:
@@ -119,7 +119,7 @@ void EyeUpEffect::displayLedMatrix(std::vector<std::vector<int>>& matrix, int ro
     }
     
 
-    driver->showData();
+    driver->showData(type);
 }
 
 // int EyeUpEffect::getValore(std::vector<std::vector<int>>& matrix, int x, int y) {

@@ -53,7 +53,7 @@ boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
             }
             // String s = "[" + String(colorVariable.R) + String(colorVariable.G) + String(colorVariable.B) + "]";
             // serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
-            driver->showData();
+            driver->showData(type);
             delay(deltaTimeMsInput);
         }
     }
@@ -67,7 +67,7 @@ boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
                 {
                     driver->sendStripData(type, colorVariable, i);
                 }
-                driver->showData();
+                driver->showData(type);
                 String s = "[" + String(colorVariable.R) +" , "+ String(colorVariable.G) +" , "+ String(colorVariable.B) + "]";
                 serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
                 delay(deltaTimeMsInput);
@@ -80,7 +80,7 @@ boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
                 {
                     driver->sendStripData(type, colorVariable, i);
                 }
-                driver->showData();
+                driver->showData(type);
                 delay(deltaTimeMsInput);
             }           
     }
@@ -93,7 +93,7 @@ boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
             {
                 driver->sendStripData(type, colorVariable, i);
             }
-            driver->showData();
+            driver->showData(type);
             delay(deltaTimeMsInput);
         }
         off(driver, type);
