@@ -37,7 +37,7 @@ SerialService serialService;
 #define STACK_SIZE_BLUETOOTH_SERVER   8192
 #define STACK_SIZE_LED_EFFECTS        4096
 #define STACK_SIZE_DELAYED_TASK       4096
-#define STACK_SIZE_SERIAL             2048
+#define STACK_SIZE_SERIAL             8192
 
 // #define STACK_SIZE_SERVER             10000
 // #define STACK_SIZE_BLUETOOTH_SERVER   10000
@@ -372,6 +372,7 @@ void test()
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
 {
+  servicesCollector.takeExclusiveExecution();
   String dataString = "";
   for (int i = 0; i < len; i++)
   {
@@ -381,9 +382,12 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   {
     ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(dataString);
   }
+  servicesCollector.freeExclusiveExecution();
 }
 
 void recvMsgBySerial(String data)
 {
+  servicesCollector.takeExclusiveExecution();
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
+  servicesCollector.freeExclusiveExecution();
 }

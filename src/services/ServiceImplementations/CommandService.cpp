@@ -52,6 +52,14 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     ((LedService *)getServiceByCollector("LedService"))->startEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 255), 100, false, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
+  case CMD::START_EFFECT:
+    ((LedService *)getServiceByCollector("LedService"))->startEffect(params.at(0), RgbColor(0, 0, 0), 100, false, false, true);
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    break;
+  case CMD::STOP_EFFECT:
+    ((LedService *)getServiceByCollector("LedService"))->stopEffect(params.at(0), RgbColor(0, 0, 0), 100, false, false, true);
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    break;
   case CMD::OFF_STRIPT:
     ((LedService *)getServiceByCollector("LedService"))->stopEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 0), 100, true, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
@@ -115,6 +123,8 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
 
   String newCommunicationMode = params.at(0);
   COMMUNICATION_MODE cm = communicationModeStringToEnum(newCommunicationMode);
+
+  serialService->logInfoln("qui","changeCommunicationMode");
 
   if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
   {

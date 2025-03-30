@@ -11,8 +11,10 @@ enum class CMD
   LED_OFF,
   LED_TOGGLE,
   START_PROGRESS_BAR,
+  START_EFFECT,                 //start_effect,<name_effect>,<rgbColors>,<ms>,<rbg_e>,<ws2811_s_e>,<matrix_e>
+  STOP_EFFECT,                  //stop_effect,<name_effect>,<rgbColors>,<ms>,<rbg_e>,<ws2811_s_e>,<matrix_e>
   OFF_STRIPT,
-  CHANGE_COMMUNICATION_MODE,
+  CHANGE_COMMUNICATION_MODE,    //change_communication_mode,<AP_MODE||WIFI_MODE||BLUETOOTH_MODE||> => change_communication_mode,BLUETOOTH_MODE, | change_communication_mode,WIFI_MODE
   REBOOT,
   INFO,
   INFO_IP,
@@ -25,6 +27,8 @@ const std::pair<CMD, String> CMD_PAIR[] = {
     {CMD::LED_OFF, "led_off"},
     {CMD::LED_TOGGLE, "led_toggle"},
     {CMD::START_PROGRESS_BAR, "start_progress_bar"},
+    {CMD::START_EFFECT, "start_effect"},
+    {CMD::STOP_EFFECT, "stop_effect"},
     {CMD::OFF_STRIPT, "off_stript"},
     {CMD::CHANGE_COMMUNICATION_MODE, "change_communication_mode"},
     {CMD::REBOOT, "reboot"},
