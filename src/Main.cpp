@@ -1,5 +1,6 @@
 #include "Main.h"
 
+boolean AP_MODE_PAUSE_LED = false;
 int ledPin = 2;
 SettingsModel s;
 
@@ -29,7 +30,7 @@ SerialService serialService;
 // Definizione delle priorità
 #define PRIORITY_SERVER               (configMAX_PRIORITIES - 3)
 #define PRIORITY_BLUETOOTH_SERVER     (configMAX_PRIORITIES - 3)
-#define PRIORITY_LED_EFFECTS          (configMAX_PRIORITIES - 5)
+#define PRIORITY_LED_EFFECTS          (configMAX_PRIORITIES - 6)
 #define PRIORITY_DELAYED_TASK         (configMAX_PRIORITIES - 7)
 #define PRIORITY_SERIAL               (configMAX_PRIORITIES - 10)
 
@@ -65,6 +66,7 @@ void setup_communication(SettingsModel sm)
   case COMMUNICATION_MODE::AP_MODE:
     serialService.logInfoln("Communication mode is AP, init AP web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    AP_MODE_PAUSE_LED = true;
     initRoutes(mastroServer);
     infoWebServer();
     break;
@@ -188,7 +190,7 @@ void setup(void)
   }
   xTaskCreate(ledTask, "LedTaskExecution", STACK_SIZE_LED_EFFECTS, NULL, PRIORITY_LED_EFFECTS, NULL);
   xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
-  // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
+  //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 
   serialService.logInfoln("Init procedure completed", "MAIN");
 }
@@ -391,3 +393,18 @@ void recvMsgBySerial(String data)
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
   servicesCollector.freeExclusiveExecution();
 }
+
+//NOTE
+// [env:Esp32Com]
+// platform = espressif32 @ 6.8.1
+// platform = espressif32
+// board = esp32doit-devkit-v1
+// framework = arduino
+// lib_deps = 
+// 	makuna/NeoPixelBus@^2.8.2
+// 	makuna/NeoPixelBus
+// 	esphome/ESPAsyncWebServer-esphome
+// 	robtillaart/ANSI@^0.3.2
+// 	bblanchon/ArduinoJson@^7.2.1
+// 	robtillaart/ANSI
+// 	bblanchon/ArduinoJson
