@@ -22,6 +22,9 @@ class DriverLed{
         NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> *ws2811Matrix;
         LEDStripDriver *rgbStrip;
         RgbColor colorRgbMemorized;
+        boolean enableStripRgb;
+        boolean enableStripWs2811;
+        boolean enableStripWs2811Matrix;
 };
 
 #endif

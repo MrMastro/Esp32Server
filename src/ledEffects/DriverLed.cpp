@@ -3,6 +3,9 @@
 
 DriverLed::DriverLed()
 {
+    enableStripRgb = false;
+    enableStripWs2811 = false;
+    enableStripWs2811Matrix = false;
     ws2811Matrix = nullptr;
     ws2811Strip = nullptr;
     rgbStrip = nullptr;
@@ -15,15 +18,19 @@ DriverLed::DriverLed(NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> *ws2811MatrixI
     rgbStrip = rgbStripInput;
     ws2811Matrix = ws2811MatrixInput;
 
-    ws2811Strip->Begin();
-    delay(100);
-    ws2811Strip->Show();
-    delay(100);
+    if(ws2811Strip != nullptr){
+        ws2811Strip->Begin();
+        delay(100);
+        ws2811Strip->Show();
+        delay(100);
+    }
 
-    ws2811Matrix->Begin();
-    delay(100);
-    ws2811Matrix->Show();
-    delay(100);
+    if(ws2811Matrix != nullptr){
+        ws2811Matrix->Begin();
+        delay(100);
+        ws2811Matrix->Show();
+        delay(100);
+    }
 }
 
 int DriverLed::getMaxNumPixel(TYPE_STRIP type)
@@ -31,13 +38,19 @@ int DriverLed::getMaxNumPixel(TYPE_STRIP type)
     switch (type)
     {
     case TYPE_STRIP::RGB:
-        return 1;
+        if(rgbStrip != nullptr){
+            return 1;
+        }
         break;
     case TYPE_STRIP::WS2811:
-        return ws2811Strip->PixelCount();
+        if(ws2811Strip != nullptr){
+            return ws2811Strip->PixelCount();
+        }
         break;
     case TYPE_STRIP::WS2811_MATRIX:
-        return ws2811Matrix->PixelCount();
+        if(ws2811Matrix != nullptr){
+            return ws2811Matrix->PixelCount();
+        }
         break;
     default:
         break;
@@ -50,13 +63,19 @@ RgbColor DriverLed::getColorPixel(uint16_t indexPixel, TYPE_STRIP type)
     switch (type)
     {
     case TYPE_STRIP::RGB:
-        return colorRgbMemorized;
+        if(rgbStrip != nullptr){
+            return colorRgbMemorized;
+        }
         break;
     case TYPE_STRIP::WS2811:
-        return ws2811Strip->GetPixelColor(indexPixel);
+        if(ws2811Strip != nullptr){
+            return ws2811Strip->GetPixelColor(indexPixel);
+        }
         break;
     case TYPE_STRIP::WS2811_MATRIX:
-        return ws2811Matrix->GetPixelColor(indexPixel);
+        if(ws2811Matrix != nullptr){
+            return ws2811Matrix->GetPixelColor(indexPixel);
+        }
         break;
     default:
         break;
@@ -68,14 +87,20 @@ void DriverLed::sendStripData(TYPE_STRIP type, RgbColor colorInput, uint16_t ind
     switch (type)
     {
     case TYPE_STRIP::RGB:
-        colorRgbMemorized = colorInput;
-        rgbStrip->setColor(colorInput.R, colorInput.G, colorInput.B);
+        if(rgbStrip != nullptr){
+            colorRgbMemorized = colorInput;
+            rgbStrip->setColor(colorInput.R, colorInput.G, colorInput.B);
+        }
         break;
     case TYPE_STRIP::WS2811:
-        ws2811Strip->SetPixelColor(indexPixel, colorInput);
+        if(ws2811Strip != nullptr){
+            ws2811Strip->SetPixelColor(indexPixel, colorInput);
+        }
         break;
     case TYPE_STRIP::WS2811_MATRIX:
-        ws2811Matrix->SetPixelColor(indexPixel, colorInput);
+        if(ws2811Matrix != nullptr){
+            ws2811Matrix->SetPixelColor(indexPixel, colorInput);
+        }
         break;
     default:
         break;
@@ -88,10 +113,14 @@ void DriverLed::showData(TYPE_STRIP type){
     case TYPE_STRIP::RGB:
         break;
     case TYPE_STRIP::WS2811:
-        ws2811Strip->Show();
+        if(ws2811Strip != nullptr){
+            ws2811Strip->Show();
+        }
         break;
     case TYPE_STRIP::WS2811_MATRIX:
-        ws2811Matrix->Show();
+        if(ws2811Matrix != nullptr){
+            ws2811Matrix->Show();
+        }
     default:
         break;
     }
@@ -103,15 +132,21 @@ void DriverLed::clear(TYPE_STRIP type)
     switch (type)
     {
     case TYPE_STRIP::RGB:
-        rgbStrip->setColor(0, 0, 0);
+        if(rgbStrip != nullptr){
+            rgbStrip->setColor(0, 0, 0);
+        }
         break;
     case TYPE_STRIP::WS2811:
-        ws2811Strip->ClearTo(RgbColor(0));
-        ws2811Strip->Show();
+        if(ws2811Strip != nullptr){
+            ws2811Strip->ClearTo(RgbColor(0));
+            ws2811Strip->Show();
+        }
         break;
     case TYPE_STRIP::WS2811_MATRIX:
-        ws2811Matrix->ClearTo(RgbColor(0));
-        ws2811Matrix->Show();
+        if(ws2811Matrix != nullptr){
+            ws2811Matrix->ClearTo(RgbColor(0));
+            ws2811Matrix->Show();
+        }
         break;
     default:
         break;
