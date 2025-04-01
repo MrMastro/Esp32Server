@@ -178,8 +178,8 @@ void setup(void)
   Serial.println(s.toJson());
 
   // init communication (Server wifi/ap or Bluetooth)
-  xTaskCreate(apiServerTask, "apiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
-  //setup_communication(s);
+  //xTaskCreate(apiServerTask, "apiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
+  setup_communication(s);
 
   delay(100);
 
@@ -201,8 +201,6 @@ void loop(void)
 }
 
 void apiServerTask(void *pvParameters) {
-  setup_communication(s);
-
   // Il task può restare in esecuzione finché il sistema non è spento o resetta
   while (true) {
       // Puoi mettere qui del codice per monitorare o gestire il server, se necessario.
