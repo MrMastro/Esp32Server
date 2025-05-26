@@ -377,6 +377,49 @@ void ledTask(void *pvParameters)
 void test()
 {
   serialService.logInfoln("Test", "MAIN");
+  pinMode(33, INPUT_PULLUP);
+  bool printed = false;
+  int xValue = 0;
+  int yValue = 0;
+  int swState = LOW;
+  while(true){
+    xValue = analogRead(34);  // Legge il valore X
+    yValue = analogRead(35);  // Legge il valore Y
+    swState = digitalRead(33);
+    Serial.print("X: ");
+    Serial.print(xValue);
+    Serial.print(" | Y: ");
+    Serial.println(yValue);
+
+    // Zona morta (±300 intorno a 2048)
+    int CENTER_MIN = 1890;
+    int CENTER_MAX = 2000;
+        
+    // // Direzione Y
+    if (yValue > CENTER_MAX) {
+      Serial.print("DES");
+    } else if (yValue < CENTER_MIN) {
+      Serial.print("SIN");
+    }
+
+    // // Spazio tra le direzioni se necessario
+    // if (xValue > CENTER_MAX || xValue < CENTER_MIN) {
+    //   if (printed) Serial.print(" | ");
+    // }
+
+    // // Direzione X
+    if (xValue > CENTER_MAX) {
+      Serial.print("SU");
+    } else if (xValue < CENTER_MIN) {
+      Serial.print("GIU");
+    }
+    if (swState == LOW) {
+      Serial.print(" | Switch");
+      Serial.print(swState);
+    }
+    delay(500);  // Attesa di 1 secondo
+  }
+      
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
