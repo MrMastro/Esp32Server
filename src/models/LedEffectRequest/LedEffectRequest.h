@@ -14,16 +14,18 @@ public:
     int ms;
     boolean rgbAction;
     boolean ws2811Action;
+    boolean ws2811MatrixAction;  // Aggiunto ws2811MatrixAction
 
     // Serializzazione in JSON
     String toJson() const
     {
-        StaticJsonDocument<512> doc;
+        JsonDocument doc;  // Usa JsonDocument senza dimensione
 
         doc["effect"] = effect;
         doc["ms"] = ms;
         doc["rgbAction"] = rgbAction;
         doc["ws2811Action"] = ws2811Action;
+        doc["ws2811MatrixAction"] = ws2811MatrixAction;  // Aggiungi ws2811MatrixAction
 
         // Creiamo un array JSON per i colori
         JsonArray colorsArray = doc.createNestedArray("colors");
@@ -41,7 +43,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        StaticJsonDocument<512> doc;
+        JsonDocument doc;  // Usa JsonDocument senza dimensione
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)
@@ -52,7 +54,7 @@ public:
         }
 
         if (!doc.containsKey("effect") || !doc.containsKey("ms") || !doc.containsKey("colors") ||
-            !doc.containsKey("rgbAction") || !doc.containsKey("ws2811Action"))
+            !doc.containsKey("rgbAction") || !doc.containsKey("ws2811Action") || !doc.containsKey("ws2811MatrixAction"))
         {
             return false; // Chiave mancante
         }
@@ -61,6 +63,7 @@ public:
         ms = doc["ms"];
         rgbAction = doc["rgbAction"];
         ws2811Action = doc["ws2811Action"];
+        ws2811MatrixAction = doc["ws2811MatrixAction"];  // Aggiungi ws2811MatrixAction
 
         // Deserializziamo il vettore dei colori
         colors.clear(); // Pulisci il vettore prima di aggiungere nuovi elementi

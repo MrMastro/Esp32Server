@@ -16,6 +16,7 @@ void commandController(AsyncWebServerRequest *request);
 void getOk(AsyncWebServerRequest *request);
 void login(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 void getJsonSettings(AsyncWebServerRequest *request);
+void getInfoHello(AsyncWebServerRequest *request);
 
 //LedController
 void setEffectWs2811(AsyncWebServerRequest *request);

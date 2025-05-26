@@ -6,7 +6,7 @@ class UnauthorizedErrorException extends Error {
         this.name = 'UnauthorizedError';
         // Mantieni lo stack trace
         if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, UnauthorizedError);
+            Error.captureStackTrace(this, UnauthorizedErrorException);
         }
     }
 }

@@ -49,11 +49,19 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     break;
   case CMD::START_PROGRESS_BAR:
     //todo
-    ((LedService *)getServiceByCollector("LedService"))->startEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 255), 100, false, true);
+    ((LedService *)getServiceByCollector("LedService"))->startEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 255), 100, false, true, true);
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    break;
+  case CMD::START_EFFECT:
+    ((LedService *)getServiceByCollector("LedService"))->startEffect(params.at(0), RgbColor(0, 0, 0), 100, false, false, true);
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    break;
+  case CMD::STOP_EFFECT:
+    ((LedService *)getServiceByCollector("LedService"))->stopEffect(params.at(0), {RgbColor(0, 0, 0)}, 100, false, false, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::OFF_STRIPT:
-    ((LedService *)getServiceByCollector("LedService"))->stopEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 0), 100, true, true);
+    ((LedService *)getServiceByCollector("LedService"))->stopEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 0), 100, true, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::REBOOT:
@@ -116,6 +124,8 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   String newCommunicationMode = params.at(0);
   COMMUNICATION_MODE cm = communicationModeStringToEnum(newCommunicationMode);
 
+  serialService->logInfoln("qui","changeCommunicationMode");
+
   if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
   {
     res = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
@@ -123,7 +133,9 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
     return res;
   }
 
-  if (!settingService->changeSetting("communicationMode", newCommunicationMode))
+  boolean operationDone = ((SettingService *)servicesCollector.getService("SettingService"))->changeSetting("communicationMode", newCommunicationMode);
+
+  if (!operationDone)
   {
     res = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
     res.setDescription("Error while set new communication");

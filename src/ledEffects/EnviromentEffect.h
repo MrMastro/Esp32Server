@@ -11,7 +11,8 @@ class Effect;
 enum class TYPE_STRIP
 {
   RGB,
-  WS2811
+  WS2811,
+  WS2811_MATRIX
 };
 
 enum class STEP_LIFE_LED_EFFECT

@@ -10,11 +10,48 @@ export default class LocalStorageService {
     }
 
     setEffectList(list) {
-
         if (!Array.isArray(list)) {
             throw new Error("L'input deve essere un array.");
         }
         localStorage.setItem('ledEffectList', JSON.stringify(list));
+    }
+
+    getEsp32InfoDeviceMem() {
+        const value = localStorage.getItem('esp32InfoDeviceMem');
+        return value ? JSON.parse(value) : null;
+    }
+
+    setEsp32InfoDeviceMem(list){
+        if (!Array.isArray(list)) {
+            throw new Error("L'input deve essere un array.");
+        }
+        localStorage.setItem('esp32InfoDeviceMem', JSON.stringify(list));
+    }
+
+    setLocalIp(ip){
+        ip = (ip === null) ? "" : ip;
+
+        if (typeof ip != "string") {
+            throw new Error("L'input deve essere un array.");
+        }
+        localStorage.setItem('localIp', ip);
+    }
+
+    getLocalIp() {
+        const value = localStorage.getItem('localIp');
+        return value ? value : null;
+    }
+
+    setIpListKnown(list){
+        if (!Array.isArray(list)) {
+            throw new Error("L'input deve essere un array.");
+        }
+        localStorage.setItem('ipListKnown', JSON.stringify(list));
+    }
+
+    getIpListKnown(){
+        const value = localStorage.getItem('ipListKnown');
+        return value ? JSON.parse(value) : null;
     }
 
     checkExistenceEffectList() {
@@ -24,6 +61,4 @@ export default class LocalStorageService {
     formatEffectList() {
         localStorage.setItem('ledEffectList' , JSON.stringify(DefaultConstants.defaultEffects));
     }
-
-
 }

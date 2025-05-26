@@ -16,25 +16,29 @@ class LedService : public Service
 {
 public:
   LedService();
-  LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811);
-  LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811);
+  //LedService(NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ledStriptInput, LEDStripDriver *rgbLedStriptInput, boolean enableRgb, boolean enableWs2811);
+  LedService(DriverLed* driverInput, boolean enableRgb, boolean enableWs2811, boolean enableWs2811Matrix);
   boolean isAvaible() override;
   boolean preparePin();
   boolean changeLed(boolean active, boolean toggle);
 
   void setOperativeRgbOrchestrator(boolean enable);
   void setOperativeWs2811Orchestrator(boolean enable);
+  void setOperativeWs2811MatrixOrchestrator(boolean enable);
+  
   boolean isOperativeRgbOrchestrator();
   boolean isOperative2811Orchestrator();
+  boolean isOperative2811MatrixOrchestrator();
 
 
   // Service Methods
-  void startEffect(String effect, RgbColor colorRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
-  void stopEffect(String effect, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
-  void startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript);
-  void stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript);
+  void startEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript, boolean actionWs2811Matrix);
+  void stopEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgb, boolean actionWs2811, boolean actionWs2811Matrix);
+  void startEffect(String effectInput, RgbColor colorRgb, int deltaTms, boolean actionRgbStript, boolean actionWs2811Stript, boolean actionWs2811Matrix);
+  void stopEffect(String effect, std::vector<RgbColor> colorsRgb, int deltaTmsInput, boolean actionRgbStript, boolean actionWs2811Stript, boolean actionWs2811Matrix);
   boolean runRgbLifeCycle();
   boolean runWs2811LifeCycle();
+  boolean runWs2811MatrixLifeCycle();
   std::vector<Effect*> getAvaibleEffects();
 
 protected:
@@ -48,6 +52,7 @@ private:
 
   EffectOrchestrator rgbOrchestrator;
   EffectOrchestrator ws2811Orchestrator;
+  EffectOrchestrator ws2811MatrixOrchestrator;
 };
 
 #endif // LedService_H

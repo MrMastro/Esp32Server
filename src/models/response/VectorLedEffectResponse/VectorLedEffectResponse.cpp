@@ -13,18 +13,20 @@ void VectorLedEffectResponse::setData(const std::vector<Effect*> &newData) {
 }
 
 String VectorLedEffectResponse::toJson() {
-    StaticJsonDocument<1024> doc;
+    JsonDocument doc;
     JsonArray effectsArray = doc.createNestedArray("effects");
+
     for (auto effect : data) {
         if (effect != nullptr) {
-            StaticJsonDocument<256> effectJson;
+            JsonDocument effectJson;
             DeserializationError error = deserializeJson(effectJson, effect->toJson());
 
             if (!error) {
-                effectsArray.add(effectJson);
+                effectsArray.add(effectJson.as<JsonObject>());
             }
         }
     }
+
     String output;
     serializeJson(doc, output);
     return output;

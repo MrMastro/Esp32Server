@@ -1,5 +1,6 @@
 #include "Main.h"
 
+boolean AP_MODE_PAUSE_LED = false;
 int ledPin = 2;
 SettingsModel s;
 
@@ -7,6 +8,7 @@ AsyncWebServer webServer(80);
 BluetoothSerial SerialBT;
 
 // Deprecated: MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
+NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> *ws2811Matrix = nullptr;
 NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> *ws2811Strip = nullptr;
 LEDStripDriver *rgbStrip = nullptr;
 DriverLed *myDriver;
@@ -25,6 +27,27 @@ SerialService serialService;
 // other baud rate: 115200
 // baud rate: 9600
 
+// Definizione delle priorità
+#define PRIORITY_SERVER               (configMAX_PRIORITIES - 3)
+#define PRIORITY_BLUETOOTH_SERVER     (configMAX_PRIORITIES - 3)
+#define PRIORITY_LED_EFFECTS          (configMAX_PRIORITIES - 6)
+#define PRIORITY_DELAYED_TASK         (configMAX_PRIORITIES - 7)
+#define PRIORITY_SERIAL               (configMAX_PRIORITIES - 10)
+
+#define STACK_SIZE_SERVER             8192
+#define STACK_SIZE_BLUETOOTH_SERVER   8192
+#define STACK_SIZE_LED_EFFECTS        4096
+#define STACK_SIZE_DELAYED_TASK       4096
+#define STACK_SIZE_SERIAL             8192
+
+// #define STACK_SIZE_SERVER             10000
+// #define STACK_SIZE_BLUETOOTH_SERVER   10000
+// #define STACK_SIZE_LED_EFFECTS        10000
+// #define STACK_SIZE_DELAYED_TASK       10000
+// #define STACK_SIZE_SERIAL             10000
+
+
+
 void setup_communication(SettingsModel sm)
 {
   serialService.logInfoln("setup_communication method", "MAIN");
@@ -33,7 +56,7 @@ void setup_communication(SettingsModel sm)
 
   // Task for serial COM
   serialService.logInfoln("Create SerialCableTaskExecution for comunicate with serial com", "MAIN");
-  xTaskCreate(serialCableTask, "SerialCableTaskExecution", 10000, NULL, 0, NULL);
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
 
   // Task for communication
   COMMUNICATION_MODE mode = communicationModeStringToEnum(sm.communicationMode);
@@ -43,6 +66,7 @@ void setup_communication(SettingsModel sm)
   case COMMUNICATION_MODE::AP_MODE:
     serialService.logInfoln("Communication mode is AP, init AP web Server", "MAIN");
     mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    AP_MODE_PAUSE_LED = true;
     initRoutes(mastroServer);
     infoWebServer();
     break;
@@ -57,7 +81,7 @@ void setup_communication(SettingsModel sm)
   case COMMUNICATION_MODE::BLUETOOTH_MODE:
     serialService.logInfoln("Communication mode is BLUETOOTH, init Bluetooth and Bluetooth Serial", "MAIN");
     serialService.initSerialBtBegin(sm.deviceName, &SerialBT);
-    xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", 10000, NULL, 1, NULL);
+    xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", STACK_SIZE_BLUETOOTH_SERVER, NULL, PRIORITY_BLUETOOTH_SERVER, NULL);
     break;
 
   // Case WIP or Defaults
@@ -121,10 +145,20 @@ void initServices(HardwareSerial *serialPointer)
   serialService.setSettings(&s);
 
   // init LedService
-  rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
-  ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
-  myDriver = new DriverLed(ws2811Strip, rgbStrip);
-  ledService = LedService(myDriver, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
+  if(s.ledSettings.enableStripRgb){
+    rgbStrip = new LEDStripDriver(s.ledSettings.pinLedDinRgb, s.ledSettings.pinLedCinRgb);
+  }
+
+  if(s.ledSettings.enableStripWs2811){
+    ws2811Strip = new NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811, s.ledSettings.pinLedWs2811);
+  }
+
+  if(s.ledSettings.enableStripWs2811Matrix){
+    ws2811Matrix = new NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>(s.ledSettings.numLedWs2811Matrix, s.ledSettings.pinLedWs2811Matrix);
+  }
+
+  myDriver = new DriverLed(ws2811Matrix, ws2811Strip, rgbStrip);
+  ledService = LedService(myDriver, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
 
   servicesCollector.attachServer(&mastroServer);
   servicesCollector.addService(&commandService, "CommandService", &s);
@@ -138,7 +172,7 @@ void initServices(HardwareSerial *serialPointer)
 
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("\n");
   Serial.println("Started");
   delay(10);
@@ -146,11 +180,14 @@ void setup(void)
   initServices(&Serial);
   delay(10);
 
+  delay(1000);
+
   Serial.println("");
   Serial.println("Load settings:");
   Serial.println(s.toJson());
 
   // init communication (Server wifi/ap or Bluetooth)
+  //xTaskCreate(apiServerTask, "apiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
   setup_communication(s);
 
   delay(100);
@@ -160,9 +197,9 @@ void setup(void)
   {
     // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
   }
-  xTaskCreate(ledTask, "LedTaskExecution", 10000, NULL, 3, NULL);
-  xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", 10000, NULL, 4, NULL);
-  // vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
+  xTaskCreate(ledTask, "LedTaskExecution", STACK_SIZE_LED_EFFECTS, NULL, PRIORITY_LED_EFFECTS, NULL);
+  xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
+  //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
 
   serialService.logInfoln("Init procedure completed", "MAIN");
 }
@@ -170,6 +207,17 @@ void setup(void)
 // loop is used for print debug
 void loop(void)
 {
+}
+
+void apiServerTask(void *pvParameters) {
+  // Il task può restare in esecuzione finché il sistema non è spento o resetta
+  while (true) {
+      // Puoi mettere qui del codice per monitorare o gestire il server, se necessario.
+      // Ma questo task non termina mai a meno che non venga fermato o reset.
+
+      // FreeRTOS richiede che i task chiamino vTaskDelay() periodicamente
+      vTaskDelay(1); // Questo fa "pausare" il task per un breve periodo, lasciando spazio ad altri task
+  }
 }
 
 // Serial bt task check input for bluetooth message
@@ -278,35 +326,48 @@ void ledTask(void *pvParameters)
   {
     msg = formatMsg("First effect running: {} | time: {} | colors: {} ", {s.initialEffect, String(s.initialDeltaT), vectorRgbColorToString(rgbColors)});
     serialService.logInfoln(msg, "MAIN");
-    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, rgbColors, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(s.initialEffect, rgbColors, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
   }
 
+  // Loop principale del task
   while (true)
   {
     if (!servicesCollector.isBusyForServiceApi())
     {
-
       boolean executedCorrectly = false;
 
+      // Controllo e gestione per RGB
       if (s.ledSettings.enableStripRgb)
       {
         executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runRgbLifeCycle();
-        if(!executedCorrectly){
-          delay(TIME_MS_FOR_ERROR_EXECUTION);
+        if (!executedCorrectly)
+        {
+          // Gestisci eventuali errori con un delay
+          vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico
         }
       }
 
       if (s.ledSettings.enableStripWs2811)
       {
         executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runWs2811LifeCycle();
-        if(!executedCorrectly){
-          delay(TIME_MS_FOR_ERROR_EXECUTION);
+        if (!executedCorrectly)
+        {
+          vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico
+        }
+      }
+      if (s.ledSettings.enableStripWs2811Matrix)
+      {
+        executedCorrectly = ((LedService *)servicesCollector.getService("LedService"))->runWs2811MatrixLifeCycle();
+        if (!executedCorrectly)
+        {
+          vTaskDelay(TIME_MS_FOR_ERROR_EXECUTION / portTICK_PERIOD_MS);  // Usa vTaskDelay per ridurre il carico
         }
       }
     }
     else
     {
-      yield();
+      // Se il servizio è occupato, sospendiamo temporaneamente il task senza bloccare la CPU
+      yield();  // Cede il controllo al sistema operativo per altri task
     }
 
     vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -320,6 +381,7 @@ void test()
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
 {
+  servicesCollector.takeExclusiveExecution();
   String dataString = "";
   for (int i = 0; i < len; i++)
   {
@@ -329,9 +391,27 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   {
     ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(dataString);
   }
+  servicesCollector.freeExclusiveExecution();
 }
 
 void recvMsgBySerial(String data)
 {
+  servicesCollector.takeExclusiveExecution();
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
+  servicesCollector.freeExclusiveExecution();
 }
+
+//NOTE
+// [env:Esp32Com]
+// platform = espressif32 @ 6.8.1
+// platform = espressif32
+// board = esp32doit-devkit-v1
+// framework = arduino
+// lib_deps = 
+// 	makuna/NeoPixelBus@^2.8.2
+// 	makuna/NeoPixelBus
+// 	esphome/ESPAsyncWebServer-esphome
+// 	robtillaart/ANSI@^0.3.2
+// 	bblanchon/ArduinoJson@^7.2.1
+// 	robtillaart/ANSI
+// 	bblanchon/ArduinoJson

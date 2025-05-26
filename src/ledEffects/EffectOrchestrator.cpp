@@ -30,7 +30,7 @@ boolean EffectOrchestrator::runLifeCycle()
 {
   if (serialService != nullptr)
   {
-    if(actualStep != STEP_LIFE_LED_EFFECT::OFF)
+    if(actualStep != STEP_LIFE_LED_EFFECT::OFF && actualStep != STEP_LIFE_LED_EFFECT::LOOP_STEP)
     {
       String s = "\nPlays\nEffect {},\nStep: {},\nRgbColors: {},\ndeltaTimesMs: {}\n";
       String sEffect = effect;
@@ -38,7 +38,7 @@ boolean EffectOrchestrator::runLifeCycle()
       String colorString = vectorRgbColorToString(colorsEffect);
       String msg = formatMsg(s, {sEffect, sLifeStep, colorString, String(deltaTmsEffect)});
       String subject = formatMsg("EffectOrchestrator - {}", {name});
-      serialService->logInfoFixed(msg, subject);
+      serialService->logInfoln(msg, subject);
     }
   }
 

@@ -2,24 +2,36 @@
 
 #include "ledEffects/Effect.h"
 #include "ledEffects/EffectImplementations/MulticolorConstantEffect.h"
-#include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
+//#include "ledEffects/EffectImplementations/ConstantUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/BreathEffect.h"
 #include "ledEffects/EffectImplementations/ProgressiveBarUniqueColorEffect.h"
 #include "ledEffects/EffectImplementations/ConsumeColorEffect.h"
 #include "ledEffects/EffectImplementations/StarDustEffect.h"
 #include "ledEffects/EffectImplementations/LiveFlameColorEffect.h"
 #include "ledEffects/EffectImplementations/ProgresiveBarBreathEffect.h"
+#include "ledEffects/EffectImplementations/EyeMidEffect.h"
+#include "ledEffects/EffectImplementations/EyeRightEffect.h"
+#include "ledEffects/EffectImplementations/EyeLeftEffect.h"
+#include "ledEffects/EffectImplementations/EyeUpEffect.h"
+#include "ledEffects/EffectImplementations/EyeDownEffect.h"
+#include "ledEffects/EffectImplementations/EyeHungryEffect.h"
 #include "EnviromentEffect.h"
 
 const std::vector<Effect *> LED_EFFECT_REFERENCE = {
-    new ConstantUniqueColorEffect(),
+    //new ConstantUniqueColorEffect(),
     new ConsumeColorEffect(),
     new ProgressiveBarUniqueColorEffect(),
     new BreathEffect(),
     new MulticolorConstantEffect(),
     new ProgresiveBarBreathEffect(),
     new StarDustEffect(),
-    new LiveFlameColorEffect()
+    new LiveFlameColorEffect(),
+    new EyeMidEffect(),
+    new EyeUpEffect(),
+    new EyeDownEffect(),
+    new EyeRightEffect(),
+    new EyeLeftEffect(),
+    new EyeHungryEffect()
     };
 
 const LED_EFFECT_LABEL getEffectLabelByName(String inputString)

@@ -7,7 +7,7 @@ class GenericErrorExceptions extends Error {
         this.name = 'GenericError';
         // Mantieni lo stack trace
         if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, GenericError);
+            Error.captureStackTrace(this, GenericErrorExceptions);
         }
     }
 }

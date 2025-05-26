@@ -27,6 +27,10 @@ boolean ProgresiveBarBreathEffect::getCompatibilityWs2811()
     return true;
 }
 
+boolean ProgresiveBarBreathEffect::getCompatibilityWs2811Matrix(){
+    return true;
+}
+
 boolean ProgresiveBarBreathEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
 {
     if (driver == nullptr)
@@ -55,7 +59,7 @@ boolean ProgresiveBarBreathEffect::execStep(String effectInput, STEP_LIFE_LED_EF
             RgbColor color = RgbColor(0, 0, 0);
             driver->sendStripData(type, color, i);
         }
-        driver->showData();
+        driver->showData(type);
         delay(deltaTimeMsInput);
         break;
     }
@@ -96,7 +100,7 @@ boolean ProgresiveBarBreathEffect::execStep(String effectInput, STEP_LIFE_LED_EF
                 driver->sendStripData(type, RgbColor(0, 0, 0), i); // Spegni il resto dei LED
             }
         }
-        driver->showData();
+        driver->showData(type);
 
         // Aggiorna il fattore di luminosità (effetto breath)
         if (increasing)
@@ -128,7 +132,7 @@ boolean ProgresiveBarBreathEffect::execStep(String effectInput, STEP_LIFE_LED_EF
         {
             driver->sendStripData(type, RgbColor(0, 0, 0), i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
     }
     case STEP_LIFE_LED_EFFECT::OFF:

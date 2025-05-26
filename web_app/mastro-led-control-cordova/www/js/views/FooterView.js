@@ -9,7 +9,7 @@ export default class FooterView {
 
     // Metodo render per creare la struttura del modale e iniettarla nel DOM
     render() {
-        this.rootElement.insertAdjacentHTML('beforeend', `
+        this.rootElement.innerHTML = (`
             <div class="container text-white py-4 py-lg-5">
                 <ul class="list-inline">
                     <li class="list-inline-item me-4"><a class="link-light" href="#">Web design</a></li>

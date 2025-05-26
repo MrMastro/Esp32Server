@@ -9,13 +9,13 @@ const DefaultConstants = (() => {
 
     const defaultEffectOption = "PROGRESSIVE_BAR_UNIQUE_COLOR";
     const defaultApHost = "192.168.4.1";
-    const defaultDebug = false;
+    const debugApp = true;
 
     return {
         defaultEffects,
         defaultEffectOption,
         defaultApHost,
-        defaultDebug
+        debugApp
     };
 })();
 
