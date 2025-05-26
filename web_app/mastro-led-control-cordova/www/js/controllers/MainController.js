@@ -1,7 +1,6 @@
 import WaitView from '../views/WaitView.js';
 import AlertMessageView from '../views/AlertMessageView.js';
 import LedService from '../services/LedService.js';
-import ColorUtils from '../utils/ColorUtils.js';
 import FrontEndMessage from '../constants/FrontEndMessageItalian.js'
 import InitialSettingSaveModel from '../models/InitialSettingSaveModel.js';
 import HeaderView from '../views/HeaderView.js';
@@ -17,21 +16,25 @@ import GenericErrorExceptions from '../exceptions/GenericErrorException.js';
 import TimeUtils from '../utils/TimeUtils.js';
 import LedEffectRequest from '../models/request/LedEffectRequest.js';
 import TextUtils from '../utils/TextUtils.js';
+import Esp32ConnectionService from '../services/Esp32ConnectionService.js';
+import Esp32ConnectionController from './Esp32ConnectionController.js';
 
 export default class MainController {
-    constructor(host) {
+    constructor(context = null) {
+        this.context = context;
+        this.esp32ConnectionService = context.espConnectionService;
+        this.espConnectionView = this.context.espConnectionView;
         //status variable:
-        this.referenceHost = host;
-        this.apHost = DefaultConstants.defaultApHost;
-        this.debug = DefaultConstants.defaultDebug;
-
+        // this.referenceHost = host;
+        // this.apHost = DefaultConstants.defaultApHost;
+        // this.debug = DefaultConstants.debugApp;
         //Component
         this.ledService = new LedService();
         this.localStorageService = new LocalStorageService();
         this.mainView = new MainView(document.getElementById('MainViewContainer'),[]);
         this.headerView = new HeaderView(document.getElementById('HeaderViewContainer'));
         this.footerView = new FooterView(document.getElementById('FooterViewContainer'));
-        this.settingController = new SettingController(host, this.headerView);
+        this.settingController = context.settingController;
         this.waitView = new WaitView(document.getElementById('WaitViewContainer'));
         this.alertMessageView = new AlertMessageView(document.getElementById('AlertMessageViewContainer'));
         this.init();
@@ -41,8 +44,8 @@ export default class MainController {
         this.initilizeStorage();
         this.mainView.render(new LedMainModel(), this.localStorageService.getLedEffectList());
         this.waitView.render();
-        this.switchConnection();
         this.bindEvents();
+
     }
 
     initilizeStorage(){
@@ -52,34 +55,14 @@ export default class MainController {
     }
 
     async bindEvents() {
-
         this.mainView.bindBtnWs2811SetEffect(this.sendStartEffect.bind(this));
         this.mainView.bindBtnStopEffect(this.sendStopEffect.bind(this));
         this.mainView.bindBtnSaveInitialEffect(this.saveInitialEffect.bind(this));
         this.mainView.bindBtnUpdateEffect(this.updateEffectList.bind(this));
 
         this.mainView.bindBtnClearInitialEffect(this.clearInitialEffect.bind(this));
-        this.mainView.bindFieldIpInput(this.changeIp.bind(this));
-        this.mainView.bindAPConnectionSwitch(this.switchConnection.bind(this));
         this.mainView.bindRangeInputChange(this.rangeInputChange.bind(this));
         this.mainView.bindInputChange(this.inputChange.bind(this));
-    }
-
-    //Imposta a se stesso e agli altri controller il referece host
-    async setReferenceHost(newHost) {
-        this.referenceHost = newHost;
-        this.settingController.setReferenceHost(newHost);
-    }
-
-    switchConnection() {
-        if (this.mainView.isAPconnection()) {
-            this.mainView.hideFieldIp();
-            this.referenceHost = this.apHost;
-            this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
-        } else {
-            this.mainView.showFieldIp();
-            this.changeIp();
-        }
     }
 
     rangeInputChange(){
@@ -103,21 +86,6 @@ export default class MainController {
         this.mainView.setTimingRangeInput(valueTime);
     }
 
-    changeIp() {
-        let test = /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(this.mainView.getFieldIp());
-        if (!this.mainView.getFieldIp()) {
-            this.mainView.setLabelIp("Inserisci un indirizzo ip");
-        }
-        else if (test) {
-            this.referenceHost = this.mainView.getFieldIp();
-            this.mainView.setLabelIp("Indirizzo attuale: " + this.referenceHost);
-            this.settingController.setReferenceHost(this.referenceHost);
-            this.setReferenceHost(this.referenceHost);
-        } else {
-            this.mainView.setLabelIp("Inserisci un ip valido");
-        }
-    }
-
     showSettings() {
         this.settingController.showModal();
     }
@@ -131,29 +99,37 @@ export default class MainController {
     }
 
     // SUCCESS AND FAILURE METHOD
-    genericSuccessAlert() {
-        this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
+    genericSuccessAlert(nameEsp32) {
+        this.alertMessageView.alert(nameEsp32 + FrontEndMessage.titleSuccess, FrontEndMessage.genericSuccessOperation);
     }
 
     customAlert(title, content){
         this.alertMessageView.alert(title, content);
     }
 
-    genericFailureAlert(content) {
-        this.alertMessageView.alert(FrontEndMessage.titleError, content);
+    genericFailureAlert(infoTitle, content) {
+        this.alertMessageView.alert(infoTitle + FrontEndMessage.titleError, content);
     }
 
     async updateEffectList(){
         try {
             this.waitView.show();
             await TimeUtils.wait(200);
-            let list = await this.ledService.getAvaibleEffects(this.referenceHost);
-            await TimeUtils.wait(200);
-            this.waitView.hide();
-            await TimeUtils.wait(200);
-            this.localStorageService.setEffectList(list);
-            this.mainView.render( this.mainView.getLedMainModel(), list);
-            this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
+            let activeConnections = this.context.espConnectionView.getActiveConnections();
+            if(Array.isArray(activeConnections) && activeConnections.length > 0){
+                let firstConnection = this.context.espConnectionView.getActiveConnections()[0];
+                let list = await this.ledService.getAvaibleEffects(firstConnection.espConnection.infoConnection.ip);
+                await TimeUtils.wait(200);
+                this.waitView.hide();
+                await TimeUtils.wait(200);
+                this.localStorageService.setEffectList(list);
+                this.mainView.render( this.mainView.getLedMainModel(), list);
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleSuccess, FrontEndMessage.updateEffectListSuccess);
+            }else{
+                this.waitView.hide();
+                this.alertMessageView.alert(FrontEndMessage.titleError, "Devi prima avere un dispositivo online, aggiungi un dispositivo o collegalo");
+            }
         } catch (error) {
             if (error instanceof UnauthorizedErrorException) {
                 this.waitView.hide();
@@ -166,6 +142,7 @@ export default class MainController {
             }
             else if (error instanceof GenericErrorExceptions) {
                 this.waitView.hide();
+                this.hideWait();
                 this.alertMessageView.alert(FrontEndMessage.titleError, FrontEndMessage.genericError);
             }
             else {
@@ -177,69 +154,103 @@ export default class MainController {
     }
 
     async saveInitialEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
         let request = new InitialSettingSaveModel(ledModel.effect, ledModel.deltaT, ledModel.colors);
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, request);
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.saveInitialEffect(connectionInfo.ip, request);
+            this.valutateResponseAlertMessage(result,esp32Model);
+        });
         this.hideWait();
-        this.valutateResponseAlertMessage(result);
     }
 
     async clearInitialEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         this.showWait();
-        let result = await this.ledService.saveInitialEffect(this.referenceHost, new InitialSettingSaveModel());
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.saveInitialEffect(connectionInfo.ip, new InitialSettingSaveModel());
+            this.valutateResponseAlertMessage(result,esp32Model);
+        });
         this.hideWait();
-        this.valutateResponseAlertMessage(result);
     }
 
     async sendStartEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check, ledModel.ws2811MatrixCheck);
         this.showWait();
-        let result = await this.ledService.postStartEffect(this.referenceHost, request);
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.postStartEffect(connectionInfo.ip, request);
+            this.valutateResponseAlert(result, esp32Model);
+        });
         this.hideWait();
-        console.log(result);
-        this.valutateResponseAlert(result);
     }
 
     async sendStopEffect() {
+        let activeConnections = this.context.espConnectionView.getActiveConnections();
         let ledModel = new LedMainModel();
         ledModel =  this.mainView.getLedMainModel();
-        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check);
-
+        let request = new LedEffectRequest(ledModel.effect, ledModel.colors, ledModel.deltaT, ledModel.rgbCheck, ledModel.ws2811Check, ledModel.ws2811MatrixCheck);
         this.showWait();
-        let result = await this.ledService.postStoptEffect(this.referenceHost, request);
+        activeConnections.forEach( async (esp32SingleReference) => {
+            let esp32Model = esp32SingleReference.espConnection;
+            let connectionInfo = esp32SingleReference.espConnection.infoConnection;
+            let result = await this.ledService.postStoptEffect(connectionInfo.ip, request);
+            this.valutateResponseAlert(result, esp32Model);
+        });
         this.hideWait();
-        console.log(result);
-        this.valutateResponseAlert(result);
     }
 
-    valutateResponseAlert(response) {
+    valutateResponseAlert(response, esp32Model = "") {
+        let nameEsp32 = "";
+        if(typeof esp32Model.infoConnection.deviceName == 'string'){
+            nameEsp32 = esp32Model.infoConnection.deviceName+" - ";
+        }
         switch (response.status) {
             case -4:
-                this.genericFailureAlert(FrontEndMessage.noConnect);
+                this.genericFailureAlert(nameEsp32, FrontEndMessage.noConnect);
+                this.setOfflineDevice(esp32Model);
                 break;
             case 200:
-                this.genericSuccessAlert();
+                this.genericSuccessAlert(nameEsp32);
+                break;
+            default:
+                this.genericFailureAlert(nameEsp32, FrontEndMessage.noConnect);
+                this.setOfflineDevice(esp32Model);
+                break;
+        }
+    }
+
+    valutateResponseAlertMessage(response, esp32Model = "") {
+        let nameEsp32 = "";
+        if(typeof esp32Model.infoConnection.deviceName == 'string'){
+            nameEsp32 = esp32Model.infoConnection.deviceName+" - ";
+        }
+        switch (response.status) {
+            case -4:
+                this.genericFailureAlert(nameEsp32, FrontEndMessage.noConnect);
+                this.setOfflineDevice(esp32Model);
+                break;
+            case 200:
+                this.customAlert(nameEsp32 + FrontEndMessage.titleSuccess, response.data.status.description);//todo change data.status.description in data.infoStatus.description
                 break;
             default:
                 break;
         }
     }
 
-    valutateResponseAlertMessage(response) {
-        switch (response.status) {
-            case -4:
-                this.genericFailureAlert(FrontEndMessage.noConnect);
-                break;
-            case 200:
-                this.customAlert(FrontEndMessage.titleSuccess, response.data.status.description);//todo change data.status.description in data.infoStatus.description
-                break;
-            default:
-                break;
-        }
+    setOfflineDevice(esp32Model){
+        this.esp32ConnectionService.setSingleDeviceOffline(esp32Model);
+        this.espConnectionView.render(this.localStorageService.getEsp32InfoDeviceMem());
     }
 
 }

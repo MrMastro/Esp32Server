@@ -59,3 +59,12 @@ void getJsonSettings(AsyncWebServerRequest *request)
     request->send(res.getStatus().getCode(), "application/json", res.toJson());
     servicesCollector.freeExclusiveExecution();
 }
+
+void getInfoHello(AsyncWebServerRequest *request)
+{
+    servicesCollector.takeExclusiveExecution();
+    InfoService *infoService = ((InfoService *)servicesCollector.getService("InfoService"));
+    InfoEsp32Model info = infoService->getHelloInfo();
+    request->send(getStatusInfoByHttpCode(HTTP_CODE::OK).getCode(), "application/json", info.toJson());
+    servicesCollector.freeExclusiveExecution();
+}

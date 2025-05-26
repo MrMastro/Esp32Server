@@ -42,24 +42,24 @@ export default class SettingService {
 
     // Metodo per salvare le impostazioni del dispositivo
     async saveDeviceSettings(host, settings) {
-        let result = await HttpUtils.postCustom(host, ConstantApiList.saveSettigsApi, {}, settings);
-        let content;
-        if (typeof result.data == 'string') {
-            content = JSON.parse(result.data);
-        } else {
-            content = result.data;
-        }
-
-        switch (result.status) {
-            case -4:
-                throw new NoConnectException(FrontEndMessage.noConnect);
-            case 401:
-                throw new UnauthorizedErrorException(FrontEndMessage.unauthorized);
-            case 200:
-                break;
-            default:
-                throw new GenericErrorExceptions(FrontEndMessage.genericError);
-        }
+            let result = await HttpUtils.postCustom(host, ConstantApiList.saveSettigsApi, {}, settings);
+            let content;
+            if (typeof result.data == 'string') {
+                content = JSON.parse(result.data);
+            } else {
+                content = result.data;
+            }
+    
+            switch (result.status) {
+                case -4:
+                    throw new NoConnectException(FrontEndMessage.noConnect);
+                case 401:
+                    throw new UnauthorizedErrorException(FrontEndMessage.unauthorized);
+                case 200:
+                    break;
+                default:
+                    throw new GenericErrorExceptions(FrontEndMessage.genericError);
+            }
         return true;
     }
 
@@ -70,16 +70,21 @@ export default class SettingService {
     // Metodo per salvare le impostazioni del dispositivo
     async login(host, deviceName, devicePassword) {
         let result = await HttpUtils.postCustom(host, ConstantApiList.loginApi, {}, { deviceName: deviceName, devicePassword: devicePassword });
-        if (result.status != 200) {
-            if (result.code == 200) {
-                console.warn("result.status != 200 but result.code == 200, is your similation on cordova simulate?");
+        if (result.status != 200 && result.code == 200) {//simulation cordova
+            console.warn("result.status != 200 but result.code == 200, is your similation on cordova simulate?");
+            result.status = 200;
+        }
+        switch (result.status) {
+            case -4:
+                throw new NoConnectException(FrontEndMessage.noConnect);
+            case 401:
+                throw new UnauthorizedErrorException(FrontEndMessage.unauthorized);
+            case 200:
                 this.logged = true;
                 return true;
-            }
-            return result;
+            default:
+                throw new GenericErrorExceptions(FrontEndMessage.genericError);
         }
-        this.logged = true;
-        return result;
     }
 
 }

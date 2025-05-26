@@ -56,6 +56,7 @@ boolean SettingService::changeSetting(String key, String value)
 {
     SettingsModel newSettings;
     newSettings.fromJson(settings->toJson());
+    serialService->logInfoln(newSettings.toJson(),"changeSetting");
     if (key == "communicationMode")
     {
         newSettings.communicationMode = value;

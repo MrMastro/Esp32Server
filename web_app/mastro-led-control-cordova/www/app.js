@@ -24,9 +24,30 @@
 
 import MainController from './js/controllers/MainController.js';
 import ConstantApiList from './js/constants/apiList.js'
-import DefaultConstants from './js/constants/DefaultConstants.js';
+import Esp32ConnectionController from './js/controllers/Esp32ConnectionController.js';
+import Esp32ConnectionView from './js/views/Esp32ConnectionView.js';
+import Esp32ConnectionService from './js/services/Esp32ConnectionService.js';
+import SettingController from './js/controllers/SettingController.js';
+import LoginView from './js/views/LoginView.js';
+import SettingService from './js/services/SettingServices.js';
+import SettingView from './js/views/SettingView.js';
 
 const app = {
+
+    context: { 
+        "espConnectionView": null,
+        "loginView": null,
+        "settingView": null,
+        "mainController": null,
+        "esp32ConnectionController": null,
+        "settingController": null,
+        "espConnectionService" : null,
+        "settingService": null,
+        "networkInterface": null,
+        "networkState": null,
+        "permissions" : null,
+        "havePermission":null
+    },
 
     // Application Constructor
     initialize() {
@@ -37,27 +58,85 @@ const app = {
     // Bind Event Listeners
     bindEvents() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+        document.addEventListener("resume", this.onDeviceReady.bind(this), false);
     },
 
     // deviceready Event Handler
-    onDeviceReady() {
-        // Cordova is now initialized. Have fun!
+    async onDeviceReady() {
+
+        let context = this.context;
+
+        context.networkInterface = networkinterface;
+        context.networkState = navigator.connection.type;
+        context.permissions = cordova.plugins.permissions;
+
+        let permission = await this.requestPermissions();
+        context.havePermission = permission;
+
         console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
-        
-        console.log('Create MainController');
         this.createComponent();
 
         if(cordova.platformId == 'android'){
             cordova.plugin.http.setRequestTimeout(ConstantApiList.timeoutMs);
         }
+
+    },
+
+    async onDeviceResume(){
+        console.log('Resume cordova-' + cordova.platformId + '@' + cordova.version);
+        // this.context.esp32ConnectionController.firstUpdateStatusDevices();
     },
 
     createComponent(){
-        this.mainController = new MainController(DefaultConstants.defaultApHost);
+        //this.mainController = new MainController(DefaultConstants.defaultApHost);
+        let context = this.context;
+      
+        if (context.networkState !== Connection.WIFI) {
+            console.log("WIFI IS MANDATORY");
+        }
+
+        context.espConnectionView = new Esp32ConnectionView(document.querySelector('#Esp32ConnectionViewContainer'),"mainConnections");
+        context.loginView = new LoginView(document.getElementById('LoginViewContainer'));
+        context.settingView = new SettingView(document.getElementById('SettingsViewContainer'));
+
+        context.espConnectionService = new Esp32ConnectionService(context);
+        context.settingService = new SettingService();
+        
+        //context.settingController = new SettingController(context);
+        context.esp32ConnectionController = new Esp32ConnectionController(context);
+        context.mainController = new MainController(context);
     },
+
+    requestPermissions() {
+        return new Promise((resolve, reject) => {
+            if (this.context.permissions == null) {
+                console.log("Warning: errore caricamento permessi");
+                reject("Errore nel caricamento dei permessi");
+                return false;
+            }
+    
+            this.context.permissions.requestPermission(
+                this.context.permissions.ACCESS_NETWORK_STATE,
+                function(status) {
+                    if (status.hasPermission) {
+                        console.log("Permesso per accedere allo stato della rete concesso!");
+                        resolve(true);
+                    } else {
+                        console.error("Permesso per accedere allo stato della rete negato!");
+                        resolve(false);
+                    }
+                },
+                function(error) {
+                    console.error("Errore nella richiesta dei permessi:", error);
+                    resolve(false);
+                }
+            );
+        });
+    }
+
 }
 
 // Initialize the app
-$(document).ready(() => {
+document.addEventListener("deviceready", function () {
     app.initialize();
 });

@@ -6,8 +6,11 @@ const ConstantApiList = (() => {
     const sendStopEffectApi=    "/api/v2/ws2811StopEffect";
     const saveInitialEffectApi= "/api/v1/saveInitialEffect";
     const getAvaibleEffects =   "/api/v1/getAvaibleEffects";
-    const loginApi=             "/api/v1/login";
-    const timeoutMs = 3;
+    const loginApi =            "/api/v1/login";
+    const getInfoEsp32Hello =   "/api/v1/getInfoHello";
+    const timeoutMs = 15;
+    const timeoutForSearchtMs = 15;
+    const waitWhileEsp32Rebooting = 5000;
     
     return {
         saveSettigsApi,
@@ -16,8 +19,11 @@ const ConstantApiList = (() => {
         sendStopEffectApi,
         saveInitialEffectApi,
         loginApi,
+        getInfoEsp32Hello,
         getAvaibleEffects,
-        timeoutMs
+        timeoutMs,
+        timeoutForSearchtMs,
+        waitWhileEsp32Rebooting
     };
 })();
 

@@ -27,6 +27,10 @@ boolean StarDustEffect::getCompatibilityWs2811() {
     return true;
 }
 
+boolean StarDustEffect::getCompatibilityWs2811Matrix(){
+    return true;
+}
+
 boolean StarDustEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService) {
     if (driver == nullptr) {
         return false;
@@ -50,7 +54,7 @@ boolean StarDustEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepIn
 
     case STEP_LIFE_LED_EFFECT::LOOP_STEP:
         updateStars(driver, type);
-        driver->showData();  // Mostra i cambiamenti
+        driver->showData(type);  // Mostra i cambiamenti
         delay(deltaTimeMsInput);
         break;
 

@@ -22,18 +22,23 @@
       "android"
     ],
     "plugins": {
+      "cordova-plugin-enable-cleartext-traffic": {},
+      "cordova-plugin-network-information": {},
       "cordova-plugin-advanced-http": {
         "ANDROIDBLACKLISTSECURESOCKETPROTOCOLS": "SSLv3,TLSv1"
       },
-      "cordova-plugin-enable-cleartext-traffic": {},
-      "cordova-plugin-splashscreen": {}
+      "cordova-plugin-networkinterface": {},
+      "cordova-plugin-android-permissions": {}
     }
   },
   "devDependencies": {
     "cordova-android": "^13.0.0",
     "cordova-plugin-advanced-http": "^3.3.1",
+    "cordova-plugin-android-permissions": "^1.1.5",
     "cordova-plugin-enable-cleartext-traffic": "^2.1.0",
     "cordova-plugin-file": "^8.1.0",
-    "cordova-plugin-splashscreen": "^6.0.1"
+    "cordova-plugin-network-information": "^3.0.0",
+    "cordova-plugin-networkinterface": "^2.2.0",
+    "es6-promise-plugin": "^4.1.0"
   }
 }

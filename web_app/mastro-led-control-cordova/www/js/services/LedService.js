@@ -24,6 +24,8 @@ export default class LedService {
         let result = await HttpUtils.postCustom(host,ConstantApiList.sendEffectLedApi,{},requestBody);
         if(typeof result.data == 'string'){
             result.data = JSON.parse(result.data);
+        }else if(typeof result.data == 'undefined'){
+            return result;
         }else{
             result.data = result.data;
         }

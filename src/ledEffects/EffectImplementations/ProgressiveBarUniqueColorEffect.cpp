@@ -27,6 +27,10 @@ boolean ProgressiveBarUniqueColorEffect::getCompatibilityWs2811(){
     return true;
 }
 
+boolean ProgressiveBarUniqueColorEffect::getCompatibilityWs2811Matrix(){
+    return true;
+}
+
 boolean ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed* driver, TYPE_STRIP type, SerialService* serialService)
 {
     if(colorsInput.size() < getMinColorsNumber()){
@@ -40,7 +44,7 @@ boolean ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_
         for (int pixel = 0; pixel < driver->getMaxNumPixel(type); pixel++)
         {
             driver->sendStripData(type,colorInput,pixel);
-            driver->showData();
+            driver->showData(type);
             delay(deltaTimeMsInput);
         }
     }
@@ -50,7 +54,7 @@ boolean ProgressiveBarUniqueColorEffect::execStep(String effectInput, STEP_LIFE_
         {
             driver->sendStripData(type,colorInput,pixel);
         }
-        driver->showData();
+        driver->showData(type);
     }
     else if (stepInput == STEP_LIFE_LED_EFFECT::END_STEP)
     {

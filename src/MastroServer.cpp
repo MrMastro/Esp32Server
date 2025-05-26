@@ -23,6 +23,7 @@ MastroServer::MastroServer(AsyncWebServer *webServer, String mode, String ssid, 
     MastroServer();
     pointWebServer = webServer;
     debug = debugMode;
+    this->deviceName = deviceName;
     logInfo("\n");
 
     initLittleFs();
@@ -64,7 +65,7 @@ MastroServer::MastroServer(AsyncWebServer *webServer, String mode, String ssid, 
     //init default route
     logInfoln("Set Route");
     setRoutes();
-    beginListFiles("/www");
+    //beginListFiles("/www");
 
     //Init web server
     logInfoln("Starting web server...");
@@ -164,6 +165,14 @@ String MastroServer::getIp()
     }
     else return "Server not connected";
 
+}
+
+String MastroServer::getMacAdress()
+{
+    if(isAvaible()){
+        return WiFi.macAddress();
+    }
+    else return "Server not connected";
 }
 
 String MastroServer::getWifiCommunicationMode()

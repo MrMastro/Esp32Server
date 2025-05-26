@@ -17,6 +17,11 @@ String InfoService::getIp()
     return getServerByCollector()->getIp();
 }
 
+String InfoService::getMacAdress()
+{
+    return getServerByCollector()->getMacAdress();
+}
+
 String InfoService::getInfo()
 {
     String info = "WIP, info visualizated here";
@@ -49,4 +54,13 @@ boolean InfoService::checkAuthorization(String ip){
 boolean InfoService::isAvaible()
 {
   return isOperative;
+}
+
+InfoEsp32Model InfoService::getHelloInfo()
+{
+    InfoEsp32Model info = InfoEsp32Model();
+    info.deviceName = getServerByCollector()->getName();
+    info.ip = getIp();
+    info.macAdress = getMacAdress();
+    return info;
 }

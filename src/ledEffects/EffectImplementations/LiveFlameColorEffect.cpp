@@ -32,6 +32,11 @@ boolean LiveFlameColorEffect::getCompatibilityWs2811()
     return true; // Compatibile con WS2811
 }
 
+boolean LiveFlameColorEffect::getCompatibilityWs2811Matrix(){
+    return true;
+}
+
+
 boolean LiveFlameColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT stepInput, const std::vector<RgbColor> &colorsInput, int deltaTimeMsInput, DriverLed *driver, TYPE_STRIP type, SerialService *serialService)
 {
     if (driver == nullptr)
@@ -59,7 +64,7 @@ boolean LiveFlameColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT 
 
     case STEP_LIFE_LED_EFFECT::LOOP_STEP:
         updateFlame(driver, type, false);
-        driver->showData(); // Mostra i cambiamenti
+        driver->showData(type); // Mostra i cambiamenti
         delay(deltaTimeMsInput);
         break;
 
@@ -68,7 +73,7 @@ boolean LiveFlameColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT 
         while (currentFlameHeight > 0)
         {
             updateFlame(driver, type, true); // Aggiorna la fiamma
-            driver->showData();              // Mostra i cambiamenti
+            driver->showData(type);              // Mostra i cambiamenti
             currentFlameHeight -= growthStep; // Riduci l'altezza della fiamma
             delay(deltaTimeMsInput);
         }

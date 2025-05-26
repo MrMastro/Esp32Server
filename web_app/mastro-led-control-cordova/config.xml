@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.mastroconnect.led_espert" version="1.0.0" xmlns="http://www.w3.org/ns/widgets"
-    xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    xmlns:cdv="http://cordova.apache.org/ns/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <name>LedEspert</name>
     <description>Control your esp 32 Server with fantastic led games.</description>
     <author email="" href=""> MastroSoft </author>
     <content src="index.html" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
+    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
 
     <!-- Preferenze per lo Splash Screen -->
     <preference name="SplashScreen" value="screen" />
@@ -14,14 +14,14 @@
     <!-- Configurazione dell'icona di splash screen -->
     <preference name="AndroidWindowSplashScreenIcon" value="resources/android/icon.png" />
     <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/android/icon.png" /> <!-- Per compatibilità -->
-    <preference name="SplashScreenDelay" value="3000" />
+    <preference name="SplashScreenDelay" value="4000" />
 
+    <!-- Permessi necessari -->
     <platform name="android">
-        <icon src="resources/android/icon.png" density="mdpi" />
-        <icon src="resources/android/icon.png" density="hdpi" />
-        <icon src="resources/android/icon.png" density="xhdpi" />
-        <icon src="resources/android/icon.png" density="xxhdpi" />
-        <icon src="resources/android/icon.png" density="xxxhdpi" />
-        <icon src="resources/android/icon.png" />
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>
     </platform>
 </widget>

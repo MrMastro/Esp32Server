@@ -15,8 +15,11 @@ export default class SettingsModel {
         pinLedDinRgb = 19,
         pinLedCinRgb = 18,
         enableStripWs2811 = false,
+        enableStripWs2811Matrix = false,
         numLedWs2811 = 32,
-        pinLedWs2811 = 5
+        numLedWs2811Matrix = 128,
+        pinLedWs2811 = 5,
+        pinLedWs2811Matrix = 21
     ) {
         // Inizializza i valori del dispositivo con quelli passati o di default
         this.deviceName = deviceName;
@@ -34,11 +37,14 @@ export default class SettingsModel {
         // Impostazioni LED
         this.ledSettings = {
             enableStripWs2811: enableStripWs2811,
+            enableStripWs2811Matrix: enableStripWs2811Matrix,
             numLedWs2811: numLedWs2811,
+            numLedWs2811Matrix: numLedWs2811Matrix,
             pinLedWs2811: pinLedWs2811,
             enableStripRgb: enableStripRgb,
             pinLedDinRgb: pinLedDinRgb,
-            pinLedCinRgb: pinLedCinRgb
+            pinLedCinRgb: pinLedCinRgb,
+            pinLedWs2811Matrix: pinLedWs2811Matrix
         };
     }
 

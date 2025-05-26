@@ -14,7 +14,7 @@ int MulticolorConstantEffect::getMaxColorsNumber()
 
 int MulticolorConstantEffect::getMinColorsNumber()
 {
-    return 2;
+    return 1;
 }
 
 boolean MulticolorConstantEffect::getCompatibilityRgb(){
@@ -22,6 +22,10 @@ boolean MulticolorConstantEffect::getCompatibilityRgb(){
 }
 
 boolean MulticolorConstantEffect::getCompatibilityWs2811(){
+    return true;
+}
+
+boolean MulticolorConstantEffect::getCompatibilityWs2811Matrix(){
     return true;
 }
 
@@ -50,7 +54,7 @@ boolean MulticolorConstantEffect::execStep(String effectInput, STEP_LIFE_LED_EFF
             RgbColor currentColor = colorsInput[i % colorsInput.size()];
             driver->sendStripData(type, currentColor, i);
         }
-        driver->showData();
+        driver->showData(type);
         break;
 
     case STEP_LIFE_LED_EFFECT::END_STEP:
