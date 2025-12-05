@@ -5,6 +5,7 @@
 #include <BluetoothSerial.h>
 #include "MastroServer.h"
 #include "constants/CommunicationMode.h"
+#include "constants/JoystickDirections.h"
 #include "ledEffects/DriverLed.h"
 
 

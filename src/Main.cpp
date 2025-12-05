@@ -92,13 +92,21 @@ void setup_communication(SettingsModel sm)
     break;
   case COMMUNICATION_MODE::HYBRID_BLUETOOTH_AP:
     serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_AP, this communication is yet as WIP", "MAIN", "setup_communication");
+    delay(1000);
+    mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    initRoutes(mastroServer);
+    infoWebServer();
     defaultMode = true;
-    unknonwMode = true;
+    unknonwMode = false;
     break;
   case COMMUNICATION_MODE::HYBRID_BLUETOOTH_WIFI:
     serialService.logWarning("Communication mode is HYBRID_BLUETOOTH_WIFI, this communication is yet as WIP", "MAIN", "setup_communication");
+    delay(1000);
+    mastroServer = MastroServer(&webServer, "WIFI", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    initRoutes(mastroServer);
+    infoWebServer();
     defaultMode = true;
-    unknonwMode = true;
+    unknonwMode = false;
     break;
   default:
     defaultMode = true;
@@ -110,13 +118,14 @@ void setup_communication(SettingsModel sm)
     if (unknonwMode)
     {
       serialService.logWarning("the mode passing is unknown. Loading ap mode as default", "MAIN", "setup_communication");
+      mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+      initRoutes(mastroServer);
+      infoWebServer();
     }
     else
     {
-      serialService.logWarning("Hybrid Communcation isn't yet avaible in this version (WIP). Loading ap mode as default", "MAIN", "setup_communication");
+      serialService.logWarning("Hybrid Communcation isn't yet avaible in this version (WIP).", "MAIN", "setup_communication");
     }
-    mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
-    infoWebServer();
   }
 }
 
@@ -382,40 +391,167 @@ void test()
   int xValue = 0;
   int yValue = 0;
   int swState = LOW;
+  String msgLog = "";
+  while (true) {
+    xValue = analogRead(34);
+    yValue = analogRead(35);
+    swState = digitalRead(33);
+  
+    String code = "";
+  
+    const int CENTER_MIN = 1890;
+    const int CENTER_MAX = 2700;
+
+    msgLog = String("X: ") + xValue + " | Y: " + yValue;
+    Serial.println(msgLog);
+  
+    // Asse X → UP / DOWN
+    if (xValue > CENTER_MAX) {
+      code += "UP";
+    } else if (xValue < CENTER_MIN) {
+      code += "DOWN";
+    }
+  
+    // Asse Y → LEFT / RIGHT
+    if (yValue > CENTER_MAX) {
+      if(code.length() > 0){
+        code += "_";
+      }
+      code += "RIGHT";
+    } else if (yValue < CENTER_MIN) {
+      if(code.length() > 0){
+        code += "_";
+      }
+      code += "LEFT";
+    }
+  
+    // Nessun movimento → CENTER
+    if (code.length() == 0) {
+      code = "CENTER";
+    }
+  
+    // Pulsante premuto → aggiungo 'B'
+    if (swState == LOW) {
+      code += "_BUTTON";
+    }
+  
+    //Serial.println(code);
+  
+    J_DIRECTION direction = mapStringToJdirections(code);
+
+    // ------------------------------
+    // SWITCH SU TUTTI I POSSIBILI CASI
+    // ------------------------------
+    
+    switch (direction) {
+
+      case J_DIRECTION::CENTER:
+          Serial.println("CENTER");
+          break;
+
+      case J_DIRECTION::UP:
+          Serial.println("UP");
+          break;
+
+      case J_DIRECTION::DOWN:
+          Serial.println("DOWN");
+          break;
+
+      case J_DIRECTION::LEFT:
+          Serial.println("LEFT");
+          break;
+
+      case J_DIRECTION::RIGHT:
+          Serial.println("RIGHT");
+          break;
+
+      case J_DIRECTION::UP_LEFT:
+          Serial.println("UP_LEFT");
+          break;
+
+      case J_DIRECTION::UP_RIGHT:
+          Serial.println("UP_RIGHT");
+          break;
+
+      case J_DIRECTION::DOWN_LEFT:
+          Serial.println("DOWN_LEFT");
+          break;
+
+      case J_DIRECTION::DOWN_RIGHT:
+          Serial.println("DOWN_RIGHT");
+          break;
+
+      // Con pulsante premuto
+      case J_DIRECTION::CENTER_BUTTON:
+          Serial.println("CENTER_BUTTON");
+          break;
+
+      case J_DIRECTION::UP_BUTTON:
+          Serial.println("UP_BUTTON");
+          break;
+
+      case J_DIRECTION::DOWN_BUTTON:
+          Serial.println("DOWN_BUTTON");
+          break;
+
+      case J_DIRECTION::LEFT_BUTTON:
+          Serial.println("LEFT_BUTTON");
+          break;
+
+      case J_DIRECTION::RIGHT_BUTTON:
+          Serial.println("RIGHT_BUTTON");
+          break;
+
+      case J_DIRECTION::UP_LEFT_BUTTON:
+          Serial.println("UP_LEFT_BUTTON");
+          break;
+
+      case J_DIRECTION::UP_RIGHT_BUTTON:
+          Serial.println("UP_RIGHT_BUTTON");
+          break;
+
+      case J_DIRECTION::DOWN_LEFT_BUTTON:
+          Serial.println("DOWN_LEFT_BUTTON");
+          break;
+
+      case J_DIRECTION::DOWN_RIGHT_BUTTON:
+          Serial.println("DOWN_RIGHT_BUTTON");
+          break;
+
+      default:
+          Serial.println("UNKNOWN");
+          break;
+    }
+  
+    delay(500);
+  }
+
   while(true){
     xValue = analogRead(34);  // Legge il valore X
     yValue = analogRead(35);  // Legge il valore Y
     swState = digitalRead(33);
-    Serial.print("X: ");
-    Serial.print(xValue);
-    Serial.print(" | Y: ");
-    Serial.println(yValue);
+    msgLog = String("X: ") + xValue + " | Y: " + yValue;
+    Serial.println(msgLog);
 
     // Zona morta (±300 intorno a 2048)
     int CENTER_MIN = 1890;
-    int CENTER_MAX = 2000;
+    int CENTER_MAX = 2700;
         
-    // // Direzione Y
+    // Direzione Y
     if (yValue > CENTER_MAX) {
-      Serial.print("DES");
+      Serial.println("DES");
     } else if (yValue < CENTER_MIN) {
-      Serial.print("SIN");
+      Serial.println("SIN");
     }
 
-    // // Spazio tra le direzioni se necessario
-    // if (xValue > CENTER_MAX || xValue < CENTER_MIN) {
-    //   if (printed) Serial.print(" | ");
-    // }
-
-    // // Direzione X
+    // Direzione X
     if (xValue > CENTER_MAX) {
-      Serial.print("SU");
+      Serial.println("SU");
     } else if (xValue < CENTER_MIN) {
-      Serial.print("GIU");
+      Serial.println("GIU");
     }
     if (swState == LOW) {
-      Serial.print(" | Switch");
-      Serial.print(swState);
+      Serial.println("Switch");
     }
     delay(500);  // Attesa di 1 secondo
   }

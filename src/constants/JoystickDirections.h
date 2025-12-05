@@ -1,0 +1,34 @@
+#ifndef JOYSTICK_DIRECTIONS
+#define JOYSTICK_DIRECTIONS
+
+#include <vector>
+#include <Arduino.h>
+
+//J_DIRECTION
+enum class J_DIRECTION
+{
+  CENTER,
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  UP_LEFT,
+  UP_RIGHT,
+  DOWN_LEFT,
+  DOWN_RIGHT,
+  CENTER_BUTTON,
+  UP_BUTTON,
+  DOWN_BUTTON,
+  LEFT_BUTTON,
+  RIGHT_BUTTON,
+  UP_LEFT_BUTTON,
+  UP_RIGHT_BUTTON,
+  DOWN_LEFT_BUTTON,
+  DOWN_RIGHT_BUTTON
+};
+
+//FUNCTION FOR MAPPING
+J_DIRECTION mapStringToJdirections(String inputString);
+String mapJdirectionsToString(J_DIRECTION input);
+
+#endif  // COMMAND_H
