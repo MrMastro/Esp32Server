@@ -400,6 +400,7 @@ void test()
   int xValue = 0;
   int yValue = 0;
   int swState = LOW;
+  bool activeButton = false;
   String msgLog = "";
   J_DIRECTION lastDirection = J_DIRECTION::NONE;
   while (true) {
@@ -412,8 +413,8 @@ void test()
     const int CENTER_MIN = 1890;
     const int CENTER_MAX = 2700;
 
-    msgLog = String("X: ") + xValue + " | Y: " + yValue;
-    Serial.println(msgLog);
+    // msgLog = String("X: ") + xValue + " | Y: " + yValue;
+    // Serial.println(msgLog);
   
     // Asse X → UP / DOWN
     if (xValue > CENTER_MAX) {
@@ -439,9 +440,12 @@ void test()
     if (code.length() == 0) {
       code = "CENTER";
     }
-  
+
     // Pulsante premuto → aggiungo 'B'
     if (swState == LOW) {
+      code += "_BUTTON";
+      activeButton = !activeButton;
+    }else if(activeButton){
       code += "_BUTTON";
     }
   
@@ -449,6 +453,8 @@ void test()
   
     J_DIRECTION direction = mapStringToJdirections(code);
     if(direction != lastDirection){
+      msgLog = String("X: ") + xValue + " | Y: " + yValue;
+      Serial.println(msgLog);
       recvButtonByJoystick(direction);
       lastDirection = direction;
     }
@@ -569,7 +575,6 @@ void recvButtonByJoystick(J_DIRECTION direction){
   Serial.println(s_direction);
   const LedPresetModel* execPreset = ledPresets.getByTrigger(s_direction);
   if(execPreset != nullptr){
-    Serial.println(String("Eseguo ") + execPreset->effect);
     std::vector<RgbColor> rgbColors = getRgbColorsByLedColor(execPreset->colors);
     ((LedService *)servicesCollector.getService("LedService"))->startEffect(execPreset->effect, rgbColors, execPreset->deltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
   }
