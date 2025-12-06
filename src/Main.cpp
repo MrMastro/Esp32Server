@@ -19,6 +19,7 @@ SettingService settingService;
 LedService ledService;
 InfoService infoService;
 SerialService serialService;
+FileManagerService fileManagerService;
 
 // AsyncWebServer server(80);
 //  ################################################################################ //
@@ -149,11 +150,15 @@ void initServices(HardwareSerial *serialPointer)
   serialService.attachSerial(&Serial);
   serialService.logInfoln("Service init", "MAIN");
   servicesCollector.addService(&serialService, "SerialService");
+  servicesCollector.addService(&fileManagerService, "fileManagerService");
   servicesCollector.addService(&settingService, "SettingService");
   settingService.loadSettings(SETTINGS_FILE_LOCATION_PATH);
   s = settingService.getSettings();
+  delay(1000);
+  Serial.println("TEST");
   //TODO load ledPresets
-  //ledPresets = settingService.
+  String dataLedPreset = fileManagerService.getFileData(PRESETS_LED_FILE_LOCATION_PATH);
+  ledPresets.fromJson(dataLedPreset);
   serialService.setSettings(&s);
 
   // init LedService
@@ -396,6 +401,7 @@ void test()
   int yValue = 0;
   int swState = LOW;
   String msgLog = "";
+  J_DIRECTION lastDirection = J_DIRECTION::NONE;
   while (true) {
     swState = digitalRead(s.joystickSettings.pinSwitch);
     xValue = analogRead(s.joystickSettings.pinAnalogX);
@@ -442,7 +448,10 @@ void test()
     //Serial.println(code);
   
     J_DIRECTION direction = mapStringToJdirections(code);
-    recvButtonByJoystick(direction);
+    if(direction != lastDirection){
+      recvButtonByJoystick(direction);
+      lastDirection = direction;
+    }
     // ------------------------------
     // SWITCH SU TUTTI I POSSIBILI CASI
     // ------------------------------
@@ -558,11 +567,16 @@ void recvButtonByJoystick(J_DIRECTION direction){
   //metodo che ottiene il preset dal json e la direzione
   String s_direction = mapJdirectionsToString(direction);
   Serial.println(s_direction);
+  const LedPresetModel* execPreset = ledPresets.getByTrigger(s_direction);
+  if(execPreset != nullptr){
+    Serial.println(String("Eseguo ") + execPreset->effect);
+    std::vector<RgbColor> rgbColors = getRgbColorsByLedColor(execPreset->colors);
+    ((LedService *)servicesCollector.getService("LedService"))->startEffect(execPreset->effect, rgbColors, execPreset->deltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
+  }
   // String prEffect = "EYE_MID";
   // RgbColor prColorRgb = RgbColor(100,100,100); 
   // int prDeltaTms = 100;
   // //todo WIP
-  // ((LedService *)servicesCollector.getService("LedService"))->startEffect(prEffect, prColorRgb, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
   servicesCollector.freeExclusiveExecution();
 }
 

@@ -8,7 +8,7 @@ FileManagerService::FileManagerService()
 
 
 
-String FileManagerService::getFileData(String &path)
+String FileManagerService::getFileData(String path)
 {
     boolean recoveryJson = false;
     // Initialize SPIFFS
@@ -30,7 +30,7 @@ String FileManagerService::getFileData(String &path)
         file = LittleFS.open(path, "r");
         if (!file)
         {
-            ((SerialService *)getServiceByCollector("SerialService"))->logWarning("Errore nell'aprire il file", getNameService(), "getFileData(String &path)");
+            ((SerialService *)getServiceByCollector("SerialService"))->logWarning("Errore nell'aprire il file", getNameService(), "getFileData(String path)");
             return "";
         }
 
@@ -42,7 +42,7 @@ String FileManagerService::getFileData(String &path)
         file.close();
         return fileContent;
     }else{
-        ((SerialService *)getServiceByCollector("SerialService"))->logWarning("File non esiste", getNameService(), "getFileData(String &path)");
+        ((SerialService *)getServiceByCollector("SerialService"))->logWarning("File non esiste", getNameService(), "getFileData(String path)");
     }
 
     return "";
@@ -54,7 +54,7 @@ void FileManagerService::onInitServiceCollector()
     isOperative = true;
 }
 
-boolean FileManagerService::writeFile(String &path, String &content, bool create)
+boolean FileManagerService::writeFile(String path, String &content, bool create)
 {
     // Crea e scrivi il contenuto predefinito nel file
     File file = LittleFS.open(path, "w", create);
@@ -69,7 +69,7 @@ boolean FileManagerService::writeFile(String &path, String &content, bool create
     return true;
 }
 
-boolean FileManagerService::fileExists(String &path)
+boolean FileManagerService::fileExists(String path)
 {
     return LittleFS.exists(path);
 }

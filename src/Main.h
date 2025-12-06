@@ -17,6 +17,7 @@
 #include "services/ServiceImplementations/CommandService.h"
 #include "services/ServiceImplementations/LedService.h"
 #include "services/ServiceImplementations/SettingService.h"
+#include "services/ServiceImplementations/FileManagerService.h"
 #include "services/ServiceImplementations/SerialService.h"
 
 #include "routes/Routes.h"

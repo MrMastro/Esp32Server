@@ -16,7 +16,9 @@ public:
     // ---------------------------------------
     bool fromJson(const String &json)
     {
-        DynamicJsonDocument doc(4096);
+        presets.clear(); 
+
+        JsonDocument doc;
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)
@@ -27,7 +29,6 @@ public:
         }
 
         JsonArray arr = doc.as<JsonArray>();
-        presets.clear();
 
         for (JsonObject obj : arr)
         {
@@ -47,16 +48,36 @@ public:
     // ---------------------------------------
     // Serializzazione lista preset
     // ---------------------------------------
-    void toJson(JsonObject &json) const
+    String toJson() const
     {
-        JsonArray arr = json.createNestedArray("ledPresets");
+        JsonDocument doc; // dimensione sufficiente per tutta la lista
+        JsonArray arr = doc.to<JsonArray>();
+
         for (const auto &p : presets)
         {
-            JsonObject o = arr.createNestedObject();
-            p.toJson(o);
-        }
-    }
+            JsonObject obj = arr.createNestedObject();
 
+            obj["effect"] = p.effect;
+            obj["deltaT"] = p.deltaT;
+
+            JsonArray triggersArray = obj.createNestedArray("triggers");
+            for (const auto &t : p.triggers)
+                triggersArray.add(t);
+
+            JsonArray colorsArray = obj.createNestedArray("colors");
+            for (const auto &c : p.colors)
+            {
+                JsonObject colorObj = colorsArray.createNestedObject();
+                colorObj["r"] = c.r;
+                colorObj["g"] = c.g;
+                colorObj["b"] = c.b;
+            }
+        }
+
+        String output;
+        serializeJson(arr, output);
+        return output;
+    }
     // ---------------------------------------
     // Ottieni singolo preset per trigger
     // ---------------------------------------
@@ -84,25 +105,6 @@ public:
                 return &p;
         }
         return nullptr;
-    }
-
-    // ------------------------------------------------------------
-    // Ritorna una stringa JSON contenente tutti i preset presenti
-    // ------------------------------------------------------------
-    String getPresetList() const
-    {
-        DynamicJsonDocument doc(4096); // dimensione sufficiente per tutti i preset
-        JsonArray arr = doc.to<JsonArray>();
-
-        for (const auto &p : presets)
-        {
-            JsonObject obj = arr.createNestedObject();
-            p.toJson(obj);
-        }
-
-        String output;
-        serializeJson(arr, output);
-        return output;
     }
 };
 

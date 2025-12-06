@@ -18,9 +18,9 @@ class FileManagerService : public Service
 {
 public:
     FileManagerService();
-    boolean writeFile(String &path, String& content, bool create=false);
-    String getFileData(String &path);
-    boolean fileExists(String &path);
+    boolean writeFile(String path, String& content, bool create=false);
+    String getFileData(String path);
+    boolean fileExists(String path);
 protected:
     void onInitServiceCollector() override;
 private:

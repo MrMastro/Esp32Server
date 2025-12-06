@@ -1,6 +1,7 @@
 #include "FunctionUtils.h"
 #include "SerialSimple.h"
 #include <models/LedEffectRequest/LedColorRequest.h>
+#include <models/LedPresetModel/LedColor.h>
 
 // Function to split a string based on a delimiter
 std::vector<String> splitString(const String &str, char delimiter)
@@ -63,6 +64,19 @@ const std::vector<RgbColor> getRgbColorsByRequest(const std::vector<LedColorRequ
     for (size_t i = 0; i < ledColorRequests.size(); i++)
     {
         LedColorRequest c = ledColorRequests.at(i);
+        rgbColors.push_back(RgbColor(c.r, c.g, c.b));
+    }
+
+    return rgbColors;
+}
+
+const std::vector<RgbColor> getRgbColorsByLedColor(const std::vector<LedColor> ledColor)
+{
+    std::vector<RgbColor> rgbColors;
+
+    for (size_t i = 0; i < ledColor.size(); i++)
+    {
+        LedColor c = ledColor.at(i);
         rgbColors.push_back(RgbColor(c.r, c.g, c.b));
     }
 

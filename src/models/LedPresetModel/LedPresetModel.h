@@ -17,23 +17,28 @@ public:
     // ---------------------------------------
     // Serializzazione in oggetto JSON
     // ---------------------------------------
-    void toJson(JsonObject &json) const
+    String toJson() const
     {
-        json["effect"] = effect;
-        json["deltaT"] = deltaT;
+        JsonDocument doc;  // Usa JsonDocument senza dimensione
 
-        JsonArray triggersArray = json.createNestedArray("triggers");
-        for (const auto &t : triggers)
+        doc["effect"] = effect;
+        doc["deltaT"] = deltaT;
+
+        JsonArray triggersArray = doc.createNestedArray("triggers");
+        for (const auto &t : triggers){
             triggersArray.add(t);
-
-        JsonArray colorsArray = json.createNestedArray("colors");
-        for (const auto &c : colors)
-        {
-            JsonObject o = colorsArray.createNestedObject();
-            o["r"] = c.r;
-            o["g"] = c.g;
-            o["b"] = c.b;
         }
+
+        JsonArray colorsArray = doc.createNestedArray("colors");
+        for (const auto &color : colors)
+        {
+            JsonObject colorObj = colorsArray.createNestedObject();
+            color.toJson(colorObj);  // Utilizziamo il metodo toJson di LedColorRequest
+        }
+
+        String output;
+        serializeJson(doc, output);
+        return output;
     }
 
     // ---------------------------------------
@@ -60,14 +65,20 @@ public:
         deltaT = obj["deltaT"];
 
         triggers.clear();
-        for (JsonVariant v : obj["triggers"].as<JsonArray>())
+        for (JsonVariant v : obj["triggers"].as<JsonArray>()){
             triggers.push_back(v.as<String>());
+        }
 
         colors.clear();
-        for (JsonObject cObj : obj["colors"].as<JsonArray>())
+        JsonArray colorsArray = doc["colors"].as<JsonArray>();
+        for (JsonObject colorObj : colorsArray)
         {
-            LedColor c{cObj["r"], cObj["g"], cObj["b"]};
-            colors.push_back(c);
+            LedColor color;
+            if (!color.fromJson(colorObj))
+            {
+                return false; // Se fallisce la deserializzazione di un colore
+            }
+            colors.push_back(color); // Aggiungi il colore al vettore
         }
 
         return true;
