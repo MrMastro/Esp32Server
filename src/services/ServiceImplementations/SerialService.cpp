@@ -290,6 +290,19 @@ void SerialService::logInfoln(String msg, String subject)
     }
 }
 
+void SerialService::logInfoln(String msg, String subject, boolean debug)
+{
+    if (debug == true)
+    {
+        String log = "[ LOG - {subject} ] {msg}";
+        log.replace("{subject}", subject);
+        log.replace("{msg}", msg);
+        setLastMessage(log, true);
+        printlnColored(log, "\033[32m");
+        lastMsgIsFixed = false;
+    }
+}
+
 void SerialService::logWarning(String msg, String subject, String context)
 {
     String warn = "[ WARNING - SERVICE {nameService} on {context} ] {msg}";

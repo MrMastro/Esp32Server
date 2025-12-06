@@ -3,6 +3,9 @@
 #include <Arduino.h>
 #include <NeoPixelBus.h>
 #include <BluetoothSerial.h>
+
+#include "models/LedPresetModel/LedPresetModelList.h"
+
 #include "MastroServer.h"
 #include "constants/CommunicationMode.h"
 #include "constants/JoystickDirections.h"
@@ -33,6 +36,7 @@ void commandDelayedTask(void *pvParameters);
 void test();
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);
+void recvButtonByJoystick(J_DIRECTION direction);
 
 
 

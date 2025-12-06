@@ -92,6 +92,7 @@ void ServicesCollector::addService(Service *service, String name)
 
     service->setNameService(name);
     service->attachCollector(this);
+    service->onInitServiceCollector();
     containerService[name] = service;
 }
 

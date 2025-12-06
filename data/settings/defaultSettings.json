@@ -20,5 +20,11 @@
     "enableStripRgb": false,
     "pinLedDinRgb": 19,
     "pinLedCinRgb": 18
+  },
+  "joystickSettings": {
+    "enableJoystick": true,
+    "pinSwitch": 32,
+    "pinAnalogX": 34,
+    "pinAnalogY": 35
   }
 }

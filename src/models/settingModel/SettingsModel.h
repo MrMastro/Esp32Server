@@ -6,6 +6,7 @@
 #include <vector>
 #include <models/LedSettingsModel/LedSettingsModel.h>
 #include <models/LedEffectRequest/LedColorRequest.h>
+#include <models/JoystickSettingsModel/JoystickSettingsModel.h>
 
 class SettingsModel
 {
@@ -24,6 +25,7 @@ public:
         this->ssidWIFI = other.ssidWIFI;
         this->passwordWIFI = other.passwordWIFI;
         this->ledSettings = other.ledSettings;
+        this->joystickSettings = other.joystickSettings;
     };
 
     String deviceName;
@@ -38,6 +40,7 @@ public:
     String ssidWIFI;
     String passwordWIFI;
     LedSettingsModel ledSettings;
+    JoystickSettingsModel joystickSettings;
 
     String toJson() const
     {
@@ -66,6 +69,9 @@ public:
 
         JsonObject ledSettingsJson = doc["ledSettings"].to<JsonObject>();
         ledSettings.toJson(ledSettingsJson);
+
+        JsonObject joystickSettingsJson = doc["joystickSetings"].to<JsonObject>();
+        joystickSettings.toJson(joystickSettingsJson);
 
         String output;
         doc.shrinkToFit();
@@ -109,6 +115,11 @@ public:
         passwordWIFI = doc["passwordWIFI"].as<String>();
 
         if (!ledSettings.fromJson(doc["ledSettings"].as<String>()))
+        {
+            return false;
+        }
+
+        if (!joystickSettings.fromJson(doc["joystickSettings"].as<String>()))
         {
             return false;
         }

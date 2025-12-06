@@ -1,0 +1,38 @@
+[
+  {
+  "effect": "EYE_MID",
+  "deltaT": 100,
+  "triggers": ["CENTER"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "EYE_RIGHT",
+  "deltaT": 100,
+  "triggers": ["RIGHT"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "EYE_LEFT",
+  "deltaT": 100,
+  "triggers": ["LEFT"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "EYE_DOWN",
+  "deltaT": 100,
+  "triggers": ["DOWN"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "EYE_UP",
+  "deltaT": 100,
+  "triggers": ["UP"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "EYE_HUNGRY",
+  "deltaT": 100,
+  "triggers": ["CENTER_BUTTON"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  }
+]

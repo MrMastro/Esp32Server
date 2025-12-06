@@ -127,7 +127,7 @@ void SettingService::loadSettings(String path)
     }
     // carico il contenuto di filecontent dentro loadSettings
     boolean res = settings->fromJson(fileContent);
-    Serial.println(res);
+    serialService->logInfoln("Testo da file\n" + fileContent, getNameService(), settings->debug);
     if (!res)
     {
         serialService->logWarning("Errore file json, ripristino json", getNameService(), "loadSettings(String path)");

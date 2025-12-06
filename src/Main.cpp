@@ -3,6 +3,7 @@
 boolean AP_MODE_PAUSE_LED = false;
 int ledPin = 2;
 SettingsModel s;
+LedPresetListModel ledPresets;
 
 AsyncWebServer webServer(80);
 BluetoothSerial SerialBT;
@@ -151,6 +152,8 @@ void initServices(HardwareSerial *serialPointer)
   servicesCollector.addService(&settingService, "SettingService");
   settingService.loadSettings(SETTINGS_FILE_LOCATION_PATH);
   s = settingService.getSettings();
+  //TODO load ledPresets
+  //ledPresets = settingService.
   serialService.setSettings(&s);
 
   // init LedService
@@ -252,7 +255,7 @@ void serialBtTask(void *pvParameters)
   }
 }
 
-// Serial Cable task check input for usb Serial message
+// Serial Cable task check input for usb Serial message or pin
 void serialCableTask(void *pvParameters)
 {
   serialService.logInfoln("Serial Task execution", "MAIN");
@@ -274,6 +277,7 @@ void serialCableTask(void *pvParameters)
           recvMsgBySerial(msg);
         }
       }
+
     }
     else
     {
@@ -386,16 +390,16 @@ void ledTask(void *pvParameters)
 void test()
 {
   serialService.logInfoln("Test", "MAIN");
-  pinMode(33, INPUT_PULLUP);
+  pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
   bool printed = false;
   int xValue = 0;
   int yValue = 0;
   int swState = LOW;
   String msgLog = "";
   while (true) {
-    xValue = analogRead(34);
-    yValue = analogRead(35);
-    swState = digitalRead(33);
+    swState = digitalRead(s.joystickSettings.pinSwitch);
+    xValue = analogRead(s.joystickSettings.pinAnalogX);
+    yValue = analogRead(s.joystickSettings.pinAnalogY);
   
     String code = "";
   
@@ -438,124 +442,93 @@ void test()
     //Serial.println(code);
   
     J_DIRECTION direction = mapStringToJdirections(code);
-
+    recvButtonByJoystick(direction);
     // ------------------------------
     // SWITCH SU TUTTI I POSSIBILI CASI
     // ------------------------------
     
-    switch (direction) {
+    // switch (direction) {
 
-      case J_DIRECTION::CENTER:
-          Serial.println("CENTER");
-          break;
+    //   case J_DIRECTION::CENTER:
+    //       Serial.println("CENTER");
+    //       break;
 
-      case J_DIRECTION::UP:
-          Serial.println("UP");
-          break;
+    //   case J_DIRECTION::UP:
+    //       Serial.println("UP");
+    //       break;
 
-      case J_DIRECTION::DOWN:
-          Serial.println("DOWN");
-          break;
+    //   case J_DIRECTION::DOWN:
+    //       Serial.println("DOWN");
+    //       break;
 
-      case J_DIRECTION::LEFT:
-          Serial.println("LEFT");
-          break;
+    //   case J_DIRECTION::LEFT:
+    //       Serial.println("LEFT");
+    //       break;
 
-      case J_DIRECTION::RIGHT:
-          Serial.println("RIGHT");
-          break;
+    //   case J_DIRECTION::RIGHT:
+    //       Serial.println("RIGHT");
+    //       break;
 
-      case J_DIRECTION::UP_LEFT:
-          Serial.println("UP_LEFT");
-          break;
+    //   case J_DIRECTION::UP_LEFT:
+    //       Serial.println("UP_LEFT");
+    //       break;
 
-      case J_DIRECTION::UP_RIGHT:
-          Serial.println("UP_RIGHT");
-          break;
+    //   case J_DIRECTION::UP_RIGHT:
+    //       Serial.println("UP_RIGHT");
+    //       break;
 
-      case J_DIRECTION::DOWN_LEFT:
-          Serial.println("DOWN_LEFT");
-          break;
+    //   case J_DIRECTION::DOWN_LEFT:
+    //       Serial.println("DOWN_LEFT");
+    //       break;
 
-      case J_DIRECTION::DOWN_RIGHT:
-          Serial.println("DOWN_RIGHT");
-          break;
+    //   case J_DIRECTION::DOWN_RIGHT:
+    //       Serial.println("DOWN_RIGHT");
+    //       break;
 
-      // Con pulsante premuto
-      case J_DIRECTION::CENTER_BUTTON:
-          Serial.println("CENTER_BUTTON");
-          break;
+    //   // Con pulsante premuto
+    //   case J_DIRECTION::CENTER_BUTTON:
+    //       Serial.println("CENTER_BUTTON");
+    //       break;
 
-      case J_DIRECTION::UP_BUTTON:
-          Serial.println("UP_BUTTON");
-          break;
+    //   case J_DIRECTION::UP_BUTTON:
+    //       Serial.println("UP_BUTTON");
+    //       break;
 
-      case J_DIRECTION::DOWN_BUTTON:
-          Serial.println("DOWN_BUTTON");
-          break;
+    //   case J_DIRECTION::DOWN_BUTTON:
+    //       Serial.println("DOWN_BUTTON");
+    //       break;
 
-      case J_DIRECTION::LEFT_BUTTON:
-          Serial.println("LEFT_BUTTON");
-          break;
+    //   case J_DIRECTION::LEFT_BUTTON:
+    //       Serial.println("LEFT_BUTTON");
+    //       break;
 
-      case J_DIRECTION::RIGHT_BUTTON:
-          Serial.println("RIGHT_BUTTON");
-          break;
+    //   case J_DIRECTION::RIGHT_BUTTON:
+    //       Serial.println("RIGHT_BUTTON");
+    //       break;
 
-      case J_DIRECTION::UP_LEFT_BUTTON:
-          Serial.println("UP_LEFT_BUTTON");
-          break;
+    //   case J_DIRECTION::UP_LEFT_BUTTON:
+    //       Serial.println("UP_LEFT_BUTTON");
+    //       break;
 
-      case J_DIRECTION::UP_RIGHT_BUTTON:
-          Serial.println("UP_RIGHT_BUTTON");
-          break;
+    //   case J_DIRECTION::UP_RIGHT_BUTTON:
+    //       Serial.println("UP_RIGHT_BUTTON");
+    //       break;
 
-      case J_DIRECTION::DOWN_LEFT_BUTTON:
-          Serial.println("DOWN_LEFT_BUTTON");
-          break;
+    //   case J_DIRECTION::DOWN_LEFT_BUTTON:
+    //       Serial.println("DOWN_LEFT_BUTTON");
+    //       break;
 
-      case J_DIRECTION::DOWN_RIGHT_BUTTON:
-          Serial.println("DOWN_RIGHT_BUTTON");
-          break;
+    //   case J_DIRECTION::DOWN_RIGHT_BUTTON:
+    //       Serial.println("DOWN_RIGHT_BUTTON");
+    //       break;
 
-      default:
-          Serial.println("UNKNOWN");
-          break;
-    }
+    //   default:
+    //       Serial.println("UNKNOWN");
+    //       break;
+    // }
   
     delay(500);
-  }
-
-  while(true){
-    xValue = analogRead(34);  // Legge il valore X
-    yValue = analogRead(35);  // Legge il valore Y
-    swState = digitalRead(33);
-    msgLog = String("X: ") + xValue + " | Y: " + yValue;
-    Serial.println(msgLog);
-
-    // Zona morta (±300 intorno a 2048)
-    int CENTER_MIN = 1890;
-    int CENTER_MAX = 2700;
-        
-    // Direzione Y
-    if (yValue > CENTER_MAX) {
-      Serial.println("DES");
-    } else if (yValue < CENTER_MIN) {
-      Serial.println("SIN");
-    }
-
-    // Direzione X
-    if (xValue > CENTER_MAX) {
-      Serial.println("SU");
-    } else if (xValue < CENTER_MIN) {
-      Serial.println("GIU");
-    }
-    if (swState == LOW) {
-      Serial.println("Switch");
-    }
-    delay(500);  // Attesa di 1 secondo
-  }
-      
+  }      
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
@@ -577,6 +550,19 @@ void recvMsgBySerial(String data)
 {
   servicesCollector.takeExclusiveExecution();
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
+  servicesCollector.freeExclusiveExecution();
+}
+
+void recvButtonByJoystick(J_DIRECTION direction){
+  servicesCollector.takeExclusiveExecution();
+  //metodo che ottiene il preset dal json e la direzione
+  String s_direction = mapJdirectionsToString(direction);
+  Serial.println(s_direction);
+  // String prEffect = "EYE_MID";
+  // RgbColor prColorRgb = RgbColor(100,100,100); 
+  // int prDeltaTms = 100;
+  // //todo WIP
+  // ((LedService *)servicesCollector.getService("LedService"))->startEffect(prEffect, prColorRgb, s.initialDeltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
   servicesCollector.freeExclusiveExecution();
 }
 
