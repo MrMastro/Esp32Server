@@ -207,10 +207,10 @@ void setup(void)
   delay(100);
 
   // Thread running
-  if (mastroServer.isAvaible())
-  {
-    // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
-  }
+  // if (mastroServer.isAvaible())
+  // {
+  //   // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
+  // }
   xTaskCreate(ledTask, "LedTaskExecution", STACK_SIZE_LED_EFFECTS, NULL, PRIORITY_LED_EFFECTS, NULL);
   xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
   //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
@@ -306,7 +306,8 @@ void webOtaServerTask(void *pvParameters)
   {
     if (!servicesCollector.isBusyForServiceApi())
     {
-      mastroServer.handleOta();
+      //mastroServer.handleOta();
+      serialService.logInfoln("WebOtaServerTask disabled", "MAIN");
     }
     else
     {
