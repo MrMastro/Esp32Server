@@ -25,7 +25,7 @@ enum class HTTP_CODE
 
 //Path
 #define SETTINGS_FILE_LOCATION_PATH "/settings/settings.json"
-#define PRESETS_LED_FILE_LOCATION_PATH "/settings/ledPreset.json"
+#define PRESETS_EFFECT_FILE_LOCATION_PATH "/settings/effectPreset.json"
 #define SETTINGS_FOLDER_LOCATION_PATH "/settings"
 
 //FRONT END CUSTOM MESSAGE

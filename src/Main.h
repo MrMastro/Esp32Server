@@ -38,6 +38,8 @@ void test();
 void recvMsgBySerial(String data);
 void recvMsgBySerialWeb(uint8_t *data, size_t len);
 void recvButtonByJoystick(J_DIRECTION direction);
+void calibrateJoystick(int &CENTER_X, int &CENTER_Y, int samples = 50);
+void readJoystickAndSendCommand( int &xValue, int &yValue, int &swState, int &lastSwState, bool &activeButton, J_DIRECTION &lastDirection, int CENTER_X = 1930, int CENTER_Y = 1960, const int DEAD_ZONE = 400);
 
 
 

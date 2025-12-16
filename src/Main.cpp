@@ -154,10 +154,7 @@ void initServices(HardwareSerial *serialPointer)
   servicesCollector.addService(&settingService, "SettingService");
   settingService.loadSettings(SETTINGS_FILE_LOCATION_PATH);
   s = settingService.getSettings();
-  delay(1000);
-  Serial.println("TEST");
-  //TODO load ledPresets
-  String dataLedPreset = fileManagerService.getFileData(PRESETS_LED_FILE_LOCATION_PATH);
+  String dataLedPreset = fileManagerService.getFileData(PRESETS_EFFECT_FILE_LOCATION_PATH);
   ledPresets.fromJson(dataLedPreset);
   serialService.setSettings(&s);
 
@@ -264,11 +261,17 @@ void serialBtTask(void *pvParameters)
 void serialCableTask(void *pvParameters)
 {
   serialService.logInfoln("Serial Task execution", "MAIN");
+  pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
+  int xValue = 0;
+  int yValue = 0;
+  int swState = HIGH;
+  int lastSwState = HIGH;
+  bool activeButton = false;
+  J_DIRECTION lastDirection = J_DIRECTION::NONE;
   while (true)
   {
     if (!servicesCollector.isBusyForServiceApi())
     {
-      // todo change with if (serialService.availableSerial())
       if (serialService.availableSerial())
       {
         String msg = serialService.getMsgbySerial();
@@ -282,7 +285,7 @@ void serialCableTask(void *pvParameters)
           recvMsgBySerial(msg);
         }
       }
-
+      readJoystickAndSendCommand(xValue, yValue, swState, lastSwState, activeButton, lastDirection);
     }
     else
     {
@@ -392,158 +395,93 @@ void ledTask(void *pvParameters)
   }
 }
 
-void test()
-{
-  serialService.logInfoln("Test", "MAIN");
-  pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
-  bool printed = false;
-  int xValue = 0;
-  int yValue = 0;
-  int swState = LOW;
-  bool activeButton = false;
-  String msgLog = "";
-  J_DIRECTION lastDirection = J_DIRECTION::NONE;
-  while (true) {
-    swState = digitalRead(s.joystickSettings.pinSwitch);
-    xValue = analogRead(s.joystickSettings.pinAnalogX);
-    yValue = analogRead(s.joystickSettings.pinAnalogY);
-  
-    String code = "";
-  
-    const int CENTER_MIN = 1890;
-    const int CENTER_MAX = 2700;
 
-    // msgLog = String("X: ") + xValue + " | Y: " + yValue;
-    // Serial.println(msgLog);
-  
-    // Asse X → UP / DOWN
-    if (xValue > CENTER_MAX) {
-      code += "UP";
-    } else if (xValue < CENTER_MIN) {
-      code += "DOWN";
+void printJoystickRaw() {
+    Serial.println("Modalità RAW joystick");
+
+    pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
+
+    while (true) {
+        int xValue = analogRead(s.joystickSettings.pinAnalogX);
+        int yValue = analogRead(s.joystickSettings.pinAnalogY);
+        int swState = digitalRead(s.joystickSettings.pinSwitch);
+
+        Serial.print("X: "); Serial.print(xValue);
+        Serial.print(" | Y: "); Serial.print(yValue);
+        Serial.print(" | SW: "); Serial.println(swState);
+
+        delay(100); // riduci se vuoi più frequenza
     }
-  
-    // Asse Y → LEFT / RIGHT
-    if (yValue > CENTER_MAX) {
-      if(code.length() > 0){
-        code += "_";
-      }
-      code += "RIGHT";
-    } else if (yValue < CENTER_MIN) {
-      if(code.length() > 0){
-        code += "_";
-      }
-      code += "LEFT";
-    }
-  
-    // Nessun movimento → CENTER
-    if (code.length() == 0) {
-      code = "CENTER";
+}
+
+void test() {
+    Serial.println("Test method");
+}
+
+void calibrateJoystick(int &CENTER_X, int &CENTER_Y, int samples) {
+    Serial.println("Centro calibrazione...");
+    long sumX = 0, sumY = 0;
+
+    pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
+
+    for (int i = 0; i < samples; i++) {
+        int x = analogRead(s.joystickSettings.pinAnalogX);
+        int y = analogRead(s.joystickSettings.pinAnalogY);
+
+        sumX += x;
+        sumY += y;
+        delay(10);
     }
 
-    // Pulsante premuto → aggiungo 'B'
-    if (swState == LOW) {
-      code += "_BUTTON";
+    CENTER_X = sumX / samples;
+    CENTER_Y = sumY / samples;
+
+    Serial.print("Centro trovato -> X: "); Serial.print(CENTER_X);
+    Serial.print(" | Y: "); Serial.println(CENTER_Y);
+}
+
+void readJoystickAndSendCommand( int &xValue, int &yValue, int &swState, int &lastSwState, bool &activeButton, J_DIRECTION &lastDirection, int CENTER_X, int CENTER_Y, const int DEAD_ZONE) {
+  swState = digitalRead(s.joystickSettings.pinSwitch);
+  xValue  = analogRead(s.joystickSettings.pinAnalogX);
+  yValue  = analogRead(s.joystickSettings.pinAnalogY);
+
+  // TOGGLE PULSANTE
+  if (lastSwState == HIGH && swState == LOW) {
       activeButton = !activeButton;
-    }else if(activeButton){
-      code += "_BUTTON";
-    }
-  
-    //Serial.println(code);
-  
-    J_DIRECTION direction = mapStringToJdirections(code);
-    if(direction != lastDirection){
-      msgLog = String("X: ") + xValue + " | Y: " + yValue;
-      Serial.println(msgLog);
+  }
+  lastSwState = swState;
+
+  String code = "";
+  int dx = xValue - CENTER_X;
+  int dy = yValue - CENTER_Y;
+
+  bool xCentered = abs(dx) <= DEAD_ZONE;
+  bool yCentered = abs(dy) <= DEAD_ZONE;
+
+  if (xCentered && yCentered) {
+      code = "CENTER";
+  } else {
+      if (!xCentered) {
+          if (dx > DEAD_ZONE) code += "UP";
+          else if (dx < -DEAD_ZONE) code += "DOWN";
+      }
+      if (!yCentered) {
+          if (code.length() > 0) code += "_";
+          if (dy > DEAD_ZONE) code += "RIGHT";
+          else if (dy < -DEAD_ZONE) code += "LEFT";
+      }
+      if (code.length() == 0) code = "CENTER";
+  }
+
+  if (activeButton) code += "_BUTTON";
+
+  J_DIRECTION direction = mapStringToJdirections(code);
+
+  if (direction != lastDirection) {
+      serialService.logInfoln(String("X: ") + xValue + " | Y: " + yValue + " -> " + code, "MAIN");
       recvButtonByJoystick(direction);
       lastDirection = direction;
-    }
-    // ------------------------------
-    // SWITCH SU TUTTI I POSSIBILI CASI
-    // ------------------------------
-    
-    // switch (direction) {
-
-    //   case J_DIRECTION::CENTER:
-    //       Serial.println("CENTER");
-    //       break;
-
-    //   case J_DIRECTION::UP:
-    //       Serial.println("UP");
-    //       break;
-
-    //   case J_DIRECTION::DOWN:
-    //       Serial.println("DOWN");
-    //       break;
-
-    //   case J_DIRECTION::LEFT:
-    //       Serial.println("LEFT");
-    //       break;
-
-    //   case J_DIRECTION::RIGHT:
-    //       Serial.println("RIGHT");
-    //       break;
-
-    //   case J_DIRECTION::UP_LEFT:
-    //       Serial.println("UP_LEFT");
-    //       break;
-
-    //   case J_DIRECTION::UP_RIGHT:
-    //       Serial.println("UP_RIGHT");
-    //       break;
-
-    //   case J_DIRECTION::DOWN_LEFT:
-    //       Serial.println("DOWN_LEFT");
-    //       break;
-
-    //   case J_DIRECTION::DOWN_RIGHT:
-    //       Serial.println("DOWN_RIGHT");
-    //       break;
-
-    //   // Con pulsante premuto
-    //   case J_DIRECTION::CENTER_BUTTON:
-    //       Serial.println("CENTER_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::UP_BUTTON:
-    //       Serial.println("UP_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::DOWN_BUTTON:
-    //       Serial.println("DOWN_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::LEFT_BUTTON:
-    //       Serial.println("LEFT_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::RIGHT_BUTTON:
-    //       Serial.println("RIGHT_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::UP_LEFT_BUTTON:
-    //       Serial.println("UP_LEFT_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::UP_RIGHT_BUTTON:
-    //       Serial.println("UP_RIGHT_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::DOWN_LEFT_BUTTON:
-    //       Serial.println("DOWN_LEFT_BUTTON");
-    //       break;
-
-    //   case J_DIRECTION::DOWN_RIGHT_BUTTON:
-    //       Serial.println("DOWN_RIGHT_BUTTON");
-    //       break;
-
-    //   default:
-    //       Serial.println("UNKNOWN");
-    //       break;
-    // }
-  
-    delay(500);
-  }      
+  }
 }
 
 void recvMsgBySerialWeb(uint8_t *data, size_t len)
@@ -570,32 +508,12 @@ void recvMsgBySerial(String data)
 
 void recvButtonByJoystick(J_DIRECTION direction){
   servicesCollector.takeExclusiveExecution();
-  //metodo che ottiene il preset dal json e la direzione
   String s_direction = mapJdirectionsToString(direction);
-  Serial.println(s_direction);
+  serialService.logInfoln("Joystick direction: " + s_direction, "MAIN");
   const LedPresetModel* execPreset = ledPresets.getByTrigger(s_direction);
   if(execPreset != nullptr){
     std::vector<RgbColor> rgbColors = getRgbColorsByLedColor(execPreset->colors);
     ((LedService *)servicesCollector.getService("LedService"))->startEffect(execPreset->effect, rgbColors, execPreset->deltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
   }
-  // String prEffect = "EYE_MID";
-  // RgbColor prColorRgb = RgbColor(100,100,100); 
-  // int prDeltaTms = 100;
-  // //todo WIP
   servicesCollector.freeExclusiveExecution();
 }
-
-//NOTE
-// [env:Esp32Com]
-// platform = espressif32 @ 6.8.1
-// platform = espressif32
-// board = esp32doit-devkit-v1
-// framework = arduino
-// lib_deps = 
-// 	makuna/NeoPixelBus@^2.8.2
-// 	makuna/NeoPixelBus
-// 	esphome/ESPAsyncWebServer-esphome
-// 	robtillaart/ANSI@^0.3.2
-// 	bblanchon/ArduinoJson@^7.2.1
-// 	robtillaart/ANSI
-// 	bblanchon/ArduinoJson
