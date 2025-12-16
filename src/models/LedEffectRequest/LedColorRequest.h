@@ -11,7 +11,8 @@ public:
     int g;
     int b;
 
-    LedColorRequest(){
+    LedColorRequest()
+    {
         r = 0;
         g = 0;
         b = 0;
@@ -28,9 +29,9 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const JsonObject &jsonObj)
     {
-        if (!jsonObj.containsKey("r") || !jsonObj.containsKey("g") || !jsonObj.containsKey("b"))
+        if (!jsonObj["r"].is<int>() || !jsonObj["g"].is<int>() || !jsonObj["b"].is<int>())
         {
-            return false; // Chiave mancante
+            return false;
         }
 
         r = jsonObj["r"];

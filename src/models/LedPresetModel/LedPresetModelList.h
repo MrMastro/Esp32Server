@@ -55,19 +55,19 @@ public:
 
         for (const auto &p : presets)
         {
-            JsonObject obj = arr.createNestedObject();
+            JsonObject obj = arr.add<JsonObject>();
 
             obj["effect"] = p.effect;
             obj["deltaT"] = p.deltaT;
 
-            JsonArray triggersArray = obj.createNestedArray("triggers");
+            JsonArray triggersArray = obj["triggers"].to<JsonArray>();
             for (const auto &t : p.triggers)
                 triggersArray.add(t);
 
-            JsonArray colorsArray = obj.createNestedArray("colors");
+            JsonArray colorsArray = obj["colors"].to<JsonArray>();
             for (const auto &c : p.colors)
             {
-                JsonObject colorObj = colorsArray.createNestedObject();
+                JsonObject colorObj = colorsArray.add<JsonObject>();
                 colorObj["r"] = c.r;
                 colorObj["g"] = c.g;
                 colorObj["b"] = c.b;

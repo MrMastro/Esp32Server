@@ -28,10 +28,10 @@ public:
         doc["ws2811MatrixAction"] = ws2811MatrixAction;  // Aggiungi ws2811MatrixAction
 
         // Creiamo un array JSON per i colori
-        JsonArray colorsArray = doc.createNestedArray("colors");
+        JsonArray colorsArray = doc["colors"].to<JsonArray>();
         for (const auto &color : colors)
         {
-            JsonObject colorObj = colorsArray.createNestedObject();
+            JsonObject colorObj = colorsArray.add<JsonObject>();
             color.toJson(colorObj);  // Utilizziamo il metodo toJson di LedColorRequest
         }
 
@@ -53,8 +53,8 @@ public:
             return false;
         }
 
-        if (!doc.containsKey("effect") || !doc.containsKey("ms") || !doc.containsKey("colors") ||
-            !doc.containsKey("rgbAction") || !doc.containsKey("ws2811Action") || !doc.containsKey("ws2811MatrixAction"))
+        if (doc["effect"].isNull() || doc["ms"].isNull() || doc["colors"].isNull() ||
+            doc["rgbAction"].isNull() || doc["ws2811Action"].isNull() || doc["ws2811MatrixAction"].isNull())
         {
             return false; // Chiave mancante
         }

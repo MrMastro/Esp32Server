@@ -15,21 +15,21 @@ public:
     // Serializzazione in JSON
     String toJson() const
     {
-        DynamicJsonDocument doc(1896); // Usa DynamicJsonDocument per allocare dinamicamente la memoria
-        //2048
+        JsonDocument doc;  // capacità esplicita (obbligatoria)
 
         doc["initialEffect"] = initialEffect;
         doc["initialDeltaT"] = initialDeltaT;
 
-        // Serializzazione del vettore di colori initialColors
-        JsonArray colorsArray = doc.createNestedArray("initialColors");
+        // Creazione esplicita dell'array
+        JsonArray colorsArray = doc["initialColors"].to<JsonArray>();
         for (const auto &color : initialColors)
         {
-            JsonObject colorObj = colorsArray.createNestedObject();
+            JsonObject colorObj = colorsArray.add<JsonObject>();
             colorObj["r"] = color.r;
             colorObj["g"] = color.g;
             colorObj["b"] = color.b;
         }
+
 
         String output;
         serializeJson(doc, output);
@@ -39,7 +39,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        DynamicJsonDocument doc(1896); // Usa DynamicJsonDocument per la deserializzazione
+        JsonDocument doc; // Usa JsonDocument per la deserializzazione
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)

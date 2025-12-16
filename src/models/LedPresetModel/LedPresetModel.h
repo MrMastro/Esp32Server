@@ -24,15 +24,15 @@ public:
         doc["effect"] = effect;
         doc["deltaT"] = deltaT;
 
-        JsonArray triggersArray = doc.createNestedArray("triggers");
+        JsonArray triggersArray = doc["triggers"].to<JsonArray>();
         for (const auto &t : triggers){
             triggersArray.add(t);
         }
 
-        JsonArray colorsArray = doc.createNestedArray("colors");
+        JsonArray colorsArray = doc["colors"].to<JsonArray>();
         for (const auto &color : colors)
         {
-            JsonObject colorObj = colorsArray.createNestedObject();
+            JsonObject colorObj = colorsArray.add<JsonObject>();
             color.toJson(colorObj);  // Utilizziamo il metodo toJson di LedColorRequest
         }
 
@@ -46,7 +46,7 @@ public:
     // ---------------------------------------
     bool fromJson(const String &json)
     {
-        DynamicJsonDocument doc(1024);
+        JsonDocument doc;
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)

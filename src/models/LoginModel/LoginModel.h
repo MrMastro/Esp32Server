@@ -12,7 +12,7 @@ public:
 
     String toJson() const
     {
-        StaticJsonDocument<256> doc;
+        JsonDocument doc;
 
         doc["deviceName"] = deviceName;
         doc["devicePassword"] = devicePassword;
@@ -25,7 +25,7 @@ public:
     // Deserializzazione da JSON
     bool fromJson(const String &json)
     {
-        StaticJsonDocument<256> doc;
+        JsonDocument doc;
         DeserializationError error = deserializeJson(doc, json);
 
         if (error)

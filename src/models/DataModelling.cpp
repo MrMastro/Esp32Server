@@ -3,13 +3,10 @@
 // Function to convert a boolean to JSON
 String simpleBooleanToJson(boolean paramBool)
 {
-    // Create a JSON document
-    StaticJsonDocument<50> doc;
+    JsonDocument doc;  // capacità esplicita, niente deprecazioni
 
-    // Add the boolean value to the document
     doc["data"] = paramBool;
 
-    // Serialize the JSON document to a String
     String jsonString;
     serializeJson(doc, jsonString);
 
@@ -20,7 +17,7 @@ String simpleBooleanToJson(boolean paramBool)
 boolean jsonToSimpleBoolean(String jsonString)
 {
     // Parse the JSON document
-    StaticJsonDocument<50> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, jsonString);
 
     // Check for parsing errors
@@ -40,7 +37,7 @@ boolean jsonToSimpleBoolean(String jsonString)
 StatusInfo jsonToStatusInfo(String &json)
 {
     // Create a JSON document to parse the incoming JSON string
-    StaticJsonDocument<200> jsonDocument;
+    JsonDocument jsonDocument;
 
     // Parse the JSON string
     DeserializationError error = deserializeJson(jsonDocument, json);
@@ -72,7 +69,7 @@ StatusInfo jsonToStatusInfo(String &json)
 String dtoToJson(StatusInfo &info)
 {
     // Create a JSON document with enough capacity to store the data
-    StaticJsonDocument<200> jsonDocument;
+    JsonDocument jsonDocument;
 
     // Add data to the JSON document
     jsonDocument["message"] = info.getMessage();
@@ -91,7 +88,7 @@ String dtoToJson(StatusInfo &info)
 BasicResponse jsonToDto(String &json)
 {
     // Create a JSON document to parse the incoming JSON string
-    StaticJsonDocument<200> jsonDocument;
+    JsonDocument jsonDocument;
 
     // Parse the JSON string
     DeserializationError error = deserializeJson(jsonDocument, json);
@@ -118,8 +115,8 @@ BasicResponse jsonToDto(String &json)
 String dtoToJson(BasicResponse &data)
 {
     // Create a JSON document with enough capacity to store the data
-    StaticJsonDocument<968> jsonDocument;
-    StaticJsonDocument<200> jsonInnerDocument;
+    JsonDocument jsonDocument;
+    JsonDocument jsonInnerDocument;
     // Add data to the JSON document
     // StatusInfo statusN = data.getStatus();
     // String jsonStatus = dtoToJson(statusN);
@@ -145,8 +142,8 @@ String dtoToJson(BasicResponse &data)
 String dtoToJson(BasicResponseString data)
 {
     // Create a JSON document with enough capacity to store the data
-    StaticJsonDocument<968> jsonDocument;
-    StaticJsonDocument<200> jsonInnerDocument;
+    JsonDocument jsonDocument;
+    JsonDocument jsonInnerDocument;
     // Add data to the JSON document
     // StatusInfo statusN = data.getStatus();
     // String jsonStatus = dtoToJson(statusN);
