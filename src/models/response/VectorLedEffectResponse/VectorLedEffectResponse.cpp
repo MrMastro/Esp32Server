@@ -14,7 +14,7 @@ void VectorLedEffectResponse::setData(const std::vector<Effect*> &newData) {
 
 String VectorLedEffectResponse::toJson() {
     JsonDocument doc;
-    JsonArray effectsArray = doc.createNestedArray("effects");
+    JsonArray effectsArray = doc["effects"].to<JsonArray>();
 
     for (auto effect : data) {
         if (effect != nullptr) {

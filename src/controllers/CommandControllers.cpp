@@ -4,6 +4,7 @@
 void commandController(AsyncWebServerRequest *request)
 {
     servicesCollector.takeExclusiveExecution();
+    servicesCollector.sleepyJoystick();
     BasicResponseString response;
     String command = request->arg("command");
     StatusInfo result = ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(command);

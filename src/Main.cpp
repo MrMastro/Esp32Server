@@ -450,6 +450,16 @@ void readJoystickAndSendCommand( int &xValue, int &yValue, int &swState, int &la
   xValue  = analogRead(s.joystickSettings.pinAnalogX);
   yValue  = analogRead(s.joystickSettings.pinAnalogY);
 
+  if(servicesCollector.isSleepyJoystick()){
+    if(swState == LOW){
+      servicesCollector.wakeUpJoystick();
+      recvButtonByJoystick(J_DIRECTION::CENTER_BUTTON);
+      lastDirection = J_DIRECTION::NONE;
+      delay(200); // debounce
+    }
+    return;
+  }
+
   // TOGGLE PULSANTE
   if (lastSwState == HIGH && swState == LOW) {
       activeButton = !activeButton;
@@ -500,6 +510,7 @@ void recvMsgBySerialWeb(uint8_t *data, size_t len)
   if (dataString.length() > 0)
   {
     ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(dataString);
+    servicesCollector.sleepyJoystick();
   }
   servicesCollector.freeExclusiveExecution();
 }
@@ -508,6 +519,7 @@ void recvMsgBySerial(String data)
 {
   servicesCollector.takeExclusiveExecution();
   ((CommandService *)servicesCollector.getService("CommandService"))->recvMsgAndExecute(data);
+  servicesCollector.sleepyJoystick();
   servicesCollector.freeExclusiveExecution();
 }
 

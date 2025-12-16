@@ -7,6 +7,7 @@ void setEffectWs2811(AsyncWebServerRequest *request)
     // todo introduce other param
     // todo check for parsing error String -> int
     servicesCollector.takeExclusiveExecution();
+    servicesCollector.sleepyJoystick();
     BasicResponse response;
     String effect = request->arg("effect");
     int r = request->arg("r").toInt();
@@ -77,6 +78,7 @@ void stopEffectWs2811(AsyncWebServerRequest *request)
 void setEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
 {
     servicesCollector.takeExclusiveExecution();
+    servicesCollector.sleepyJoystick();
     BasicResponse response;
     String body = getBodyString(data, len);
     LedEffectRequest ledRequest;
@@ -132,6 +134,7 @@ void setEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t le
 void stopEffectWs2811_v2(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
 {
     servicesCollector.takeExclusiveExecution();
+    servicesCollector.sleepyJoystick();
     BasicResponse response;
     String body = getBodyString(data, len);
     LedEffectRequest ledRequest;

@@ -51,12 +51,16 @@ public:
     void addService(Service* service, String name, SettingsModel* s);
     void attachServer(MastroServer* serverParam);
     MastroServer* getServer();
+    boolean isSleepyJoystick();
+    void sleepyJoystick();
+    void wakeUpJoystick();
     ~ServicesCollector();
 private:
     boolean busy;
     MastroServer* server;
     std::map<String,Service*> containerService;
     boolean debug;
+    boolean sleepJoystick = false;
     void throwServicesCollectorError(ERROR_CODE err, const String detailMessage, const String context);
     void logError(String msg, String subject, String context);
     void logInfoln(String msg, String subject);

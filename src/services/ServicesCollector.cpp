@@ -78,6 +78,29 @@ MastroServer *ServicesCollector::getServer()
     return server;
 }
 
+boolean ServicesCollector::isSleepyJoystick()
+{
+    return sleepJoystick;
+}
+
+void ServicesCollector::sleepyJoystick()
+{
+    if (debug)
+    {
+        logInfoln("Putting joystick to sleep", "ServicesCollector");
+    }
+    sleepJoystick = true;
+}
+
+void ServicesCollector::wakeUpJoystick()
+{
+    if (debug)
+    {
+        logInfoln("Aweking joystick from sleep", "ServicesCollector");
+    }
+    sleepJoystick = false;
+}
+
 void ServicesCollector::addService(Service *service, String name)
 {
     String s = "Adding service: {name}";
