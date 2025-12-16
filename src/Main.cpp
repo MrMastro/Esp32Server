@@ -261,7 +261,9 @@ void serialBtTask(void *pvParameters)
 void serialCableTask(void *pvParameters)
 {
   serialService.logInfoln("Serial Task execution", "MAIN");
-  pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
+  if(s.joystickSettings.enableJoystick){
+    pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
+  }
   int xValue = 0;
   int yValue = 0;
   int swState = HIGH;
@@ -285,7 +287,9 @@ void serialCableTask(void *pvParameters)
           recvMsgBySerial(msg);
         }
       }
-      readJoystickAndSendCommand(xValue, yValue, swState, lastSwState, activeButton, lastDirection);
+      if(s.joystickSettings.enableJoystick){
+        readJoystickAndSendCommand(xValue, yValue, swState, lastSwState, activeButton, lastDirection);
+      }
     }
     else
     {
