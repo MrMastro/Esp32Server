@@ -60,7 +60,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     ((LedService *)getServiceByCollector("LedService"))->stopEffect(params.at(0), {RgbColor(0, 0, 0)}, 100, false, false, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
-  case CMD::OFF_STRIPT:
+  case CMD::OFF_STRIP:
     ((LedService *)getServiceByCollector("LedService"))->stopEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 0), 100, true, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;

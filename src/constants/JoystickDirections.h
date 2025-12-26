@@ -32,4 +32,4 @@ enum class J_DIRECTION
 J_DIRECTION mapStringToJdirections(String inputString);
 String mapJdirectionsToString(J_DIRECTION input);
 
-#endif  // COMMAND_H
+#endif  // JOYSTICK_DIRECTIONS

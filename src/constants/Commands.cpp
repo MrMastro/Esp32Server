@@ -7,7 +7,7 @@ const std::pair<CMD, String> CMD_PAIR[] = {
   {CMD::START_PROGRESS_BAR, "start_progress_bar"},
   {CMD::START_EFFECT, "start_effect"},
   {CMD::STOP_EFFECT, "stop_effect"},
-  {CMD::OFF_STRIPT, "off_stript"},
+  {CMD::OFF_STRIP, "off_strip"},
   {CMD::CHANGE_COMMUNICATION_MODE, "change_communication_mode"},
   {CMD::REBOOT, "reboot"},
   {CMD::INFO, "info"},

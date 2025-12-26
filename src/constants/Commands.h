@@ -13,7 +13,7 @@ enum class CMD
   START_PROGRESS_BAR,
   START_EFFECT,                 //start_effect,<name_effect>,<rgbColors>,<ms>,<rbg_e>,<ws2811_s_e>,<matrix_e>
   STOP_EFFECT,                  //stop_effect,<name_effect>,<rgbColors>,<ms>,<rbg_e>,<ws2811_s_e>,<matrix_e>
-  OFF_STRIPT,
+  OFF_STRIP,
   CHANGE_COMMUNICATION_MODE,    //change_communication_mode,<AP_MODE||WIFI_MODE||BLUETOOTH_MODE||> => change_communication_mode,BLUETOOTH_MODE, | change_communication_mode,WIFI_MODE
   REBOOT,
   INFO,
