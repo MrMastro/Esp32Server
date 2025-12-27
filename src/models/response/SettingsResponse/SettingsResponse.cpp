@@ -65,12 +65,12 @@ String SettingsResponse::toString()
 String SettingsResponse::toJson()
 {
     // Crea un nuovo documento JSON per combinare le informazioni
-    DynamicJsonDocument doc(2560);
+    JsonDocument doc;
     deserializeJson(doc, status.toJson()); // Deserializza il JSON della classe base
 
     // Serializza il modello di impostazioni
-    JsonObject dataJson = doc.createNestedObject("data");
-    StaticJsonDocument<2048> dataDoc;
+    JsonObject dataJson = doc["data"].to<JsonObject>();
+    JsonDocument dataDoc;
     DeserializationError statusDataError = deserializeJson(dataDoc, data.toJson());
     if (!statusDataError)
     {
@@ -89,7 +89,7 @@ String SettingsResponse::toJson()
 bool SettingsResponse::fromJson(const String &json)
 {
     // Crea un documento JSON per la deserializzazione
-    StaticJsonDocument<2048> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, json);
 
     // Controlla se la deserializzazione ha avuto successo

@@ -38,7 +38,7 @@ String StatusInfo::toString()
 
 String StatusInfo::toJson() const
 {
-    StaticJsonDocument<256> doc;
+    JsonDocument doc;
 
     doc["code"] = code;
     doc["message"] = message;
@@ -51,7 +51,7 @@ String StatusInfo::toJson() const
 
 bool StatusInfo::fromJson(const String &json)
 {
-    StaticJsonDocument<256> doc;  // Documento JSON con un buffer massimo di 256 byte
+    JsonDocument doc;  // Documento JSON con un buffer massimo di 256 byte
     DeserializationError error = deserializeJson(doc, json);
 
     if (error) {
@@ -61,7 +61,7 @@ bool StatusInfo::fromJson(const String &json)
     }
 
     // Assicuriamoci che i campi siano presenti
-    if (doc.containsKey("code") && doc.containsKey("message") && doc.containsKey("description")) {
+    if (doc["code"].is<int>() && doc["message"].is<String>() && doc["description"].is<String>()) {
         code = doc["code"];
         message = doc["message"].as<String>();
         description = doc["description"].as<String>();

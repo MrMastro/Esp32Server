@@ -34,7 +34,7 @@ String VectorStringResponse::toJson()
     String basicResponseJson = BasicResponse::toJson();
 
     // Crea un documento JSON che contiene il risultato di BasicResponse
-    StaticJsonDocument<1024> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, basicResponseJson);
 
     if (error) {
@@ -58,7 +58,7 @@ String VectorStringResponse::toJson()
 bool VectorStringResponse::fromJson(const String &json)
 {
     // Deserializza l'intero JSON nel documento
-    StaticJsonDocument<1024> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, json);
 
     if (error) {

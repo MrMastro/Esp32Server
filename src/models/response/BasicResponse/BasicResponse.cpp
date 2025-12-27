@@ -37,11 +37,11 @@ void BasicResponse::setStatus(StatusInfo &newStatus)
 String BasicResponse::toJson()
 {
     // Crea un documento JSON
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
 
     // Crea un oggetto annidato per "status" e usa il metodo toJson di StatusInfo
-    JsonObject statusJson = doc.createNestedObject("status");
-    StaticJsonDocument<128> tempStatusDoc;
+    JsonObject statusJson = doc["status"].to<JsonObject>();
+    JsonDocument tempStatusDoc;
     DeserializationError statusError = deserializeJson(tempStatusDoc, status.toJson());
     if (!statusError)
     {
@@ -62,7 +62,7 @@ String BasicResponse::toJson()
 bool BasicResponse::fromJson(const String &json)
 {
     // Crea un documento JSON per la deserializzazione
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
     DeserializationError error = deserializeJson(doc, json);
 
     // Controlla se la deserializzazione ha avuto successo

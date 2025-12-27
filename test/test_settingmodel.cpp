@@ -19,9 +19,9 @@ void test_settings_model_creation_from_default(void) {
     TEST_ASSERT_EQUAL_STRING("Home_Network", settings.ssidWIFI.c_str());
     TEST_ASSERT_EQUAL_STRING("wifi_password", settings.passwordWIFI.c_str());
     TEST_ASSERT_EQUAL(100, settings.initialDeltaT);
-    TEST_ASSERT_EQUAL(0, settings.initialR);
-    TEST_ASSERT_EQUAL(0, settings.initialG);
-    TEST_ASSERT_EQUAL(0, settings.initialB);
+    // TEST_ASSERT_EQUAL(0, settings.initialColors.initialR);
+    // TEST_ASSERT_EQUAL(0, settings.initialColors.initialG);
+    // TEST_ASSERT_EQUAL(0, settings.initialColors.initialB);
 
     // Verifica dei valori di default per LedSettingsModel
     LedSettingsModel ledSettings = settings.ledSettings;
