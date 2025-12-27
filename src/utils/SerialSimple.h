@@ -10,6 +10,6 @@
 // void differentSerialprint(const String& msg, String colorMsg, HardwareSerial* serial, WebSerialClass* webSerial);
 void differentSerialprintln(const String& msg, String colorMsg, HardwareSerial* serial);
 void differentSerialprint(const String& msg, String colorMsg, HardwareSerial* serial);
-int countSubString(String msg, String subString);
-String formatMsg(String msg, std::vector<String> args);
+int countSubString(const String& msg, const String& subString);
+String formatMsg(const String& msg, const std::vector<String>& args);
 #endif  // SerialSimple_H
