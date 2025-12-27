@@ -44,7 +44,7 @@ String VectorStringResponse::toJson()
     }
 
     // Aggiungi il vettore data al documento JSON
-    JsonArray dataJsonArray = doc.createNestedArray("data");
+    JsonArray dataJsonArray = doc["data"].to<JsonArray>();
     for (const auto &item : data) {
         dataJsonArray.add(item);  // Aggiungi ciascun elemento del vettore al JSON
     }
