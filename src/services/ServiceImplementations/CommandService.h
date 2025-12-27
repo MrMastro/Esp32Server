@@ -13,6 +13,7 @@
 #include "SerialService.h"
 #include "SettingService.h"
 #include "./validators/validators.h"
+#include <models/LedPresetModel/LedPresetModel.h>
 
 
 class CommandService : public Service

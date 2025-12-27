@@ -48,8 +48,7 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::START_PROGRESS_BAR:
-    //todo
-    ((LedService *)getServiceByCollector("LedService"))->startEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 255), 100, false, true, true);
+    ((LedService *)getServiceByCollector("LedService"))->startEffect("PROGRESSIVE_BAR_UNIQUE_COLOR", RgbColor(0, 0, 255), 100, true, true, true);
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::START_EFFECT:
@@ -189,17 +188,36 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
 
   String command = stringPop(dataArray);
 
-  String errorValidation = validateCmd(mapStringToEnum(command), dataArray);
-  if(!errorValidation.isEmpty())
-  {
-    StatusInfo result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
-    result.setDescription(errorValidation);
-    serialService->println(formatMsg(ERROR_COMMAND, {command, result.getDescription()}));
-    return result;
-  }
+  // String errorValidation = validateCmd(mapStringToEnum(command), dataArray);
+  // if(!errorValidation.isEmpty())
+  // {
+  //   StatusInfo result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+  //   result.setDescription(errorValidation);
+  //   serialService->println(formatMsg(ERROR_COMMAND, {command, result.getDescription()}));
+  //   return result;
+  // }
 
   StatusInfo result = executeCommand(mapStringToEnum(command), dataArray);
 
+  //Check other command after command enum
+  if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
+  {
+    //CONTROLLO LED PRESET
+    const LedPresetListModel presets = settingService->getPresets();
+    const LedPresetModel* execPreset1 = presets.getByTrigger(command);
+    const SettingsModel s = settingService->getSettings();
+    if(execPreset1 != nullptr){
+      std::vector<RgbColor> rgbColors = getRgbColorsByLedColor(execPreset1->colors);
+      ((LedService *)servicesCollector.getService("LedService"))->startEffect(execPreset1->effect, rgbColors, execPreset1->deltaT, s.ledSettings.enableStripRgb, s.ledSettings.enableStripWs2811, s.ledSettings.enableStripWs2811Matrix);
+      result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+      return result;
+    }else{
+      result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+      result.setDescription(UKNOWN_COMMAND);
+    }
+  }
+
+  //Final check
   if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
   {
     serialService->println(formatMsg(ERROR_COMMAND, {command, result.getDescription()}));

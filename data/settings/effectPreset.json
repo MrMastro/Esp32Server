@@ -32,7 +32,19 @@
   {
   "effect": "EYE_HUNGRY",
   "deltaT": 100,
-  "triggers": ["CENTER_BUTTON"],
+  "triggers": ["CENTER_BUTTON","K1"],
   "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "LIVE_FLAME_COLOR_EFFECT",
+  "deltaT": 100,
+  "triggers": ["K2"],
+  "colors": [{ "r": 0, "g": 0, "b": 255 }]
+  },
+  {
+  "effect": "MULTICOLOR_CONSTANT_EFFECT",
+  "deltaT": 100,
+  "triggers": ["K3"],
+  "colors": [{ "r": 0, "g": 255, "b": 255 }]
   }
 ]

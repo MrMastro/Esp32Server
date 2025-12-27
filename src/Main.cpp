@@ -152,11 +152,16 @@ void initServices(HardwareSerial *serialPointer)
   servicesCollector.addService(&serialService, "SerialService");
   servicesCollector.addService(&fileManagerService, "fileManagerService");
   servicesCollector.addService(&settingService, "SettingService");
+
+  //Load main settings
   settingService.loadSettings(SETTINGS_FILE_LOCATION_PATH);
   s = settingService.getSettings();
+  serialService.setSettings(&s);
+  
+  //Load effect presets
   String dataLedPreset = fileManagerService.getFileData(PRESETS_EFFECT_FILE_LOCATION_PATH);
   ledPresets.fromJson(dataLedPreset);
-  serialService.setSettings(&s);
+  settingService.setPresets(&ledPresets);
 
   // init LedService
   if(s.ledSettings.enableStripRgb){

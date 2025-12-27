@@ -87,8 +87,9 @@ public:
         {
             for (const auto &t : p.triggers)
             {
-                if (t == trigger)
+                if (t == trigger){
                     return &p;
+                }
             }
         }
         return nullptr;

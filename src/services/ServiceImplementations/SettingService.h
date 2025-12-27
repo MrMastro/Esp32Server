@@ -9,6 +9,7 @@
 #include <exceptions/exceptions.h>
 #include <models/settingModel/SettingsModel.h>
 #include <models/InitialSettingSaveModel/InitialSettingSaveModel.h>
+#include <models/LedPresetModel/LedPresetModelList.h>
 #include <Arduino.h>
 #include <LittleFS.h>
 #include "SerialService.h"
@@ -20,12 +21,15 @@ public:
     SettingService();
     SettingsModel getSettings();
     void loadSettings(String path);
+    LedPresetListModel getPresets();
+    void setPresets(LedPresetListModel* p);
     boolean saveSettings(String path, SettingsModel s);
     boolean saveInitialSettings(String path, InitialSettingSaveModel s);
     boolean changeSetting(String key, String value);
     String getJsonSettings();
 protected:
     SettingsModel* settings;
+    LedPresetListModel* presets;
     void onInitServiceCollector() override;
 private:
     boolean isOperative;

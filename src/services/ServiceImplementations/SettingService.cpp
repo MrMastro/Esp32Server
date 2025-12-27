@@ -17,6 +17,20 @@ SettingsModel SettingService::getSettings()
     return *settings;
 }
 
+LedPresetListModel SettingService::getPresets()
+{
+    if (!isOperative)
+    {
+        return LedPresetListModel();
+    }
+    return *presets;
+}
+
+void SettingService::setPresets(LedPresetListModel *p)
+{
+    presets = p;
+}
+
 String SettingService::getJsonSettings()
 {
     if (!isOperative)
