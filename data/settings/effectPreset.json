@@ -2,7 +2,7 @@
   {
   "effect": "EYE_MID",
   "deltaT": 100,
-  "triggers": ["CENTER"],
+  "triggers": ["CENTER","DOWN_BUTTON"],
   "colors": [{ "r": 0, "g": 0, "b": 255 }]
   },
   {

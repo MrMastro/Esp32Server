@@ -268,6 +268,9 @@ void serialCableTask(void *pvParameters)
   serialService.logInfoln("Serial Task execution", "MAIN");
   if(s.joystickSettings.enableJoystick){
     pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
+    servicesCollector.wakeUpJoystick();
+  }else{
+    servicesCollector.sleepyJoystick();
   }
   int xValue = 0;
   int yValue = 0;
@@ -490,15 +493,19 @@ void readJoystickAndSendCommand( int &xValue, int &yValue, int &swState, int &la
           if (dy > DEAD_ZONE) code += "RIGHT";
           else if (dy < -DEAD_ZONE) code += "LEFT";
       }
-      if (code.length() == 0) code = "CENTER";
+      if (code.length() == 0){
+        code = "CENTER";
+      } 
   }
 
-  if (activeButton) code += "_BUTTON";
+  if (activeButton){
+    code += "_BUTTON";
+  }
 
   J_DIRECTION direction = mapStringToJdirections(code);
 
-  if (direction != lastDirection) {
-      serialService.logInfoln(String("X: ") + xValue + " | Y: " + yValue + " -> " + code, "MAIN");
+  if ( (direction != lastDirection) && (direction != J_DIRECTION::NONE) ) {
+      //serialService.logInfoln(String("X: ") + xValue + " | Y: " + yValue + " -> " + code, "MAIN");
       recvButtonByJoystick(direction);
       lastDirection = direction;
   }

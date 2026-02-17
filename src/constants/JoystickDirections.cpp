@@ -32,7 +32,7 @@ J_DIRECTION mapStringToJdirections(String inputString)
       }
   }
   // Return a special value or throw an exception if the string is not found
-  return J_DIRECTION::CENTER;
+  return J_DIRECTION::NONE;
 }
 
 String mapJdirectionsToString(J_DIRECTION input)
@@ -42,5 +42,5 @@ String mapJdirectionsToString(J_DIRECTION input)
         return pair.second;
     }
   }
-  return "CENTER";
+  return "NONE";
 }

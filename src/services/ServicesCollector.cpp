@@ -11,6 +11,7 @@ ServicesCollector::ServicesCollector()
     server = nullptr;
     busy = false;
     debug = false;
+    sleepJoystick = false;
 }
 
 ServicesCollector::ServicesCollector(MastroServer *serverParam, boolean debugMode)
