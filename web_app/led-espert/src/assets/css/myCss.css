@@ -1,0 +1,158 @@
+/* @media  {
+  .containerLabel {
+    display: flex;
+    justify-content: center;
+    width: auto;
+    min-width: 100px;
+  }
+} */
+
+.form-label {
+  min-height: 30px;
+  height: auto;
+  max-height: inherit;
+}
+
+.componentForm.rangeForm {
+  height: auto;
+  min-width: 205px;
+  max-width: initial;
+  min-height: 40px;
+  font-size: 20px;
+  text-align: center;
+  color: var(--bs-body-bg);
+  position: sticky;
+}
+
+.form-label-title {
+  font-size: 16.5px;
+  font-weight: bold;
+}
+
+.fieldIp {
+  text-align: center;
+}
+
+.containerExecutiveLed {
+  /*border: 6px solid var(--bs-body-bg) ;*/
+  /*border-radius: 19px;*/
+  /*justify-content: center;*/
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  margin: 6px;
+  padding: 16px;
+  /*width: auto;*/
+  /*height: inherit;*/
+  /*max-width: auto;*/
+}
+
+:root {
+  --bs-body-bg: #333; /* Sostituisci con il colore scuro desiderato */
+  --bs-body-color: #fff;
+}
+
+[data-bs-theme="dark"] {
+  --bs-body-bg: #333; /* Sostituisci con il colore scuro desiderato */
+  --bs-body-color: #fff;
+}
+
+.containerAction {
+  border: 6px solid var(--bs-body-bg) ;
+  border-radius: 19px;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  margin: 6px;
+  padding: 16px;
+  width: auto;
+  height: inherit;
+  /*max-width: auto;*/
+}
+
+.elementEsp32 {
+  margin-left: 1px;
+  margin-right: 1px;
+}
+
+.panelConnections {
+  border: 5px;
+  border-radius: 30px;
+}
+
+.esp32PanelConnection {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.hidden{
+  display: none !important;
+}
+
+.indicator-UNKNOWN{
+  background-color: gray;
+}
+
+.indicator-OFFLINE{
+  background-color: rgb(82, 0, 7);
+}
+
+.indicator-ONLINE{
+  background-color: rgb(5, 141, 39);
+}
+
+.labelWrong {
+  margin-top: 10px;
+  color: rgb(82, 0, 7);
+  background-color: rgba(95,93,93,0.93);
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.labelIpWrong {
+  margin-top: 5px;
+  color: rgb(82, 0, 7);
+  background-color: rgba(95,93,93,0.93);
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.labelIpRight {
+  margin-top: 5px;
+  color: rgb(5, 141, 39);
+  background-color: rgba(95,93,93,0.93);
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.labelIpNeutral {
+  margin-top: 5px;
+  color: rgb(255, 255, 255);
+  background-color: rgba(95,93,93,0.93);
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.btn_svg_icon {
+  padding: 0px;
+}
+
+@media screen and (max-width: 410px) {
+  .container-info-strip-leds, .panel-info-strip-leds {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    box-sizing: border-box; /* Assicura che il padding non aumenti la larghezza totale */
+  }
+
+  .container-info-strip-leds > *, .panel-info-strip-leds > * {
+    flex: 1 0 calc(50% - 16px); /* Riduci la larghezza massima per lasciare spazio per il margin */
+    max-width: calc(50% - 16px);
+    margin: 4px;
+    box-sizing: border-box; /* Assicura che il padding e il bordo non aumentino la larghezza totale */
+  }
+}
+

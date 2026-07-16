@@ -1,0 +1,63 @@
+
+import DefaultConstants from "../constants/DefaultConstants";
+
+export default class LocalStorageService {
+  constructor() {}
+
+  getLedEffectList() {
+    const value = localStorage.getItem('ledEffectList');
+    return value ? JSON.parse(value) : null;
+  }
+
+  setEffectList(list: any) {
+    if (!Array.isArray(list)) {
+      throw new Error("L'input deve essere un array.");
+    }
+    localStorage.setItem('ledEffectList', JSON.stringify(list));
+  }
+
+  getEsp32InfoDeviceMem() {
+    const value = localStorage.getItem('esp32InfoDeviceMem');
+    return value ? JSON.parse(value) : null;
+  }
+
+  setEsp32InfoDeviceMem(list: any) {
+    if (!Array.isArray(list)) {
+      throw new Error("L'input deve essere un array.");
+    }
+    localStorage.setItem('esp32InfoDeviceMem', JSON.stringify(list));
+  }
+
+  setLocalIp(ip: string | null) {
+    ip = (ip === null) ? "" : ip;
+    if (typeof ip !== "string") {
+      throw new Error("L'input deve essere una stringa.");
+    }
+    localStorage.setItem('localIp', ip);
+  }
+
+  getLocalIp() {
+    const value = localStorage.getItem('localIp');
+    return value ? value : null;
+  }
+
+  setIpListKnown(list: any) {
+    if (!Array.isArray(list)) {
+      throw new Error("L'input deve essere un array.");
+    }
+    localStorage.setItem('ipListKnown', JSON.stringify(list));
+  }
+
+  getIpListKnown() {
+    const value = localStorage.getItem('ipListKnown');
+    return value ? JSON.parse(value) : null;
+  }
+
+  checkExistenceEffectList() {
+    return localStorage.getItem('ledEffectList') !== null;
+  }
+
+  formatEffectList() {
+    localStorage.setItem('ledEffectList', JSON.stringify(DefaultConstants.defaultEffects));
+  }
+}

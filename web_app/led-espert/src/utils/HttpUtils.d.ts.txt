@@ -1,0 +1,10 @@
+declare module 'HttpUtils' {
+    export interface HttpOptions {
+        method: string;
+        data?: any;
+        param?: any;
+    }
+
+    export function postCustom(host: string, url: string, queryParam: any, postData: any): Promise<any>;
+    export function getCustom(host: string, url: string, queryParam: any, postData: any): Promise<any>;
+}
