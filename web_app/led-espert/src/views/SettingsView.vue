@@ -249,7 +249,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { Modal } from 'bootstrap'
 import GroupColorView from './GroupColorView.vue'
-import SettingsModel from '../models/SettingModel.js'
+import SettingsModel from '../models/SettingModel'
 
 const emit = defineEmits(['save'])
 

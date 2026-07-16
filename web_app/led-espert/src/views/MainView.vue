@@ -112,8 +112,8 @@
 // Esp32ConnectionView, non di MainView. Sembra codice morto/residuo di un
 // refactor: non l'ho riportato qui per evitare di duplicare responsabilità.
 import { ref, computed } from 'vue'
-import TextUtils from '../utils/TextUtils.js'
-import LedMainModel from '../models/LedMainModel.js'
+import TextUtils from '../utils/TextUtils'
+import LedMainModel from '../models/LedMainModel'
 import GroupColorView from './GroupColorView.vue'
 
 const props = defineProps({

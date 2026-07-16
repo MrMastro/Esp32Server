@@ -50,7 +50,7 @@
 // Qui manteniamo la stessa costante.
 import { ref, computed, watch } from 'vue'
 import ColorUtils from '../utils/ColorUtils.js'
-import LedColorRequest from '../models/request/LedColorRequest.js'
+import LedColorRequest from '../models/request/LedColorRequest'
 
 const MAX_SLOTS = 5
 

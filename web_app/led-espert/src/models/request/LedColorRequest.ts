@@ -1,4 +1,7 @@
 export default class LedColorRequest {
+    r: number;
+    g: number;
+    b: number;
     constructor(r = 0, g = 0, b = 0) {
         this.r = r;
         this.g = g;
@@ -15,7 +18,7 @@ export default class LedColorRequest {
     }
 
     // Deserializzazione da JSON
-    static fromJson(json) {
+    static fromJson(json: { r: number | undefined; g: number | undefined; b: number | undefined; }) {
         if (!json || typeof json.r === 'undefined' || typeof json.g === 'undefined' || typeof json.b === 'undefined') {
             throw new Error('Invalid JSON structure for LedColorRequest');
         }

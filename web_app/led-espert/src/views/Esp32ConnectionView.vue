@@ -84,7 +84,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ConnectionInfo } from '../models/Esp32Model.js'
+import { ConnectionInfo } from '../models/Esp32Model'
 
 // connections: array di { infoConnection, connectionState, active, espConnection }
 // sostituisce l'array interno this.arrayConnections dell'originale, che

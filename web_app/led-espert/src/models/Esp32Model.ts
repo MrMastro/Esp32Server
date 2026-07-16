@@ -1,4 +1,4 @@
-import InfoEsp32Model from "./InfoEsp32Model.js";
+import InfoEsp32Model from "./InfoEsp32Model";
 
 export const ConnectionInfo = {
     ONLINE: "ONLINE",
@@ -7,29 +7,39 @@ export const ConnectionInfo = {
 };
 
 export class Esp32Model {
+    infoConnection: InfoEsp32Model | null;
+    connectionState: string;
+    active: boolean;
+
     /**
-     * @param {ConnectionInfo} connectionState - Stato della connessione (obbligatorio dall'enumeratore ConnectionInfo)
-     * @param {InfoEsp32} infoEsp32 - Nome del dispositivo
+     * @param {string} connectionState - Stato della connessione (obbligatorio dall'enumeratore ConnectionInfo)
+     * @param {InfoEsp32Model} infoEsp32 - Informazioni del dispositivo
      */
-    constructor(connectionState, infoEsp32) {
-        if (!Object.values(ConnectionInfo).includes(connectionState)) {
+    constructor(connectionState: string, infoEsp32: InfoEsp32Model) {
+        if (
+            connectionState !== ConnectionInfo.ONLINE &&
+            connectionState !== ConnectionInfo.OFFLINE &&
+            connectionState !== ConnectionInfo.UNKNOWN
+        ) {
             throw new Error("connectionState deve essere un valore dell'enumeratore ConnectionInfo");
         }
-        this.infoConnection = InfoEsp32Model.createModel(infoEsp32);
+        this.infoConnection = infoEsp32;
         this.connectionState = connectionState;
         this.active = true;
     }
 
     // Metodo per aggiornare le impostazioni del dispositivo
-    updateInfoEsp32(el) {
-        Object.assign(this.infoConnection, el);
+    updateInfoEsp32(el: Partial<InfoEsp32Model>) {
+        if (this.infoConnection) {
+            Object.assign(this.infoConnection, el);
+        }
     }
 
     /**
-     * @param {ConnectionInfo} connectionState - Stato della connessione (obbligatorio dall'enumeratore ConnectionInfo)
+     * @param {string} connectionState - Stato della connessione (obbligatorio dall'enumeratore ConnectionInfo)
      */ 
-    setConnection(connectionState) {
-        if (!Object.values(ConnectionInfo).includes(connectionState)) {
+    setConnection(connectionState: string) {
+        if (connectionState !== ConnectionInfo.ONLINE && connectionState !== ConnectionInfo.OFFLINE && connectionState !== ConnectionInfo.UNKNOWN) {
             throw new Error("connectionState deve essere un valore dell'enumeratore ConnectionInfo");
         }
         this.connectionState = connectionState;
@@ -39,16 +49,17 @@ export class Esp32Model {
         return this.infoConnection;
     }
 
-    static validate(object) {
-        return (object.hasOwnProperty("connectionState") && object.hasOwnProperty("infoConnection") && object.infoConnection.hasOwnProperty("deviceName") && object.infoConnection.hasOwnProperty("ip") && object.infoConnection.hasOwnProperty("macAddress"));
+    static validate(object: { infoConnection: InfoEsp32Model }) {
+        return (object.hasOwnProperty("connectionState") && object.infoConnection.hasOwnProperty("deviceName") && object.infoConnection.hasOwnProperty("ip") && object.infoConnection.hasOwnProperty("macAddress"));
     }
 
-    static createModel(object) {
+    static createModel(object: any) {
         if (this.validate(object)) {
-            return new Esp32Model(ConnectionInfo.UNKNOWN, object.deviceName, object.ip, object.macAddress);
+            return new Esp32Model(ConnectionInfo.UNKNOWN, object.infoConnection);
         } else {
             console.error("Cannot create, the object passed isn't valid for Esp32Model");
             return null;
         }
     }
 }
+

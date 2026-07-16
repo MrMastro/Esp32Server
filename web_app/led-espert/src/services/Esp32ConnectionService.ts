@@ -5,7 +5,7 @@ import IpV4StringUtils from '../utils/IpV4StringUtils';
 import ConstantApiList from '../constants/apiList';
 import LocalStorageService from './LocalStorageService';
 import InfoEsp32Model from '../models/InfoEsp32Model';
-import TextUtils from '../utils/TextUtils.js';
+import TextUtils from '../utils/TextUtils';
 import { ConnectionInfo, Esp32Model } from '../models/Esp32Model';
 import NoConnectException from '../exceptions/NoConnectException';
 

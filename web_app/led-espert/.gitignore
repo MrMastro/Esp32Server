@@ -1,0 +1,76 @@
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+.build/
+
+# Vite cache
+.vite/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependency directories
+.pnpm-store/
+
+# Environment files
+.env
+.env.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Capacitor
+android/
+ios/
+www/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Optional IDE files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Android Studio
+.gradle/
+/local.properties
+/.cxx/
+/captures/
+.externalNativeBuild/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Mac
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+~*.*
+
+# Debugger files
+*.log
+
+# System files
+ehthumbs.db
+Icon?
+
+# Misc
+.sass-cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
