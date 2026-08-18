@@ -52,6 +52,4 @@ data/settings/sereSettings_1.0.json
 data/settings/settings_hotspot.json
 data/settings/settings_wifi.json
 data/settings/effectPreset_sans.json
-data/settings/example/defaultSettings.json
-data/settings/example/effectPreset_sans.json
-data/settings/example/mySettings.json
+data/settings/example/*.json
