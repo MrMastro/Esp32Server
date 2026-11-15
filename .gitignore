@@ -1,3 +1,12 @@
+# =====================================================================
+# .gitignore unico della repository Esp32Server
+# (progetto principale + tutti i progetti in addon_project/)
+# Non creare altri .gitignore nelle sottocartelle: aggiungere qui.
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# C/C++ - file compilati
+# ---------------------------------------------------------------------
 # Prerequisites
 *.d
 
@@ -30,20 +39,27 @@
 *.exe
 *.out
 *.app
+
+# ---------------------------------------------------------------------
+# PlatformIO / IDE (valgono per tutti i progetti, anche negli addon)
+# ---------------------------------------------------------------------
+.pio
+.cache
+.dummy
 .vscode
-src/build
+compile_commands.json
 build
+.DS_Store
+
+# ---------------------------------------------------------------------
+# Progetto principale (root)
+# ---------------------------------------------------------------------
+src/build
 src/settingsBakup.h
 src/settings.h
-.pio
-
-#Custom
 /src/settings/*.h
 !/src/settings/settingsDefault.h
-web_app/mastro-led-control-cordova/mastroLed/.idea
-web_app/mastro-led-control/android
-web_app/mastro-led-control/ios
-web_app/mastro-led-control-cordova/.idea
+
 data/settings/mySettings.json
 data/settings/sereSettings.json
 data/settings/settings.json
@@ -52,12 +68,32 @@ data/settings/sereSettings_1.0.json
 data/settings/settings_hotspot.json
 data/settings/settings_wifi.json
 data/settings/effectPreset_sans.json
-web_app/led-espert/.continue
-web_app/led-espert_2/mastro-led-control-cordova/node_modules
-web_app/led-espert_2/mastro-led-control-cordova/platforms
 data/settings/example/defaultSettings.json
 data/settings/example/effectPreset_sans.json
 data/settings/example/mySettings.json
-web_app/mastro-led-control-vue/led-espert/android/.idea
-web_app/mastro-led-control-vue/led-espert/android/.gradle
-web_app/mastro-led-control-vue/led-espert/android/local.properties
+
+# ---------------------------------------------------------------------
+# addon_project/web_app
+# ---------------------------------------------------------------------
+# dipendenze npm (ovunque)
+node_modules/
+
+addon_project/web_app/led-espert/.continue
+
+addon_project/web_app/led-espert_2/mastro-led-control-cordova/node_modules
+addon_project/web_app/led-espert_2/mastro-led-control-cordova/platforms
+
+# Cordova (ex .gitignore locale di mastro-led-control-cordova)
+addon_project/web_app/mastro-led-control-cordova/.idea
+addon_project/web_app/mastro-led-control-cordova/plugins/
+addon_project/web_app/mastro-led-control-cordova/platforms/
+
+# Android (Capacitor) dell'app Vue
+addon_project/web_app/mastro-led-control-vue/led-espert/android/.idea
+addon_project/web_app/mastro-led-control-vue/led-espert/android/.gradle
+addon_project/web_app/mastro-led-control-vue/led-espert/android/local.properties
+
+# ---------------------------------------------------------------------
+# addon_project/remote_control_esp32
+# ---------------------------------------------------------------------
+# (.pio e .vscode sono già coperti dalle regole generali sopra)
