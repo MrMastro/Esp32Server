@@ -58,3 +58,6 @@ web_app/led-espert_2/mastro-led-control-cordova/platforms
 data/settings/example/defaultSettings.json
 data/settings/example/effectPreset_sans.json
 data/settings/example/mySettings.json
+web_app/mastro-led-control-vue/led-espert/android/.idea
+web_app/mastro-led-control-vue/led-espert/android/.gradle
+web_app/mastro-led-control-vue/led-espert/android/local.properties
