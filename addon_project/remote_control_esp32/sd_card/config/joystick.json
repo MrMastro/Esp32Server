@@ -1,0 +1,10 @@
+{
+  "enableJoystick": true,
+  "pinSwitch": 1,
+  "pinAnalogX": 3,
+  "pinAnalogY": 2,
+  "autoCalibrate": true,
+  "centerX": 1930,
+  "centerY": 1960,
+  "deadZone": 400
+}

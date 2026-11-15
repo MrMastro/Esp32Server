@@ -2,6 +2,9 @@
 # .gitignore unico della repository Esp32Server
 # (progetto principale + tutti i progetti in addon_project/)
 # Non creare altri .gitignore nelle sottocartelle: aggiungere qui.
+# Eccezione: i progetti PlatformIO (es. addon_project/remote_control_esp32)
+# hanno un .gitignore generato in automatico dall'estensione VS Code
+# (lo ricrea ad ogni apertura se manca): si lascia, è innocuo.
 # =====================================================================
 
 # ---------------------------------------------------------------------
@@ -46,6 +49,8 @@
 .pio
 .cache
 .dummy
+# modello generato dall'estensione PlatformIO di VS Code accanto al .gitignore
+.gitignore.optional
 .vscode
 compile_commands.json
 build
@@ -97,3 +102,11 @@ addon_project/web_app/mastro-led-control-vue/led-espert/android/local.properties
 # addon_project/remote_control_esp32
 # ---------------------------------------------------------------------
 # (.pio e .vscode sono già coperti dalle regole generali sopra)
+
+# Configurazioni della microSD: contengono dati sensibili (password WiFi/AP/OTA)
+# e ogni PC ha le sue. Si versionano solo il modello e la config del joystick.
+# Sulla SD il firmware legge sempre /config/main_settings.json:
+# copiare default_main_settings.json -> main_settings.json e personalizzarlo.
+addon_project/remote_control_esp32/sd_card/config/*
+!addon_project/remote_control_esp32/sd_card/config/default_main_settings.json
+!addon_project/remote_control_esp32/sd_card/config/joystick.json

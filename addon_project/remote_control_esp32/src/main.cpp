@@ -1,50 +1,104 @@
 #include <Arduino.h>
-#include <Arduino_GFX_Library.h>
 
-// Pinout Waveshare ESP32-C6-LCD-1.3 (dal demo ufficiale Waveshare)
-#define LCD_MOSI 6
-#define LCD_SCLK 7
-#define LCD_CS   14
-#define LCD_DC   15
-#define LCD_RST  21
-#define LCD_BL   22
+#include "BoardPins.h"
+#include "display/Display.h"
+#include "storage/SdStorage.h"
+#include "settings/SettingsModel.h"
+#include "settings/DeviceMode.h"
+#include "network/WifiConnection.h"
+#include "joystick/Joystick.h"
+#include "joystick/JoystickConfig.h"
+#include "test/JoystickDisplayTest.h"
 
-#define LCD_WIDTH  240
-#define LCD_HEIGHT 240
+static SettingsModel settings;
+static DEVICE_MODE deviceMode = DEVICE_MODE::REMOTE_CONTROL;
+static WifiStatus wifiStatus;
 
-Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC, LCD_CS, LCD_SCLK, LCD_MOSI, GFX_NOT_DEFINED);
+static JoystickConfig joystickConfig;
+static Joystick joystick;
 
-// rotation = 0, IPS = true (inversione colori attiva), nessun offset
-Arduino_GFX *gfx = new Arduino_ST7789(bus, LCD_RST, 0, true, LCD_WIDTH, LCD_HEIGHT, 0, 0, 0, 0);
+static void setupRemoteControl(bool sdAvailable)
+{
+  if (sdAvailable)
+  {
+    joystickConfig.loadFromFile(SD_JOYSTICK_CONFIG);
+  }
+
+  if (joystickConfig.enableJoystick)
+  {
+    joystick.begin(joystickConfig);
+    if (joystickConfig.autoCalibrate)
+    {
+      displayMessage("Calibrazione", "non toccare");
+      joystick.calibrate();
+    }
+  }
+}
 
 void setup()
 {
-    Serial.begin(115200);
+  Serial.begin(115200);
+  // Senza monitor seriale aperto, la seriale USB bloccherebbe ogni print fino a ~100ms
+  Serial.setTxTimeoutMs(0);
 
-    if (!gfx->begin())
-    {
-        Serial.println("gfx->begin() fallito!");
-    }
+  // 1) Display: avvia anche il bus SPI condiviso con la SD
+  displayBegin();
+  displayMessage("Avvio...");
 
-    pinMode(LCD_BL, OUTPUT);
-    digitalWrite(LCD_BL, HIGH); // retroilluminazione accesa
+  // 2) microSD + impostazioni generali (default se SD o file mancano)
+  bool sdAvailable = sdBegin();
+  bool settingsFromFile = false;
+  settings = SettingsModel::load(SD_MAIN_SETTINGS, sdAvailable, &settingsFromFile);
+  if (settings.debug)
+  {
+    settings.print();
+  }
+  if (!settingsFromFile)
+  {
+    displayMessage(sdAvailable ? "No settings" : "No SD", "uso default");
+    delay(1500);
+  }
 
-    gfx->fillScreen(RGB565_BLACK);
+  // 3) Rete (AP_MODE / WIFI_MODE)
+  displayMessage("WiFi...", settings.communicationMode);
+  wifiStatus = wifiBegin(settings);
+  displayMessage(wifiStatus.fallbackToAp ? "AP (fallback)" : communicationModeEnumToString(wifiStatus.activeMode),
+                 wifiStatus.ip);
+  delay(1500);
 
-    const char *msg = "Hello World";
-    gfx->setTextSize(3);
-    gfx->setTextColor(RGB565_WHITE);
+  // 4) Modalità del dispositivo
+  deviceMode = deviceModeStringToEnum(settings.mode);
+  if (deviceMode == DEVICE_MODE::UNKNOWN)
+  {
+    Serial.println("[Main] mode sconosciuta (" + settings.mode + "): uso remote_control");
+    displayMessage("Mode ignota", "uso remote_control");
+    delay(1500);
+    deviceMode = DEVICE_MODE::REMOTE_CONTROL;
+  }
 
-    int16_t x1, y1;
-    uint16_t w, h;
-    gfx->getTextBounds(msg, 0, 0, &x1, &y1, &w, &h);
-    gfx->setCursor((LCD_WIDTH - w) / 2, (LCD_HEIGHT - h) / 2);
-    gfx->print(msg);
+  switch (deviceMode)
+  {
+  case DEVICE_MODE::REMOTE_CONTROL:
+    setupRemoteControl(sdAvailable);
+    break;
+  default:
+    break;
+  }
 
-    Serial.println("Hello World a schermo");
+  testJoystickSetNetworkInfo((wifiStatus.activeMode == COMMUNICATION_MODE::WIFI_MODE ? "WIFI " : "AP ") + wifiStatus.ip);
 }
 
 void loop()
 {
-    delay(1000);
+  switch (deviceMode)
+  {
+  case DEVICE_MODE::REMOTE_CONTROL:
+    // --- TEST: commenta la riga sotto per disattivare il test a schermo del joystick ---
+    if (joystickConfig.enableJoystick) testJoystickOnDisplay(joystick);
+    break;
+  default:
+    break;
+  }
+
+  delay(2);
 }

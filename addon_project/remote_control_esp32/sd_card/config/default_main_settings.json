@@ -1,0 +1,11 @@
+{
+  "mode": "remote_control",
+  "deviceName": "ESP32_Remote",
+  "devicePassword": "esp32password",
+  "communicationMode": "AP_MODE",
+  "debug": true,
+  "ssidAP": "ESP32_Remote_AP",
+  "passwordAP": "ap_password",
+  "ssidWIFI": "Home_Network",
+  "passwordWIFI": "wifi_password"
+}

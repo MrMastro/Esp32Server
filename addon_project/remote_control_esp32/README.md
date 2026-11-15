@@ -7,6 +7,7 @@ Progetto PlatformIO (piattaforma pioarduino, Arduino core 3.x).
 ## Build e upload
 
 - Compilare da **PowerShell** o dai pulsanti PlatformIO di VS Code, **non da Git Bash**: lo script `idf_tools.py` di pioarduino rifiuta gli ambienti MSYS/MinGW e la toolchain non viene installata.
+- Tabella partizioni `min_spiffs.csv`: due slot app da 1,9MB per l'OTA, filesystem in flash minimo (le configurazioni sono sulla SD).
 - Upload via USB-C. Se la porta non viene vista: tenere premuto BOOT, premere RST, rilasciare BOOT.
 
 ## Pin della scheda
@@ -63,3 +64,60 @@ Formattare in **FAT32** da Windows (preferibilmente schede ≤ 32GB). exFAT non 
 Le configurazioni JSON stanno nella cartella **`/config`** della microSD (es. `/config/joystick.json`).
 Non si usa la cartella `data/` di PlatformIO né il filesystem in flash (LittleFS/SPIFFS): per cambiare
 una configurazione basta modificare il file sulla SD dal PC, senza ricaricare nulla sulla scheda.
+
+Il contenuto da copiare nella root della SD è in [`sd_card/`](sd_card/) (quindi `sd_card/config/joystick.json` → `/config/joystick.json`).
+
+In git sono versionati solo `default_main_settings.json` (modello senza dati reali) e `joystick.json`.
+Tutti gli altri file in `sd_card/config/` sono ignorati perché contengono dati sensibili e cambiano da PC a PC.
+Il firmware legge sempre **`/config/main_settings.json`**: copiare `default_main_settings.json` in
+`main_settings.json`, inserire le proprie credenziali e mettere quello sulla SD.
+Se la SD o il file mancano, il firmware usa i default (pin 1/2/3, calibrazione automatica, zona morta 400).
+
+### /config/main_settings.json
+
+Impostazioni generali (stessi nomi di `SettingsModel` del progetto principale, solo i campi utili).
+Se la SD manca, il file non esiste o il JSON non è valido si usano i default di `SettingsModel::getDefault()`;
+i singoli campi mancanti nel file prendono il valore di default.
+
+| Campo | Default | Significato |
+| --- | --- | --- |
+| `mode` | `remote_control` | Funzione del dispositivo (per ora solo `remote_control`) |
+| `deviceName` | `ESP32_Device` | Hostname in rete (e nome per l'OTA) |
+| `devicePassword` | `esp32password` | Password per l'OTA |
+| `communicationMode` | `AP_MODE` | `AP_MODE` o `WIFI_MODE` |
+| `debug` | `false` | Stampa le impostazioni sulla seriale all'avvio |
+| `ssidAP` / `passwordAP` | `ESP32_AP` / `ap_password` | Access point creato dalla scheda (password ≥ 8 caratteri) |
+| `ssidWIFI` / `passwordWIFI` | `Home_Network` / `wifi_password` | Rete WiFi a cui collegarsi (solo 2,4GHz) |
+
+Comportamento della rete (come `MastroServer` del progetto principale):
+
+- `AP_MODE`: la scheda crea l'access point `ssidAP` (IP `192.168.4.1`).
+- `WIFI_MODE`: si collega a `ssidWIFI`; se entro 10 secondi non ci riesce, passa ad AP.
+- valore sconosciuto: AP.
+
+`BLUETOOTH_MODE` non è supportato: l'ESP32-C6 ha solo Bluetooth LE, non il Bluetooth classico.
+
+### /config/joystick.json
+
+| Campo | Default | Significato |
+| --- | --- | --- |
+| `enableJoystick` | `true` | Abilita il joystick |
+| `pinSwitch` / `pinAnalogX` / `pinAnalogY` | `1` / `3` / `2` | GPIO di SW, VRx, VRy |
+| `autoCalibrate` | `true` | Misura il centro all'avvio (non toccare la levetta durante il boot) |
+| `centerX` / `centerY` | `1930` / `1960` | Centro usato se `autoCalibrate` è `false` |
+| `deadZone` | `400` | Scostamento dal centro sotto il quale l'asse è centrato |
+
+## Struttura del codice
+
+| File | Contenuto |
+| --- | --- |
+| `src/main.cpp` | Avvio (display → SD → config → joystick) e `loop()` |
+| `src/BoardPins.h` | Pin della scheda e default del joystick |
+| `src/display/` | Display ST7789 (Arduino_GFX) sul bus SPI condiviso |
+| `src/storage/` | Montaggio microSD e percorsi in `/config` |
+| `src/settings/` | `SettingsModel` (main_settings.json), `COMMUNICATION_MODE`, `DEVICE_MODE` |
+| `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE |
+| `src/joystick/` | Algoritmo del joystick, configurazione JSON, enum `J_DIRECTION` (copia di quello del progetto principale) |
+| `src/test/` | `testJoystickOnDisplay()`: mostra a schermo la stringa `J_DIRECTION` e i valori grezzi |
+
+Il test si attiva/disattiva commentando la riga `testJoystickOnDisplay(joystick);` in `loop()`.
