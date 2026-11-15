@@ -57,6 +57,19 @@ static bool connectStation(const SettingsModel &settings, WifiStatus &status)
   return true;
 }
 
+NETWORK_STATE wifiCurrentState(const WifiStatus &status)
+{
+  switch (status.activeMode)
+  {
+  case COMMUNICATION_MODE::AP_MODE:
+    return NETWORK_STATE::AP;
+  case COMMUNICATION_MODE::WIFI_MODE:
+    return WiFi.status() == WL_CONNECTED ? NETWORK_STATE::WIFI_CONNECTED : NETWORK_STATE::WIFI_DISCONNECTED;
+  default:
+    return NETWORK_STATE::OFF;
+  }
+}
+
 WifiStatus wifiBegin(const SettingsModel &settings)
 {
   switch (communicationModeStringToEnum(settings.communicationMode))

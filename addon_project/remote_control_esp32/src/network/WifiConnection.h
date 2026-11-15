@@ -20,4 +20,15 @@ struct WifiStatus
 //  - modalità sconosciuta: AP
 WifiStatus wifiBegin(const SettingsModel &settings);
 
+// Stato attuale della rete, letto al momento (per l'indicatore a schermo)
+enum class NETWORK_STATE
+{
+  AP,                // access point attivo
+  WIFI_CONNECTED,    // collegato alla rete WiFi
+  WIFI_DISCONNECTED, // in WIFI_MODE ma la connessione è caduta
+  OFF
+};
+
+NETWORK_STATE wifiCurrentState(const WifiStatus &status);
+
 #endif // WIFI_CONNECTION_H

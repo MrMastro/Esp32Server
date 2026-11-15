@@ -2,6 +2,7 @@
 
 #include "BoardPins.h"
 #include "display/Display.h"
+#include "display/StatusBar.h"
 
 // Ridisegna al massimo ogni FRAME_MS, e solo se qualcosa è cambiato
 static const uint32_t FRAME_MS = 33; // ~30 fps
@@ -31,6 +32,7 @@ static void drawFrame(Joystick &joystick, J_DIRECTION direction)
   gfx->setTextColor(RGB565_CYAN);
   gfx->setCursor(10, 10);
   gfx->print("JOYSTICK TEST");
+  statusBarDraw();
   gfx->setTextSize(1);
   gfx->setTextColor(RGB565_DARKGREY);
   gfx->setCursor(10, 33);
@@ -82,7 +84,7 @@ void testJoystickOnDisplay(Joystick &joystick)
     return;
   }
 
-  bool dirty = firstFrame || direction != shownDirection || joystick.switchPressed() != shownSwitch ||
+  bool dirty = firstFrame || statusBarChanged() || direction != shownDirection || joystick.switchPressed() != shownSwitch ||
                abs(joystick.rawX() - shownX) > RAW_CHANGE_THRESHOLD ||
                abs(joystick.rawY() - shownY) > RAW_CHANGE_THRESHOLD;
   if (!dirty)

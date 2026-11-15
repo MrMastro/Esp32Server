@@ -2,6 +2,7 @@
 
 #include "BoardPins.h"
 #include "display/Display.h"
+#include "display/StatusBar.h"
 #include "storage/SdStorage.h"
 #include "settings/SettingsModel.h"
 #include "settings/DeviceMode.h"
@@ -85,7 +86,8 @@ void setup()
     break;
   }
 
-  testJoystickSetNetworkInfo((wifiStatus.activeMode == COMMUNICATION_MODE::WIFI_MODE ? "WIFI " : "AP ") + wifiStatus.ip);
+  statusBarBegin(&wifiStatus);
+  testJoystickSetNetworkInfo("IP " + wifiStatus.ip);
 }
 
 void loop()
