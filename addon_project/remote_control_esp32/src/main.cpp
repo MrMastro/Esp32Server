@@ -9,7 +9,9 @@
 #include "network/WifiConnection.h"
 #include "network/OtaUpload.h"
 #include "settings/SettingsValidator.h"
+#include "system/ExclusiveExecution.h"
 #include <WebServer.h>
+#include "hal/usb_serial_jtag_ll.h" // watchdog ricezione USB, vedi readSerialMessage()
 
 #ifndef BOOT_SERIAL_WAIT_MS
 #define BOOT_SERIAL_WAIT_MS 3000 // valore reale in platformio.ini (build_flags)
@@ -160,41 +162,275 @@ static void printSettings()
   Serial.println(settings.toJsonString(false));
 }
 
-// Comandi dal monitor seriale (una riga terminata da invio):
-//   settings  -> ristampa la configurazione caricata
-static void handleSerialCommands()
+// ---------------------------------------------------------------------------
+// Comandi seriali: stessi nomi e formato del progetto principale (CommandService / Commands.cpp),
+// "comando,param1,param2" con i parametri separati da virgola (qui va bene anche lo spazio).
+// ---------------------------------------------------------------------------
+
+// Riavvio ritardato (come insertDelayedCommand(CMD::REBOOT, ...) del progetto principale)
+static bool delayedRebootPending = false;
+static uint32_t delayedRebootAtMs = 0;
+
+static bool isUnsignedLong(const String &str)
 {
-  static String line = "";
+  if (str.length() == 0)
+    return false;
+  for (size_t i = 0; i < str.length(); i++)
+  {
+    if (!isDigit(str[i]))
+      return false;
+  }
+  return true;
+}
+
+static void insertDelayedReboot(unsigned long millsDelayed)
+{
+  delayedRebootPending = true;
+  delayedRebootAtMs = millis() + millsDelayed;
+}
+
+static void checkDelayedRebootAndExecute()
+{
+  if (delayedRebootPending && (int32_t)(millis() - delayedRebootAtMs) >= 0)
+  {
+    Serial.println("Comando delayed eseguito: reboot");
+    delay(50);
+    ESP.restart();
+  }
+}
+
+// Esito dei comandi, con gli stessi messaggi del progetto principale (constants.h)
+static void printCommandSuccess(const String &command, const String &description = "")
+{
+  Serial.println("Comando eseguito: " + command + " - " + description);
+}
+
+static void printCommandError(const String &command, const String &description)
+{
+  Serial.println("ERRORE: " + command + " - " + description);
+}
+
+// reboot[,ms]: senza parametro (o 0) riavvia subito, altrimenti dopo ms millisecondi
+static void reboot(const String &command, const String &param)
+{
+  if (param.length() > 0 && !isUnsignedLong(param))
+  {
+    printCommandError(command, "first param must be a number");
+    return;
+  }
+
+  unsigned long millsDelayed = param.length() > 0 ? strtoul(param.c_str(), nullptr, 10) : 0;
+  if (millsDelayed == 0)
+  {
+    printCommandSuccess(command, "restarting...");
+    delay(50);
+    ESP.restart();
+    return;
+  }
+  insertDelayedReboot(millsDelayed);
+  printCommandSuccess(command, "reboot tra " + String(millsDelayed) + " ms");
+}
+
+// change_communication_mode,<AP_MODE|WIFI_MODE>: salva su main_settings.json e riavvia dopo 1s
+static void changeCommunicationMode(const String &command, const String &param)
+{
+  if (param.length() == 0)
+  {
+    printCommandError(command, "insert mode like first param");
+    return;
+  }
+  COMMUNICATION_MODE cm = communicationModeStringToEnum(param);
+  if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
+  {
+    printCommandError(command, "Communication mode is not valid");
+    return;
+  }
+  if (!sdAvailable)
+  {
+    printCommandError(command, "microSD non disponibile: impossibile salvare");
+    return;
+  }
+
+  JsonDocument value;
+  value.set(communicationModeEnumToString(cm));
+  if (!settings.saveKey(SD_MAIN_SETTINGS, "communicationMode", value.as<JsonVariantConst>()))
+  {
+    printCommandError(command, "Error while set new communication");
+    return;
+  }
+  printCommandSuccess(command, "communication mode is setted, restarting....");
+  insertDelayedReboot(1000);
+}
+
+static void printInfo(const String &command)
+{
+  String info = "mode=" + settings.mode +
+                ", deviceName=" + settings.deviceName +
+                ", communicationMode=" + (wifiStatus.fallbackToAp ? String("AP_MODE (fallback)") : communicationModeEnumToString(wifiStatus.activeMode)) +
+                ", ssid=" + wifiStatus.ssid +
+                ", ip=" + wifiStatus.ip +
+                ", ota=" + (otaIsEnabled() ? "ON" : "OFF") +
+                ", sd=" + (sdAvailable ? "OK" : "NO");
+  printCommandSuccess(command, info);
+}
+
+// Funzione di prova lanciata dal comando seriale "t": metti qui il codice da testare
+static void test()
+{
+  Serial.println("[Test] test() eseguita");
+}
+
+// Comandi riconosciuti (in C++ lo switch non accetta String: si mappa su un enum).
+// I primi sono gli stessi di CMD nel progetto principale; gli ultimi sono solo di questo progetto.
+enum class SERIAL_COMMAND
+{
+  REBOOT,                    // "reboot" (alias "reset")
+  CHANGE_COMMUNICATION_MODE, // "change_communication_mode"
+  INFO,                      // "info"
+  INFO_IP,                   // "info_ip"
+  SETTINGS,                  // "settings"
+  TEST,                      // "t"
+  NONE,
+  UNKNOWN
+};
+
+static SERIAL_COMMAND parseSerialCommand(String command)
+{
+  command.toLowerCase();
+  if (command.length() == 0)
+    return SERIAL_COMMAND::NONE;
+  if (command == "reboot" || command == "reset")
+    return SERIAL_COMMAND::REBOOT;
+  if (command == "change_communication_mode")
+    return SERIAL_COMMAND::CHANGE_COMMUNICATION_MODE;
+  if (command == "info")
+    return SERIAL_COMMAND::INFO;
+  if (command == "info_ip")
+    return SERIAL_COMMAND::INFO_IP;
+  if (command == "settings")
+    return SERIAL_COMMAND::SETTINGS;
+  if (command == "t")
+    return SERIAL_COMMAND::TEST;
+  return SERIAL_COMMAND::UNKNOWN;
+}
+
+// Comandi dal monitor seriale (caratteri in sequenza, il messaggio si chiude dopo 1s di pausa):
+//   reboot[,ms]                      -> riavvia l'ESP32 (subito, o dopo ms millisecondi); alias: reset
+//   change_communication_mode,<mode> -> AP_MODE / WIFI_MODE, salva sulla SD e riavvia
+//   info                             -> stato del dispositivo
+//   info_ip                          -> indirizzo IP
+//   settings                         -> ristampa la configurazione caricata
+//   t                                -> esegue test()
+// Raccolta del messaggio seriale come SerialService::getMsgbySerial() del progetto principale
+// (Serial.readString): i caratteri si scrivono in sequenza e il messaggio è completo quando
+// non ne arrivano altri per SERIAL_MSG_TIMEOUT_MS. Non serve premere Invio.
+// A differenza di readString non blocca il task mentre aspetta.
+static const uint32_t SERIAL_MSG_TIMEOUT_MS = 1000; // come il timeout di default di Serial
+static const size_t SERIAL_MSG_MAX_LENGTH = 64;
+
+// Watchdog della ricezione USB (HWCDC, USB Serial/JTAG del C6).
+// Il driver Arduino legge la FIFO hardware solo nell'interrupt "pacchetto ricevuto"; se un
+// pacchetto arriva prima/durante Serial.begin() (che azzera i flag di interrupt) o se un
+// interrupt va perso, i dati restano nella FIFO (64 byte), nessuno la svuota e l'host non può
+// più inviare nulla: la COM risulta "occupata" (Write timeout) finché non si stacca il cavo.
+// Qui, se la FIFO contiene dati non letti dal driver, li si legge direttamente.
+static portMUX_TYPE usbRxMux = portMUX_INITIALIZER_UNLOCKED;
+
+static size_t drainStuckUsbRxFifo(uint8_t *out, size_t maxLen)
+{
+  if (Serial.available() || !usb_serial_jtag_ll_rxfifo_data_available())
+    return 0;
+  portENTER_CRITICAL(&usbRxMux); // niente interrupt nel frattempo: l'ISR non legge in parallelo
+  size_t n = usb_serial_jtag_ll_read_rxfifo(out, maxLen);
+  portEXIT_CRITICAL(&usbRxMux);
+  return n;
+}
+
+static bool readSerialMessage(String &msg)
+{
+  static String buffer = "";
+  static uint32_t lastCharMs = 0;
+
   while (Serial.available())
   {
     char c = Serial.read();
-    if (c == '\r')
-      continue;
-    if (c != '\n')
-    {
-      if (line.length() < 64)
-        line += c;
-      continue;
-    }
+    if (buffer.length() < SERIAL_MSG_MAX_LENGTH)
+      buffer += c;
+    lastCharMs = millis();
+  }
 
-    line.trim();
-    if (line.equalsIgnoreCase("settings"))
-    {
-      printSettings();
-    }
-    else if (line.length() > 0)
-    {
-      Serial.println("[Serial] comando sconosciuto: " + line + " (disponibili: settings)");
-    }
-    line = "";
+  uint8_t stuck[64];
+  size_t stuckLen = drainStuckUsbRxFifo(stuck, sizeof(stuck));
+  for (size_t i = 0; i < stuckLen; i++)
+  {
+    if (buffer.length() < SERIAL_MSG_MAX_LENGTH)
+      buffer += (char)stuck[i];
+    lastCharMs = millis();
+  }
+
+  if (buffer.length() == 0 || millis() - lastCharMs < SERIAL_MSG_TIMEOUT_MS)
+    return false;
+
+  msg = buffer;
+  buffer = "";
+  msg.trim(); // toglie eventuali CR/LF se il monitor li invia
+  return msg.length() > 0;
+}
+
+static void executeSerialMessage(const String &msg)
+{
+  Serial.println("Serial has msg: " + msg);
+
+  String command = msg;
+  String param = "";
+  int sep = msg.indexOf(',');
+  if (sep < 0)
+    sep = msg.indexOf(' ');
+  if (sep > 0)
+  {
+    command = msg.substring(0, sep);
+    param = msg.substring(sep + 1);
+    command.trim();
+    param.trim();
+  }
+
+  switch (parseSerialCommand(command))
+  {
+  case SERIAL_COMMAND::REBOOT:
+    reboot(command, param);
+    break;
+  case SERIAL_COMMAND::CHANGE_COMMUNICATION_MODE:
+    changeCommunicationMode(command, param);
+    break;
+  case SERIAL_COMMAND::INFO:
+    printInfo(command);
+    break;
+  case SERIAL_COMMAND::INFO_IP:
+    printCommandSuccess(command, wifiStatus.ip);
+    break;
+  case SERIAL_COMMAND::SETTINGS:
+    printSettings();
+    break;
+  case SERIAL_COMMAND::TEST:
+    test();
+    break;
+  case SERIAL_COMMAND::UNKNOWN:
+    printCommandError(command, "Comando non riconosciuto (disponibili: reboot[,ms], change_communication_mode,<mode>, info, info_ip, settings, t)");
+    break;
+  case SERIAL_COMMAND::NONE:
+  default:
+    break;
   }
 }
+
+static void startTasks(); // definita sotto, insieme ai task
 
 void setup()
 {
   Serial.begin(115200);
-  // Senza monitor seriale aperto, la seriale USB bloccherebbe ogni print fino a ~100ms
-  Serial.setTxTimeoutMs(0);
+  // NB: non usare Serial.setTxTimeoutMs(0): sul C6 manda in stallo la ricezione USB (HWCDC)
+  // dopo le stampe lunghe e la COM smette di accettare comandi. Si lascia il default (100ms):
+  // senza host USB (es. power bank) le print vengono comunque scartate senza attese.
 
   // 1) Display: avvia anche il bus SPI condiviso con la SD
   displayBegin();
@@ -253,31 +489,130 @@ void setup()
 
   statusBarBegin(&wifiStatus);
   testJoystickSetNetworkInfo("IP " + wifiStatus.ip + (otaIsEnabled() ? "  OTA ON" : ""));
+
+  // 6) Task (serial, API/OTA, comandi ritardati, joystick)
+  startTasks();
 }
 
-void loop()
-{
-  otaHandle();
-  server.handleClient();
-  handleSerialCommands();
+// ---------------------------------------------------------------------------
+// Task FreeRTOS (come Main.cpp del progetto principale).
+// Ogni task fa un giro di lavoro dentro take/freeExclusiveExecution e poi dorme 10ms
+// con vTaskDelay: il C6 ha un solo core, quindi ogni task DEVE cedere la CPU.
+// ---------------------------------------------------------------------------
 
-  if (rebootPending)
+// Priorità: NON quelle del progetto principale. Là l'ESP32 ha due core e i task dell'app
+// girano su un core diverso da WiFi/lwIP; il C6 ha un solo core, e valori come
+// configMAX_PRIORITIES-3 (=22) mettono i task sopra lwIP (18) e alla pari di esp_timer (22),
+// togliendo CPU allo stack di rete e alla seriale USB.
+// Qui tutti i task stanno in basso (come loop() di Arduino, priorità 1) e la seriale è la più alta
+// tra loro, così i comandi hanno sempre la precedenza su joystick e schermo.
+#define PRIORITY_SERIAL 5
+#define PRIORITY_DELAYED_TASK 4
+#define PRIORITY_SERVER 3
+#define PRIORITY_JOYSTICK 2 // al posto di PRIORITY_LED_EFFECTS (qui non ci sono strisce LED)
+
+#define STACK_SIZE_SERVER 8192
+#define STACK_SIZE_JOYSTICK 6144
+#define STACK_SIZE_DELAYED_TASK 4096
+#define STACK_SIZE_SERIAL 8192
+
+static const TickType_t TASK_DELAY_TICKS = 10 / portTICK_PERIOD_MS;
+
+// API impostazioni (WebServer) e OTA.
+// Durante un upload OTA, otaHandle() resta dentro per tutto il trasferimento tenendo il lock:
+// gli altri task aspettano e la schermata di avanzamento non viene sovrascritta.
+static void apiServerTask(void *pvParameters)
+{
+  Serial.println("[Task] apiServerTask avviato");
+  while (true)
   {
-    handlePendingReboot();
-    delay(2);
-    return;
+    takeExclusiveExecution();
+    otaHandle();
+    server.handleClient();
+    freeExclusiveExecution();
+    vTaskDelay(TASK_DELAY_TICKS);
   }
+}
+
+// Comandi dal monitor seriale (serialCableTask nel progetto principale)
+static void serialCableTask(void *pvParameters)
+{
+  Serial.println("[Task] serialCableTask avviato");
+  while (true)
+  {
+    String msg;
+    if (readSerialMessage(msg))
+    {
+      takeExclusiveExecution();
+      executeSerialMessage(msg);
+      freeExclusiveExecution();
+    }
+    vTaskDelay(TASK_DELAY_TICKS);
+  }
+}
+
+// Comandi ritardati (reboot,ms / change_communication_mode) e riavvio richiesto dall'API
+static void commandDelayedTask(void *pvParameters)
+{
+  Serial.println("[Task] commandDelayedTask avviato");
+  while (true)
+  {
+    takeExclusiveExecution();
+    checkDelayedRebootAndExecute();
+    if (rebootPending)
+    {
+      handlePendingReboot();
+    }
+    freeExclusiveExecution();
+    vTaskDelay(TASK_DELAY_TICKS);
+  }
+}
+
+// Lettura del joystick e schermo (modalità remote_control)
+static void joystickTask(void *pvParameters)
+{
+  Serial.println("[Task] joystickTask avviato");
+  while (true)
+  {
+    takeExclusiveExecution();
+    // durante il conto alla rovescia del riavvio lo schermo è di commandDelayedTask
+    if (!rebootPending)
+    {
+      // --- TEST: commenta la riga sotto per disattivare il test a schermo del joystick ---
+      // secondo parametro: true = stampa le direzioni sulla seriale, false = solo a schermo
+      testJoystickOnDisplay(joystick, false);
+    }
+    freeExclusiveExecution();
+    vTaskDelay(TASK_DELAY_TICKS);
+  }
+}
+
+static void startTasks()
+{
+  exclusiveExecutionBegin();
+
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
+  xTaskCreate(apiServerTask, "ApiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
+  xTaskCreate(commandDelayedTask, "CommandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
 
   switch (deviceMode)
   {
   case DEVICE_MODE::REMOTE_CONTROL:
-    // --- TEST: commenta la riga sotto per disattivare il test a schermo del joystick ---
-    // secondo parametro: true = stampa le direzioni sulla seriale, false = solo a schermo
-    if (joystickConfig.enableJoystick) testJoystickOnDisplay(joystick, false);
+    if (joystickConfig.enableJoystick)
+    {
+      xTaskCreate(joystickTask, "JoystickTaskExecution", STACK_SIZE_JOYSTICK, NULL, PRIORITY_JOYSTICK, NULL);
+    }
     break;
   default:
     break;
   }
 
-  delay(2);
+  Serial.println("[Main] Init procedure completed");
+}
+
+// Tutto il lavoro è nei task: come nel progetto principale loop() non fa nulla.
+// Il task di loop() viene eliminato per non tenere occupato l'unico core del C6.
+void loop()
+{
+  vTaskDelete(NULL);
 }

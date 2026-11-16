@@ -166,6 +166,7 @@ Comportamento della rete (come `MastroServer` del progetto principale):
 | `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE, OTA (ArduinoOTA) |
 | `src/settings/SettingsValidator.*` | Validazione delle richieste all'API impostazioni |
 | `src/joystick/` | Algoritmo del joystick, configurazione JSON, enum `J_DIRECTION` (copia di quello del progetto principale) |
+| `src/system/` | `take/freeExclusiveExecution()`: mutex tra i task FreeRTOS (display e SD condividono il bus SPI) |
 | `src/test/` | `testJoystickOnDisplay()`: mostra a schermo la stringa `J_DIRECTION` e i valori grezzi |
 
 Il test si attiva/disattiva commentando la riga `testJoystickOnDisplay(joystick);` in `loop()`.
