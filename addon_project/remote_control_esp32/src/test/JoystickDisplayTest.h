@@ -6,7 +6,8 @@
 // Test: mostra a schermo la stringa J_DIRECTION corrispondente al joystick,
 // più i valori grezzi (X, Y, SW) e il centro calibrato.
 // Da chiamare in loop(); commentare la chiamata per disattivarlo.
-void testJoystickOnDisplay(Joystick &joystick);
+// logDirections: se true stampa sulla seriale "[Test] Joystick direction: ..." a ogni cambio.
+void testJoystickOnDisplay(Joystick &joystick, bool logDirections = true);
 
 // Testo mostrato nell'intestazione del test (es. "AP 192.168.4.1").
 void testJoystickSetNetworkInfo(const String &info);

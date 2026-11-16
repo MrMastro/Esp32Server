@@ -68,12 +68,12 @@ static void drawFrame(Joystick &joystick, J_DIRECTION direction)
   displayFlush();
 }
 
-void testJoystickOnDisplay(Joystick &joystick)
+void testJoystickOnDisplay(Joystick &joystick, bool logDirections)
 {
   // la lettura avviene a ogni giro di loop, così nessuna pressione viene persa
   J_DIRECTION direction = joystick.read();
 
-  if (joystick.changed())
+  if (logDirections && joystick.changed())
   {
     Serial.println("[Test] Joystick direction: " + mapJdirectionsToString(direction));
   }

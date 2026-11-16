@@ -8,7 +8,53 @@ Progetto PlatformIO (piattaforma pioarduino, Arduino core 3.x).
 
 - Compilare da **PowerShell** o dai pulsanti PlatformIO di VS Code, **non da Git Bash**: lo script `idf_tools.py` di pioarduino rifiuta gli ambienti MSYS/MinGW e la toolchain non viene installata.
 - Tabella partizioni `min_spiffs.csv`: due slot app da 1,9MB per l'OTA, filesystem in flash minimo (le configurazioni sono sulla SD).
+  Il firmware deve restare sotto 1,9MB (controllare la riga `Flash:` del build).
 - Upload via USB-C. Se la porta non viene vista: tenere premuto BOOT, premere RST, rilasciare BOOT.
+
+## OTA (upload via WiFi)
+
+1. In `main_settings.json` impostare `"ota_upload": true` (oppure via API, vedi sotto) e riavviare.
+   Lo schermo mostra `OTA ON` accanto all'IP.
+2. Copiare `ota_local.ini.example` in `ota_local.ini` (non versionato) e inserire IP della scheda e `devicePassword`.
+3. Caricare con l'ambiente OTA: `pio run -e esp32-c6-lcd-1_3-ota -t upload`
+   (o dalla barra di PlatformIO scegliendo l'ambiente `esp32-c6-lcd-1_3-ota`).
+
+Il PC deve essere sulla stessa rete della scheda (in AP_MODE: collegarsi al WiFi `ssidAP`).
+Ogni firmware caricato deve contenere l'OTA, altrimenti si torna all'upload via USB.
+
+## API impostazioni
+
+`POST http://<ip>/api/settings` con corpo JSON: `deviceName` e `devicePassword` (autenticazione)
+più **una sola** chiave di `main_settings.json`. Se la richiesta è valida la chiave viene salvata
+sulla SD, lo schermo mostra la chiave modificata e la scheda si riavvia dopo 5 secondi.
+
+```json
+{ "deviceName": "ESP32_Remote", "devicePassword": "esp32password", "ota_upload": true }
+```
+
+Esempio da PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://192.168.4.1/api/settings -ContentType "application/json" `
+  -Body '{"deviceName":"ESP32_Remote","devicePassword":"esp32password","communicationMode":"WIFI_MODE"}'
+```
+
+Chiavi modificabili e validazione:
+
+| Chiave | Valori ammessi |
+| --- | --- |
+| `ota_upload`, `debug` | `true` / `false` |
+| `mode` | `remote_control` |
+| `communicationMode` | `AP_MODE`, `WIFI_MODE` |
+| `ssidAP`, `ssidWIFI` | stringa da 1 a 32 caratteri |
+| `passwordAP`, `passwordWIFI` | vuota (rete aperta) o da 8 a 63 caratteri |
+
+`deviceName` e `devicePassword` non sono modificabili via API (servono per l'autenticazione).
+
+Risposte: `200` salvato · `400` richiesta non valida · `401` credenziali errate · `409` riavvio già in corso ·
+`503` SD assente · `500` scrittura fallita. Corpo: `{"status": "ok"|"error", "message": "..."}`.
+
+Nota: la comunicazione è in HTTP non cifrato, la password viaggia in chiaro sulla rete.
 
 ## Pin della scheda
 
@@ -83,7 +129,8 @@ i singoli campi mancanti nel file prendono il valore di default.
 | --- | --- | --- |
 | `mode` | `remote_control` | Funzione del dispositivo (per ora solo `remote_control`) |
 | `deviceName` | `ESP32_Device` | Hostname in rete (e nome per l'OTA) |
-| `devicePassword` | `esp32password` | Password per l'OTA |
+| `devicePassword` | `esp32password` | Password per l'OTA e per l'API delle impostazioni |
+| `ota_upload` | `false` | `true` = OTA via WiFi attivo (upload da PlatformIO) |
 | `communicationMode` | `AP_MODE` | `AP_MODE` o `WIFI_MODE` |
 | `debug` | `false` | Stampa le impostazioni sulla seriale all'avvio |
 | `ssidAP` / `passwordAP` | `ESP32_AP` / `ap_password` | Access point creato dalla scheda (password ≥ 8 caratteri) |
@@ -116,7 +163,8 @@ Comportamento della rete (come `MastroServer` del progetto principale):
 | `src/display/` | Display ST7789 (Arduino_GFX) sul bus SPI condiviso |
 | `src/storage/` | Montaggio microSD e percorsi in `/config` |
 | `src/settings/` | `SettingsModel` (main_settings.json), `COMMUNICATION_MODE`, `DEVICE_MODE` |
-| `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE |
+| `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE, OTA (ArduinoOTA) |
+| `src/settings/SettingsValidator.*` | Validazione delle richieste all'API impostazioni |
 | `src/joystick/` | Algoritmo del joystick, configurazione JSON, enum `J_DIRECTION` (copia di quello del progetto principale) |
 | `src/test/` | `testJoystickOnDisplay()`: mostra a schermo la stringa `J_DIRECTION` e i valori grezzi |
 

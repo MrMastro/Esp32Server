@@ -7,5 +7,6 @@
   "ssidAP": "ESP32_Remote_AP",
   "passwordAP": "ap_password",
   "ssidWIFI": "Home_Network",
-  "passwordWIFI": "wifi_password"
+  "passwordWIFI": "wifi_password",
+  "ota_upload": false
 }
