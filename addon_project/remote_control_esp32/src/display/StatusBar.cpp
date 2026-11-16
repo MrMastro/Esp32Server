@@ -60,3 +60,10 @@ void statusBarDraw()
   gfx->setCursor(x, y);
   gfx->print(label);
 }
+
+int16_t statusBarLeftEdge()
+{
+  // stesso calcolo di statusBarDraw() con l'etichetta più lunga ("WIFI", dimensione 2)
+  const int16_t widest = 4 * 6 * 2;
+  return LCD_WIDTH - 6 - widest - 4;
+}

@@ -3,13 +3,10 @@
 
 #include "joystick/Joystick.h"
 
-// Test: mostra a schermo la stringa J_DIRECTION corrispondente al joystick,
-// più i valori grezzi (X, Y, SW) e il centro calibrato.
-// Da chiamare in loop(); commentare la chiamata per disattivarlo.
-// logDirections: se true stampa sulla seriale "[Test] Joystick direction: ..." a ogni cambio.
-void testJoystickOnDisplay(Joystick &joystick, bool logDirections = true);
-
-// Testo mostrato nell'intestazione del test (es. "AP 192.168.4.1").
-void testJoystickSetNetworkInfo(const String &info);
+// Test: la schermata remote_control (RemoteControlScreen) con la scritta "JOYSTICK TEST" in fondo.
+// Da chiamare in loop al posto di remoteControlOnDisplay(); commentare la chiamata per disattivarlo.
+// logDirections: se true stampa sulla seriale la direzione a ogni cambio.
+// showRawValues: se true mostra centro calibrato e X/Y grezzi del joystick.
+void testJoystickOnDisplay(Joystick &joystick, bool logDirections = true, bool showRawValues = true);
 
 #endif // JOYSTICK_DISPLAY_TEST_H

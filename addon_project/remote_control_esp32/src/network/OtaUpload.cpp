@@ -36,6 +36,7 @@ void otaBegin(const SettingsModel &settings)
       .onStart([]()
                {
                  Serial.println("[OTA] inizio aggiornamento");
+                 displaySetOn(true); // l'avanzamento si vede anche se lo schermo era spento
                  lastShownPercent = -1;
                  drawProgress(0);
                })

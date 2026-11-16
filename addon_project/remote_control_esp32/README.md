@@ -154,6 +154,47 @@ Comportamento della rete (come `MastroServer` del progetto principale):
 | `centerX` / `centerY` | `1930` / `1960` | Centro usato se `autoCalibrate` è `false` |
 | `deadZone` | `400` | Scostamento dal centro sotto il quale l'asse è centrato |
 
+### /config/espDevices.json
+
+Lista dei dispositivi conosciuti (ESP32 del progetto principale), compilata a mano: al massimo **10** (gli altri vengono ignorati). Può essere vuota (`[]`); se il file manca la lista è vuota. Non è versionato (contiene IP e MAC della rete di casa).
+
+```json
+[
+  { "deviceName": "Esp32Server", "ip": "172.17.252.192", "macAdress": "14:33:5C:02:7B:A0", "color": "#52A3BA" }
+]
+```
+
+| Campo | Significato |
+| --- | --- |
+| `deviceName` | Nome del dispositivo (solo descrittivo) |
+| `ip` | Indirizzo su cui chiamare `GET http://<ip>/api/v1/getInfoHello` (obbligatorio) |
+| `macAdress` | MAC atteso nella risposta: identifica il dispositivo (obbligatorio, maiuscole/minuscole indifferenti) |
+| `color` | Colore del pallino a schermo, `#RRGGBB` (se manca o non è valido: bianco) |
+
+Un dispositivo è **online** se risponde a `getInfoHello` con HTTP 200 e lo stesso `macAdress`. I dispositivi vengono contattati **all'avvio, come ultima cosa**, in un task in background (lo schermo resta attivo): ogni dispositivo offline viene ritentato una volta (timeout 7 s per tentativo), perché il primo contatto dopo l'avvio spesso fallisce. L'esito è nel log seriale (`[Devices] ...`).
+
+A schermo, sotto l'intestazione, c'è un pallino per dispositivo nel suo `color`: **vuoto** = offline, **mezzo pieno** = online, **pieno** = collegato (da fare).
+
+Nota: sul telecomando il risparmio energetico WiFi (modem sleep) è disattivato: con il modem sleep attivo su entrambi gli ESP32 il primo contatto diretto tra loro falliva.
+
+## Collegamento con i dispositivi (in progetto)
+
+Il collegamento continuo telecomando → dispositivi (ESP-NOW, sessioni per il risparmio energetico,
+`wirelessJoystick` nel progetto generale) è descritto in [docs/WIRELESS_JOYSTICK.md](docs/WIRELESS_JOYSTICK.md).
+
+## Comandi seriali
+
+I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto principale): il comando parte dopo 1 secondo senza nuovi caratteri, non serve Invio. Parametri separati da virgola.
+
+| Comando | Effetto |
+| --- | --- |
+| `reboot[,ms]` (alias `reset`) | Riavvia subito, o dopo `ms` millisecondi |
+| `change_communication_mode,<AP_MODE\|WIFI_MODE>` | Salva la modalità su SD e riavvia |
+| `info` / `info_ip` | Stato del dispositivo / indirizzo IP |
+| `settings` | Ristampa la configurazione caricata |
+| `hello,<ip>` | Diagnosi: `GET http://<ip>/api/v1/getInfoHello` verso un IP qualsiasi |
+| `t` | `test()`: funzione di prova libera |
+
 ## Struttura del codice
 
 | File | Contenuto |
@@ -166,6 +207,7 @@ Comportamento della rete (come `MastroServer` del progetto principale):
 | `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE, OTA (ArduinoOTA) |
 | `src/settings/SettingsValidator.*` | Validazione delle richieste all'API impostazioni |
 | `src/joystick/` | Algoritmo del joystick, configurazione JSON, enum `J_DIRECTION` (copia di quello del progetto principale) |
+| `src/devices/` | Dispositivi conosciuti (`espDevices.json`), stato online/offline, chiamata a `getInfoHello` |
 | `src/system/` | `take/freeExclusiveExecution()`: mutex tra i task FreeRTOS (display e SD condividono il bus SPI) |
 | `src/test/` | `testJoystickOnDisplay()`: mostra a schermo la stringa `J_DIRECTION` e i valori grezzi |
 

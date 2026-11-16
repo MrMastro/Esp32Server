@@ -11,8 +11,13 @@ extern Arduino_GFX *gfx;
 // Inizializza il display, avvia il bus SPI condiviso e accende la retroilluminazione.
 bool displayBegin();
 
-// Invia il contenuto del buffer al display.
+// Invia il contenuto del buffer al display (non fa nulla se lo schermo è spento).
 void displayFlush();
+
+// Accende/spegne lo schermo per risparmiare corrente: spento = retroilluminazione off e
+// pannello in sleep. Usa il bus SPI: chiamare dentro takeExclusiveExecution().
+void displaySetOn(bool on);
+bool displayIsOn();
 
 // Messaggio centrato a schermo intero (boot, errori...), già inviato al display.
 void displayMessage(const String &title, const String &subtitle = "");

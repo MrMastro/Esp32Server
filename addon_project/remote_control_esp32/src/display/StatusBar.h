@@ -14,4 +14,8 @@ bool statusBarChanged();
 // Disegna gli indicatori nel buffer 'gfx' (poi serve displayFlush()).
 void statusBarDraw();
 
+// Bordo sinistro dell'area occupata dal badge (calcolato sul badge più largo, "WIFI"):
+// a sinistra di questo x si può disegnare altro senza sovrapporsi.
+int16_t statusBarLeftEdge();
+
 #endif // STATUS_BAR_H

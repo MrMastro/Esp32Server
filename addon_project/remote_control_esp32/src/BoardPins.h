@@ -19,6 +19,9 @@
 // microSD
 #define PIN_SD_CS 4
 
+// Tasto BOOT (attivo basso): dopo l'avvio è libero e accende/spegne lo schermo
+#define PIN_BOOT_BUTTON 9
+
 // Joystick: valori di default, sovrascrivibili da /config/joystick.json
 #define DEFAULT_PIN_JOY_SW 1
 #define DEFAULT_PIN_JOY_VRY 2

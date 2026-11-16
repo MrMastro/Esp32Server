@@ -10,7 +10,9 @@
 #include "network/OtaUpload.h"
 #include "settings/SettingsValidator.h"
 #include "system/ExclusiveExecution.h"
+#include "devices/EspDevices.h"
 #include <WebServer.h>
+#include <WiFi.h>
 #include "hal/usb_serial_jtag_ll.h" // watchdog ricezione USB, vedi readSerialMessage()
 
 #ifndef BOOT_SERIAL_WAIT_MS
@@ -19,6 +21,7 @@
 #include "joystick/Joystick.h"
 #include "joystick/JoystickConfig.h"
 #include "test/JoystickDisplayTest.h"
+#include "display/RemoteControlScreen.h"
 
 static SettingsModel settings;
 static DEVICE_MODE deviceMode = DEVICE_MODE::REMOTE_CONTROL;
@@ -119,6 +122,7 @@ static void handlePendingReboot()
     return;
   rebootShownSeconds = seconds;
 
+  displaySetOn(true); // il conto alla rovescia si vede anche se lo schermo era spento
   gfx->fillScreen(RGB565_BLACK);
   displayPrintCentered("MODIFICA", 40, 3, RGB565_CYAN);
   uint8_t keySize = rebootKey.length() * 6 * 2 <= LCD_WIDTH - 10 ? 2 : 1;
@@ -269,6 +273,10 @@ static void printInfo(const String &command)
                 ", communicationMode=" + (wifiStatus.fallbackToAp ? String("AP_MODE (fallback)") : communicationModeEnumToString(wifiStatus.activeMode)) +
                 ", ssid=" + wifiStatus.ssid +
                 ", ip=" + wifiStatus.ip +
+                (WiFi.status() == WL_CONNECTED
+                     ? ", mask=" + WiFi.subnetMask().toString() + ", gateway=" + WiFi.gatewayIP().toString() +
+                           ", mac=" + WiFi.macAddress() + ", rssi=" + String(WiFi.RSSI())
+                     : String("")) +
                 ", ota=" + (otaIsEnabled() ? "ON" : "OFF") +
                 ", sd=" + (sdAvailable ? "OK" : "NO");
   printCommandSuccess(command, info);
@@ -289,6 +297,7 @@ enum class SERIAL_COMMAND
   INFO,                      // "info"
   INFO_IP,                   // "info_ip"
   SETTINGS,                  // "settings"
+  HELLO,                     // "hello"
   TEST,                      // "t"
   NONE,
   UNKNOWN
@@ -309,6 +318,8 @@ static SERIAL_COMMAND parseSerialCommand(String command)
     return SERIAL_COMMAND::INFO_IP;
   if (command == "settings")
     return SERIAL_COMMAND::SETTINGS;
+  if (command == "hello")
+    return SERIAL_COMMAND::HELLO;
   if (command == "t")
     return SERIAL_COMMAND::TEST;
   return SERIAL_COMMAND::UNKNOWN;
@@ -320,7 +331,8 @@ static SERIAL_COMMAND parseSerialCommand(String command)
 //   info                             -> stato del dispositivo
 //   info_ip                          -> indirizzo IP
 //   settings                         -> ristampa la configurazione caricata
-//   t                                -> esegue test()
+//   hello,<ip>                       -> diagnosi: GET http://<ip>/api/v1/getInfoHello
+//   t                                -> esegue test() (funzione di prova libera)
 // Raccolta del messaggio seriale come SerialService::getMsgbySerial() del progetto principale
 // (Serial.readString): i caratteri si scrivono in sequenza e il messaggio è completo quando
 // non ne arrivano altri per SERIAL_MSG_TIMEOUT_MS. Non serve premere Invio.
@@ -411,11 +423,17 @@ static void executeSerialMessage(const String &msg)
   case SERIAL_COMMAND::SETTINGS:
     printSettings();
     break;
+  case SERIAL_COMMAND::HELLO:
+    if (param.length() == 0)
+      printCommandError(command, "insert ip like first param");
+    else
+      printCommandSuccess(command, espDevicesProbe(param));
+    break;
   case SERIAL_COMMAND::TEST:
     test();
     break;
   case SERIAL_COMMAND::UNKNOWN:
-    printCommandError(command, "Comando non riconosciuto (disponibili: reboot[,ms], change_communication_mode,<mode>, info, info_ip, settings, t)");
+    printCommandError(command, "Comando non riconosciuto (disponibili: reboot[,ms], change_communication_mode,<mode>, info, info_ip, settings, hello,<ip>, t)");
     break;
   case SERIAL_COMMAND::NONE:
   default:
@@ -423,7 +441,8 @@ static void executeSerialMessage(const String &msg)
   }
 }
 
-static void startTasks(); // definita sotto, insieme ai task
+static void startTasks();      // definita sotto, insieme ai task
+static void startDeviceScan(); // idem
 
 void setup()
 {
@@ -450,6 +469,11 @@ void setup()
   printSettings();
   Serial.println(settingsInfo);
   Serial.println(sdInfo);
+
+  // Dispositivi conosciuti (lista vuota se SD o file mancano)
+  String devicesInfo;
+  espDevicesLoad(SD_ESP_DEVICES, sdAvailable, &devicesInfo);
+  Serial.println(devicesInfo);
 
   if (!settingsFromFile)
   {
@@ -488,10 +512,13 @@ void setup()
   }
 
   statusBarBegin(&wifiStatus);
-  testJoystickSetNetworkInfo("IP " + wifiStatus.ip + (otaIsEnabled() ? "  OTA ON" : ""));
+  remoteControlScreenSetNetworkInfo("IP " + wifiStatus.ip + (otaIsEnabled() ? "  OTA ON" : ""));
 
   // 6) Task (serial, API/OTA, comandi ritardati, joystick)
   startTasks();
+
+  // 7) Ultima cosa: contatto dei dispositivi conosciuti, in background
+  startDeviceScan();
 }
 
 // ---------------------------------------------------------------------------
@@ -551,13 +578,32 @@ static void serialCableTask(void *pvParameters)
   }
 }
 
-// Comandi ritardati (reboot,ms / change_communication_mode) e riavvio richiesto dall'API
+// Tasto BOOT: ogni pressione accende/spegne lo schermo (fronte HIGH->LOW + blocco anti-rimbalzo)
+static const uint32_t SCREEN_BUTTON_LOCKOUT_MS = 250;
+
+static void handleScreenButton()
+{
+  static bool lastPressed = false;
+  static uint32_t lastToggleMs = 0;
+
+  bool pressed = digitalRead(PIN_BOOT_BUTTON) == LOW;
+  if (pressed && !lastPressed && millis() - lastToggleMs > SCREEN_BUTTON_LOCKOUT_MS)
+  {
+    lastToggleMs = millis();
+    displaySetOn(!displayIsOn());
+    Serial.println(displayIsOn() ? "[Display] schermo acceso" : "[Display] schermo spento");
+  }
+  lastPressed = pressed;
+}
+
+// Comandi ritardati (reboot,ms / change_communication_mode), riavvio richiesto dall'API e tasto schermo
 static void commandDelayedTask(void *pvParameters)
 {
   Serial.println("[Task] commandDelayedTask avviato");
   while (true)
   {
     takeExclusiveExecution();
+    handleScreenButton();
     checkDelayedRebootAndExecute();
     if (rebootPending)
     {
@@ -578,18 +624,53 @@ static void joystickTask(void *pvParameters)
     // durante il conto alla rovescia del riavvio lo schermo è di commandDelayedTask
     if (!rebootPending)
     {
-      // --- TEST: commenta la riga sotto per disattivare il test a schermo del joystick ---
-      // secondo parametro: true = stampa le direzioni sulla seriale, false = solo a schermo
-      testJoystickOnDisplay(joystick, false);
+      // --- TEST: schermata con "JOYSTICK TEST" in fondo (decommenta questa e commenta quella sotto) ---
+      // parametri: stampa le direzioni sulla seriale, mostra centro e X/Y grezzi
+      // testJoystickOnDisplay(joystick, false, true);
+
+      // Schermata definitiva. Parametro: true = mostra centro e X/Y grezzi del joystick
+      remoteControlOnDisplay(joystick, false);
     }
     freeExclusiveExecution();
     vTaskDelay(TASK_DELAY_TICKS);
   }
 }
 
+// Contatta una volta i dispositivi conosciuti (espDevices.json) e poi termina.
+// La rete si usa FUORI dal lock (ogni dispositivo può impiegare fino a 7s per tentativo);
+// il lock serve solo ad aggiornare lo stato letto dallo schermo.
+#define PRIORITY_DEVICE_SCAN 1
+#define STACK_SIZE_DEVICE_SCAN 6144
+static const uint8_t DEVICE_SCAN_ATTEMPTS = 2; // il primo contatto dopo l'avvio spesso fallisce
+
+static void deviceScanTask(void *pvParameters)
+{
+  const std::vector<EspDevice> &devices = espDevicesList(); // la lista non cambia dopo l'avvio
+  Serial.println("[Devices] contatto " + String(devices.size()) + " dispositivi...");
+  for (const EspDevice &device : devices)
+  {
+    EspDeviceState state = espDevicesCheck(device, DEVICE_SCAN_ATTEMPTS);
+    takeExclusiveExecution();
+    espDevicesSetState(state);
+    freeExclusiveExecution();
+    Serial.println("[Devices] " + device.deviceName + " (" + device.ip + "): " + espDeviceStatusToString(state.status) +
+                   (state.error.length() > 0 ? " - " + state.error : String("")));
+  }
+  Serial.println("[Devices] scansione completata");
+  vTaskDelete(NULL);
+}
+
+static void startDeviceScan()
+{
+  if (espDevicesList().empty())
+    return;
+  xTaskCreate(deviceScanTask, "DeviceScanTaskExecution", STACK_SIZE_DEVICE_SCAN, NULL, PRIORITY_DEVICE_SCAN, NULL);
+}
+
 static void startTasks()
 {
   exclusiveExecutionBegin();
+  pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
 
   xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
   xTaskCreate(apiServerTask, "ApiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);

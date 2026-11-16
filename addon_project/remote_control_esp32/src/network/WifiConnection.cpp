@@ -34,6 +34,10 @@ static bool connectStation(const SettingsModel &settings, WifiStatus &status)
   Serial.println("[WiFi] connessione a: " + settings.ssidWIFI);
 
   WiFi.mode(WIFI_STA);
+  // Niente modem sleep (risparmio energetico WiFi): con il modem sleep il C6 non riusciva a
+  // comunicare direttamente con gli altri ESP32 della rete (anch'essi in modem sleep), mentre
+  // dal PC funzionava. Costa qualche decina di mA in più.
+  WiFi.setSleep(false);
   WiFi.setHostname(settings.deviceName.c_str());
   WiFi.begin(settings.ssidWIFI.c_str(), settings.passwordWIFI.c_str());
 

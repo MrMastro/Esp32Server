@@ -13,6 +13,8 @@ static Arduino_GFX *panel = new Arduino_ST7789(bus, PIN_LCD_RST, 0, true, LCD_WI
 // Buffer in RAM (240*240*2 = ~113KB) su cui si disegna
 Arduino_GFX *gfx = new Arduino_Canvas(LCD_WIDTH, LCD_HEIGHT, panel);
 
+static bool screenOn = true;
+
 bool displayBegin()
 {
   // CS della SD alto, così la scheda non risponde mentre si inizializza il display
@@ -34,7 +36,32 @@ bool displayBegin()
 
 void displayFlush()
 {
+  if (!screenOn)
+    return; // schermo spento: niente trasferimenti SPI
   gfx->flush();
+}
+
+void displaySetOn(bool on)
+{
+  if (on == screenOn)
+    return;
+  screenOn = on;
+  if (on)
+  {
+    panel->displayOn();   // esce dallo sleep (SLPOUT + DISPON)
+    gfx->flush();         // ripristina subito l'ultimo frame del buffer
+    digitalWrite(PIN_LCD_BL, HIGH);
+  }
+  else
+  {
+    digitalWrite(PIN_LCD_BL, LOW); // la retroilluminazione è la parte che consuma di più
+    panel->displayOff();           // pannello in sleep (DISPOFF + SLPIN)
+  }
+}
+
+bool displayIsOn()
+{
+  return screenOn;
 }
 
 void displayPrintCentered(const String &text, int16_t y, uint8_t size, uint16_t color)
@@ -49,6 +76,7 @@ void displayPrintCentered(const String &text, int16_t y, uint8_t size, uint16_t 
 
 void displayMessage(const String &title, const String &subtitle)
 {
+  displaySetOn(true); // i messaggi di sistema (boot, OTA, errori) si vedono sempre
   gfx->fillScreen(RGB565_BLACK);
   displayPrintCentered(title, 95, 3, RGB565_WHITE);
   if (subtitle.length() > 0)
