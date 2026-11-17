@@ -34,7 +34,7 @@ const std::vector<Effect *> LED_EFFECT_REFERENCE = {
     new EyeHungryEffect()
     };
 
-const LED_EFFECT_LABEL getEffectLabelByName(String inputString)
+LED_EFFECT_LABEL getEffectLabelByName(String inputString)
 {
   inputString.toUpperCase();
   for (const auto &entry : LED_EFFECT_LABEL_REFERENCE_STRING)

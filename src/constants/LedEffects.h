@@ -15,6 +15,6 @@ enum class RGB_EFFECT
 };
 
 const String rgbEffectEnomToString(RGB_EFFECT inputEnum);
-const RGB_EFFECT rgbEffectStringToEnum(String inputString);
+RGB_EFFECT rgbEffectStringToEnum(String inputString);
 
 #endif //LED_EFFECT

@@ -9,7 +9,7 @@ const std::pair<RGB_EFFECT, String> EFFECT_RGB_PAIR[] = {
   // Add more effect codes and information as needed
 };
 
-const RGB_EFFECT rgbEffectStringToEnum(String inputString)
+RGB_EFFECT rgbEffectStringToEnum(String inputString)
 {
   inputString.toUpperCase();
   for (const auto &entry : EFFECT_RGB_PAIR)

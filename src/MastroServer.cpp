@@ -310,7 +310,6 @@ void MastroServer::setRouteSystem(String path, String resource)
     {
         String pathNotModified = resourcePath;
         int index = resource.lastIndexOf(".html");
-        int length = resource.length();
         resource = resource.substring(0, index);
         apiPath = path + "/" + resource;
         pointWebServer->on(pathNotModified.c_str(), HTTP_GET, [apiPath](AsyncWebServerRequest *request)

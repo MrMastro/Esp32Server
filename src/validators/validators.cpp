@@ -156,7 +156,7 @@ String validateReboot(std::vector<String> params)
 bool isUnsignedLong(const String &str)
 {
   char *end;
-  unsigned long val = strtoul(str.c_str(), &end, 10);
+  strtoul(str.c_str(), &end, 10);
 
   // Se end non punta alla fine della stringa, ci sono caratteri non validi
   return *end == '\0';

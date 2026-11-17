@@ -1,6 +1,6 @@
 #include "ProgresiveBarBreathEffect.h"
 
-ProgresiveBarBreathEffect::ProgresiveBarBreathEffect() : brightness(255), increasing(false), minBrightnessThresholdPercent(0), positionProgressBar(0), timeAccumulator(0) {} // Inizializza la luminosità massima
+ProgresiveBarBreathEffect::ProgresiveBarBreathEffect() : brightness(255), increasing(false), minBrightnessThresholdPercent(0), timeAccumulator(0), positionProgressBar(0) {} // Inizializza la luminosità massima
 
 String ProgresiveBarBreathEffect::getName()
 {

@@ -42,22 +42,9 @@ boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
 
     RgbColor colorVariable = colorsInput[0];
 
-    if (stepInput == STEP_LIFE_LED_EFFECT::BEGIN_STEP)
-    {
-        while (colorVariable.CalculateBrightness() < 0)
-        {
-            colorVariable.Lighten(10);
-            for (int i = 0; i < driver->getMaxNumPixel(type); i++)
-            {
-                driver->sendStripData(type, colorVariable, i);
-            }
-            // String s = "[" + String(colorVariable.R) + String(colorVariable.G) + String(colorVariable.B) + "]";
-            // serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
-            driver->showData(type);
-            delay(deltaTimeMsInput);
-        }
-    }
-    else if (stepInput == STEP_LIFE_LED_EFFECT::LOOP_STEP)
+    // BEGIN_STEP: nothing to do (a fade-in loop with "brightness < 0" was here: it never ran,
+    // CalculateBrightness() returns uint8_t)
+    if (stepInput == STEP_LIFE_LED_EFFECT::LOOP_STEP)
     {
         //colorVariable = driver->getColorPixel(0, type);
             while (colorVariable.CalculateBrightness() > 0)
@@ -71,18 +58,7 @@ boolean ConsumeColorEffect::execStep(String effectInput, STEP_LIFE_LED_EFFECT st
                 String s = "[" + String(colorVariable.R) +" , "+ String(colorVariable.G) +" , "+ String(colorVariable.B) + "]";
                 serialService->logInfoFixed(s, formatMsg("Effect - {}", {getName()}));
                 delay(deltaTimeMsInput);
-            }          
-
-            while (colorVariable.CalculateBrightness() < 0)
-            {
-                colorVariable.Lighten(10);
-                for (int i = 0; i < driver->getMaxNumPixel(type); i++)
-                {
-                    driver->sendStripData(type, colorVariable, i);
-                }
-                driver->showData(type);
-                delay(deltaTimeMsInput);
-            }           
+            }
     }
     else if (stepInput == STEP_LIFE_LED_EFFECT::END_STEP)
     {

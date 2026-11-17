@@ -10,7 +10,7 @@ const std::pair<COMMUNICATION_MODE, String> COMMUNICATION_MODE_PAIR[] = {
     // Add more status codes and information as needed
 };
 
-const COMMUNICATION_MODE communicationModeStringToEnum(String inputString)
+COMMUNICATION_MODE communicationModeStringToEnum(String inputString)
 {
     inputString.toUpperCase();
     for (const auto &entry : COMMUNICATION_MODE_PAIR)

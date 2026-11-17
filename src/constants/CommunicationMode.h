@@ -16,7 +16,7 @@ enum class COMMUNICATION_MODE
 };
 
 //FUNCTION FOR MAPPING
-const COMMUNICATION_MODE communicationModeStringToEnum(String inputString);
+COMMUNICATION_MODE communicationModeStringToEnum(String inputString);
 const String communicationModeEnumToString(COMMUNICATION_MODE inputEnum);
 
 #endif //COMMUNICATION_COSTANTS

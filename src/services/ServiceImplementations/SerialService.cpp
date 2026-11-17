@@ -230,8 +230,6 @@ void SerialService::logInfoFixed(String msg, String subject)
                 }
             }
 
-            int newLinesInLastMsg = lastLineMsg.size();
-
             if (lastLineMsg.size() > 0 && lastMsgIsFixed)
             {
                 std::vector<String> lineLog = splitString(log,'\n');

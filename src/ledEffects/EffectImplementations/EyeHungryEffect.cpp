@@ -141,7 +141,6 @@ void EyeHungryEffect::displayLedMatrix(std::vector<std::vector<RgbColor>>& matri
 {
 
     int linearIndex = 0;
-    int valueMatrix = 0;
     int i=0;
     int j=0;
     for (i = 0; i < rows; i++)

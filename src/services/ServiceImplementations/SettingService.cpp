@@ -85,7 +85,6 @@ boolean SettingService::changeSetting(String key, String value)
 
 void SettingService::loadSettings(String path)
 {
-    boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
     {

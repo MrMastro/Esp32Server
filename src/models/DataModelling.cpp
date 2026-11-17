@@ -59,9 +59,7 @@ StatusInfo jsonToStatusInfo(String &json)
     String description = jsonDocument["description"].as<String>();
 
     // Create and return a StatusInfo object
-    StatusInfo info;
-    info.setMessage(message);
-    info.setDescription(description);
+    StatusInfo info(code, message, description);
 
     return info;
 }

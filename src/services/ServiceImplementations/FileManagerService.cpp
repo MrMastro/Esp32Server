@@ -10,7 +10,6 @@ FileManagerService::FileManagerService()
 
 String FileManagerService::getFileData(String path)
 {
-    boolean recoveryJson = false;
     // Initialize SPIFFS
     if (!LittleFS.begin())
     {
