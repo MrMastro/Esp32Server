@@ -25,6 +25,7 @@
     "enableJoystick": true,
     "pinSwitch": 32,
     "pinAnalogX": 34,
-    "pinAnalogY": 35
+    "pinAnalogY": 35,
+    "remoteControlWireless": false
   }
 }

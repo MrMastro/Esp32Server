@@ -31,7 +31,7 @@ Requisiti:
 | Primo comando dopo una pausa | Inviato **subito** dentro `SESSION_START`: ogni dispositivo lo applica appena si sveglia (sfasamento max ~100 ms, solo sul primo) |
 | Durata sessione | **15 s** senza movimenti, **configurabile** |
 | Joystick addormentato del progetto generale | **Ignorato**: il telecomando ha la priorità (stato prevedibile su tutti i dispositivi) |
-| Joystick fisico sui dispositivi | Nuovo `joystickSettings.wirelessJoystick`: se `true` i pin vengono ignorati e si ascolta solo il telecomando |
+| Joystick fisico sui dispositivi | Nuovo `joystickSettings.remoteControlWireless`: se `true` i pin vengono ignorati e si ascolta solo il telecomando |
 | Sospendere / riprendere | Tenere premuto **SW per più di 5 s** sospende tutte le connessioni; altri 5 s le riprendono (vedi sotto) |
 
 ## Architettura
@@ -261,10 +261,10 @@ Se il file manca si usano i default (come `joystick.json`).
 
 | Campo | Default | Significato |
 | --- | --- | --- |
-| `wirelessJoystick` | `false` | `true`: ignora i pin e il joystick fisico, ascolta solo il telecomando |
+| `remoteControlWireless` | `false` | `true`: ignora i pin e il joystick fisico, ascolta solo il telecomando |
 | `wirelessSessionTimeoutS` | `30` | se non riceve nulla per questo tempo torna da solo in modem sleep (deve essere > `sessionTimeoutS` del telecomando) |
 
-Con `wirelessJoystick = true`: non si chiamano `pinMode`/`analogRead` sui pin del joystick, `serialCableTask`
+Con `remoteControlWireless = true`: non si chiamano `pinMode`/`analogRead` sui pin del joystick, `serialCableTask`
 non legge più il joystick fisico, e lo stato "joystick addormentato" (`sleepyJoystick` / `wakeUpJoystick`)
 non blocca i comandi del telecomando.
 
@@ -283,12 +283,12 @@ non blocca i comandi del telecomando.
 
 ### Progetto generale (`Esp32Server`)
 
-- `JoystickSettingsModel`: `wirelessJoystick`, `wirelessSessionTimeoutS` (to/fromJson, default).
+- `JoystickSettingsModel`: `remoteControlWireless`, `wirelessSessionTimeoutS` (to/fromJson, default).
 - Endpoint `POST /api/v1/remote/pair` (verifica password come `login`, nonce, chiave di sessione).
 - Ricevitore ESP-NOW: callback → coda → task (verifica firma e `seq`) → `recvButtonByJoystick()` solo al cambio.
 - Gestione sessioni: `esp_wifi_set_ps` a runtime, timeout di sicurezza.
 - `REMOTE_PAUSE`: chiude la sessione e smette di attendere heartbeat da quel telecomando.
-- `serialCableTask`: con `wirelessJoystick = true` non legge il joystick fisico.
+- `serialCableTask`: con `remoteControlWireless = true` non legge il joystick fisico.
 - Attenzione: `takeExclusiveExecution()` qui è un flag, non un mutex (vedi `ServicesCollector`).
 
 ## Piano di lavoro
@@ -296,7 +296,7 @@ non blocca i comandi del telecomando.
 0. **Test di compatibilità ESP-NOW** C6 (ESP-NOW v2) ↔ ESP32 classico (v1), nei due versi, con pacchetti
    piccoli. Se fallisce, va rivista l'architettura: farlo per primo.
 1. **Accoppiamento**: `devicePassword`, endpoint `/api/v1/remote/pair`, chiave di sessione su entrambi i lati.
-2. **Direzioni**: pacchetti firmati a tutti, coda e task sul dispositivo, `wirelessJoystick`.
+2. **Direzioni**: pacchetti firmati a tutti, coda e task sul dispositivo, `remoteControlWireless`.
 3. **Heartbeat con ACK**: pallino pieno, `UNKNOWN_SESSION` → riaccoppiamento, riscoperta periodica.
 4. **Sessioni e risparmio energetico**: `SESSION_START`/`SESSION_END`, modem sleep a sessioni, timeout di sicurezza.
 5. **Sospensione/ripresa** con pressione lunga di SW (`REMOTE_PAUSE`, annullamento del toggle BUTTON, schermo).

@@ -70,7 +70,7 @@ public:
         JsonObject ledSettingsJson = doc["ledSettings"].to<JsonObject>();
         ledSettings.toJson(ledSettingsJson);
 
-        JsonObject joystickSettingsJson = doc["joystickSetings"].to<JsonObject>();
+        JsonObject joystickSettingsJson = doc["joystickSettings"].to<JsonObject>();
         joystickSettings.toJson(joystickSettingsJson);
 
         String output;

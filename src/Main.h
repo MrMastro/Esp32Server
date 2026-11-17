@@ -33,6 +33,7 @@ void webOtaServerTask(void *pvParameters);
 void serialBtTask(void *pvParameters);
 void serialCableTask(void *pvParameters);
 void commandDelayedTask(void *pvParameters);
+void remoteControlWirelessTask(void *pvParameters);
 
 void test();
 void recvMsgBySerial(String data);

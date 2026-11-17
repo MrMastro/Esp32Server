@@ -35,12 +35,14 @@ FileManagerService fileManagerService;
 #define PRIORITY_LED_EFFECTS          (configMAX_PRIORITIES - 6)
 #define PRIORITY_DELAYED_TASK         (configMAX_PRIORITIES - 7)
 #define PRIORITY_SERIAL               (configMAX_PRIORITIES - 10)
+#define PRIORITY_REMOTE_WIRELESS      (configMAX_PRIORITIES - 6)
 
 #define STACK_SIZE_SERVER             8192
 #define STACK_SIZE_BLUETOOTH_SERVER   8192
 #define STACK_SIZE_LED_EFFECTS        4096
 #define STACK_SIZE_DELAYED_TASK       4096
 #define STACK_SIZE_SERIAL             8192
+#define STACK_SIZE_REMOTE_WIRELESS    4096
 
 // #define STACK_SIZE_SERVER             10000
 // #define STACK_SIZE_BLUETOOTH_SERVER   10000
@@ -59,6 +61,13 @@ void setup_communication(SettingsModel sm)
   // Task for serial COM
   serialService.logInfoln("Create SerialCableTaskExecution for comunicate with serial com", "MAIN");
   xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
+
+  // Task for wireless remote control (only if enabled: the physical joystick is then disabled)
+  if (sm.joystickSettings.remoteControlWireless)
+  {
+    serialService.logInfoln("Remote control wireless enabled: physical joystick disabled, create RemoteControlWirelessTaskExecution", "MAIN");
+    xTaskCreate(remoteControlWirelessTask, "RemoteControlWirelessTaskExecution", STACK_SIZE_REMOTE_WIRELESS, NULL, PRIORITY_REMOTE_WIRELESS, NULL);
+  }
 
   // Task for communication
   COMMUNICATION_MODE mode = communicationModeStringToEnum(sm.communicationMode);
@@ -266,7 +275,9 @@ void serialBtTask(void *pvParameters)
 void serialCableTask(void *pvParameters)
 {
   serialService.logInfoln("Serial Task execution", "MAIN");
-  if(s.joystickSettings.enableJoystick){
+  // With remoteControlWireless the physical joystick is never read: no pinMode/analogRead on its pins
+  const bool physicalJoystick = s.joystickSettings.usePhysicalJoystick();
+  if(physicalJoystick){
     pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
     servicesCollector.wakeUpJoystick();
   }else{
@@ -295,7 +306,7 @@ void serialCableTask(void *pvParameters)
           recvMsgBySerial(msg);
         }
       }
-      if(s.joystickSettings.enableJoystick){
+      if(physicalJoystick){
         readJoystickAndSendCommand(xValue, yValue, swState, lastSwState, activeButton, lastDirection);
       }
     }
@@ -340,6 +351,21 @@ void commandDelayedTask(void *pvParameters)
     }
 
     vTaskDelay(10 / portTICK_PERIOD_MS);
+  }
+}
+
+// Wireless remote control task (remote_control_esp32 via ESP-NOW).
+// Structure only for now: see addon_project/remote_control_esp32/docs/WIRELESS_JOYSTICK.md
+void remoteControlWirelessTask(void *pvParameters)
+{
+  serialService.logInfoln("Remote Control Wireless Task execution", "MAIN");
+
+  // TODO: init ESP-NOW receiver (callback -> queue)
+
+  while (true)
+  {
+    // TODO: wait for packets from the queue, verify signature/seq, call recvButtonByJoystick() on change
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
 
