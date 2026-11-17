@@ -1,4 +1,5 @@
 #include "OtaUpload.h"
+#include "system/Log.h"
 
 #include <ArduinoOTA.h>
 #include "BoardPins.h"
@@ -24,7 +25,7 @@ void otaBegin(const SettingsModel &settings)
   enabled = settings.otaUpload;
   if (!enabled)
   {
-    Serial.println("[OTA] disattivato (ota_upload = false)");
+    logInfo("[OTA] disattivato (ota_upload = false)");
     return;
   }
 
@@ -35,7 +36,7 @@ void otaBegin(const SettingsModel &settings)
   ArduinoOTA
       .onStart([]()
                {
-                 Serial.println("[OTA] inizio aggiornamento");
+                 logInfo("[OTA] inizio aggiornamento");
                  displaySetOn(true); // l'avanzamento si vede anche se lo schermo era spento
                  lastShownPercent = -1;
                  drawProgress(0);
@@ -52,18 +53,18 @@ void otaBegin(const SettingsModel &settings)
                   })
       .onEnd([]()
              {
-               Serial.println("[OTA] completato, riavvio");
+               logInfo("[OTA] completato, riavvio");
                displayMessage("OTA OK", "riavvio...");
              })
       .onError([](ota_error_t error)
                {
-                 Serial.printf("[OTA] errore %u\n", error);
+                 logWarningf("[OTA] errore %u\n", error);
                  displayMessage("OTA errore", String("codice ") + error);
                  delay(2000);
                });
 
   ArduinoOTA.begin();
-  Serial.println("[OTA] attivo, hostname: " + settings.deviceName);
+  logInfo("[OTA] attivo, hostname: " + settings.deviceName);
 }
 
 void otaHandle()

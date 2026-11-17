@@ -12,7 +12,8 @@ typedef void (*WirelessDirectionHandler)(const String &direction);
 
 // Avvia ESP-NOW (il WiFi deve essere gia' attivo) e mette la radio in modem sleep (riposo). false se l'avvio fallisce.
 // sessionTimeoutS: senza SESSION_START/DIRECTION per questo tempo la sessione si chiude da sola (modem sleep).
-bool wirelessReceiverBegin(WirelessDirectionHandler onDirection, uint32_t sessionTimeoutS);
+// debug: log informativi solo se true (come logInfoln di SerialService); gli errori escono sempre.
+bool wirelessReceiverBegin(WirelessDirectionHandler onDirection, uint32_t sessionTimeoutS, bool debug);
 
 // Attende un pacchetto fino a waitMs e lo elabora.
 void wirelessReceiverProcess(uint32_t waitMs);

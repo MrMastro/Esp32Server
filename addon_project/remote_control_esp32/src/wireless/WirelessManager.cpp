@@ -1,4 +1,5 @@
 #include "WirelessManager.h"
+#include "system/Log.h"
 #include "WirelessLink.h"
 #include "WirelessPairing.h"
 #include "devices/EspDevices.h"
@@ -174,15 +175,15 @@ static void pairDevice(const EspDevice &device)
   freeExclusiveExecution();
 
   if (result == PAIR_RESULT::PAIRED)
-    Serial.println("[Wireless] " + device.deviceName + " accoppiato: canale " + String(session.channel) +
+    logInfo("[Wireless] " + device.deviceName + " accoppiato: canale " + String(session.channel) +
                    ", impronta chiave " + wirelessKeyFingerprint(session.sessionKey));
   else
-    Serial.println("[Wireless] " + device.deviceName + " non accoppiato: " + (state.pairError.length() > 0 ? state.pairError : error));
+    logInfo("[Wireless] " + device.deviceName + " non accoppiato: " + (state.pairError.length() > 0 ? state.pairError : error));
 }
 
 static void pairingTask(void *pvParameters)
 {
-  Serial.println("[Task] pairingTask avviato");
+  logInfo("[Task] pairingTask avviato");
   while (true)
   {
     uint8_t index;
@@ -208,7 +209,7 @@ static void pairingTask(void *pvParameters)
       takeExclusiveExecution();
       finishConnectingFeedback(false);
       freeExclusiveExecution();
-      Serial.println("[Wireless] connessione: nessun dispositivo ha accettato l'accoppiamento");
+      logInfo("[Wireless] connessione: nessun dispositivo ha accettato l'accoppiamento");
     }
   }
 }
@@ -229,12 +230,12 @@ static void markLost(WirelessSession &s, const String &mac, const String &reason
   setDeviceStatus(mac, ESP_DEVICE_STATUS::ONLINE, false, reason);
   if (repairNow)
   {
-    Serial.println("[Wireless] " + s.deviceName + ": " + reason + ", riaccoppiamento");
+    logInfo("[Wireless] " + s.deviceName + ": " + reason + ", riaccoppiamento");
     requestPair(deviceIndexByMac(mac));
   }
   else
   {
-    Serial.println("[Wireless] " + s.deviceName + ": " + reason + ", riprovo alla prossima riscoperta (" +
+    logInfo("[Wireless] " + s.deviceName + ": " + reason + ", riprovo alla prossima riscoperta (" +
                    String(cfg.rediscoveryS) + " s)");
   }
 }
@@ -271,7 +272,7 @@ static void handleRx(const WirelessRx &rx)
     {
       s.connected = true;
       setDeviceStatus(mac, ESP_DEVICE_STATUS::CONNECTED, true, "");
-      Serial.println("[Wireless] " + s.deviceName + " collegato (HEARTBEAT_ACK)");
+      logInfo("[Wireless] " + s.deviceName + " collegato (HEARTBEAT_ACK)");
       if (connectingFeedback)
         finishConnectingFeedback(true);
     }
@@ -283,7 +284,7 @@ static void handleRx(const WirelessRx &rx)
       break;
     s.rxSeq = rx.packet.seq;
     s.disconnectAcked = true;
-    Serial.println("[Wireless] t=" + String(millis()) + " DISCONNECT_ACK da " + s.deviceName);
+    logInfo("[Wireless] t=" + String(millis()) + " DISCONNECT_ACK da " + s.deviceName);
     break;
 
   default:
@@ -397,7 +398,7 @@ static void endSessionIfIdle()
       wirelessLinkSendReliable(entry.second, WIRELESS_PKT_SESSION_END, SESSION_END_WINDOW_MS);
   }
   freeExclusiveExecution();
-  Serial.println("[Wireless] fine sessione (" + String(cfg.sessionTimeoutS) + " s senza movimenti)");
+  logInfo("[Wireless] fine sessione (" + String(cfg.sessionTimeoutS) + " s senza movimenti)");
 }
 
 // Modem sleep del telecomando: spento in sessione, durante l'accoppiamento, con invii affidabili in corso
@@ -486,7 +487,7 @@ static void startDisconnect()
   }
   radioHoldUntilMs = max(radioHoldUntilMs, millis() + DISCONNECT_ACK_WAIT_MS + ACK_HOLD_MS);
   freeExclusiveExecution();
-  Serial.println("[Wireless] t=" + String(millis()) + " disconnessione: DISCONNECT a " + String(sent) + " dispositivi");
+  logInfo("[Wireless] t=" + String(millis()) + " disconnessione: DISCONNECT a " + String(sent) + " dispositivi");
 }
 
 // Fine dell'attesa degli ACK (tutti confermati o tempo scaduto): sessioni cancellate, pallini grigi
@@ -521,7 +522,7 @@ static void finishDisconnectIfDone()
   remoteControlScreenSetBusy(nullptr);
   remoteControlScreenShowMessage("DISCONNESSO", "", RGB565_ORANGE, RESULT_MESSAGE_MS);
   freeExclusiveExecution();
-  Serial.println("[Wireless] t=" + String(millis()) + " dispositivi disconnessi: " + String(acked) + "/" + String(total) +
+  logInfo("[Wireless] t=" + String(millis()) + " dispositivi disconnessi: " + String(acked) + "/" + String(total) +
                  " hanno confermato" +
                  (acked < total ? " (gli altri chiuderanno la sessione allo scadere del loro timeout)" : ""));
 }
@@ -540,7 +541,7 @@ static void startConnect()
   freeExclusiveExecution();
   lastRediscoveryMs = millis();
   int queued = wirelessRequestPairAll();
-  Serial.println("[Wireless] t=" + String(millis()) + " connessione: accoppiamento di " + String(queued) + " dispositivi");
+  logInfo("[Wireless] t=" + String(millis()) + " connessione: accoppiamento di " + String(queued) + " dispositivi");
   if (queued == 0)
   {
     takeExclusiveExecution();
@@ -554,7 +555,7 @@ static void handleConnectToggleRequest()
   if (!connectToggleRequested)
     return;
   connectToggleRequested = false;
-  Serial.println("[Wireless] t=" + String(millis()) + " richiesta di disconnessione/connessione presa dal task wireless");
+  logInfo("[Wireless] t=" + String(millis()) + " richiesta di disconnessione/connessione presa dal task wireless");
   if (linkState == LINK_STATE::CONNECTED)
     startDisconnect();
   else if (linkState == LINK_STATE::DISCONNECTED)
@@ -564,7 +565,7 @@ static void handleConnectToggleRequest()
 
 static void wirelessTask(void *pvParameters)
 {
-  Serial.println("[Task] wirelessTask avviato");
+  logInfo("[Task] wirelessTask avviato");
   lastRediscoveryMs = millis();
   while (true)
   {
@@ -586,7 +587,7 @@ static void wirelessTask(void *pvParameters)
       takeExclusiveExecution();
       finishConnectingFeedback(false);
       freeExclusiveExecution();
-      Serial.println("[Wireless] connessione: nessun dispositivo collegato entro " + String(CONNECTING_TIMEOUT_MS / 1000) + " s");
+      logInfo("[Wireless] connessione: nessun dispositivo collegato entro " + String(CONNECTING_TIMEOUT_MS / 1000) + " s");
     }
     if (linkState == LINK_STATE::CONNECTED)
     {

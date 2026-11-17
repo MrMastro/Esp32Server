@@ -28,6 +28,14 @@ static bool inSession = false;
 static uint32_t lastSessionPacketMs = 0; // ultimo SESSION_START / DIRECTION valido
 static uint32_t sessionTimeoutMs = 30000;
 
+static bool debugLog = false; // log informativi solo con "debug": true (come SerialService::logInfoln)
+
+static void logInfo(const String &msg)
+{
+  if (debugLog)
+    Serial.println(msg);
+}
+
 static uint32_t rejectedCount = 0;
 static uint32_t lastRejectLogMs = 0;
 static uint32_t lastUnknownSessionMs = 0;
@@ -50,7 +58,7 @@ static void logReject(const String &reason, const uint8_t *mac)
   if (now - lastRejectLogMs >= REJECT_LOG_INTERVAL_MS)
   {
     lastRejectLogMs = now;
-    Serial.println("[Wireless] pacchetto scartato da " + wirelessMacToString(mac) + ": " + reason +
+    logInfo("[Wireless] pacchetto scartato da " + wirelessMacToString(mac) + ": " + reason +
                    " (scartati in totale: " + String(rejectedCount) + ")");
   }
 }
@@ -108,7 +116,7 @@ static void startSession()
     return;
   inSession = true;
   WiFi.setSleep(false); // radio sempre accesa: le direzioni arrivano in pochi ms
-  Serial.println("[Wireless] inizio sessione: radio sempre accesa");
+  logInfo("[Wireless] inizio sessione: radio sempre accesa");
 }
 
 static void endSession(const String &reason)
@@ -117,7 +125,7 @@ static void endSession(const String &reason)
     return;
   inSession = false;
   WiFi.setSleep(true); // modem sleep: la radio si sveglia a ogni beacon del router
-  Serial.println("[Wireless] fine sessione (" + reason + "): modem sleep");
+  logInfo("[Wireless] fine sessione (" + reason + "): modem sleep");
 }
 
 // Applica la direzione solo se cambia (stato, non eventi: un heartbeat con la stessa direzione non fa nulla)
@@ -152,10 +160,11 @@ static void sendHeartbeatAck(const RemotePairing &pairing)
   sendSignedReply(pairing, WIRELESS_PKT_HEARTBEAT_ACK);
 }
 
-bool wirelessReceiverBegin(WirelessDirectionHandler onDirection, uint32_t sessionTimeoutS)
+bool wirelessReceiverBegin(WirelessDirectionHandler onDirection, uint32_t sessionTimeoutS, bool debug)
 {
   if (ready)
     return true;
+  debugLog = debug;
   directionHandler = onDirection;
   sessionTimeoutMs = sessionTimeoutS * 1000;
 
@@ -171,7 +180,7 @@ bool wirelessReceiverBegin(WirelessDirectionHandler onDirection, uint32_t sessio
     return false;
   }
   esp_now_register_recv_cb(onEspNowRecv);
-  Serial.println("[Wireless] ricevitore ESP-NOW attivo: MAC " + WiFi.macAddress() + ", canale " + String(WiFi.channel()) +
+  logInfo("[Wireless] ricevitore ESP-NOW attivo: MAC " + WiFi.macAddress() + ", canale " + String(WiFi.channel()) +
                  ", modem sleep a riposo, timeout sessione " + String(sessionTimeoutS) + " s");
   ready = true;
   return true;
@@ -261,7 +270,7 @@ void wirelessReceiverProcess(uint32_t waitMs)
     sendSignedReply(pairing, WIRELESS_PKT_DISCONNECT_ACK);
     endSession("DISCONNECT dal telecomando");
     remotePairingClear();
-    Serial.println("[Wireless] telecomando disconnesso: accoppiamento dimenticato, esecuzione senza joystick");
+    logInfo("[Wireless] telecomando disconnesso: accoppiamento dimenticato, esecuzione senza joystick");
     break;
   default:
     // altri tipi: fasi successive

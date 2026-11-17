@@ -474,7 +474,9 @@ Attenzione: nel progetto generale `takeExclusiveExecution()` è un flag, non un 
 
 ## Come verificare
 
-Servono i due monitor seriali: telecomando (USB del C6) e dispositivo (CH340). Sul telecomando il comando
+Servono i due monitor seriali: telecomando (USB del C6) e dispositivo (CH340), con **`"debug": true`** su
+entrambi (`main_settings.json` del telecomando, `settings.json` del dispositivo): con `debug = false` i log
+informativi qui sotto non escono (restano warning, errori e risposte ai comandi, come `devices`). Sul telecomando il comando
 `devices` riassume tutto: stato e pallino di ogni dispositivo, statistiche ESP-NOW, sessione attiva o a
 riposo, modem sleep, ultimo ACK e heartbeat persi.
 

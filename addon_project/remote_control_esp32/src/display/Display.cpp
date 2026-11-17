@@ -1,4 +1,5 @@
 #include "Display.h"
+#include "system/Log.h"
 #include "BoardPins.h"
 
 // 80MHz come nel demo Waveshare (la microSD usa la sua frequenza nelle proprie transazioni)
@@ -23,7 +24,7 @@ bool displayBegin()
 
   if (!gfx->begin(LCD_SPI_FREQ))
   {
-    Serial.println("[Display] begin() fallito (memoria per il buffer?)");
+    logWarning("[Display] begin() fallito (memoria per il buffer?)");
     return false;
   }
 

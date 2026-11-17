@@ -1,4 +1,5 @@
 #include "WirelessConfig.h"
+#include "system/Log.h"
 
 #include <ArduinoJson.h>
 #include <SD.h>
@@ -8,7 +9,7 @@ bool WirelessConfig::loadFromFile(const char *path)
   File file = SD.open(path, FILE_READ);
   if (!file)
   {
-    Serial.printf("[WirelessConfig] %s non trovato, uso i default\n", path);
+    logInfof("[WirelessConfig] %s non trovato, uso i default\n", path);
     return false;
   }
 
@@ -18,7 +19,7 @@ bool WirelessConfig::loadFromFile(const char *path)
 
   if (error)
   {
-    Serial.printf("[WirelessConfig] JSON non valido in %s: %s\n", path, error.c_str());
+    logWarningf("[WirelessConfig] JSON non valido in %s: %s\n", path, error.c_str());
     return false;
   }
 
@@ -38,7 +39,7 @@ bool WirelessConfig::loadFromFile(const char *path)
   rediscoveryS = max<uint16_t>(rediscoveryS, 5);
   pairAttempts = max<uint8_t>(pairAttempts, 1);
 
-  Serial.printf("[WirelessConfig] caricato %s (sessione %u s, heartbeat %lu ms / %u s, missed %u, riscoperta %u s, modem sleep %s)\n",
+  logInfof("[WirelessConfig] caricato %s (sessione %u s, heartbeat %lu ms / %u s, missed %u, riscoperta %u s, modem sleep %s)\n",
                 path, sessionTimeoutS, (unsigned long)heartbeatActiveMs, heartbeatIdleS, missedHeartbeats, rediscoveryS,
                 remoteModemSleep ? "si" : "no");
   return true;

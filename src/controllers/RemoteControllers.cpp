@@ -69,7 +69,8 @@ void remotePair(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
     boolean authorized = ((InfoService *)servicesCollector.getService("InfoService"))->loginValidate(req["deviceName"].as<String>(), req["devicePassword"].as<String>());
     if (!authorized)
     {
-        Serial.println("[Wireless] accoppiamento rifiutato: credenziali errate (" + req["remoteMac"].as<String>() + ")");
+        if (settings.debug)
+            Serial.println("[Wireless] accoppiamento rifiutato: credenziali errate (" + req["remoteMac"].as<String>() + ")");
         sendPairResponse(request, 401, "deviceName o devicePassword errati");
         servicesCollector.freeExclusiveExecution();
         return;
@@ -112,7 +113,8 @@ void remotePair(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
     serializeJson(res, body);
     request->send(200, "application/json", body);
 
-    Serial.println("[Wireless] telecomando " + wirelessMacToString(pairing.remoteMac) + " accoppiato, canale " + String(channel) +
+    if (settings.debug)
+        Serial.println("[Wireless] telecomando " + wirelessMacToString(pairing.remoteMac) + " accoppiato, canale " + String(channel) +
                    ", impronta chiave " + wirelessKeyFingerprint(pairing.sessionKey));
     servicesCollector.freeExclusiveExecution();
 }

@@ -1,4 +1,5 @@
 #include "Joystick.h"
+#include "system/Log.h"
 
 void Joystick::begin(const JoystickConfig &config)
 {
@@ -20,7 +21,7 @@ void Joystick::calibrate(int samples)
   }
   _cfg.centerX = sumX / samples;
   _cfg.centerY = sumY / samples;
-  Serial.printf("[Joystick] centro calibrato -> X: %d | Y: %d\n", _cfg.centerX, _cfg.centerY);
+  logInfof("[Joystick] centro calibrato -> X: %d | Y: %d\n", _cfg.centerX, _cfg.centerY);
 }
 
 // Ogni pressione del tasto centrale (fronte HIGH -> LOW) alterna la modalità BUTTON.

@@ -395,7 +395,7 @@ void remoteControlWirelessTask(void *pvParameters)
   // ESP-NOW receiver: signed packets from the paired remote; recvButtonByJoystick() only when the direction changes.
   // The "sleepy joystick" state is ignored: the remote has priority (see WIRELESS_JOYSTICK.md)
   wirelessReceiverBegin([](const String &direction) { recvButtonByJoystick(mapStringToJdirections(direction)); },
-                        s.joystickSettings.wirelessSessionTimeoutS);
+                        s.joystickSettings.wirelessSessionTimeoutS, s.debug);
 
   while (true)
   {

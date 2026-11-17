@@ -133,7 +133,7 @@ i singoli campi mancanti nel file prendono il valore di default.
 | `devicePassword` | `esp32password` | Password per l'OTA e per l'API delle impostazioni |
 | `ota_upload` | `false` | `true` = OTA via WiFi attivo (upload da PlatformIO) |
 | `communicationMode` | `AP_MODE` | `AP_MODE` o `WIFI_MODE` |
-| `debug` | `false` | Stampa le impostazioni sulla seriale all'avvio |
+| `debug` | `false` | `true`: log informativi sulla seriale (avvio, WiFi, joystick wireless, tempi `t=...`). `false`: escono solo warning, errori, le risposte ai comandi seriali e la configurazione all'avvio, e il telecomando è più reattivo (come `debug` nel progetto principale) |
 | `ssidAP` / `passwordAP` | `ESP32_AP` / `ap_password` | Access point creato dalla scheda (password ≥ 8 caratteri) |
 | `ssidWIFI` / `passwordWIFI` | `Home_Network` / `wifi_password` | Rete WiFi a cui collegarsi (solo 2,4GHz) |
 

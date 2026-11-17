@@ -1,4 +1,5 @@
 #include "RemoteControlScreen.h"
+#include "system/Log.h"
 
 #include "BoardPins.h"
 #include "display/Display.h"
@@ -100,7 +101,7 @@ static int holdStep()
 
 static void drawMessage()
 {
-  Serial.println("[Screen] t=" + String(millis()) + " messaggio: " + messageLine1 + " " + messageLine2);
+  logInfo("[Screen] t=" + String(millis()) + " messaggio: " + messageLine1 + " " + messageLine2);
   gfx->fillScreen(RGB565_BLACK);
   if (messageLine2.length() == 0)
   {
@@ -202,7 +203,7 @@ void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const 
 {
   if (options.logDirections && joystick.changed())
   {
-    Serial.println("[Joystick] direction: " + mapJdirectionsToString(direction));
+    logInfo("[Joystick] direction: " + mapJdirectionsToString(direction));
   }
 
   // schermo spento: si continua a leggere il joystick ma non si disegna; alla riaccensione
@@ -261,7 +262,7 @@ void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const 
   if (busyLabel != nullptr && !sliderLogged)
   {
     sliderLogged = true;
-    Serial.println("[Screen] t=" + String(drawStart) + " slider a schermo (disegno " + String(millis() - drawStart) + " ms)");
+    logInfo("[Screen] t=" + String(drawStart) + " slider a schermo (disegno " + String(millis() - drawStart) + " ms)");
   }
 }
 

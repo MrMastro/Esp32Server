@@ -1,4 +1,5 @@
 #include "WifiConnection.h"
+#include "system/Log.h"
 
 #include <WiFi.h>
 
@@ -7,11 +8,11 @@ static const uint32_t WIFI_CONNECT_TIMEOUT_MS = 10000;
 static WifiStatus startAp(const SettingsModel &settings)
 {
   WifiStatus status;
-  Serial.println("[WiFi] avvio access point: " + settings.ssidAP);
+  logInfo("[WiFi] avvio access point: " + settings.ssidAP);
 
   if (settings.passwordAP.length() > 0 && settings.passwordAP.length() < 8)
   {
-    Serial.println("[WiFi] ATTENZIONE: passwordAP deve avere almeno 8 caratteri, l'AP potrebbe non partire");
+    logWarning("[WiFi] ATTENZIONE: passwordAP deve avere almeno 8 caratteri, l'AP potrebbe non partire");
   }
 
   // AP + STA come nel progetto principale (lascia la possibilità di cercare reti)
@@ -19,19 +20,19 @@ static WifiStatus startAp(const SettingsModel &settings)
   WiFi.softAPsetHostname(settings.deviceName.c_str());
   if (!WiFi.softAP(settings.ssidAP.c_str(), settings.passwordAP.c_str()))
   {
-    Serial.println("[WiFi] softAP() fallito");
+    logWarning("[WiFi] softAP() fallito");
   }
 
   status.activeMode = COMMUNICATION_MODE::AP_MODE;
   status.ssid = settings.ssidAP;
   status.ip = WiFi.softAPIP().toString();
-  Serial.println("[WiFi] AP attivo, IP: " + status.ip);
+  logInfo("[WiFi] AP attivo, IP: " + status.ip);
   return status;
 }
 
 static bool connectStation(const SettingsModel &settings, WifiStatus &status)
 {
-  Serial.println("[WiFi] connessione a: " + settings.ssidWIFI);
+  logInfo("[WiFi] connessione a: " + settings.ssidWIFI);
 
   WiFi.mode(WIFI_STA);
   // Niente modem sleep (risparmio energetico WiFi): con il modem sleep il C6 non riusciva a
@@ -46,18 +47,18 @@ static bool connectStation(const SettingsModel &settings, WifiStatus &status)
   {
     if (millis() - start >= WIFI_CONNECT_TIMEOUT_MS)
     {
-      Serial.println("\n[WiFi] timeout di connessione");
+      logWarning("\n[WiFi] timeout di connessione");
       WiFi.disconnect(true);
       return false;
     }
     delay(250);
-    Serial.print(".");
+    logInfoRaw(".");
   }
 
   status.activeMode = COMMUNICATION_MODE::WIFI_MODE;
   status.ssid = settings.ssidWIFI;
   status.ip = WiFi.localIP().toString();
-  Serial.println("\n[WiFi] connesso, IP: " + status.ip);
+  logInfo("\n[WiFi] connesso, IP: " + status.ip);
   return true;
 }
 
@@ -85,7 +86,7 @@ WifiStatus wifiBegin(const SettingsModel &settings)
     {
       return status;
     }
-    Serial.println("[WiFi] WIFI_MODE fallito: passo in AP_MODE");
+    logWarning("[WiFi] WIFI_MODE fallito: passo in AP_MODE");
     status = startAp(settings);
     status.fallbackToAp = true;
     return status;
@@ -95,7 +96,7 @@ WifiStatus wifiBegin(const SettingsModel &settings)
     return startAp(settings);
 
   default:
-    Serial.println("[WiFi] communicationMode sconosciuta (" + settings.communicationMode + "): uso AP_MODE");
+    logWarning("[WiFi] communicationMode sconosciuta (" + settings.communicationMode + "): uso AP_MODE");
     return startAp(settings);
   }
 }

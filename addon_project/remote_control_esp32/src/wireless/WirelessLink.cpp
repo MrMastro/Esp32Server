@@ -1,4 +1,5 @@
 #include "WirelessLink.h"
+#include "system/Log.h"
 #include "WirelessPairing.h"
 #include <WiFi.h>
 #include <esp_now.h>
@@ -91,7 +92,7 @@ void wirelessLinkAddPeer(const uint8_t mac[WIRELESS_MAC_LEN])
   peer.encrypt = false; // firma HMAC applicativa (vedi WIRELESS_JOYSTICK.md)
   esp_err_t err = esp_now_add_peer(&peer);
   if (err != ESP_OK)
-    Serial.println("[Wireless] esp_now_add_peer " + wirelessMacToString(mac) + ": " + esp_err_to_name(err));
+    logWarning("[Wireless] esp_now_add_peer " + wirelessMacToString(mac) + ": " + esp_err_to_name(err));
 }
 
 void wirelessLinkRemovePeer(const uint8_t mac[WIRELESS_MAC_LEN])
@@ -112,7 +113,7 @@ static bool sendPacket(WirelessSession &s, uint8_t type, uint8_t direction)
     return true;
   }
   if (sendErrorCount++ == 0)
-    Serial.println("[Wireless] esp_now_send verso " + s.deviceName + ": " + esp_err_to_name(err));
+    logWarning("[Wireless] esp_now_send verso " + s.deviceName + ": " + esp_err_to_name(err));
   return false;
 }
 

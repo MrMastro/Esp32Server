@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "system/Log.h"
 
 #include "BoardPins.h"
 #include "display/Display.h"
@@ -85,7 +86,7 @@ static void handleSettingsPost()
   SettingsValidation v = validateSettingsRequest(request, settings);
   if (!v.ok)
   {
-    Serial.println("[API] richiesta rifiutata: " + v.error);
+    logWarning("[API] richiesta rifiutata: " + v.error);
     sendJson(v.httpCode, "error", v.error);
     return;
   }
@@ -101,7 +102,7 @@ static void handleSettingsPost()
     return;
   }
 
-  Serial.println("[API] modificata la chiave '" + v.key + "', riavvio tra 5 secondi");
+  logInfo("[API] modificata la chiave '" + v.key + "', riavvio tra 5 secondi");
   sendJson(200, "ok", "chiave '" + v.key + "' salvata, riavvio tra 5 secondi");
 
   rebootPending = true;
@@ -142,7 +143,7 @@ static void serverBegin()
   server.onNotFound([]()
                     { sendJson(404, "error", "endpoint non trovato"); });
   server.begin();
-  Serial.println("[API] server attivo: POST http://" + wifiStatus.ip + "/api/settings");
+  logInfo("[API] server attivo: POST http://" + wifiStatus.ip + "/api/settings");
 }
 
 static void setupRemoteControl(bool sdAvailable)
@@ -503,14 +504,16 @@ void setup()
   sdAvailable = sdBegin(&sdInfo);
   bool settingsFromFile = false;
   settings = SettingsModel::load(SD_MAIN_SETTINGS, sdAvailable, &settingsFromFile, &settingsInfo);
+  // da qui i log informativi escono solo con "debug": true (warning, errori e risposte ai comandi sempre)
+  logSetDebug(settings.debug);
   printSettings();
-  Serial.println(settingsInfo);
-  Serial.println(sdInfo);
+  logInfo(settingsInfo);
+  logInfo(sdInfo);
 
   // Dispositivi conosciuti (lista vuota se SD o file mancano)
   String devicesInfo;
   espDevicesLoad(SD_ESP_DEVICES, sdAvailable, &devicesInfo);
-  Serial.println(devicesInfo);
+  logInfo(devicesInfo);
 
   if (!settingsFromFile)
   {
@@ -529,7 +532,7 @@ void setup()
   String linkError;
   bool linkReady = wirelessLinkBegin(linkError);
   if (!linkReady)
-    Serial.println("[Wireless] ESP-NOW non avviato: " + linkError);
+    logWarning("[Wireless] ESP-NOW non avviato: " + linkError);
 
   // 4) OTA (solo se ota_upload = true) e API impostazioni
   otaBegin(settings);
@@ -539,7 +542,7 @@ void setup()
   deviceMode = deviceModeStringToEnum(settings.mode);
   if (deviceMode == DEVICE_MODE::UNKNOWN)
   {
-    Serial.println("[Main] mode sconosciuta (" + settings.mode + "): uso remote_control");
+    logWarning("[Main] mode sconosciuta (" + settings.mode + "): uso remote_control");
     displayMessage("Mode ignota", "uso remote_control");
     delay(1500);
     deviceMode = DEVICE_MODE::REMOTE_CONTROL;
@@ -601,7 +604,7 @@ static const TickType_t TASK_DELAY_TICKS = 10 / portTICK_PERIOD_MS;
 // gli altri task aspettano e la schermata di avanzamento non viene sovrascritta.
 static void apiServerTask(void *pvParameters)
 {
-  Serial.println("[Task] apiServerTask avviato");
+  logInfo("[Task] apiServerTask avviato");
   while (true)
   {
     takeExclusiveExecution();
@@ -615,7 +618,7 @@ static void apiServerTask(void *pvParameters)
 // Comandi dal monitor seriale (serialCableTask nel progetto principale)
 static void serialCableTask(void *pvParameters)
 {
-  Serial.println("[Task] serialCableTask avviato");
+  logInfo("[Task] serialCableTask avviato");
   while (true)
   {
     String msg;
@@ -642,7 +645,7 @@ static void handleScreenButton()
   {
     lastToggleMs = millis();
     displaySetOn(!displayIsOn());
-    Serial.println(displayIsOn() ? "[Display] schermo acceso" : "[Display] schermo spento");
+    logInfo(displayIsOn() ? "[Display] schermo acceso" : "[Display] schermo spento");
   }
   lastPressed = pressed;
 }
@@ -650,7 +653,7 @@ static void handleScreenButton()
 // Comandi ritardati (reboot,ms / change_communication_mode), riavvio richiesto dall'API e tasto schermo
 static void commandDelayedTask(void *pvParameters)
 {
-  Serial.println("[Task] commandDelayedTask avviato");
+  logInfo("[Task] commandDelayedTask avviato");
   while (true)
   {
     takeExclusiveExecution();
@@ -684,7 +687,7 @@ static void handleLongPress(J_DIRECTION &direction)
     if (joystick.changed())
       wirelessSendDirection(direction);
     bool connecting = wirelessManagerDisconnected();
-    Serial.println("[Wireless] t=" + String(millis()) + " pressione lunga di SW: " + (connecting ? "connessione" : "disconnessione"));
+    logInfo("[Wireless] t=" + String(millis()) + " pressione lunga di SW: " + (connecting ? "connessione" : "disconnessione"));
     // riscontro immediato: la barra diventa subito uno slider animato (stesso punto, stessa scritta) finche'
     // il task wireless non ha finito (DISCONNECT + ACK, oppure accoppiamento); poi conferma breve a schermo
     remoteControlScreenSetHold(-1, nullptr);
@@ -703,7 +706,7 @@ static void handleLongPress(J_DIRECTION &direction)
 // Lettura del joystick e schermo (modalità remote_control)
 static void joystickTask(void *pvParameters)
 {
-  Serial.println("[Task] joystickTask avviato");
+  logInfo("[Task] joystickTask avviato");
   while (true)
   {
     takeExclusiveExecution();
@@ -758,7 +761,7 @@ static void startTasks()
     break;
   }
 
-  Serial.println("[Main] Init procedure completed");
+  logInfo("[Main] Init procedure completed");
 }
 
 // Tutto il lavoro è nei task: come nel progetto principale loop() non fa nulla.

@@ -1,4 +1,5 @@
 #include "SettingsModel.h"
+#include "system/Log.h"
 
 #include <SD.h>
 
@@ -132,7 +133,7 @@ bool SettingsModel::saveKey(const char *path, const String &key, JsonVariantCons
   File out = SD.open(tmpPath, FILE_WRITE);
   if (!out)
   {
-    Serial.println("[Settings] impossibile scrivere " + tmpPath);
+    logWarning("[Settings] impossibile scrivere " + tmpPath);
     return false;
   }
   size_t written = serializeJsonPretty(doc, out);
@@ -146,10 +147,10 @@ bool SettingsModel::saveKey(const char *path, const String &key, JsonVariantCons
   SD.remove(path);
   if (!SD.rename(tmpPath, path))
   {
-    Serial.println("[Settings] rename fallito: impostazioni rimaste in " + tmpPath);
+    logWarning("[Settings] rename fallito: impostazioni rimaste in " + tmpPath);
     return false;
   }
 
-  Serial.printf("[Settings] salvata la chiave '%s' in %s\n", key.c_str(), path);
+  logInfof("[Settings] salvata la chiave '%s' in %s\n", key.c_str(), path);
   return true;
 }
