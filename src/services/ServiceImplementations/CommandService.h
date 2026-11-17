@@ -36,6 +36,8 @@ private:
     StatusInfo executeCommand(CMD cmd, std::vector<String> params);
     // Method for command
     StatusInfo changeCommunicationMode(std::vector<String> params);
+    StatusInfo setDebugAndReboot(bool debug);
+    String helpText();
     void reboot(std::vector<String> params);
 };
 

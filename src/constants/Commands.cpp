@@ -12,6 +12,9 @@ const std::pair<CMD, String> CMD_PAIR[] = {
   {CMD::REBOOT, "reboot"},
   {CMD::INFO, "info"},
   {CMD::INFO_IP, "info_ip"},
+  {CMD::PROD, "prod"},
+  {CMD::DEBUG, "debug"},
+  {CMD::HELP, "help"},
   {CMD::NONE, "none"},
   {CMD::UNKNOWN, "unknown_command"}
   // Add more status codes and information as needed

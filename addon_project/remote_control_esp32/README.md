@@ -204,6 +204,9 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `hello,<ip>` | Diagnosi: `GET http://<ip>/api/v1/getInfoHello` verso un IP qualsiasi |
 | `devices` | Stato dei dispositivi (online, accoppiati, motivo), statistiche ESP-NOW e sessioni wireless con l'impronta della chiave |
 | `pair` | Riaccoppia tutti i dispositivi (in background) |
+| `prod` | `debug = false` in `main_settings.json` e riavvio: escono solo warning, errori, le risposte ai comandi e la configurazione all'avvio |
+| `debug` | `debug = true` in `main_settings.json` e riavvio: tutti i log |
+| `help` | Lista dei comandi |
 | `t` | `test()`: funzione di prova libera |
 
 ## Struttura del codice

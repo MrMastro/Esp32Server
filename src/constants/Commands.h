@@ -18,6 +18,9 @@ enum class CMD
   REBOOT,
   INFO,
   INFO_IP,
+  PROD,                         //prod  => debug = false in settings.json e riavvio
+  DEBUG,                        //debug => debug = true in settings.json e riavvio
+  HELP,                         //help  => lista dei comandi
   NONE,
   UNKNOWN
 };

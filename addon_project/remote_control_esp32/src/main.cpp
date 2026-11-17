@@ -293,6 +293,43 @@ static void test()
   Serial.println("[Test] test() eseguita");
 }
 
+// prod / debug: salva "debug" in main_settings.json e riavvia dopo 1s (come change_communication_mode).
+// Con debug = false escono solo warning, errori, le risposte ai comandi e la configurazione all'avvio.
+static void setDebugAndReboot(const String &command, bool debug)
+{
+  if (!sdAvailable)
+  {
+    printCommandError(command, "microSD non disponibile: impossibile salvare");
+    return;
+  }
+  JsonDocument value;
+  value.set(debug);
+  if (!settings.saveKey(SD_MAIN_SETTINGS, "debug", value.as<JsonVariantConst>()))
+  {
+    printCommandError(command, "Error while saving debug");
+    return;
+  }
+  printCommandSuccess(command, String("debug = ") + (debug ? "true" : "false") + " saved, restarting....");
+  insertDelayedReboot(1000);
+}
+
+// help: lista dei comandi (esce sempre, anche con debug = false)
+static void printHelp(const String &command)
+{
+  printCommandSuccess(command, "lista dei comandi (parametri separati da virgola o spazio):");
+  Serial.println("  reboot[,ms]                       riavvia (subito o dopo ms millisecondi); alias: reset");
+  Serial.println("  change_communication_mode,<modo>  AP_MODE | WIFI_MODE, salva sulla SD e riavvia");
+  Serial.println("  info | info_ip                    stato del dispositivo / indirizzo IP");
+  Serial.println("  settings                          ristampa la configurazione caricata");
+  Serial.println("  hello,<ip>                        diagnosi: GET http://<ip>/api/v1/getInfoHello");
+  Serial.println("  devices                           stato dei dispositivi e delle sessioni wireless");
+  Serial.println("  pair                              riaccoppia tutti i dispositivi (in background)");
+  Serial.println("  prod                              debug = false (solo warning, errori e risposte), salva e riavvia");
+  Serial.println("  debug                             debug = true (tutti i log), salva e riavvia");
+  Serial.println("  help                              questa lista");
+  Serial.println("  t                                 funzione di prova test()");
+}
+
 // devices: stato dei dispositivi conosciuti (online, accoppiati) e sessioni wireless
 static void printDevices(const String &command)
 {
@@ -314,6 +351,9 @@ enum class SERIAL_COMMAND
   HELLO,                     // "hello"
   DEVICES,                   // "devices"
   PAIR,                      // "pair"
+  PROD,                      // "prod"
+  DEBUG,                     // "debug"
+  HELP,                      // "help"
   TEST,                      // "t"
   NONE,
   UNKNOWN
@@ -340,6 +380,12 @@ static SERIAL_COMMAND parseSerialCommand(String command)
     return SERIAL_COMMAND::DEVICES;
   if (command == "pair")
     return SERIAL_COMMAND::PAIR;
+  if (command == "prod")
+    return SERIAL_COMMAND::PROD;
+  if (command == "debug")
+    return SERIAL_COMMAND::DEBUG;
+  if (command == "help")
+    return SERIAL_COMMAND::HELP;
   if (command == "t")
     return SERIAL_COMMAND::TEST;
   return SERIAL_COMMAND::UNKNOWN;
@@ -354,6 +400,8 @@ static SERIAL_COMMAND parseSerialCommand(String command)
 //   hello,<ip>                       -> diagnosi: GET http://<ip>/api/v1/getInfoHello
 //   devices                          -> stato dei dispositivi (online, accoppiati) e sessioni wireless
 //   pair                             -> ricontatta e riaccoppia tutti i dispositivi (in background)
+//   prod / debug                     -> debug = false / true in main_settings.json, poi riavvio
+//   help                             -> lista dei comandi
 //   t                                -> esegue test() (funzione di prova libera)
 // Raccolta del messaggio seriale come SerialService::getMsgbySerial() del progetto principale
 // (Serial.readString): i caratteri si scrivono in sequenza e il messaggio è completo quando
@@ -468,11 +516,20 @@ static void executeSerialMessage(const String &msg)
       printCommandError(command, "accoppiamento gia' in corso o nessun dispositivo in espDevices.json");
   }
     break;
+  case SERIAL_COMMAND::PROD:
+    setDebugAndReboot(command, false);
+    break;
+  case SERIAL_COMMAND::DEBUG:
+    setDebugAndReboot(command, true);
+    break;
+  case SERIAL_COMMAND::HELP:
+    printHelp(command);
+    break;
   case SERIAL_COMMAND::TEST:
     test();
     break;
   case SERIAL_COMMAND::UNKNOWN:
-    printCommandError(command, "Comando non riconosciuto (disponibili: reboot[,ms], change_communication_mode,<mode>, info, info_ip, settings, hello,<ip>, devices, pair, t)");
+    printCommandError(command, "Comando non riconosciuto (scrivi help per la lista dei comandi)");
     break;
   case SERIAL_COMMAND::NONE:
   default:

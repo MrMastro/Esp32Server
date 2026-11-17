@@ -77,6 +77,11 @@ boolean SettingService::changeSetting(String key, String value)
         saveSettings(SETTINGS_FILE_LOCATION_PATH, newSettings);
         return true;
     }
+    else if (key == "debug")
+    {
+        newSettings.debug = (value == "true");
+        return saveSettings(SETTINGS_FILE_LOCATION_PATH, newSettings);
+    }
     else
     {
         return false;

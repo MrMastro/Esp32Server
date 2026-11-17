@@ -69,7 +69,6 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     break;
   case CMD::CHANGE_COMMUNICATION_MODE:
     result = changeCommunicationMode(params);
-    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     break;
   case CMD::INFO_IP:
     content = ((InfoService *)getServiceByCollector("InfoService"))->getIp();
@@ -80,6 +79,16 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     content = ((InfoService *)getServiceByCollector("InfoService"))->getInfo();
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     result.setDescription(content);
+    break;
+  case CMD::PROD:
+    result = setDebugAndReboot(false);
+    break;
+  case CMD::DEBUG:
+    result = setDebugAndReboot(true);
+    break;
+  case CMD::HELP:
+    result = getStatusInfoByHttpCode(HTTP_CODE::OK);
+    result.setDescription(helpText());
     break;
   default:
     result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
@@ -154,6 +163,40 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   insertDelayedCommand(CMD::REBOOT, {}, 1000);
 
   return res;
+}
+
+// prod / debug: salva il flag debug in settings.json e riavvia (i log informativi escono solo con debug = true)
+StatusInfo CommandService::setDebugAndReboot(bool debug)
+{
+  StatusInfo res;
+  boolean operationDone = ((SettingService *)servicesCollector.getService("SettingService"))->changeSetting("debug", debug ? "true" : "false");
+  if (!operationDone)
+  {
+    res = getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
+    res.setDescription("Error while saving debug");
+    return res;
+  }
+  res = getStatusInfoByHttpCode(HTTP_CODE::OK);
+  res.setDescription(String("debug = ") + (debug ? "true" : "false") + " saved, restarting....");
+  insertDelayedCommand(CMD::REBOOT, {}, 1000);
+  return res;
+}
+
+String CommandService::helpText()
+{
+  return String("lista dei comandi (parametri separati da virgola):\n") +
+         "  led_on | led_off | led_toggle          LED di stato\n" +
+         "  start_progress_bar | off_strip         barra di prova / spegne le strisce\n" +
+         "  start_effect,<effetto>                 avvia un effetto sulla matrice\n" +
+         "  stop_effect,<effetto>                  ferma un effetto sulla matrice\n" +
+         "  change_communication_mode,<modo>       AP_MODE | WIFI_MODE | BLUETOOTH_MODE, salva e riavvia\n" +
+         "  reboot[,ms]                            riavvia (subito o dopo ms millisecondi)\n" +
+         "  info | info_ip                         stato del dispositivo / indirizzo IP\n" +
+         "  prod                                   debug = false (solo warning, errori e risposte), salva e riavvia\n" +
+         "  debug                                  debug = true (tutti i log), salva e riavvia\n" +
+         "  help                                   questa lista\n" +
+         "  t                                      funzione di prova test()\n" +
+         "  <trigger di un preset>                 avvia il preset LED con quel trigger (es. CENTER, UP, K1)";
 }
 
 void CommandService::reboot(std::vector<String> params)
