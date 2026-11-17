@@ -20,6 +20,7 @@ static uint32_t expiredCount = 0;            // invio affidabile mai confermato 
 static uint8_t currentDirection = WIRELESS_DIRECTION_NONE; // ultima direzione del joystick (anche senza dispositivi)
 static uint32_t lastActivityMs = 0;
 static bool sessionActive = false;
+static bool disconnected = false;
 
 // Callback ESP-NOW: girano nel task WiFi, quindi solo contatori e code
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
@@ -121,9 +122,9 @@ void wirelessSendDirection(J_DIRECTION direction)
   if (code == WIRELESS_DIRECTION_NONE)
     return; // NONE: niente da inviare
   currentDirection = code;
+  if (!ready || disconnected)
+    return; // disconnesso: la direzione si mostra a schermo ma non va a nessuno
   lastActivityMs = millis();
-  if (!ready)
-    return;
 
   if (!sessionActive)
   {
@@ -141,6 +142,11 @@ void wirelessSendDirection(J_DIRECTION direction)
       continue; // le ritrasmissioni di SESSION_START portano gia' la direzione attuale
     sendPacket(s, WIRELESS_PKT_DIRECTION, code);
   }
+}
+
+void wirelessLinkSetDisconnected(bool value)
+{
+  disconnected = value;
 }
 
 bool wirelessLinkSessionActive()

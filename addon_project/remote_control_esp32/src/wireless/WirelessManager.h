@@ -19,4 +19,15 @@ int wirelessRequestPairAll();
 // Stato delle sessioni per la seriale (una riga per sessione)
 String wirelessManagerStatus();
 
+// Pressione lunga di SW (fase 5): disconnette tutti i dispositivi se collegati, rifa' la connessione
+// (accoppiamento da capo, come all'accensione) se disconnessi.
+// Non bloccante: il lavoro (DISCONNECT + attesa degli ACK, oppure accoppiamento) lo fa il task wireless.
+void wirelessRequestConnectToggle();
+
+// true se disconnesso (o in disconnessione) con la pressione lunga di SW
+bool wirelessManagerDisconnected();
+
+// longPressS di wireless.json in millisecondi
+uint32_t wirelessManagerLongPressMs();
+
 #endif // WIRELESS_MANAGER_H

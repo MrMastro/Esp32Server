@@ -9,8 +9,7 @@
 > | 2. Direzioni firmate | ✅ fatta e provata |
 > | 3. Heartbeat, pallino pieno, riaccoppiamento | ✅ fatta e provata |
 > | 4. Sessioni e risparmio energetico | ✅ fatta e provata (riposo, risveglio al primo movimento, timeout di sicurezza) |
-> | 5. Pressione lunga di SW (sospensione / ripresa) | ⬜ **non ancora implementata**: oggi SW fa solo il toggle BUTTON |
-> | 6. Misure di corrente e latenza | ⬜ da fare |
+> | 5. Pressione lunga di SW (disconnessione / connessione) | 🟡 provata; poi cambiato lo schermo (slider al posto di "in corso", conferma breve, pallini vuoti da disconnessi): **da riprovare** |
 >
 > Per controllare da soli se funziona: [Come verificare](#come-verificare). Riguarda **due progetti**:
 >
@@ -37,13 +36,13 @@ Requisiti:
 | Destinatari | Ogni direzione va a **tutti** i dispositivi collegati |
 | Rete | Tutti (telecomando compreso) in **WIFI_MODE** sullo stesso router → stesso canale. Niente AP (consuma di più) |
 | Trasporto comandi | **ESP-NOW unicast** verso ciascun dispositivo (non broadcast: niente conferma, niente firma per dispositivo) |
-| Accoppiamento | **HTTP** una volta (all'avvio / alla riscoperta / alla ripresa), con `deviceName` e password del dispositivo. È anche il **primo contatto**: `getInfoHello` non si usa |
+| Accoppiamento | **HTTP** una volta (all'avvio / alla riscoperta / alla riconnessione con SW), con `deviceName` e password del dispositivo. È anche il **primo contatto**: `getInfoHello` non si usa |
 | Password | **Una per dispositivo**, in `espDevices.json` (campo `devicePassword`); il `deviceName` di `espDevices.json` deve essere **uguale** a quello del dispositivo |
-| Primo comando dopo una pausa | Inviato **subito** dentro `SESSION_START`: ogni dispositivo lo applica appena si sveglia (sfasamento max ~100 ms, solo sul primo) |
+| Primo comando dopo il riposo (fine sessione) | Inviato **subito** dentro `SESSION_START`: ogni dispositivo lo applica appena si sveglia (sfasamento max ~100 ms, solo sul primo) |
 | Durata sessione | **15 s** senza movimenti, **configurabile** |
 | Joystick addormentato del progetto generale | **Ignorato**: il telecomando ha la priorità (stato prevedibile su tutti i dispositivi) |
 | Joystick fisico sui dispositivi | Nuovo `joystickSettings.remoteControlWireless`: se `true` i pin vengono ignorati e si ascolta solo il telecomando |
-| Sospendere / riprendere | Tenere premuto **SW per più di 5 s** sospende il telecomando (per i dispositivi è **come spegnerlo**, ma vengono avvisati subito); un'altra pressione lunga lo riprende **come all'accensione** (vedi sotto) |
+| Disconnettere / connettere | Tenere premuto **SW per più di 5 s** **disconnette** tutti i dispositivi (per loro è **come spegnere il telecomando**, ma vengono avvisati subito); un'altra pressione lunga **rifà la connessione** come all'accensione (vedi sotto). Non è una pausa: i dispositivi dimenticano il telecomando |
 
 ## Architettura
 
@@ -122,65 +121,80 @@ Note:
 - il light sleep automatico (dorme anche la CPU) richiederebbe la gestione energetica di ESP-IDF, non attiva
   nel core 2.x precompilato del progetto generale: per ora si resta sul modem sleep a sessioni.
 
-## Sospensione delle connessioni (pressione lunga di SW)
+## Disconnessione e connessione (pressione lunga di SW)
 
 Tenendo premuto il tasto SW del joystick per più di **5 s** (`longPressS`, configurabile) il telecomando
-**sospende** il joystick wireless; ripetendo la pressione lunga lo **riprende**.
+**disconnette** tutti i dispositivi; ripetendo la pressione lunga **rifà la connessione**.
 
-Per i dispositivi la sospensione equivale a **spegnere il telecomando**: tornano a funzionare come senza
-telecomando. L'unica differenza è che vengono **avvisati subito** invece di accorgersene allo scadere del
-timeout di sicurezza. La ripresa equivale a **riaccendere il telecomando**: si rifanno tutti i passaggi
-dell'avvio (contatto, accoppiamento, sessione).
+Non è una pausa: i dispositivi vengono **disconnessi davvero**. Per loro equivale a **spegnere il
+telecomando** (tornano a funzionare come senza telecomando e lo dimenticano); l'unica differenza è che
+vengono **avvisati subito** invece di accorgersene allo scadere del timeout di sicurezza. La connessione
+successiva equivale a **riaccendere il telecomando**: si rifà l'accoppiamento da capo, con nuove chiavi.
 
 ### Convivenza con il toggle BUTTON
 
-Oggi SW cambia la modalità BUTTON **sul fronte di pressione** (subito, per non aggiungere latenza): anche
+SW cambia la modalità BUTTON **sul fronte di pressione** (subito, per non aggiungere latenza): anche
 una pressione lunga inizia quindi con un cambio di modalità, e i dispositivi ricevono la variante
 `*_BUTTON` (o viceversa). Regola:
 
-1. alla pressione: toggle BUTTON immediato e invio della nuova direzione (comportamento attuale, fluido);
+1. alla pressione: toggle BUTTON immediato e invio della nuova direzione (comportamento normale, fluido);
 2. se SW resta premuto fino a `longPressS`: il toggle viene **annullato** (si torna alla modalità di prima)
    e ai dispositivi si invia la direzione ripristinata, così restano nello stato precedente alla pressione;
-3. poi la sospensione (o la ripresa).
+3. poi la disconnessione (o la connessione).
 
-Durante la pressione, dopo ~1 s, lo schermo mostra una barra di avanzamento verso i 5 s, così si capisce
-che sta per scattare la sospensione e si può rilasciare prima per avere solo il toggle BUTTON.
+### A schermo
 
-### Sospensione
+- Pressione **sotto i 2 s**: nulla (pressione normale, solo toggle BUTTON).
+- **Da 2 s a 5 s**: in fondo allo schermo la scritta "DISCONNESSIONE" (o "CONNESSIONE" se i dispositivi
+  sono disconnessi) e una barra che si riempie; rilasciando prima resta solo il toggle BUTTON. Se
+  `longPressS` è minore di 4 s, la barra parte a metà del tempo.
+- **A 5 s**: nello stesso punto la barra diventa **subito uno slider animato** (cursore che va avanti e
+  indietro) con la stessa scritta, finché il lavoro non è finito; poi una **conferma breve** a tutto schermo
+  (~1 s):
+
+| Azione | Slider fino a | Conferma |
+| --- | --- | --- |
+| Disconnessione | tutti i dispositivi hanno confermato (o 500 ms) | "DISCONNESSO"; poi pallini **vuoti** (i dispositivi per il telecomando sono offline) e la scritta "DISCONNESSO" sotto la direzione |
+| Connessione | il **primo dispositivo risulta collegato** (al massimo 15 s) | "CONNESSO" (quali dispositivi lo sono si vede dai pallini); se nessuno accetta l'accoppiamento o si collega entro 15 s: "NESSUN DISPOSITIVO" |
+
+Nei log ogni passaggio ha il tempo (`t=...` in ms).
+
+### Disconnessione
 
 Telecomando:
 
-- invia `REMOTE_PAUSE` (firmato) a ogni dispositivo accoppiato e attende `REMOTE_PAUSE_ACK`, con qualche
-  ritrasmissione (es. 3 tentativi in ~300 ms); se un dispositivo non conferma si va avanti lo stesso
-  (scatterà il suo timeout di sicurezza, come con il telecomando spento);
-- **interrompe la comunicazione radio con i dispositivi**: niente più direzioni, heartbeat né riscoperta;
-  cancella le chiavi di sessione (alla ripresa se ne fanno di nuove);
+- invia `DISCONNECT` (firmato) a ogni dispositivo accoppiato e attende `DISCONNECT_ACK`, con
+  ritrasmissione (finestra 400 ms: il dispositivo può essere in modem sleep); dopo al massimo 500 ms va
+  avanti lo stesso (chi non ha confermato chiuderà la sessione allo scadere del suo timeout di sicurezza,
+  come con il telecomando spento);
+- **interrompe la comunicazione radio con i dispositivi**: niente più direzioni, heartbeat, riscoperta né
+  accoppiamenti; cancella le chiavi di sessione;
 - il **WiFi resta collegato al router**: OTA, API impostazioni e comandi seriali continuano a funzionare;
-- a schermo: messaggio "CONNESSIONI SOSPESE" per ~2 s, poi i pallini restano visibili ma in **grigio**
-  (stato "sospeso") con una scritta "PAUSA";
-- il joystick continua a mostrare la direzione a schermo, ma non la invia a nessuno.
+- il joystick continua a mostrare la direzione a schermo, ma non la invia a nessuno;
+- in `devices` i dispositivi sono `OFFLINE` con il motivo "disconnesso (pressione lunga di SW)"; il comando
+  `pair` è rifiutato finché non si riconnette con SW.
 
-Dispositivi, alla ricezione di `REMOTE_PAUSE` (solo se la firma è valida):
+Dispositivi, alla ricezione di `DISCONNECT` (solo se la firma è valida):
 
-- rispondono `REMOTE_PAUSE_ACK`;
+- rispondono `DISCONNECT_ACK`;
 - chiudono la sessione, tornano in modem sleep e **dimenticano l'accoppiamento** (MAC e chiave del
   telecomando): da qui in poi rifiutano i pacchetti di quel telecomando finché non si riaccoppia;
 - tornano all'**esecuzione senza joystick**: l'effetto LED in corso **continua com'è**, e il dispositivo
   risponde solo ad API, seriale e comandi ritardati. Il joystick fisico resta disattivato
   (`remoteControlWireless = true`).
 
-### Ripresa
+### Connessione
 
-Nuova pressione lunga: messaggio "CONNESSIONI RIPRESE", poi **gli stessi passaggi dell'accensione**:
+Nuova pressione lunga: **gli stessi passaggi dell'accensione**:
 
 1. accoppiamento HTTP (`/api/v1/remote/pair`) direttamente con ogni dispositivo di `espDevices.json`
    (niente `getInfoHello`): nuovi nonce, **nuova chiave di sessione**;
 2. heartbeat e sessioni come al solito; riparte la riscoperta periodica.
 
 I pallini ripartono dagli stati dell'avvio (vuoto → mezzo pieno → pieno) man mano che i dispositivi
-rispondono. Servono alcuni secondi prima di poter comandare i dispositivi.
+rispondono; lo slider "CONNESSIONE" resta a schermo finché il primo è collegato.
 
-La sospensione **non** viene salvata: dopo un riavvio il telecomando riparte con le connessioni attive.
+Lo stato "disconnesso" **non** viene salvato: dopo un riavvio il telecomando si connette come sempre.
 
 ## Accoppiamento (HTTP)
 
@@ -292,8 +306,8 @@ richiede di ricompilare il framework. Si usa invece una firma HMAC applicativa.
 | 4 | `SESSION_END` | tel → disp | torna in modem sleep |
 | 5 | `HEARTBEAT_ACK` | disp → tel | heartbeat accettato |
 | 6 | `UNKNOWN_SESSION` | disp → tel | firma non valida / sessione sconosciuta (es. dispositivo riavviato) → riaccoppiare |
-| 7 | `REMOTE_PAUSE` | tel → disp | telecomando sospeso (pressione lunga SW): chiudi la sessione, torna in modem sleep, dimentica l'accoppiamento, torna all'esecuzione senza joystick |
-| 8 | `REMOTE_PAUSE_ACK` | disp → tel | `REMOTE_PAUSE` accettato |
+| 7 | `DISCONNECT` | tel → disp | disconnessione (pressione lunga SW): chiudi la sessione, torna in modem sleep, dimentica l'accoppiamento, torna all'esecuzione senza joystick |
+| 8 | `DISCONNECT_ACK` | disp → tel | `DISCONNECT` accettato |
 
 ### Codici direzione (tabella esplicita, condivisa)
 
@@ -360,7 +374,7 @@ Il dispositivo converte il codice nella stringa (`"UP_BUTTON"`) e la passa a `re
 | `missedHeartbeats` | `3` | heartbeat senza ACK prima di considerare il dispositivo non collegato |
 | `rediscoveryS` | `60` | intervallo di riscoperta dei dispositivi non collegati |
 | `pairAttempts` | `2` | tentativi HTTP per dispositivo (il primo contatto dopo l'avvio spesso fallisce) |
-| `longPressS` | `5` | secondi di pressione di SW per sospendere / riprendere le connessioni (fase 5) |
+| `longPressS` | `5` | secondi di pressione di SW per disconnettere / riconnettere i dispositivi (fase 5) |
 | `remoteModemSleep` | `true` | modem sleep del telecomando a riposo; `false` = radio sempre accesa |
 
 Se il file manca si usano i default (come `joystick.json`); all'avvio il telecomando scrive nel log i valori
@@ -395,7 +409,7 @@ Bluetooth (`huge_app.csv`, niente OTA).
 | `/config/wireless.json` (`WirelessConfig`) | fatto (`longPressS` usato nella fase 5) |
 | Sessioni `SESSION_START` / `SESSION_END`, invio affidabile con ritrasmissione | fatto e provato (riposo e risveglio) |
 | Modem sleep: spento durante accoppiamento, sessione e attesa ACK, attivo a riposo (`remoteModemSleep`) | fatto e provato |
-| Pressione lunga di SW: annullamento del toggle BUTTON, sospensione (`REMOTE_PAUSE` + attesa di `REMOTE_PAUSE_ACK`, chiavi cancellate, WiFi collegato), ripresa come all'avvio, barra di avanzamento e pallini grigi con "PAUSA" | fase 5 |
+| Pressione lunga di SW: annullamento del toggle BUTTON, disconnessione (`DISCONNECT` + attesa di `DISCONNECT_ACK`, chiavi cancellate, WiFi collegato), connessione come all'avvio, barra da 2 s, poi slider fino al risultato, conferma breve ("DISCONNESSO" / "CONNESSO" / "NESSUN DISPOSITIVO"), pallini vuoti e scritta "DISCONNESSO" | fatto; schermo cambiato il 2026-11-18, da riprovare |
 
 ### Progetto generale (`Esp32Server`)
 
@@ -406,7 +420,7 @@ Bluetooth (`huge_app.csv`, niente OTA).
 | Ricevitore ESP-NOW: callback → coda → task (mittente, firma, `seq`) → `recvButtonByJoystick()` solo al cambio | fatto |
 | `HEARTBEAT_ACK` firmato, `UNKNOWN_SESSION` (max 1/s) | fatto |
 | `wirelessSessionTimeoutS`, sessioni con modem sleep a riposo (`WiFi.setSleep`), timeout di sicurezza | fatto e provato |
-| `REMOTE_PAUSE`: `REMOTE_PAUSE_ACK`, chiude la sessione, dimentica l'accoppiamento, esecuzione senza joystick | fase 5 |
+| `DISCONNECT`: `DISCONNECT_ACK`, chiude la sessione, dimentica l'accoppiamento, esecuzione senza joystick | fatto e provato |
 
 Attenzione: nel progetto generale `takeExclusiveExecution()` è un flag, non un mutex (vedi `ServicesCollector`).
 
@@ -439,9 +453,24 @@ Attenzione: nel progetto generale `takeExclusiveExecution()` è un flag, non un 
    Provato il **timeout di sicurezza**: telecomando staccato durante una sessione → 30 s dopo l'ultimo
    movimento il dispositivo scrive `fine sessione (nessun movimento per 30 s): modem sleep`.
    **Fase 4 fatta (2026-11-17).**
-5. **Sospensione/ripresa** con pressione lunga di SW (`REMOTE_PAUSE`/`REMOTE_PAUSE_ACK`, annullamento del
-   toggle BUTTON, ripresa come all'avvio, schermo). **Non ancora implementata.**
-6. **Misure**: corrente a riposo / in sessione su entrambi (es. con un tester USB), latenza percepita.
+5. **Disconnessione / connessione** con pressione lunga di SW (`DISCONNECT`/`DISCONNECT_ACK`, annullamento del
+   toggle BUTTON, connessione come all'avvio, schermo). Provata il 2026-11-17 come "sospensione / ripresa":
+   3 cicli; dalla pressione lunga: richiesta presa dal task wireless +36 ms, ACK del dispositivo +42 ms,
+   messaggio a schermo **+45 ms**; poi riaccoppiamento con una nuova chiave e `collegato`; da disconnesso
+   nessuna direzione arriva al dispositivo. Il 2026-11-18 rinominata in **disconnessione / connessione** (non è
+   una pausa: i dispositivi dimenticano il telecomando) e aggiunto il riscontro "CONNESSIONE in corso..." →
+   "CONNESSO" / "NESSUN DISPOSITIVO". Riprovata il 2026-11-18: 2 cicli; disconnessione → `DISCONNECT_ACK` +41 ms,
+   "DISCONNESSI 1/1" a schermo **+47 ms**; connessione → accoppiato con nuova chiave, collegato, "CONNESSO
+   MastroDevice" a schermo **+154–184 ms**; da disconnesso nessuna direzione arriva al dispositivo.
+   Poi, su richiesta: slider animato al posto del messaggio "in corso" (stesso punto della barra, riscontro
+   immediato), conferma breve (~1 s) senza nome del dispositivo, pallini **vuoti** da disconnessi (tolto lo
+   stato `DISCONNECTED` / pallino grigio). **Da riprovare.**
+   Telecomando: `Joystick::heldMs()` / `takeLongPress()`, `handleLongPress()` in `main.cpp`, stato del
+   collegamento in `WirelessManager` (`LINK_STATE`: `CONNECTED` / `DISCONNECTING` / `DISCONNECTED`),
+   schermo in `RemoteControlScreen` (barra, slider, conferma, scritta "DISCONNESSO").
+   Dispositivo: `DISCONNECT` in `WirelessReceiver` (`DISCONNECT_ACK`, fine sessione, `remotePairingClear()`).
+
+(La fase 6, misure di corrente e latenza, è stata tolta dal piano il 2026-11-18.)
 
 ## Come verificare
 
@@ -455,10 +484,13 @@ riposo, modem sleep, ultimo ACK e heartbeat persi.
 | Movimento del joystick | — (in `devices`: "sessione joystick attiva") | `inizio sessione: radio sempre accesa`, poi `Joystick direction: ...` a ogni cambio, mai due uguali di fila |
 | 15 s fermo | `fine sessione (15 s senza movimenti)` | `fine sessione (SESSION_END dal telecomando): modem sleep` |
 | A riposo | `devices`: `CONNECTED`, "ultimo ACK" sotto i 15 s circa, "invii affidabili scaduti" che non cresce | nessun messaggio |
-| Primo movimento dopo la pausa | — | `inizio sessione` e la direzione applicata; ritardo percepito al massimo di qualche centinaio di ms, solo su questo movimento |
+| Primo movimento dopo il riposo | — | `inizio sessione` e la direzione applicata; ritardo percepito al massimo di qualche centinaio di ms, solo su questo movimento |
 | Dispositivo riavviato | `sessione sconosciuta al dispositivo (riavviato?), riaccoppiamento`, poi `accoppiato` e `collegato` | `pacchetto scartato ... nessun telecomando accoppiato`, poi `telecomando ... accoppiato` |
 | Telecomando spento durante una sessione | — | dopo 30 s: `fine sessione (nessun movimento per 30 s): modem sleep` |
 | Dispositivo spento | dopo 3 heartbeat persi: `... heartbeat senza risposta, riaccoppiamento`, poi `non accoppiato: ...`; pallino **vuoto** | — |
+| SW premuto da 2 a 5 s | in fondo allo schermo "DISCONNESSIONE" (o "CONNESSIONE") e la barra che si riempie; rilasciando prima resta solo il toggle BUTTON | — |
+| SW premuto 5 s (disconnessione) | la barra diventa subito lo slider "DISCONNESSIONE"; `t=... pressione lunga di SW: disconnessione`, `DISCONNECT a N dispositivi`, `DISCONNECT_ACK da ...`, `dispositivi disconnessi: N/N hanno confermato`; conferma "DISCONNESSO" ~1 s, poi pallini **vuoti** e "DISCONNESSO" sotto la direzione; `devices`: "dispositivi DISCONNESSI", stato `OFFLINE` con motivo "disconnesso". Muovendo il joystick la direzione cambia a schermo ma non va ai dispositivi | eventuale direzione ripristinata (annullamento del toggle BUTTON), poi `fine sessione (DISCONNECT dal telecomando)` e `telecomando disconnesso: accoppiamento dimenticato`; i LED restano sull'effetto in corso |
+| SW premuto 5 s di nuovo (connessione) | la barra diventa subito lo slider "CONNESSIONE" (resta finché il primo dispositivo è collegato); `pressione lunga di SW: connessione`, `connessione: accoppiamento di N dispositivi`, poi `accoppiato` (nuova impronta) e `collegato`; conferma "CONNESSO" ~1 s, pallini di nuovo pieni. Se nessuno risponde: "NESSUN DISPOSITIVO" | `telecomando ... accoppiato` con la nuova impronta |
 
 Se qualcosa non torna: `pair` riaccoppia tutto; `remoteModemSleep: false` in `wireless.json` esclude il
 modem sleep del telecomando dalle cause.
@@ -484,8 +516,7 @@ stato rimosso nella fase 2, sostituito dal protocollo vero: resta nella storia d
 
 - ~~Compatibilità ESP-NOW v1/v2 in pratica (fase 0).~~ Verificata: vedi [Fase 0: risultati](#fase-0-risultati).
 - Comportamento con il **modem sleep attivo** sul dispositivo (fase 4): funziona a riposo (heartbeat
-  consegnati con poche ritrasmissioni) e al risveglio (primo movimento applicato, niente perso); il ritardo
-  del primo movimento resta da misurare (fase 6).
+  consegnati con poche ritrasmissioni) e al risveglio (primo movimento applicato, niente perso).
 - I LED a volte non si aggiornavano finché il dispositivo non è stato riavviato (2026-11-17): la radio e
   l'avvio degli effetti funzionavano (log). Da tenere d'occhio. Possibile causa da sistemare comunque: task
   radio e task LED toccano l'effetto in corso senza un vero lucchetto (`takeExclusiveExecution()` è un flag);

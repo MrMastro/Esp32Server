@@ -34,8 +34,30 @@ void Joystick::updateButton()
   {
     _buttonMode = !_buttonMode;
     _lastToggleMs = now;
+    _pressStartMs = now;
+    _pressReleased = false;
+    _longPressFired = false;
   }
+  // rilascio vero (non un rimbalzo subito dopo la pressione): la pressione lunga si interrompe
+  if (sw == HIGH && (now - _lastToggleMs) >= BUTTON_LOCKOUT_MS)
+    _pressReleased = true;
   _swLast = sw;
+}
+
+uint32_t Joystick::heldMs() const
+{
+  if (_pressReleased || _swLast != LOW)
+    return 0;
+  return millis() - _pressStartMs;
+}
+
+bool Joystick::takeLongPress(uint32_t thresholdMs)
+{
+  if (_longPressFired || heldMs() < thresholdMs)
+    return false;
+  _longPressFired = true;
+  _buttonMode = !_buttonMode; // annulla il toggle BUTTON di inizio pressione
+  return true;
 }
 
 J_DIRECTION Joystick::readBaseDirection()

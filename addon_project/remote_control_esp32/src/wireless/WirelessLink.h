@@ -36,6 +36,9 @@ void wirelessLinkRemovePeer(const uint8_t mac[WIRELESS_MAC_LEN]);
 // tutti (i dispositivi possono essere in modem sleep); altrimenti DIRECTION a tutti. Non bloccante.
 void wirelessSendDirection(J_DIRECTION direction);
 
+// Disconnesso (fase 5): la direzione si ricorda ma non si invia a nessuno e non apre sessioni
+void wirelessLinkSetDisconnected(bool disconnected);
+
 // Sessione (fase 4): aperta dal primo movimento, chiusa da WirelessManager dopo sessionTimeoutS
 bool wirelessLinkSessionActive();
 void wirelessLinkSetSessionActive(bool active);

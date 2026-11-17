@@ -23,6 +23,24 @@ void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const 
 // Testo della riga sotto l'intestazione (es. "IP 172.17.252.107  OTA ON").
 void remoteControlScreenSetNetworkInfo(const String &info);
 
+// Dispositivi disconnessi (pressione lunga di SW): scritta "DISCONNESSO" sotto la direzione
+void remoteControlScreenSetDisconnected(bool disconnected);
+
+// Barra di avanzamento della pressione lunga di SW: progress 0..1 con la scritta label
+// ("DISCONNESSIONE" / "CONNESSIONE"); progress < 0 la nasconde. Da chiamare a ogni giro.
+void remoteControlScreenSetHold(float progress, const char *label);
+
+// Slider animato in fondo allo schermo (stesso punto della barra della pressione lunga) con la scritta label
+// ("DISCONNESSIONE" / "CONNESSIONE"): lavoro in corso. nullptr lo nasconde.
+void remoteControlScreenSetBusy(const char *label);
+
+// true mentre lo slider e' a schermo: il joystick non va letto (direzione ferma, niente invii)
+bool remoteControlScreenBusy();
+
+// Messaggio a tutto schermo per durationMs (es. "DISCONNESSO"), poi torna la schermata normale.
+// Un nuovo messaggio sostituisce quello in corso.
+void remoteControlScreenShowMessage(const String &line1, const String &line2, uint16_t color, uint32_t durationMs);
+
 // Schermata definitiva della modalità remote_control.
 // showRawValues: true mostra centro calibrato e X/Y grezzi del joystick.
 void remoteControlOnDisplay(Joystick &joystick, J_DIRECTION direction, bool showRawValues = false);

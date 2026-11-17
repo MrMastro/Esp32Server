@@ -24,4 +24,7 @@ void remotePairingSet(const RemotePairing &pairing);
 // Copia del telecomando accoppiato; false se nessuno
 bool remotePairingGet(RemotePairing &out);
 
+// Dimentica il telecomando accoppiato (DISCONNECT): da qui i suoi pacchetti vengono rifiutati
+void remotePairingClear();
+
 #endif // REMOTE_PAIRING_H

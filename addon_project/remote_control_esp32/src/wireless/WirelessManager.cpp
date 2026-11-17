@@ -3,6 +3,8 @@
 #include "WirelessPairing.h"
 #include "devices/EspDevices.h"
 #include "system/ExclusiveExecution.h"
+#include "display/RemoteControlScreen.h"
+#include "display/Display.h" // colori RGB565_*
 #include <WiFi.h>
 
 // Priorita' basse come gli altri task del C6 (vedi main.cpp): un solo core, la seriale ha la precedenza
@@ -27,6 +29,37 @@ static volatile bool pairingInProgress = false;    // accoppiamento HTTP in cors
 static uint32_t lastRediscoveryMs = 0;
 static uint32_t radioHoldUntilMs = 0;              // radio accesa almeno fino a qui (attesa di ACK)
 static bool radioSleeping = false;                 // stato del modem sleep del telecomando applicato
+
+// Disconnessione / connessione con la pressione lunga di SW (fase 5)
+enum class LINK_STATE
+{
+  CONNECTED,     // funzionamento normale (dispositivi accoppiati o in accoppiamento)
+  DISCONNECTING, // DISCONNECT inviato, in attesa degli ACK
+  DISCONNECTED   // disconnesso: niente invii, heartbeat, riscoperta ne' accoppiamenti
+};
+static const uint32_t DISCONNECT_SEND_WINDOW_MS = 400; // ritrasmissione di DISCONNECT (dispositivi forse in modem sleep)
+static const uint32_t DISCONNECT_ACK_WAIT_MS = 500;    // attesa massima degli ACK, poi si va avanti lo stesso
+static const uint32_t RESULT_MESSAGE_MS = 1000;        // conferma breve: "DISCONNESSO" / "CONNESSO" / "NESSUN DISPOSITIVO"
+static const uint32_t CONNECTING_TIMEOUT_MS = 15000;   // slider "CONNESSIONE" al massimo per questo tempo
+static volatile LINK_STATE linkState = LINK_STATE::CONNECTED;
+static volatile bool connectToggleRequested = false;
+static uint32_t disconnectDeadlineMs = 0;
+// Riscontro a schermo della connessione richiesta con SW: slider "CONNESSIONE" finche' il primo
+// dispositivo risulta collegato (HEARTBEAT_ACK) o nessuno ha accettato l'accoppiamento
+static volatile bool connectingFeedback = false;
+static volatile int connectingPaired = 0;
+static uint32_t connectingStartMs = 0;
+
+// Fine del riscontro della connessione: via lo slider, conferma breve (DENTRO il lock)
+static void finishConnectingFeedback(bool connected)
+{
+  connectingFeedback = false;
+  remoteControlScreenSetBusy(nullptr);
+  if (connected)
+    remoteControlScreenShowMessage("CONNESSO", "", RGB565_GREEN, RESULT_MESSAGE_MS);
+  else
+    remoteControlScreenShowMessage("NESSUN", "DISPOSITIVO", RGB565_ORANGE, RESULT_MESSAGE_MS);
+}
 
 // ---------------------------------------------------------------------------
 // Utilita' (lo stato dei dispositivi si tocca DENTRO takeExclusiveExecution())
@@ -62,7 +95,8 @@ static void setDeviceStatus(const String &mac, ESP_DEVICE_STATUS status, bool pa
 // Accoda l'accoppiamento di un dispositivo (se non e' gia' in coda). Chiamabile ovunque.
 static bool requestPair(int index)
 {
-  if (index < 0 || index >= (int)espDevicesList().size() || pairQueue == nullptr || pairPending[index])
+  if (index < 0 || index >= (int)espDevicesList().size() || pairQueue == nullptr || pairPending[index] ||
+      linkState != LINK_STATE::CONNECTED)
     return false;
   pairPending[index] = true;
   uint8_t i = (uint8_t)index;
@@ -124,6 +158,14 @@ static void pairDevice(const EspDevice &device)
   state.lastCheckMs = millis();
 
   takeExclusiveExecution();
+  if (linkState != LINK_STATE::CONNECTED)
+  {
+    // disconnesso mentre l'accoppiamento era in corso: si scarta (alla connessione se ne fa uno nuovo)
+    freeExclusiveExecution();
+    return;
+  }
+  if (result == PAIR_RESULT::PAIRED)
+    connectingPaired = connectingPaired + 1;
   if (result == PAIR_RESULT::PAIRED)
     wirelessSessionSet(session); // sostituisce la sessione precedente; primo heartbeat subito
   else
@@ -160,6 +202,14 @@ static void pairingTask(void *pvParameters)
       pairingInProgress = false;
     }
     pairPending[index] = false;
+    // connessione richiesta con SW: finita la coda senza nessun dispositivo accoppiato -> riscontro a schermo
+    if (connectingFeedback && uxQueueMessagesWaiting(pairQueue) == 0 && connectingPaired == 0)
+    {
+      takeExclusiveExecution();
+      finishConnectingFeedback(false);
+      freeExclusiveExecution();
+      Serial.println("[Wireless] connessione: nessun dispositivo ha accettato l'accoppiamento");
+    }
   }
 }
 
@@ -222,7 +272,18 @@ static void handleRx(const WirelessRx &rx)
       s.connected = true;
       setDeviceStatus(mac, ESP_DEVICE_STATUS::CONNECTED, true, "");
       Serial.println("[Wireless] " + s.deviceName + " collegato (HEARTBEAT_ACK)");
+      if (connectingFeedback)
+        finishConnectingFeedback(true);
     }
+    break;
+
+  case WIRELESS_PKT_DISCONNECT_ACK:
+    if (rx.packet.version != WIRELESS_PROTOCOL_VERSION || !wirelessVerifyPacket(s.sessionKey, rx.packet) ||
+        rx.packet.seq <= s.rxSeq)
+      break;
+    s.rxSeq = rx.packet.seq;
+    s.disconnectAcked = true;
+    Serial.println("[Wireless] t=" + String(millis()) + " DISCONNECT_ACK da " + s.deviceName);
     break;
 
   default:
@@ -386,6 +447,121 @@ static void rediscovery()
   freeExclusiveExecution();
 }
 
+// Imposta lo stesso stato a tutti i dispositivi (DENTRO il lock)
+static void setAllDevicesStatus(ESP_DEVICE_STATUS status, const String &error, const String &pairError)
+{
+  for (const EspDevice &device : espDevicesList())
+  {
+    auto it = espDevicesState().find(device.macAdress);
+    if (it == espDevicesState().end())
+      continue;
+    EspDeviceState state = it->second;
+    state.status = status;
+    state.paired = false;
+    state.error = error;
+    state.pairError = pairError;
+    state.lastCheckMs = millis();
+    espDevicesSetState(state);
+  }
+}
+
+// Disconnessione: per i dispositivi e' come spegnere il telecomando, ma vengono avvisati subito
+static void startDisconnect()
+{
+  takeExclusiveExecution();
+  linkState = LINK_STATE::DISCONNECTING;
+  connectingFeedback = false;
+  disconnectDeadlineMs = millis() + DISCONNECT_ACK_WAIT_MS;
+  wirelessLinkSetDisconnected(true);
+  wirelessLinkSetSessionActive(false);
+  int sent = 0;
+  for (auto &entry : wirelessSessionsMutable())
+  {
+    WirelessSession &s = entry.second;
+    s.disconnectAcked = false;
+    if (s.lost)
+      continue;
+    wirelessLinkSendReliable(s, WIRELESS_PKT_DISCONNECT, DISCONNECT_SEND_WINDOW_MS);
+    sent++;
+  }
+  radioHoldUntilMs = max(radioHoldUntilMs, millis() + DISCONNECT_ACK_WAIT_MS + ACK_HOLD_MS);
+  freeExclusiveExecution();
+  Serial.println("[Wireless] t=" + String(millis()) + " disconnessione: DISCONNECT a " + String(sent) + " dispositivi");
+}
+
+// Fine dell'attesa degli ACK (tutti confermati o tempo scaduto): sessioni cancellate, pallini grigi
+static void finishDisconnectIfDone()
+{
+  if (linkState != LINK_STATE::DISCONNECTING)
+    return;
+  takeExclusiveExecution();
+  int total = 0, acked = 0;
+  for (const auto &entry : wirelessSessions())
+  {
+    if (entry.second.lost)
+      continue;
+    total++;
+    if (entry.second.disconnectAcked)
+      acked++;
+  }
+  if (acked < total && (int32_t)(millis() - disconnectDeadlineMs) < 0)
+  {
+    freeExclusiveExecution();
+    return; // si aspettano ancora degli ACK
+  }
+  std::vector<String> macs;
+  for (const auto &entry : wirelessSessions())
+    macs.push_back(entry.first);
+  for (const String &mac : macs)
+    wirelessSessionRemove(mac); // chiavi cancellate: alla connessione se ne fanno di nuove
+  // pallino vuoto: per il telecomando i dispositivi disconnessi sono offline
+  setAllDevicesStatus(ESP_DEVICE_STATUS::OFFLINE, "disconnesso (pressione lunga di SW)", "disconnesso (pressione lunga di SW)");
+  linkState = LINK_STATE::DISCONNECTED;
+  remoteControlScreenSetDisconnected(true);
+  remoteControlScreenSetBusy(nullptr);
+  remoteControlScreenShowMessage("DISCONNESSO", "", RGB565_ORANGE, RESULT_MESSAGE_MS);
+  freeExclusiveExecution();
+  Serial.println("[Wireless] t=" + String(millis()) + " dispositivi disconnessi: " + String(acked) + "/" + String(total) +
+                 " hanno confermato" +
+                 (acked < total ? " (gli altri chiuderanno la sessione allo scadere del loro timeout)" : ""));
+}
+
+// Connessione: come all'accensione (accoppiamento da capo, nuove chiavi)
+static void startConnect()
+{
+  takeExclusiveExecution();
+  linkState = LINK_STATE::CONNECTED;
+  wirelessLinkSetDisconnected(false);
+  setAllDevicesStatus(ESP_DEVICE_STATUS::OFFLINE, "in connessione", "");
+  remoteControlScreenSetDisconnected(false);
+  connectingPaired = 0;
+  connectingFeedback = true;
+  connectingStartMs = millis(); // lo slider "CONNESSIONE" e' gia' a schermo (main.cpp)
+  freeExclusiveExecution();
+  lastRediscoveryMs = millis();
+  int queued = wirelessRequestPairAll();
+  Serial.println("[Wireless] t=" + String(millis()) + " connessione: accoppiamento di " + String(queued) + " dispositivi");
+  if (queued == 0)
+  {
+    takeExclusiveExecution();
+    finishConnectingFeedback(false);
+    freeExclusiveExecution();
+  }
+}
+
+static void handleConnectToggleRequest()
+{
+  if (!connectToggleRequested)
+    return;
+  connectToggleRequested = false;
+  Serial.println("[Wireless] t=" + String(millis()) + " richiesta di disconnessione/connessione presa dal task wireless");
+  if (linkState == LINK_STATE::CONNECTED)
+    startDisconnect();
+  else if (linkState == LINK_STATE::DISCONNECTED)
+    startConnect();
+  // DISCONNECTING: si ignora (disconnessione gia' in corso: il suo slider resta a schermo)
+}
+
 static void wirelessTask(void *pvParameters)
 {
   Serial.println("[Task] wirelessTask avviato");
@@ -402,9 +578,22 @@ static void wirelessTask(void *pvParameters)
     }
     handleTxResults();
     processPending();
-    endSessionIfIdle();
-    sendHeartbeats();
-    rediscovery();
+    handleConnectToggleRequest();
+    finishDisconnectIfDone();
+    if (connectingFeedback && millis() - connectingStartMs >= CONNECTING_TIMEOUT_MS)
+    {
+      // accoppiati ma nessun HEARTBEAT_ACK entro il tempo massimo
+      takeExclusiveExecution();
+      finishConnectingFeedback(false);
+      freeExclusiveExecution();
+      Serial.println("[Wireless] connessione: nessun dispositivo collegato entro " + String(CONNECTING_TIMEOUT_MS / 1000) + " s");
+    }
+    if (linkState == LINK_STATE::CONNECTED)
+    {
+      endSessionIfIdle();
+      sendHeartbeats();
+      rediscovery();
+    }
     updateRadioSleep();
   }
 }
@@ -432,9 +621,25 @@ int wirelessRequestPairAll()
   return queued;
 }
 
+void wirelessRequestConnectToggle()
+{
+  connectToggleRequested = true;
+}
+
+bool wirelessManagerDisconnected()
+{
+  return linkState != LINK_STATE::CONNECTED;
+}
+
+uint32_t wirelessManagerLongPressMs()
+{
+  return (uint32_t)cfg.longPressS * 1000;
+}
+
 String wirelessManagerStatus()
 {
-  String out = "[Wireless] sessione joystick " + String(wirelessLinkSessionActive() ? "attiva" : "a riposo") +
+  String out = String(linkState == LINK_STATE::CONNECTED ? "" : "[Wireless] dispositivi DISCONNESSI (pressione lunga di SW per riconnettere)\n") +
+               "[Wireless] sessione joystick " + String(wirelessLinkSessionActive() ? "attiva" : "a riposo") +
                ", radio del telecomando " + String(radioSleeping ? "in modem sleep" : "accesa") + "\n";
   uint32_t now = millis();
   for (const auto &entry : wirelessSessions())

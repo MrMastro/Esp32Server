@@ -13,7 +13,7 @@ struct WirelessConfig
   uint8_t missedHeartbeats = 3;     // heartbeat senza ACK prima di considerare il dispositivo non collegato
   uint16_t rediscoveryS = 60;       // intervallo di riscoperta dei dispositivi non collegati
   uint8_t pairAttempts = 2;         // tentativi HTTP per dispositivo (il primo contatto dopo l'avvio spesso fallisce)
-  uint8_t longPressS = 5;           // secondi di pressione di SW per sospendere / riprendere (fase 5)
+  uint8_t longPressS = 5;           // secondi di pressione di SW per disconnettere / riconnettere (fase 5)
   bool remoteModemSleep = true;     // modem sleep del telecomando a riposo (false: radio sempre accesa, consuma di piu')
 
   // Carica i valori dal file; i campi mancanti restano ai default.

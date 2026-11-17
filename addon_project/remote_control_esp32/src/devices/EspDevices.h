@@ -32,8 +32,9 @@ struct EspDevice
 enum class ESP_DEVICE_STATUS
 {
   OFFLINE,   // non contattabile        -> pallino vuoto
-  ONLINE,    // risponde a getInfoHello -> pallino mezzo pieno
-  CONNECTED  // collegato (da fare)     -> pallino pieno
+  ONLINE,    // risponde all'accoppiamento HTTP -> pallino mezzo pieno
+  CONNECTED  // collegato (HEARTBEAT_ACK) -> pallino pieno
+  // disconnesso con la pressione lunga di SW: OFFLINE (pallino vuoto), motivo in pairError
 };
 
 String espDeviceStatusToString(ESP_DEVICE_STATUS status);

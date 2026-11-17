@@ -18,10 +18,100 @@ static int shownX = -1000;
 static int shownY = -1000;
 static String networkInfo = "";
 
+// Joystick wireless: disconnessione, barra della pressione lunga, messaggio temporaneo
+static bool disconnected = false;
+static float holdProgress = -1.0f;
+static const char *holdLabel = nullptr;
+static int shownHoldStep = -1; // barra disegnata (in passi da 1/40): si ridisegna solo se cambia
+static String messageLine1 = "";
+static String messageLine2 = "";
+static uint16_t messageColor = RGB565_WHITE;
+static uint32_t messageUntilMs = 0;
+static bool messageShown = false;
+static const int HOLD_STEPS = 40;
+static const char *busyLabel = nullptr;  // slider "lavoro in corso" (nullptr = nascosto)
+static int shownSliderStep = -1;
+static bool forceNextFrame = false; // ridisegno senza attendere FRAME_MS (comparsa dello slider)
+static bool sliderLogged = false;
+static const uint32_t SLIDER_PERIOD_MS = 1200; // andata e ritorno del cursore dello slider
+static const int SLIDER_STEPS = 40;
+
 void remoteControlScreenSetNetworkInfo(const String &info)
 {
   networkInfo = info;
   firstFrame = true;
+}
+
+void remoteControlScreenSetDisconnected(bool value)
+{
+  if (disconnected != value)
+    firstFrame = true;
+  disconnected = value;
+}
+
+void remoteControlScreenSetHold(float progress, const char *label)
+{
+  holdProgress = progress;
+  holdLabel = label;
+}
+
+void remoteControlScreenSetBusy(const char *label)
+{
+  if (label != nullptr && busyLabel == nullptr)
+  {
+    forceNextFrame = true; // lo slider deve sostituire la barra subito, al giro stesso
+    sliderLogged = false;
+  }
+  busyLabel = label;
+}
+
+bool remoteControlScreenBusy()
+{
+  return busyLabel != nullptr;
+}
+
+// Posizione del cursore dello slider (0..SLIDER_STEPS, avanti e indietro); -1 se nascosto
+static int sliderStep()
+{
+  if (busyLabel == nullptr)
+    return -1;
+  uint32_t phase = millis() % SLIDER_PERIOD_MS;
+  uint32_t half = SLIDER_PERIOD_MS / 2;
+  uint32_t pos = phase < half ? phase : SLIDER_PERIOD_MS - phase; // 0..half..0
+  return (int)(pos * SLIDER_STEPS / half);
+}
+
+void remoteControlScreenShowMessage(const String &line1, const String &line2, uint16_t color, uint32_t durationMs)
+{
+  messageLine1 = line1;
+  messageLine2 = line2;
+  messageColor = color;
+  messageUntilMs = millis() + durationMs;
+  messageShown = false;
+  firstFrame = true;
+}
+
+static int holdStep()
+{
+  if (holdProgress < 0)
+    return -1;
+  return (int)(min(holdProgress, 1.0f) * HOLD_STEPS);
+}
+
+static void drawMessage()
+{
+  Serial.println("[Screen] t=" + String(millis()) + " messaggio: " + messageLine1 + " " + messageLine2);
+  gfx->fillScreen(RGB565_BLACK);
+  if (messageLine2.length() == 0)
+  {
+    displayPrintCentered(messageLine1, 105, 3, messageColor);
+  }
+  else
+  {
+    displayPrintCentered(messageLine1, 85, 3, messageColor);
+    displayPrintCentered(messageLine2, 125, 3, messageColor);
+  }
+  displayFlush();
 }
 
 static void drawFrame(Joystick &joystick, J_DIRECTION direction, const RemoteControlScreenOptions &options)
@@ -55,6 +145,9 @@ static void drawFrame(Joystick &joystick, J_DIRECTION direction, const RemoteCon
   uint16_t color = joystick.buttonMode() ? RGB565_ORANGE : RGB565_GREEN;
   displayPrintCentered(text, 110 - 4 * size, size, color);
 
+  if (disconnected)
+    displayPrintCentered("DISCONNESSO", 135, 2, RGB565_RED);
+
   gfx->drawFastHLine(0, 160, LCD_WIDTH, RGB565_DARKGREY);
 
   // valori grezzi (opzionali) e stato del tasto
@@ -79,6 +172,29 @@ static void drawFrame(Joystick &joystick, J_DIRECTION direction, const RemoteCon
     displayPrintCentered(options.bottomLabel, 222, 2, RGB565_CYAN);
   }
 
+  // pressione lunga di SW in corso: scritta e barra che si riempie fino alla disconnessione / connessione
+  int step = holdStep();
+  if (step >= 0)
+  {
+    gfx->fillRect(0, 196, LCD_WIDTH, LCD_HEIGHT - 196, RGB565_BLACK);
+    displayPrintCentered(holdLabel != nullptr ? holdLabel : "", 198, 2, RGB565_YELLOW);
+    const int16_t barX = 10, barY = 220, barW = LCD_WIDTH - 20, barH = 14;
+    gfx->drawRect(barX, barY, barW, barH, RGB565_YELLOW);
+    gfx->fillRect(barX + 2, barY + 2, (int16_t)((barW - 4) * step / HOLD_STEPS), barH - 4, RGB565_YELLOW);
+  }
+
+  // lavoro in corso (dopo la pressione lunga): stessa scritta e, al posto della barra, uno slider animato
+  int slider = sliderStep();
+  if (slider >= 0)
+  {
+    gfx->fillRect(0, 196, LCD_WIDTH, LCD_HEIGHT - 196, RGB565_BLACK);
+    displayPrintCentered(busyLabel, 198, 2, RGB565_YELLOW);
+    const int16_t barX = 10, barY = 220, barW = LCD_WIDTH - 20, barH = 14, knobW = 50;
+    gfx->drawRect(barX, barY, barW, barH, RGB565_YELLOW);
+    int16_t knobX = barX + 2 + (int16_t)((barW - 4 - knobW) * slider / SLIDER_STEPS);
+    gfx->fillRect(knobX, barY + 2, knobW, barH - 4, RGB565_YELLOW);
+  }
+
   displayFlush();
 }
 
@@ -98,16 +214,35 @@ void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const 
   }
 
   uint32_t now = millis();
-  if (now - lastFrameMs < FRAME_MS)
+  if (now - lastFrameMs < FRAME_MS && !forceNextFrame)
   {
     return;
+  }
+  forceNextFrame = false;
+
+  // messaggio temporaneo: copre la schermata finche' non scade, poi ridisegno completo
+  if (messageUntilMs != 0)
+  {
+    if ((int32_t)(now - messageUntilMs) < 0)
+    {
+      if (!messageShown)
+      {
+        drawMessage();
+        messageShown = true;
+        lastFrameMs = now;
+      }
+      return;
+    }
+    messageUntilMs = 0;
+    firstFrame = true;
   }
 
   bool rawChanged = options.showRawValues &&
                     (abs(joystick.rawX() - shownX) > RAW_CHANGE_THRESHOLD ||
                      abs(joystick.rawY() - shownY) > RAW_CHANGE_THRESHOLD);
   bool dirty = firstFrame || statusBarChanged() || deviceDotsChanged() || direction != shownDirection ||
-               joystick.switchPressed() != shownSwitch || rawChanged;
+               joystick.switchPressed() != shownSwitch || rawChanged || holdStep() != shownHoldStep ||
+               sliderStep() != shownSliderStep;
   if (!dirty)
   {
     return;
@@ -119,7 +254,15 @@ void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const 
   shownSwitch = joystick.switchPressed();
   shownX = joystick.rawX();
   shownY = joystick.rawY();
+  shownHoldStep = holdStep();
+  shownSliderStep = sliderStep();
+  uint32_t drawStart = millis();
   drawFrame(joystick, direction, options);
+  if (busyLabel != nullptr && !sliderLogged)
+  {
+    sliderLogged = true;
+    Serial.println("[Screen] t=" + String(drawStart) + " slider a schermo (disegno " + String(millis() - drawStart) + " ms)");
+  }
 }
 
 void remoteControlOnDisplay(Joystick &joystick, J_DIRECTION direction, bool showRawValues)

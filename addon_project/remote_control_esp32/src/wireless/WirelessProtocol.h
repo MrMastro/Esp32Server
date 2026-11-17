@@ -112,8 +112,8 @@ enum : uint8_t
   WIRELESS_PKT_SESSION_END = 4,     // tel -> disp: torna in modem sleep (fase 4)
   WIRELESS_PKT_HEARTBEAT_ACK = 5,   // disp -> tel: heartbeat accettato (fase 3)
   WIRELESS_PKT_UNKNOWN_SESSION = 6, // disp -> tel: firma non valida / sessione sconosciuta (fase 3)
-  WIRELESS_PKT_REMOTE_PAUSE = 7,    // tel -> disp: telecomando sospeso (fase 5)
-  WIRELESS_PKT_REMOTE_PAUSE_ACK = 8 // disp -> tel: REMOTE_PAUSE accettato (fase 5)
+  WIRELESS_PKT_DISCONNECT = 7,      // tel -> disp: disconnessione (pressione lunga di SW): dimentica l'accoppiamento (fase 5)
+  WIRELESS_PKT_DISCONNECT_ACK = 8   // disp -> tel: DISCONNECT accettato (fase 5)
 };
 
 #define WIRELESS_HMAC_LEN 8 // primi 8 byte di HMAC-SHA256

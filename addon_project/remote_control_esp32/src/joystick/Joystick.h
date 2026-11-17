@@ -33,6 +33,15 @@ public:
   int centerX() const { return _cfg.centerX; }
   int centerY() const { return _cfg.centerY; }
 
+  // Pressione lunga di SW (disconnessione / connessione del joystick wireless):
+  // da quanto tempo SW e' tenuto premuto senza interruzioni (0 se rilasciato)
+  uint32_t heldMs() const;
+  // true UNA volta per pressione quando SW resta premuto almeno thresholdMs: in quel caso annulla il
+  // toggle BUTTON fatto all'inizio della pressione (alla read() successiva torna la direzione di prima)
+  bool takeLongPress(uint32_t thresholdMs);
+  // true se la pressione in corso ha gia' fatto scattare la pressione lunga
+  bool longPressFired() const { return _longPressFired; }
+
   // Converte una direzione base nella sua variante *_BUTTON (CENTER -> CENTER_BUTTON, ...).
   static J_DIRECTION toButtonDirection(J_DIRECTION base);
 
@@ -47,6 +56,10 @@ private:
   int _swLast = HIGH;
   uint32_t _lastToggleMs = 0;
   bool _buttonMode = false;
+
+  uint32_t _pressStartMs = 0;  // millis() del fronte di pressione accettato
+  bool _pressReleased = true;  // SW rilasciato dopo l'ultima pressione (rimbalzi esclusi)
+  bool _longPressFired = false;
 
   J_DIRECTION _lastDirection = J_DIRECTION::NONE;
   bool _changed = false;

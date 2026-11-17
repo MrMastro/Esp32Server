@@ -37,6 +37,8 @@ struct WirelessSession
   uint32_t pendingDeadlineMs = 0;
   bool pendingInFlight = false;  // inviato, esito radio non ancora arrivato
   uint32_t pendingSentMs = 0;
+
+  bool disconnectAcked = false;  // DISCONNECT confermato (fase 5)
 };
 
 enum class PAIR_RESULT

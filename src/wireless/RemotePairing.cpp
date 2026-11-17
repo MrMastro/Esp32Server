@@ -12,6 +12,14 @@ void remotePairingSet(const RemotePairing &pairing)
   portEXIT_CRITICAL(&pairingMux);
 }
 
+void remotePairingClear()
+{
+  portENTER_CRITICAL(&pairingMux);
+  current = RemotePairing();
+  current.generation = ++lastGeneration;
+  portEXIT_CRITICAL(&pairingMux);
+}
+
 bool remotePairingGet(RemotePairing &out)
 {
   portENTER_CRITICAL(&pairingMux);

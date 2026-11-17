@@ -455,6 +455,11 @@ static void executeSerialMessage(const String &msg)
     break;
   case SERIAL_COMMAND::PAIR:
   {
+    if (wirelessManagerDisconnected())
+    {
+      printCommandError(command, "dispositivi disconnessi: riconnettili con la pressione lunga di SW");
+      break;
+    }
     int queued = wirelessRequestPairAll();
     if (queued > 0)
       printCommandSuccess(command, "accoppiamento di " + String(queued) + " dispositivi avviato: il risultato arriva sulla seriale");
@@ -660,6 +665,41 @@ static void commandDelayedTask(void *pvParameters)
   }
 }
 
+// Pressione lunga di SW: da LONG_PRESS_SHOW_MS la barra a schermo; a longPressS il toggle BUTTON fatto
+// alla pressione viene annullato (ai dispositivi torna la direzione di prima) e si disconnettono /
+// riconnettono i dispositivi.
+static const uint32_t LONG_PRESS_SHOW_MS = 2000;
+
+static void handleLongPress(J_DIRECTION &direction)
+{
+  uint32_t longPressMs = wirelessManagerLongPressMs();
+  if (longPressMs == 0)
+    return; // joystick wireless non avviato
+  uint32_t showFrom = min(LONG_PRESS_SHOW_MS, longPressMs / 2);
+  uint32_t held = joystick.heldMs();
+
+  if (joystick.takeLongPress(longPressMs))
+  {
+    direction = joystick.read(); // toggle BUTTON annullato: direzione di prima della pressione
+    if (joystick.changed())
+      wirelessSendDirection(direction);
+    bool connecting = wirelessManagerDisconnected();
+    Serial.println("[Wireless] t=" + String(millis()) + " pressione lunga di SW: " + (connecting ? "connessione" : "disconnessione"));
+    // riscontro immediato: la barra diventa subito uno slider animato (stesso punto, stessa scritta) finche'
+    // il task wireless non ha finito (DISCONNECT + ACK, oppure accoppiamento); poi conferma breve a schermo
+    remoteControlScreenSetHold(-1, nullptr);
+    remoteControlScreenSetBusy(connecting ? "CONNESSIONE" : "DISCONNESSIONE");
+    wirelessRequestConnectToggle();
+    return;
+  }
+
+  if (held >= showFrom && !joystick.longPressFired())
+    remoteControlScreenSetHold((float)(held - showFrom) / (float)(longPressMs - showFrom),
+                               wirelessManagerDisconnected() ? "CONNESSIONE" : "DISCONNESSIONE");
+  else
+    remoteControlScreenSetHold(-1, nullptr);
+}
+
 // Lettura del joystick e schermo (modalità remote_control)
 static void joystickTask(void *pvParameters)
 {
@@ -670,11 +710,20 @@ static void joystickTask(void *pvParameters)
     // durante il conto alla rovescia del riavvio lo schermo è di commandDelayedTask
     if (!rebootPending)
     {
-      // la lettura avviene a ogni giro, così nessuna pressione viene persa
-      J_DIRECTION direction = joystick.read();
-      // joystick wireless: al cambio di direzione, pacchetto firmato a tutti i dispositivi accoppiati
-      if (joystick.changed())
-        wirelessSendDirection(direction);
+      // ultima direzione letta: mentre c'e' lo slider (disconnessione / connessione in corso) il joystick non
+      // si legge, quindi la direzione a schermo resta ferma e non si invia nulla
+      static J_DIRECTION direction = J_DIRECTION::NONE;
+      if (!remoteControlScreenBusy())
+      {
+        // la lettura avviene a ogni giro, così nessuna pressione viene persa
+        direction = joystick.read();
+        // joystick wireless: al cambio di direzione, pacchetto firmato a tutti i dispositivi accoppiati
+        if (joystick.changed())
+          wirelessSendDirection(direction);
+
+        // pressione lunga di SW: disconnette / riconnette i dispositivi (WIRELESS_JOYSTICK.md, fase 5)
+        handleLongPress(direction);
+      }
 
       // --- TEST: schermata con "JOYSTICK TEST" in fondo (decommenta questa e commenta quella sotto) ---
       // parametri: stampa le direzioni sulla seriale, mostra centro e X/Y grezzi

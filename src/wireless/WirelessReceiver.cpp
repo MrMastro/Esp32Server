@@ -77,7 +77,7 @@ static bool ensurePeer(const uint8_t *mac)
 static bool isRemotePacketType(uint8_t type)
 {
   return type == WIRELESS_PKT_SESSION_START || type == WIRELESS_PKT_DIRECTION || type == WIRELESS_PKT_HEARTBEAT ||
-         type == WIRELESS_PKT_SESSION_END || type == WIRELESS_PKT_REMOTE_PAUSE;
+         type == WIRELESS_PKT_SESSION_END || type == WIRELESS_PKT_DISCONNECT;
 }
 
 // Rifiuto con risposta UNKNOWN_SESSION (non firmata: non si ha la chiave giusta), cosi' il telecomando
@@ -136,14 +136,20 @@ static void applyDirection(uint8_t code, const uint8_t *mac)
     directionHandler(name);
 }
 
-static void sendHeartbeatAck(const RemotePairing &pairing)
+// Risposta firmata al telecomando (HEARTBEAT_ACK, DISCONNECT_ACK)
+static void sendSignedReply(const RemotePairing &pairing, uint8_t type)
 {
   if (!ensurePeer(pairing.remoteMac))
     return;
-  WirelessPacket ack;
-  if (!wirelessBuildPacket(pairing.sessionKey, WIRELESS_PKT_HEARTBEAT_ACK, ++txSeq, lastDirection, ack))
+  WirelessPacket reply;
+  if (!wirelessBuildPacket(pairing.sessionKey, type, ++txSeq, lastDirection, reply))
     return;
-  esp_now_send(pairing.remoteMac, (const uint8_t *)&ack, sizeof(ack));
+  esp_now_send(pairing.remoteMac, (const uint8_t *)&reply, sizeof(reply));
+}
+
+static void sendHeartbeatAck(const RemotePairing &pairing)
+{
+  sendSignedReply(pairing, WIRELESS_PKT_HEARTBEAT_ACK);
 }
 
 bool wirelessReceiverBegin(WirelessDirectionHandler onDirection, uint32_t sessionTimeoutS)
@@ -247,6 +253,15 @@ void wirelessReceiverProcess(uint32_t waitMs)
     break;
   case WIRELESS_PKT_SESSION_END:
     endSession("SESSION_END dal telecomando");
+    break;
+  case WIRELESS_PKT_DISCONNECT:
+    // disconnessione dal telecomando (pressione lunga di SW): come se fosse spento, ma avvisati subito.
+    // Si conferma, si chiude la sessione e si dimentica l'accoppiamento; l'effetto LED in corso continua.
+    // Per ricollegarsi il telecomando rifa' l'accoppiamento da capo.
+    sendSignedReply(pairing, WIRELESS_PKT_DISCONNECT_ACK);
+    endSession("DISCONNECT dal telecomando");
+    remotePairingClear();
+    Serial.println("[Wireless] telecomando disconnesso: accoppiamento dimenticato, esecuzione senza joystick");
     break;
   default:
     // altri tipi: fasi successive
