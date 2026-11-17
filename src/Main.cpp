@@ -66,13 +66,6 @@ void setup_communication(SettingsModel sm)
   serialService.logInfoln("Create SerialCableTaskExecution for comunicate with serial com", "MAIN");
   xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
 
-  // Task for wireless remote control (only if enabled: the physical joystick is then disabled)
-  if (sm.joystickSettings.remoteControlWireless)
-  {
-    serialService.logInfoln("Remote control wireless enabled: physical joystick disabled, create RemoteControlWirelessTaskExecution", "MAIN");
-    xTaskCreate(remoteControlWirelessTask, "RemoteControlWirelessTaskExecution", STACK_SIZE_REMOTE_WIRELESS, NULL, PRIORITY_REMOTE_WIRELESS, NULL);
-  }
-
   // Task for communication
   COMMUNICATION_MODE mode = communicationModeStringToEnum(sm.communicationMode);
   switch (mode)
@@ -233,6 +226,21 @@ void setup(void)
 
   delay(100);
 
+  // Task for wireless remote control (only if enabled: the physical joystick is then disabled).
+  // Created after setup_communication: ESP-NOW needs the WiFi already started
+  if (s.joystickSettings.remoteControlWireless)
+  {
+    if (mastroServer.isAvaible())
+    {
+      serialService.logInfoln("Remote control wireless enabled: physical joystick disabled, create RemoteControlWirelessTaskExecution", "MAIN");
+      xTaskCreate(remoteControlWirelessTask, "RemoteControlWirelessTaskExecution", STACK_SIZE_REMOTE_WIRELESS, NULL, PRIORITY_REMOTE_WIRELESS, NULL);
+    }
+    else
+    {
+      serialService.logWarning("Remote control wireless enabled but WiFi is not active: wireless remote control not started", "MAIN", "setup");
+    }
+  }
+
 #ifndef EXCLUDE_BLUETOOTH
   // Bluetooth build (env Esp32ComBT): the firmware (~2MB) needs huge_app.csv, which has a single
   // app slot, so OTA can never work: it is not started even with "ota_upload": true
@@ -384,12 +392,14 @@ void remoteControlWirelessTask(void *pvParameters)
 {
   serialService.logInfoln("Remote Control Wireless Task execution", "MAIN");
 
-  // TODO: init ESP-NOW receiver (callback -> queue)
+  // ESP-NOW receiver: signed packets from the paired remote; recvButtonByJoystick() only when the direction changes.
+  // The "sleepy joystick" state is ignored: the remote has priority (see WIRELESS_JOYSTICK.md)
+  wirelessReceiverBegin([](const String &direction) { recvButtonByJoystick(mapStringToJdirections(direction)); },
+                        s.joystickSettings.wirelessSessionTimeoutS);
 
   while (true)
   {
-    // TODO: wait for packets from the queue, verify signature/seq, call recvButtonByJoystick() on change
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    wirelessReceiverProcess(1000);
   }
 }
 

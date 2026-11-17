@@ -13,6 +13,9 @@ public:
     int pinAnalogY;
     // true: comandi dal telecomando wireless (ESP-NOW); il joystick fisico e' disabilitato e i suoi pin non vengono toccati
     bool remoteControlWireless = false;
+    // Telecomando wireless: senza movimenti per questo tempo il dispositivo chiude da solo la sessione e torna
+    // in modem sleep (sicurezza se il telecomando si spegne). Deve essere > sessionTimeoutS del telecomando.
+    int wirelessSessionTimeoutS = 30;
 
     // Joystick fisico attivo solo se abilitato e non in modalita' wireless
     bool usePhysicalJoystick() const
@@ -28,6 +31,7 @@ public:
         json["pinAnalogX"] = pinAnalogX;
         json["pinAnalogY"] = pinAnalogY;
         json["remoteControlWireless"] = remoteControlWireless;
+        json["wirelessSessionTimeoutS"] = wirelessSessionTimeoutS;
     }
 
     // Deserializzazione dallo stesso stile di LedSettings
@@ -48,6 +52,9 @@ public:
         pinAnalogX = doc["pinAnalogX"];
         pinAnalogY = doc["pinAnalogY"];
         remoteControlWireless = doc["remoteControlWireless"] | false; // assente nei vecchi file -> false
+        wirelessSessionTimeoutS = doc["wirelessSessionTimeoutS"] | 30;
+        if (wirelessSessionTimeoutS < 5)
+            wirelessSessionTimeoutS = 5;
 
         return true;
     }

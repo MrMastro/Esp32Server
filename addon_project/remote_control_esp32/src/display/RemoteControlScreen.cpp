@@ -82,11 +82,8 @@ static void drawFrame(Joystick &joystick, J_DIRECTION direction, const RemoteCon
   displayFlush();
 }
 
-void remoteControlScreenUpdate(Joystick &joystick, const RemoteControlScreenOptions &options)
+void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const RemoteControlScreenOptions &options)
 {
-  // la lettura avviene a ogni giro, così nessuna pressione viene persa
-  J_DIRECTION direction = joystick.read();
-
   if (options.logDirections && joystick.changed())
   {
     Serial.println("[Joystick] direction: " + mapJdirectionsToString(direction));
@@ -125,9 +122,9 @@ void remoteControlScreenUpdate(Joystick &joystick, const RemoteControlScreenOpti
   drawFrame(joystick, direction, options);
 }
 
-void remoteControlOnDisplay(Joystick &joystick, bool showRawValues)
+void remoteControlOnDisplay(Joystick &joystick, J_DIRECTION direction, bool showRawValues)
 {
   RemoteControlScreenOptions options;
   options.showRawValues = showRawValues;
-  remoteControlScreenUpdate(joystick, options);
+  remoteControlScreenUpdate(joystick, direction, options);
 }

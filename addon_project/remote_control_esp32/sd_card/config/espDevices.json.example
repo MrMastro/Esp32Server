@@ -1,0 +1,9 @@
+[
+  {
+    "deviceName": "ESP32_Device",
+    "ip": "192.168.1.50",
+    "macAdress": "AA:BB:CC:DD:EE:FF",
+    "color": "#52A3BA",
+    "devicePassword": "esp32password"
+  }
+]

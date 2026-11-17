@@ -23,6 +23,7 @@
 #include "services/ServiceImplementations/SerialService.h"
 
 #include "routes/Routes.h"
+#include "wireless/WirelessReceiver.h"
 
 void setup_communication(SettingsModel sm);
 void initServices(HardwareSerial* serialPointer);

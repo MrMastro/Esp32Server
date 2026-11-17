@@ -1,0 +1,10 @@
+{
+  "sessionTimeoutS": 15,
+  "heartbeatActiveMs": 1000,
+  "heartbeatIdleS": 15,
+  "missedHeartbeats": 3,
+  "rediscoveryS": 60,
+  "pairAttempts": 2,
+  "longPressS": 5,
+  "remoteModemSleep": true
+}

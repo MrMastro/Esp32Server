@@ -21,6 +21,10 @@
 #include "joystick/Joystick.h"
 #include "joystick/JoystickConfig.h"
 #include "test/JoystickDisplayTest.h"
+#include "wireless/WirelessPairing.h"
+#include "wireless/WirelessLink.h"
+#include "wireless/WirelessManager.h"
+#include "wireless/WirelessConfig.h"
 #include "display/RemoteControlScreen.h"
 
 static SettingsModel settings;
@@ -288,6 +292,15 @@ static void test()
   Serial.println("[Test] test() eseguita");
 }
 
+// devices: stato dei dispositivi conosciuti (online, accoppiati) e sessioni wireless
+static void printDevices(const String &command)
+{
+  printCommandSuccess(command, "dispositivi:");
+  Serial.println(espDevicesStateToJson());
+  Serial.println("[Wireless] " + wirelessLinkStats());
+  Serial.print(wirelessManagerStatus());
+}
+
 // Comandi riconosciuti (in C++ lo switch non accetta String: si mappa su un enum).
 // I primi sono gli stessi di CMD nel progetto principale; gli ultimi sono solo di questo progetto.
 enum class SERIAL_COMMAND
@@ -298,6 +311,8 @@ enum class SERIAL_COMMAND
   INFO_IP,                   // "info_ip"
   SETTINGS,                  // "settings"
   HELLO,                     // "hello"
+  DEVICES,                   // "devices"
+  PAIR,                      // "pair"
   TEST,                      // "t"
   NONE,
   UNKNOWN
@@ -320,6 +335,10 @@ static SERIAL_COMMAND parseSerialCommand(String command)
     return SERIAL_COMMAND::SETTINGS;
   if (command == "hello")
     return SERIAL_COMMAND::HELLO;
+  if (command == "devices")
+    return SERIAL_COMMAND::DEVICES;
+  if (command == "pair")
+    return SERIAL_COMMAND::PAIR;
   if (command == "t")
     return SERIAL_COMMAND::TEST;
   return SERIAL_COMMAND::UNKNOWN;
@@ -332,6 +351,8 @@ static SERIAL_COMMAND parseSerialCommand(String command)
 //   info_ip                          -> indirizzo IP
 //   settings                         -> ristampa la configurazione caricata
 //   hello,<ip>                       -> diagnosi: GET http://<ip>/api/v1/getInfoHello
+//   devices                          -> stato dei dispositivi (online, accoppiati) e sessioni wireless
+//   pair                             -> ricontatta e riaccoppia tutti i dispositivi (in background)
 //   t                                -> esegue test() (funzione di prova libera)
 // Raccolta del messaggio seriale come SerialService::getMsgbySerial() del progetto principale
 // (Serial.readString): i caratteri si scrivono in sequenza e il messaggio è completo quando
@@ -429,11 +450,23 @@ static void executeSerialMessage(const String &msg)
     else
       printCommandSuccess(command, espDevicesProbe(param));
     break;
+  case SERIAL_COMMAND::DEVICES:
+    printDevices(command);
+    break;
+  case SERIAL_COMMAND::PAIR:
+  {
+    int queued = wirelessRequestPairAll();
+    if (queued > 0)
+      printCommandSuccess(command, "accoppiamento di " + String(queued) + " dispositivi avviato: il risultato arriva sulla seriale");
+    else
+      printCommandError(command, "accoppiamento gia' in corso o nessun dispositivo in espDevices.json");
+  }
+    break;
   case SERIAL_COMMAND::TEST:
     test();
     break;
   case SERIAL_COMMAND::UNKNOWN:
-    printCommandError(command, "Comando non riconosciuto (disponibili: reboot[,ms], change_communication_mode,<mode>, info, info_ip, settings, hello,<ip>, t)");
+    printCommandError(command, "Comando non riconosciuto (disponibili: reboot[,ms], change_communication_mode,<mode>, info, info_ip, settings, hello,<ip>, devices, pair, t)");
     break;
   case SERIAL_COMMAND::NONE:
   default:
@@ -441,8 +474,7 @@ static void executeSerialMessage(const String &msg)
   }
 }
 
-static void startTasks();      // definita sotto, insieme ai task
-static void startDeviceScan(); // idem
+static void startTasks(); // definita sotto, insieme ai task
 
 void setup()
 {
@@ -488,6 +520,12 @@ void setup()
                  wifiStatus.ip);
   delay(1500);
 
+  // ESP-NOW per il joystick wireless (serve il WiFi gia' attivo)
+  String linkError;
+  bool linkReady = wirelessLinkBegin(linkError);
+  if (!linkReady)
+    Serial.println("[Wireless] ESP-NOW non avviato: " + linkError);
+
   // 4) OTA (solo se ota_upload = true) e API impostazioni
   otaBegin(settings);
   serverBegin();
@@ -517,8 +555,16 @@ void setup()
   // 6) Task (serial, API/OTA, comandi ritardati, joystick)
   startTasks();
 
-  // 7) Ultima cosa: contatto dei dispositivi conosciuti, in background
-  startDeviceScan();
+  // 7) Ultima cosa: joystick wireless (heartbeat, riaccoppiamento, riscoperta) e accoppiamento
+  //    dei dispositivi conosciuti, in background
+  if (linkReady)
+  {
+    WirelessConfig wirelessConfig;
+    if (sdAvailable)
+      wirelessConfig.loadFromFile(SD_WIRELESS_CONFIG);
+    wirelessManagerBegin(wirelessConfig);
+    wirelessRequestPairAll();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -624,47 +670,22 @@ static void joystickTask(void *pvParameters)
     // durante il conto alla rovescia del riavvio lo schermo è di commandDelayedTask
     if (!rebootPending)
     {
+      // la lettura avviene a ogni giro, così nessuna pressione viene persa
+      J_DIRECTION direction = joystick.read();
+      // joystick wireless: al cambio di direzione, pacchetto firmato a tutti i dispositivi accoppiati
+      if (joystick.changed())
+        wirelessSendDirection(direction);
+
       // --- TEST: schermata con "JOYSTICK TEST" in fondo (decommenta questa e commenta quella sotto) ---
       // parametri: stampa le direzioni sulla seriale, mostra centro e X/Y grezzi
-      // testJoystickOnDisplay(joystick, false, true);
+      // testJoystickOnDisplay(joystick, direction, false, true);
 
       // Schermata definitiva. Parametro: true = mostra centro e X/Y grezzi del joystick
-      remoteControlOnDisplay(joystick, false);
+      remoteControlOnDisplay(joystick, direction, false);
     }
     freeExclusiveExecution();
     vTaskDelay(TASK_DELAY_TICKS);
   }
-}
-
-// Contatta una volta i dispositivi conosciuti (espDevices.json) e poi termina.
-// La rete si usa FUORI dal lock (ogni dispositivo può impiegare fino a 7s per tentativo);
-// il lock serve solo ad aggiornare lo stato letto dallo schermo.
-#define PRIORITY_DEVICE_SCAN 1
-#define STACK_SIZE_DEVICE_SCAN 6144
-static const uint8_t DEVICE_SCAN_ATTEMPTS = 2; // il primo contatto dopo l'avvio spesso fallisce
-
-static void deviceScanTask(void *pvParameters)
-{
-  const std::vector<EspDevice> &devices = espDevicesList(); // la lista non cambia dopo l'avvio
-  Serial.println("[Devices] contatto " + String(devices.size()) + " dispositivi...");
-  for (const EspDevice &device : devices)
-  {
-    EspDeviceState state = espDevicesCheck(device, DEVICE_SCAN_ATTEMPTS);
-    takeExclusiveExecution();
-    espDevicesSetState(state);
-    freeExclusiveExecution();
-    Serial.println("[Devices] " + device.deviceName + " (" + device.ip + "): " + espDeviceStatusToString(state.status) +
-                   (state.error.length() > 0 ? " - " + state.error : String("")));
-  }
-  Serial.println("[Devices] scansione completata");
-  vTaskDelete(NULL);
-}
-
-static void startDeviceScan()
-{
-  if (espDevicesList().empty())
-    return;
-  xTaskCreate(deviceScanTask, "DeviceScanTaskExecution", STACK_SIZE_DEVICE_SCAN, NULL, PRIORITY_DEVICE_SCAN, NULL);
 }
 
 static void startTasks()

@@ -7,6 +7,6 @@
 // Da chiamare in loop al posto di remoteControlOnDisplay(); commentare la chiamata per disattivarlo.
 // logDirections: se true stampa sulla seriale la direzione a ogni cambio.
 // showRawValues: se true mostra centro calibrato e X/Y grezzi del joystick.
-void testJoystickOnDisplay(Joystick &joystick, bool logDirections = true, bool showRawValues = true);
+void testJoystickOnDisplay(Joystick &joystick, J_DIRECTION direction, bool logDirections = true, bool showRawValues = true);
 
 #endif // JOYSTICK_DISPLAY_TEST_H

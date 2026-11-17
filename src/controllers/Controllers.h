@@ -29,6 +29,9 @@ void getAvaibleEffects(AsyncWebServerRequest *request);
 void saveSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 void saveInitialSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 
+//RemoteControllers (joystick wireless)
+void remotePair(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+
 //------------------------------------------------------------------------------------------------------------
 
 //utils

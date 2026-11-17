@@ -113,7 +113,8 @@ una configurazione basta modificare il file sulla SD dal PC, senza ricaricare nu
 
 Il contenuto da copiare nella root della SD è in [`sd_card/`](sd_card/) (quindi `sd_card/config/joystick.json` → `/config/joystick.json`).
 
-In git sono versionati solo `default_main_settings.json` (modello senza dati reali) e `joystick.json`.
+In git sono versionati solo `default_main_settings.json` (modello senza dati reali), `joystick.json`,
+`wireless.json` e `espDevices.json.example` (modello senza dati reali).
 Tutti gli altri file in `sd_card/config/` sono ignorati perché contengono dati sensibili e cambiano da PC a PC.
 Il firmware legge sempre **`/config/main_settings.json`**: copiare `default_main_settings.json` in
 `main_settings.json`, inserire le proprie credenziali e mettere quello sulla SD.
@@ -156,31 +157,39 @@ Comportamento della rete (come `MastroServer` del progetto principale):
 
 ### /config/espDevices.json
 
-Lista dei dispositivi conosciuti (ESP32 del progetto principale), compilata a mano: al massimo **10** (gli altri vengono ignorati). Può essere vuota (`[]`); se il file manca la lista è vuota. Non è versionato (contiene IP e MAC della rete di casa).
+Lista dei dispositivi conosciuti (ESP32 del progetto principale), compilata a mano: al massimo **10** (gli altri vengono ignorati). Può essere vuota (`[]`); se il file manca la lista è vuota. Non è versionato (contiene IP, MAC e password della rete di casa): il modello è `sd_card/config/espDevices.json.example`, da copiare in `espDevices.json` e personalizzare.
 
 ```json
 [
-  { "deviceName": "Esp32Server", "ip": "172.17.252.192", "macAdress": "14:33:5C:02:7B:A0", "color": "#52A3BA" }
+  { "deviceName": "MastroDevice", "ip": "172.17.252.192", "macAdress": "14:33:5C:02:7B:A0", "color": "#52A3BA",
+    "devicePassword": "password_del_dispositivo" }
 ]
 ```
 
 | Campo | Significato |
 | --- | --- |
-| `deviceName` | Nome del dispositivo (solo descrittivo) |
-| `ip` | Indirizzo su cui chiamare `GET http://<ip>/api/v1/getInfoHello` (obbligatorio) |
+| `deviceName` | `deviceName` del `settings.json` del dispositivo: **deve coincidere** (serve per l'accoppiamento) |
+| `ip` | Indirizzo del dispositivo (obbligatorio) |
 | `macAdress` | MAC atteso nella risposta: identifica il dispositivo (obbligatorio, maiuscole/minuscole indifferenti) |
 | `color` | Colore del pallino a schermo, `#RRGGBB` (se manca o non è valido: bianco) |
+| `devicePassword` | `devicePassword` del `settings.json` del dispositivo (se manca il dispositivo non viene contattato) |
 
-Un dispositivo è **online** se risponde a `getInfoHello` con HTTP 200 e lo stesso `macAdress`. I dispositivi vengono contattati **all'avvio, come ultima cosa**, in un task in background (lo schermo resta attivo): ogni dispositivo offline viene ritentato una volta (timeout 7 s per tentativo), perché il primo contatto dopo l'avvio spesso fallisce. L'esito è nel log seriale (`[Devices] ...`).
+I dispositivi vengono contattati **all'avvio, come ultima cosa**, in un task in background (lo schermo resta attivo), direttamente con l'accoppiamento del joystick wireless (`POST http://<ip>/api/v1/remote/pair`, vedi [docs/WIRELESS_JOYSTICK.md](docs/WIRELESS_JOYSTICK.md)): un dispositivo è **online** se risponde, **accoppiato** se accetta `deviceName` e `devicePassword` e il MAC coincide. Chi non risponde viene ritentato una volta (timeout 7 s per tentativo), perché il primo contatto dopo l'avvio spesso fallisce. L'esito è nel log seriale (`[Devices] ...`, `[Wireless] ...`) e nel comando `devices`.
 
 A schermo, sotto l'intestazione, c'è un pallino per dispositivo nel suo `color`: **vuoto** = offline, **mezzo pieno** = online, **pieno** = collegato (da fare).
 
-Nota: sul telecomando il risparmio energetico WiFi (modem sleep) è disattivato: con il modem sleep attivo su entrambi gli ESP32 il primo contatto diretto tra loro falliva.
+Nota: il modem sleep (risparmio energetico WiFi) del telecomando viene spento durante l'accoppiamento HTTP: con il modem sleep attivo su entrambi gli ESP32 il primo contatto diretto tra loro falliva. A riposo è attivo (vedi `remoteModemSleep` in `wireless.json`).
 
-## Collegamento con i dispositivi (in progetto)
+### /config/wireless.json
 
-Il collegamento continuo telecomando → dispositivi (ESP-NOW, sessioni per il risparmio energetico,
-`wirelessJoystick` nel progetto generale) è descritto in [docs/WIRELESS_JOYSTICK.md](docs/WIRELESS_JOYSTICK.md).
+Parametri del joystick wireless (heartbeat, sessioni, riscoperta, modem sleep): tabella completa in
+[docs/WIRELESS_JOYSTICK.md](docs/WIRELESS_JOYSTICK.md#configurazioni). Se il file manca si usano i default.
+
+## Collegamento con i dispositivi (joystick wireless)
+
+Il collegamento continuo telecomando → dispositivi (ESP-NOW, accoppiamento, heartbeat, sessioni per il
+risparmio energetico, `remoteControlWireless` nel progetto generale) è descritto in
+[docs/WIRELESS_JOYSTICK.md](docs/WIRELESS_JOYSTICK.md), con lo stato di ogni fase e come verificare che funzioni.
 
 ## Comandi seriali
 
@@ -193,6 +202,8 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `info` / `info_ip` | Stato del dispositivo / indirizzo IP |
 | `settings` | Ristampa la configurazione caricata |
 | `hello,<ip>` | Diagnosi: `GET http://<ip>/api/v1/getInfoHello` verso un IP qualsiasi |
+| `devices` | Stato dei dispositivi (online, accoppiati, motivo), statistiche ESP-NOW e sessioni wireless con l'impronta della chiave |
+| `pair` | Riaccoppia tutti i dispositivi (in background) |
 | `t` | `test()`: funzione di prova libera |
 
 ## Struttura del codice
@@ -207,7 +218,9 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE, OTA (ArduinoOTA) |
 | `src/settings/SettingsValidator.*` | Validazione delle richieste all'API impostazioni |
 | `src/joystick/` | Algoritmo del joystick, configurazione JSON, enum `J_DIRECTION` (copia di quello del progetto principale) |
-| `src/devices/` | Dispositivi conosciuti (`espDevices.json`), stato online/offline, chiamata a `getInfoHello` |
+| `src/devices/` | Dispositivi conosciuti (`espDevices.json`), stato online/offline, client HTTP minimo |
+| `src/wireless/` | Joystick wireless: protocollo condiviso (`WirelessProtocol.h`), accoppiamento, ESP-NOW, heartbeat (`WirelessManager`), `wireless.json` |
+| `src/test/` | Prove: schermata joystick |
 | `src/system/` | `take/freeExclusiveExecution()`: mutex tra i task FreeRTOS (display e SD condividono il bus SPI) |
 | `src/test/` | `testJoystickOnDisplay()`: mostra a schermo la stringa `J_DIRECTION` e i valori grezzi |
 

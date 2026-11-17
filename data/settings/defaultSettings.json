@@ -27,6 +27,7 @@
     "pinSwitch": 32,
     "pinAnalogX": 34,
     "pinAnalogY": 35,
+    "wirelessSessionTimeoutS": 30,
     "remoteControlWireless": false
   }
 }

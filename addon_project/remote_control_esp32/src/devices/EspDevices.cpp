@@ -7,7 +7,6 @@
 static const uint16_t ESP_DEVICES_HTTP_PORT = 80;
 static const uint32_t ESP_DEVICES_HTTP_TIMEOUT_MS = 7000; // l'Esp32Server può impiegare ~5s a rispondere
 static const size_t ESP_DEVICES_MAX_RESPONSE = 2048;
-static const char *GET_INFO_HELLO_PATH = "/api/v1/getInfoHello";
 
 static std::vector<EspDevice> devices;
 static std::map<String, EspDeviceState> devicesState;
@@ -103,6 +102,7 @@ bool espDevicesLoad(const char *path, bool sdAvailable, String *info)
     device.ip = item["ip"] | "";
     device.macAdress = normalizeMac(item["macAdress"] | "");
     device.color = item["color"] | "";
+    device.devicePassword = item["devicePassword"] | "";
     if (!hexColorTo565(device.color, device.color565))
       device.color565 = 0xFFFF; // colore mancante o non valido: bianco
     if (device.ip.length() == 0 || device.macAdress.length() == 0)
@@ -143,9 +143,11 @@ const std::map<String, EspDeviceState> &espDevicesState()
   return devicesState;
 }
 
-// GET minimale su HTTP in chiaro (niente HTTPClient: si porterebbe dietro il TLS e
+// Richiesta minimale su HTTP in chiaro (niente HTTPClient: si porterebbe dietro il TLS e
 // appesantirebbe il firmware, che deve restare sotto lo slot OTA).
-static bool httpGet(const String &ip, const char *path, int &statusCode, String &body, String &error)
+// method "GET" (requestBody ignorato) o "POST" (requestBody JSON).
+static bool httpRequest(const char *method, const String &ip, const char *path, const String &requestBody,
+                        int &statusCode, String &body, String &error)
 {
   IPAddress address;
   if (!address.fromString(ip))
@@ -167,9 +169,16 @@ static bool httpGet(const String &ip, const char *path, int &statusCode, String 
     return false;
   }
 
-  client.print(String("GET ") + path + " HTTP/1.1\r\n" +
-               "Host: " + ip + "\r\n" +
-               "Connection: close\r\n\r\n");
+  bool post = strcmp(method, "POST") == 0;
+  String request = String(method) + " " + path + " HTTP/1.1\r\n" +
+                   "Host: " + ip + "\r\n" +
+                   "Connection: close\r\n";
+  if (post)
+    request += "Content-Type: application/json\r\nContent-Length: " + String(requestBody.length()) + "\r\n";
+  request += "\r\n";
+  if (post)
+    request += requestBody; // un'unica scrittura: il server riceve il body in un solo pezzo
+  client.print(request);
 
   // Si legge finché: la risposta è completa (header + Content-Length byte di body),
   // il server chiude la connessione, o scade il timeout.
@@ -219,58 +228,14 @@ static bool httpGet(const String &ip, const char *path, int &statusCode, String 
   return true;
 }
 
-// Contatta il dispositivo e restituisce il nuovo stato. Solo rete: non tocca lo stato condiviso.
-static EspDeviceState checkDevice(const EspDevice &device)
+static bool httpGet(const String &ip, const char *path, int &statusCode, String &body, String &error)
 {
-  EspDeviceState state;
-  state.deviceName = device.deviceName;
-  state.ip = device.ip;
-  state.macAdress = device.macAdress;
-  state.color = device.color;
-  state.color565 = device.color565;
-  state.status = ESP_DEVICE_STATUS::OFFLINE;
-
-  int statusCode = 0;
-  String body, error;
-  if (!httpGet(device.ip, GET_INFO_HELLO_PATH, statusCode, body, error))
-  {
-    state.error = error;
-  }
-  else if (statusCode != 200)
-  {
-    state.error = "HTTP " + String(statusCode);
-  }
-  else
-  {
-    JsonDocument doc;
-    if (deserializeJson(doc, body))
-    {
-      state.error = "risposta JSON non valida";
-    }
-    else
-    {
-      // all'ip indicato deve rispondere proprio quel dispositivo
-      String reportedMac = normalizeMac(doc["macAdress"] | "");
-      if (reportedMac != device.macAdress)
-        state.error = "macAdress diverso: " + reportedMac;
-      else
-        state.status = ESP_DEVICE_STATUS::ONLINE;
-    }
-  }
-  state.lastCheckMs = millis();
-  return state;
+  return httpRequest("GET", ip, path, "", statusCode, body, error);
 }
 
-EspDeviceState espDevicesCheck(const EspDevice &device, uint8_t attempts)
+bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, int &statusCode, String &responseBody, String &error)
 {
-  EspDeviceState state;
-  for (uint8_t i = 0; i < max<uint8_t>(attempts, 1); i++)
-  {
-    state = checkDevice(device);
-    if (state.status != ESP_DEVICE_STATUS::OFFLINE)
-      break;
-  }
-  return state;
+  return httpRequest("POST", ip, path, jsonBody, statusCode, responseBody, error);
 }
 
 void espDevicesSetState(const EspDeviceState &state)
@@ -279,14 +244,6 @@ void espDevicesSetState(const EspDeviceState &state)
   if (current.status != state.status)
     stateVersion++;
   current = state;
-}
-
-void espDevicesScan(uint8_t attempts)
-{
-  for (const EspDevice &device : devices)
-  {
-    espDevicesSetState(espDevicesCheck(device, attempts));
-  }
 }
 
 String espDevicesProbe(const String &ip, const char *path)
@@ -319,6 +276,9 @@ String espDevicesStateToJson()
     item["status"] = espDeviceStatusToString(state.status);
     if (state.error.length() > 0)
       item["error"] = state.error;
+    item["paired"] = state.paired;
+    if (state.pairError.length() > 0)
+      item["pairError"] = state.pairError;
   }
   String out;
   serializeJsonPretty(doc, out);
