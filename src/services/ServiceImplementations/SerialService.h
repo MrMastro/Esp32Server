@@ -8,24 +8,22 @@
 #include <models/DataModelling.h>
 #include <utils/SerialSimple.h>
 #include <exceptions/exceptions.h>
+#ifndef EXCLUDE_BLUETOOTH
+#ifndef EXCLUDE_BLUETOOTH
 #include "BluetoothSerial.h"
+#endif
+#endif
 
 class SerialService : public Service
 {
 public:
     SerialService();
-    SerialService(unsigned long baud, String deviceName, BluetoothSerial* btlPointer, bool isMaster = false);   //Serial and SerialBluetooth
-    DEPRECATED SerialService(unsigned long baud, BluetoothSerial* btlPointer, String deviceName, AsyncWebServer *server, const char *url = "/webserial"); //All Serials
     boolean isAvaible() override;
-    void initSerialBegin(unsigned long baud, uint32_t config = SERIAL_8N1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
+#ifndef EXCLUDE_BLUETOOTH
     void initSerialBtBegin(String localName, BluetoothSerial* bluetoothSerialPointer, bool isMaster = false);
-    void initSerialWebBegin(AsyncWebServer *server, const char *url);
+#endif
 
     void attachSerial(HardwareSerial* serial);
-
-    // void attachSerial(HardwareSerial* serialPointerParam, WebSerialClass* webSerialPointerParam) override;
-
-    void initAllSerials(unsigned long baud, BluetoothSerial* bluetoothPointer, String deviceName,  AsyncWebServer *server, const char *url = "/webserial");
     
     boolean availableSerial();
     boolean availableSerialBt();
@@ -44,7 +42,9 @@ public:
     void logError(String msg, String subject, String context);
 protected:
     HardwareSerial* serialPointer;
-    BluetoothSerial* btSerialPointer;
+    // Stream (BluetoothSerial ne deriva): print/read non dipendono dalla libreria Bluetooth.
+    // Resta nullptr se il Bluetooth non e' attivo o e' escluso dalla build (EXCLUDE_BLUETOOTH)
+    Stream* btSerialPointer;
     void onInitServiceCollector() override;
     
 private:

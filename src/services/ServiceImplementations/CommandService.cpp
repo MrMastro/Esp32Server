@@ -123,14 +123,21 @@ StatusInfo CommandService::changeCommunicationMode(std::vector<String> params)
   String newCommunicationMode = params.at(0);
   COMMUNICATION_MODE cm = communicationModeStringToEnum(newCommunicationMode);
 
-  serialService->logInfoln("qui","changeCommunicationMode");
-
   if (cm == COMMUNICATION_MODE::UNKNOWN_MODE)
   {
     res = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
     res.setDescription("Communication mode is not valid");
     return res;
   }
+
+#ifdef EXCLUDE_BLUETOOTH
+  if (cm == COMMUNICATION_MODE::BLUETOOTH_MODE)
+  {
+    res = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+    res.setDescription("Bluetooth is excluded from this firmware (EXCLUDE_BLUETOOTH)");
+    return res;
+  }
+#endif
 
   boolean operationDone = ((SettingService *)servicesCollector.getService("SettingService"))->changeSetting("communicationMode", newCommunicationMode);
 

@@ -6,7 +6,9 @@ SettingsModel s;
 LedPresetListModel ledPresets;
 
 AsyncWebServer webServer(80);
+#ifndef EXCLUDE_BLUETOOTH
 BluetoothSerial SerialBT;
+#endif
 
 // Deprecated: MastroLed myRgbStript; // LEDStripDriver(Din: 19, Cin: 18);
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> *ws2811Matrix = nullptr;
@@ -92,9 +94,18 @@ void setup_communication(SettingsModel sm)
     break;
 
   case COMMUNICATION_MODE::BLUETOOTH_MODE:
+#ifdef EXCLUDE_BLUETOOTH
+    // Bluetooth excluded from this build (build flag EXCLUDE_BLUETOOTH): fall back to AP mode
+    serialService.logWarning("Communication mode is BLUETOOTH but Bluetooth is excluded from this firmware (EXCLUDE_BLUETOOTH): falling back to AP mode", "MAIN", "setup_communication");
+    mastroServer = MastroServer(&webServer, "AP", sm.ssidWIFI, sm.passwordWIFI, sm.ssidAP, sm.passwordAP, sm.deviceName, sm.devicePassword, sm.debug, ledPin);
+    AP_MODE_PAUSE_LED = true;
+    initRoutes(mastroServer);
+    infoWebServer();
+#else
     serialService.logInfoln("Communication mode is BLUETOOTH, init Bluetooth and Bluetooth Serial", "MAIN");
     serialService.initSerialBtBegin(sm.deviceName, &SerialBT);
     xTaskCreate(serialBtTask, "SerialBluetoothTaskExecution", STACK_SIZE_BLUETOOTH_SERVER, NULL, PRIORITY_BLUETOOTH_SERVER, NULL);
+#endif
     break;
 
   // Case WIP or Defaults
@@ -222,9 +233,16 @@ void setup(void)
 
   delay(100);
 
+#ifndef EXCLUDE_BLUETOOTH
+  // Bluetooth build (env Esp32ComBT): the firmware (~2MB) needs huge_app.csv, which has a single
+  // app slot, so OTA can never work: it is not started even with "ota_upload": true
+  if (s.otaUpload)
+  {
+    serialService.logWarning("ota_upload is true but OTA is not available in the Bluetooth firmware (single app partition): ignored", "MAIN", "setup");
+  }
+#else
   // OTA (WiFi/AP only, and only with "ota_upload": true): during the update the other tasks are
   // paused (busy flag), so they don't compete for CPU and flash with the transfer.
-  // With huge_app.csv there is no second app slot, so ota_upload must stay false.
   if (s.otaUpload && mastroServer.isAvaible())
   {
     serialService.logInfoln("OTA upload enabled", "MAIN");
@@ -234,6 +252,7 @@ void setup(void)
         []() { if (servicesCollector.isBusyForServiceApi()) servicesCollector.freeExclusiveExecution(); });
     xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", STACK_SIZE_OTA, NULL, PRIORITY_OTA, NULL);
   }
+#endif
   xTaskCreate(ledTask, "LedTaskExecution", STACK_SIZE_LED_EFFECTS, NULL, PRIORITY_LED_EFFECTS, NULL);
   xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
   //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
@@ -257,6 +276,7 @@ void apiServerTask(void *pvParameters) {
   }
 }
 
+#ifndef EXCLUDE_BLUETOOTH
 // Serial bt task check input for bluetooth message
 void serialBtTask(void *pvParameters)
 {
@@ -279,6 +299,7 @@ void serialBtTask(void *pvParameters)
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
+#endif
 
 // Serial Cable task check input for usb Serial message or pin
 void serialCableTask(void *pvParameters)

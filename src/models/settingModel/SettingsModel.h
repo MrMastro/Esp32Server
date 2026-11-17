@@ -42,8 +42,8 @@ public:
     String passwordWIFI;
     LedSettingsModel ledSettings;
     JoystickSettingsModel joystickSettings;
-    // true: abilita l'upload del firmware via WiFi (ArduinoOTA). Richiede una tabella
-    // partizioni con due slot app: con huge_app.csv deve restare false
+    // true: abilita l'upload del firmware via WiFi (ArduinoOTA). Funziona solo nel firmware
+    // senza Bluetooth (env Esp32Com, min_spiffs.csv); nel firmware con Bluetooth viene ignorato
     boolean otaUpload = false;
 
     String toJson() const

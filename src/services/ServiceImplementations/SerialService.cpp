@@ -13,26 +13,6 @@ SerialService::SerialService()
     btSerialPointer = nullptr;
 }
 
-/**
- * Create a SerialService with Serial and bluetooth Serial
- */
-SerialService::SerialService(unsigned long baud, String deviceName, BluetoothSerial *btlPointer, bool isMaster)
-{
-    SerialService();
-    initSerialBegin(baud);
-    initSerialBtBegin(deviceName, btlPointer, isMaster);
-    isOperative = true;
-}
-
-/**
- * Create a SerialService with all 3 Serial avaible (Serial, bluetooth Serial and web Serial)
- */
-SerialService::SerialService(unsigned long baud, BluetoothSerial *btlPointer, String deviceName, AsyncWebServer *server, const char *url)
-{
-    SerialService();
-    initAllSerials(baud, btlPointer, deviceName, server, url);
-}
-
 boolean SerialService::isAvaible()
 {
     return isOperative;
@@ -58,24 +38,7 @@ void SerialService::attachSerial(HardwareSerial *serial)
     }
 }
 
-// WARNING Deprercated
-void SerialService::initSerialBegin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms, uint8_t rxfifo_full_thrhd)
-{
-    if (serialPointer != nullptr)
-    {
-        logError("Serial already previously initializated, cannot reinizilizer", "SerialService", "initSerialBegin");
-        return;
-    }
-
-    if (serialPointer == nullptr)
-    {
-        Serial.begin(baud, config, rxPin, txPin, invert, timeout_ms, rxfifo_full_thrhd);
-        logInfoln("Init Serial with baud: " + baud, "SerialService");
-        serialPointer = &Serial;
-        isOperative = true;
-    }
-}
-
+#ifndef EXCLUDE_BLUETOOTH
 void SerialService::initSerialBtBegin(String localName, BluetoothSerial *btlPointer, bool isMaster)
 {
     if (btSerialPointer != nullptr)
@@ -97,25 +60,7 @@ void SerialService::initSerialBtBegin(String localName, BluetoothSerial *btlPoin
         isOperative = true;
     }
 }
-
-// todo
-void SerialService::initSerialWebBegin(AsyncWebServer *server, const char *url)
-{
-    // if (webSerialPointer == nullptr)
-    // {
-    //     WebSerial.begin(server, url);
-    //     webSerialPointer = &WebSerial;
-    // }
-    // isOperative = true;
-}
-
-void SerialService::initAllSerials(unsigned long baud, BluetoothSerial *bluetoothPointer, String deviceName, AsyncWebServer *server, const char *url)
-{
-    initSerialBegin(baud);
-    initSerialBtBegin(deviceName, bluetoothPointer);
-    initSerialWebBegin(server, url);
-    isOperative = true;
-}
+#endif
 
 boolean SerialService::availableSerial()
 {
@@ -262,8 +207,8 @@ void SerialService::logInfoFixed(String msg, String subject)
 
                 if (btSerialPointer != nullptr)
                 {
-                    serialPointer->print("\n\n\n\n\n");
-                    serialPointer->println("\033[32m" + log + "\033[0m");
+                    btSerialPointer->print("\n\n\n\n\n");
+                    btSerialPointer->println("\033[32m" + log + "\033[0m");
                 }
                 setLastMessage(log, true); // Imposta il messaggio e gestisci le righe                
             }

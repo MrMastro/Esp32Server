@@ -2,7 +2,9 @@
 #define Main_H
 #include <Arduino.h>
 #include <NeoPixelBus.h>
+#ifndef EXCLUDE_BLUETOOTH
 #include <BluetoothSerial.h>
+#endif
 
 #include "models/LedPresetModel/LedPresetModelList.h"
 
@@ -30,7 +32,9 @@ void infoWebServer();
 void apiServerTask(void *pvParameters);
 void ledTask(void *pvParameters);
 void webOtaServerTask(void *pvParameters);
+#ifndef EXCLUDE_BLUETOOTH
 void serialBtTask(void *pvParameters);
+#endif
 void serialCableTask(void *pvParameters);
 void commandDelayedTask(void *pvParameters);
 void remoteControlWirelessTask(void *pvParameters);
