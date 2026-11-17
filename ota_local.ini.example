@@ -1,0 +1,8 @@
+; Copiare questo file in "ota_local.ini" (non versionato) e inserire i propri valori.
+; Sovrascrive la sezione [ota] di platformio.ini (env Esp32Server, upload via WiFi).
+;   ip       = IP della scheda (in AP_MODE e' 192.168.4.1)
+;   password = devicePassword di data/settings/settings.json
+
+[ota]
+ip = 192.168.1.50
+password = la_tua_devicePassword

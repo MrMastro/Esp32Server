@@ -2,6 +2,23 @@
 #include <ArduinoOTA.h>
 
 MastroServer mastroServer;
+
+// Stato OTA (statico: mastroServer viene ricreato per copia in setup_communication)
+static std::function<void()> otaStartHook = nullptr;
+static std::function<void()> otaStopHook = nullptr;
+static volatile bool otaInProgress = false;
+static bool otaPrevWifiSleep = true;
+
+void MastroServer::setOtaHooks(std::function<void()> onStart, std::function<void()> onStop)
+{
+    otaStartHook = onStart;
+    otaStopHook = onStop;
+}
+
+bool MastroServer::isOtaInProgress()
+{
+    return otaInProgress;
+}
 // DNSServer dnsServer;
 
 MastroServer::MastroServer()
@@ -58,9 +75,6 @@ MastroServer::MastroServer(AsyncWebServer *webServer, String mode, String ssid, 
         initAP(ssidAP, passwordAP);
     }
     delay(200);
-
-    // init ota
-    initOta(deviceName, devicePassword);
 
     //init default route
     logInfoln("Set Route");
@@ -343,6 +357,13 @@ void MastroServer::initOta(String deviceName, String devicePassword)
     ArduinoOTA
         .onStart([]()
                  {
+      otaInProgress = true;
+      // Modem sleep spento durante l'OTA: con il sleep attivo la radio si sveglia
+      // solo ai beacon (~100 ms) e il trasferimento TCP diventa lentissimo / va in timeout
+      otaPrevWifiSleep = WiFi.getSleep();
+      WiFi.setSleep(false);
+      if (otaStartHook) otaStartHook();
+
       String type;
       if (ArduinoOTA.getCommand() == U_FLASH)
         type = "sketch";
@@ -352,11 +373,19 @@ void MastroServer::initOta(String deviceName, String devicePassword)
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
       Serial.println("Start updating " + type); })
         .onEnd([]()
-               { Serial.println("\nEnd"); })
+               { Serial.println("\nOTA end, rebooting"); })
         .onProgress([](unsigned int progress, unsigned int total)
-                    { Serial.printf("Progress: %u%%\r", (progress / (total / 100))); })
+                    {
+      // stampa solo ogni 10%: la seriale a ogni blocco rallentava il trasferimento
+      static unsigned int lastStep = 101;
+      unsigned int pct = total ? (unsigned int)((uint64_t)progress * 100 / total) : 0;
+      unsigned int step = pct / 10;
+      if (step != lastStep) { lastStep = step; Serial.printf("OTA progress: %u%%\n", step * 10); } })
         .onError([](ota_error_t error)
                  {
+      otaInProgress = false;
+      WiFi.setSleep(otaPrevWifiSleep);
+      if (otaStopHook) otaStopHook();
       Serial.printf("Error[%u]: ", error);
       if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
       else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");

@@ -26,6 +26,7 @@ public:
         this->passwordWIFI = other.passwordWIFI;
         this->ledSettings = other.ledSettings;
         this->joystickSettings = other.joystickSettings;
+        this->otaUpload = other.otaUpload;
     };
 
     String deviceName;
@@ -41,6 +42,9 @@ public:
     String passwordWIFI;
     LedSettingsModel ledSettings;
     JoystickSettingsModel joystickSettings;
+    // true: abilita l'upload del firmware via WiFi (ArduinoOTA). Richiede una tabella
+    // partizioni con due slot app: con huge_app.csv deve restare false
+    boolean otaUpload = false;
 
     String toJson() const
     {
@@ -66,6 +70,7 @@ public:
         doc["passwordAP"] = passwordAP;
         doc["ssidWIFI"] = ssidWIFI;
         doc["passwordWIFI"] = passwordWIFI;
+        doc["ota_upload"] = otaUpload;
 
         JsonObject ledSettingsJson = doc["ledSettings"].to<JsonObject>();
         ledSettings.toJson(ledSettingsJson);
@@ -113,6 +118,7 @@ public:
         passwordAP = doc["passwordAP"].as<String>();
         ssidWIFI = doc["ssidWIFI"].as<String>();
         passwordWIFI = doc["passwordWIFI"].as<String>();
+        otaUpload = doc["ota_upload"] | false; // assente nei vecchi file -> false
 
         if (!ledSettings.fromJson(doc["ledSettings"].as<String>()))
         {
@@ -149,6 +155,7 @@ public:
         defaultSettings.ssidWIFI = "Home_Network";
         defaultSettings.passwordWIFI = "wifi_password";
         defaultSettings.ledSettings = LedSettingsModel::getDefault();
+        defaultSettings.otaUpload = false;
 
         return defaultSettings;
     }

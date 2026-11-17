@@ -36,6 +36,7 @@ FileManagerService fileManagerService;
 #define PRIORITY_DELAYED_TASK         (configMAX_PRIORITIES - 7)
 #define PRIORITY_SERIAL               (configMAX_PRIORITIES - 10)
 #define PRIORITY_REMOTE_WIRELESS      (configMAX_PRIORITIES - 6)
+#define PRIORITY_OTA                  (configMAX_PRIORITIES - 10)
 
 #define STACK_SIZE_SERVER             8192
 #define STACK_SIZE_BLUETOOTH_SERVER   8192
@@ -43,6 +44,7 @@ FileManagerService fileManagerService;
 #define STACK_SIZE_DELAYED_TASK       4096
 #define STACK_SIZE_SERIAL             8192
 #define STACK_SIZE_REMOTE_WIRELESS    4096
+#define STACK_SIZE_OTA                8192
 
 // #define STACK_SIZE_SERVER             10000
 // #define STACK_SIZE_BLUETOOTH_SERVER   10000
@@ -220,11 +222,18 @@ void setup(void)
 
   delay(100);
 
-  // Thread running
-  // if (mastroServer.isAvaible())
-  // {
-  //   // xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", 10000, NULL, 1, NULL); commented, cause instability
-  // }
+  // OTA (WiFi/AP only, and only with "ota_upload": true): during the update the other tasks are
+  // paused (busy flag), so they don't compete for CPU and flash with the transfer.
+  // With huge_app.csv there is no second app slot, so ota_upload must stay false.
+  if (s.otaUpload && mastroServer.isAvaible())
+  {
+    serialService.logInfoln("OTA upload enabled", "MAIN");
+    mastroServer.initOta(s.deviceName, s.devicePassword);
+    MastroServer::setOtaHooks(
+        []() { if (!servicesCollector.isBusyForServiceApi()) servicesCollector.takeExclusiveExecution(); },
+        []() { if (servicesCollector.isBusyForServiceApi()) servicesCollector.freeExclusiveExecution(); });
+    xTaskCreate(webOtaServerTask, "WebOtaServerTaskExecution", STACK_SIZE_OTA, NULL, PRIORITY_OTA, NULL);
+  }
   xTaskCreate(ledTask, "LedTaskExecution", STACK_SIZE_LED_EFFECTS, NULL, PRIORITY_LED_EFFECTS, NULL);
   xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
   //vTaskStartScheduler(); // Start the FreeRTOS scheduler, for some esp32 not working, commented!
@@ -323,16 +332,10 @@ void webOtaServerTask(void *pvParameters)
   serialService.logInfoln("Web Task execution (OTA)", "MAIN");
   while (true)
   {
-    if (!servicesCollector.isBusyForServiceApi())
-    {
-      //mastroServer.handleOta();
-      serialService.logInfoln("WebOtaServerTask disabled", "MAIN");
-    }
-    else
-    {
-      yield();
-    }
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    // Not gated by the busy flag: the OTA hooks set it themselves during the update.
+    // handle() only checks for an incoming UDP invite; the whole transfer runs inside it.
+    mastroServer.handleOta();
+    vTaskDelay(20 / portTICK_PERIOD_MS);
   }
 }
 

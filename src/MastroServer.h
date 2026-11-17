@@ -2,6 +2,7 @@
 #define MastroServer_h
 #define DEPRECATED __attribute__((deprecated))
 
+#include <functional>
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
@@ -15,7 +16,12 @@ class MastroServer
 public:
     MastroServer();
     MastroServer(AsyncWebServer* webServer, String mode, String ssid, String passwordWiFi, String ssidAP, String passwordAP, String deviceName, String devicePassword, boolean debug, int ledPin = -1); // Costruttore
-    DEPRECATED void handleOta();
+    // Avvia ArduinoOTA: chiamato solo se "ota_upload": true in settings.json
+    void initOta(String deviceName, String devicePassword);
+    void handleOta();
+    // Hook chiamati a inizio OTA e in caso di errore (es. per sospendere gli effetti LED)
+    static void setOtaHooks(std::function<void()> onStart, std::function<void()> onStop);
+    static bool isOtaInProgress();
     String getName();
     String getIp();
     String getMacAdress();
@@ -35,7 +41,6 @@ private:
     String ip;
     String deviceName;
     boolean debug;
-    DEPRECATED void initOta(String deviceName, String devicePassword); 
     void setRoutes();
     String splitIpHost(String ip);
     boolean initWIFI(String &ssid, String &passwordWiFi);

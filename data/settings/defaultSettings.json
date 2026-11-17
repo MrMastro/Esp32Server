@@ -10,6 +10,7 @@
   "passwordAP": "ap_password",
   "ssidWIFI": "Home_Network",
   "passwordWIFI": "wifi_password",
+  "ota_upload": false,
   "ledSettings": {
     "enableStripWs2811Matrix": true,
     "numLedWs2811Matrix": 128,

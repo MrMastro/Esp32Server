@@ -113,3 +113,4 @@ addon_project/remote_control_esp32/sd_card/config/*
 
 # IP e password OTA personali (modello: ota_local.ini.example)
 addon_project/remote_control_esp32/ota_local.ini
+ota_local.ini
