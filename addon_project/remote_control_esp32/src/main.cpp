@@ -12,8 +12,12 @@
 #include "settings/SettingsValidator.h"
 #include "system/ExclusiveExecution.h"
 #include "devices/EspDevices.h"
+#include "storage/SdWebDav.h"
+#include "system/BootMode.h"
+#include "network/MdnsName.h"
 #include <WebServer.h>
 #include <WiFi.h>
+#include <SD.h>
 #include "hal/usb_serial_jtag_ll.h" // watchdog ricezione USB, vedi readSerialMessage()
 
 #ifndef BOOT_SERIAL_WAIT_MS
@@ -36,6 +40,8 @@ static JoystickConfig joystickConfig;
 static Joystick joystick;
 
 static bool sdAvailable = false;
+// Modalità SD (comando "microsd"): la microSD è esposta via WebDAV, il resto del programma non gira
+static bool sdModeActive = false;
 
 // ---------------------------------------------------------------------------
 // API impostazioni: POST /api/settings
@@ -313,6 +319,25 @@ static void setDebugAndReboot(const String &command, bool debug)
   insertDelayedReboot(1000);
 }
 
+// microsd: riavvia in modalità SD (microSD esposta via WebDAV per Esplora risorse).
+// Senza microSD il comando viene ignorato. Per uscire: riavvio o corrente staccata.
+static void requestSdMode(const String &command)
+{
+  if (sdModeActive)
+  {
+    printCommandError(command, "modalita' SD gia' attiva: riavvia (reboot) per uscire");
+    return;
+  }
+  if (!sdAvailable)
+  {
+    printCommandError(command, "microSD non disponibile: comando ignorato");
+    return;
+  }
+  bootModeRequestSdMode();
+  printCommandSuccess(command, "riavvio in modalita' SD (WebDAV); per uscire: reboot o stacca la corrente");
+  insertDelayedReboot(1000);
+}
+
 // help: lista dei comandi (esce sempre, anche con debug = false)
 static void printHelp(const String &command)
 {
@@ -326,6 +351,7 @@ static void printHelp(const String &command)
   Serial.println("  pair                              riaccoppia tutti i dispositivi (in background)");
   Serial.println("  prod                              debug = false (solo warning, errori e risposte), salva e riavvia");
   Serial.println("  debug                             debug = true (tutti i log), salva e riavvia");
+  Serial.println("  microsd                           riavvia in modalita' SD: microSD come unita' di rete (WebDAV)");
   Serial.println("  help                              questa lista");
   Serial.println("  t                                 funzione di prova test()");
 }
@@ -354,6 +380,7 @@ enum class SERIAL_COMMAND
   PROD,                      // "prod"
   DEBUG,                     // "debug"
   HELP,                      // "help"
+  MICROSD,                   // "microsd"
   TEST,                      // "t"
   NONE,
   UNKNOWN
@@ -386,6 +413,8 @@ static SERIAL_COMMAND parseSerialCommand(String command)
     return SERIAL_COMMAND::DEBUG;
   if (command == "help")
     return SERIAL_COMMAND::HELP;
+  if (command == "microsd")
+    return SERIAL_COMMAND::MICROSD;
   if (command == "t")
     return SERIAL_COMMAND::TEST;
   return SERIAL_COMMAND::UNKNOWN;
@@ -401,6 +430,7 @@ static SERIAL_COMMAND parseSerialCommand(String command)
 //   devices                          -> stato dei dispositivi (online, accoppiati) e sessioni wireless
 //   pair                             -> ricontatta e riaccoppia tutti i dispositivi (in background)
 //   prod / debug                     -> debug = false / true in main_settings.json, poi riavvio
+//   microsd                          -> riavvia in modalita' SD (WebDAV); ignorato senza microSD
 //   help                             -> lista dei comandi
 //   t                                -> esegue test() (funzione di prova libera)
 // Raccolta del messaggio seriale come SerialService::getMsgbySerial() del progetto principale
@@ -476,7 +506,18 @@ static void executeSerialMessage(const String &msg)
     param.trim();
   }
 
-  switch (parseSerialCommand(command))
+  SERIAL_COMMAND parsed = parseSerialCommand(command);
+
+  // in modalità SD girano solo rete, WebDAV e seriale: gli altri comandi non hanno senso
+  if (sdModeActive && parsed != SERIAL_COMMAND::REBOOT && parsed != SERIAL_COMMAND::INFO &&
+      parsed != SERIAL_COMMAND::INFO_IP && parsed != SERIAL_COMMAND::HELP && parsed != SERIAL_COMMAND::MICROSD &&
+      parsed != SERIAL_COMMAND::NONE)
+  {
+    printCommandError(command, "non disponibile in modalita' SD: riavvia (reboot) per uscire");
+    return;
+  }
+
+  switch (parsed)
   {
   case SERIAL_COMMAND::REBOOT:
     reboot(command, param);
@@ -525,6 +566,9 @@ static void executeSerialMessage(const String &msg)
   case SERIAL_COMMAND::HELP:
     printHelp(command);
     break;
+  case SERIAL_COMMAND::MICROSD:
+    requestSdMode(command);
+    break;
   case SERIAL_COMMAND::TEST:
     test();
     break;
@@ -537,11 +581,63 @@ static void executeSerialMessage(const String &msg)
   }
 }
 
-static void startTasks(); // definita sotto, insieme ai task
+static void startTasks();        // definita sotto, insieme ai task
+static void startSdModeTasks();  // idem
+
+// Schermata della modalità SD: indirizzo da usare in "Connetti unità di rete".
+// Con mDNS attivo l'indirizzo principale è http://<deviceName adattato>.local/, con l'IP sotto come riserva.
+static void drawSdModeScreen(const String &mdnsHost, const String &ip)
+{
+  displaySetOn(true);
+  gfx->fillScreen(RGB565_BLACK);
+  displayPrintCentered("MODALITA' SD", 22, 2, RGB565_CYAN);
+
+  String host = mdnsHost.length() > 0 ? mdnsHost + ".local/" : ip + "/";
+  String url = "http://" + host;
+  if ((int)url.length() * 12 <= LCD_WIDTH - 8)
+  {
+    displayPrintCentered(url, 80, 2, RGB565_YELLOW);
+  }
+  else
+  {
+    // a dimensione 2 (12 px per carattere) l'indirizzo intero non entra in 240 px: si va a capo
+    displayPrintCentered("http://", 68, 2, RGB565_YELLOW);
+    uint8_t size = (int)host.length() * 12 <= LCD_WIDTH - 8 ? 2 : 1;
+    displayPrintCentered(host, size == 2 ? 90 : 94, size, RGB565_YELLOW);
+  }
+
+  // il font del display non ha le lettere accentate
+  displayPrintCentered("Connetti unita'", 135, 2, RGB565_WHITE);
+  displayPrintCentered("di rete", 157, 2, RGB565_WHITE);
+  if (mdnsHost.length() > 0)
+    displayPrintCentered("oppure http://" + ip + "/", 195, 1, RGB565_LIGHTGREY);
+  displayPrintCentered("riavvia per uscire", 220, 1, RGB565_DARKGREY);
+  displayFlush();
+}
+
+// Modalità SD: solo rete + WebDAV sulla microSD + seriale. Niente joystick, wireless, OTA, API.
+static void runSdMode()
+{
+  sdModeActive = true;
+  WiFi.setSleep(false); // trasferimenti più veloci; la modalità dura solo fino al riavvio
+  sdWebDavBegin(server);
+  server.begin();
+  // indirizzo con il nome al posto dell'IP: http://<deviceName adattato>.local/ (es. esp32-remote.local)
+  String mdnsHost = mdnsBeginForWebDav(settings.deviceName);
+  String url = mdnsHost.length() > 0 ? "http://" + mdnsHost + ".local/" : "http://" + wifiStatus.ip + "/";
+  Serial.println("[SD] modalita' SD attiva: in Esplora risorse \"Connetti unita' di rete\" -> " + url);
+  if (mdnsHost.length() > 0)
+    Serial.println("[SD] se il nome non viene trovato usa l'IP: http://" + wifiStatus.ip + "/");
+  Serial.println("[SD] per uscire: reboot o stacca la corrente");
+  drawSdModeScreen(mdnsHost, wifiStatus.ip);
+  startSdModeTasks();
+}
 
 void setup()
 {
   Serial.begin(115200);
+  // richiesta di modalità SD (comando "microsd"): letta e cancellata subito, vale per un solo avvio
+  bool sdModeRequested = bootModeConsumeSdMode();
   // NB: non usare Serial.setTxTimeoutMs(0): sul C6 manda in stallo la ricezione USB (HWCDC)
   // dopo le stampe lunghe e la COM smette di accettare comandi. Si lascia il default (100ms):
   // senza host USB (es. power bank) le print vengono comunque scartate senza attese.
@@ -561,6 +657,21 @@ void setup()
   sdAvailable = sdBegin(&sdInfo);
   bool settingsFromFile = false;
   settings = SettingsModel::load(SD_MAIN_SETTINGS, sdAvailable, &settingsFromFile, &settingsInfo);
+
+  // A volte, subito dopo un reset, la lettura fallisce anche con la SD montata e la scheda partiva
+  // con le impostazioni di default (deviceName, rete...). Si stampa sempre il motivo, si rimonta la SD
+  // e si ritenta prima di arrendersi ai default.
+  const int SETTINGS_LOAD_ATTEMPTS = 3;
+  for (int attempt = 2; attempt <= SETTINGS_LOAD_ATTEMPTS && sdAvailable && !settingsFromFile; attempt++)
+  {
+    logWarning(settingsInfo + " - nuovo tentativo " + String(attempt) + "/" + String(SETTINGS_LOAD_ATTEMPTS));
+    SD.end();
+    delay(200);
+    sdAvailable = sdBegin(&sdInfo);
+    settings = SettingsModel::load(SD_MAIN_SETTINGS, sdAvailable, &settingsFromFile, &settingsInfo);
+  }
+  if (sdAvailable && !settingsFromFile)
+    logWarning(settingsInfo); // fallito anche l'ultimo tentativo: uso i default
   // da qui i log informativi escono solo con "debug": true (warning, errori e risposte ai comandi sempre)
   logSetDebug(settings.debug);
   printSettings();
@@ -584,6 +695,16 @@ void setup()
   displayMessage(wifiStatus.fallbackToAp ? "AP (fallback)" : communicationModeEnumToString(wifiStatus.activeMode),
                  wifiStatus.ip);
   delay(1500);
+
+  if (sdModeRequested)
+  {
+    if (sdAvailable)
+    {
+      runSdMode();
+      return; // il resto dell'avvio (joystick, wireless, OTA, API) non serve in modalità SD
+    }
+    logWarning("[SD] modalita' SD richiesta ma microSD assente: avvio normale");
+  }
 
   // ESP-NOW per il joystick wireless (serve il WiFi gia' attivo)
   String linkError;
@@ -819,6 +940,18 @@ static void startTasks()
   }
 
   logInfo("[Main] Init procedure completed");
+}
+
+// Modalità SD: seriale (reboot, info...), WebDAV (apiServerTask: OTA non è avviato, quindi solo
+// server.handleClient) e comandi ritardati / tasto BOOT per spegnere lo schermo.
+static void startSdModeTasks()
+{
+  exclusiveExecutionBegin();
+  pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
+
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
+  xTaskCreate(apiServerTask, "WebDavServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
+  xTaskCreate(commandDelayedTask, "CommandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
 }
 
 // Tutto il lavoro è nei task: come nel progetto principale loop() non fa nulla.

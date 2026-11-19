@@ -185,6 +185,34 @@ Nota: il modem sleep (risparmio energetico WiFi) del telecomando viene spento du
 Parametri del joystick wireless (heartbeat, sessioni, riscoperta, modem sleep): tabella completa in
 [docs/WIRELESS_JOYSTICK.md](docs/WIRELESS_JOYSTICK.md#configurazioni). Se il file manca si usano i default.
 
+## Modalità SD: microSD come unità di rete (WebDAV)
+
+L'ESP32-C6 non ha USB OTG, quindi non può comparire come chiavetta USB. In alternativa la microSD si
+può aprire da **Esplora risorse via WiFi** (WebDAV):
+
+1. dal monitor seriale scrivi `microsd` (se la microSD non c'è il comando viene ignorato);
+2. la scheda si riavvia in modalità SD e lo schermo mostra l'indirizzo con il nome del dispositivo,
+   es. `http://esp32-remote.local/` (mDNS), più l'IP come riserva e la scritta "Connetti unita' di rete".
+   Il nome deriva da `deviceName` di `main_settings.json`: minuscolo, con `_`, spazi e punti sostituiti
+   da `-` (negli indirizzi di rete il `_` non è valido), es. `ESP32_Remote` → `esp32-remote.local`;
+3. in Esplora risorse: tasto destro su *Questo PC* → **Connetti unità di rete** → cartella
+   `http://esp32-remote.local/` (se il nome non viene trovato usa l'IP, es. `http://172.17.252.107/`) (oppure scrivi `\\172.17.252.107\DavWWWRoot` nella barra degli indirizzi);
+4. per uscire: `reboot` dal monitor seriale, oppure stacca la corrente. La richiesta vale per un solo
+   avvio (flag in NVS cancellato all'avvio), quindi ogni riavvio successivo torna alla modalità normale.
+
+In modalità SD girano solo rete, server WebDAV (porta 80, radice = radice della microSD) e seriale
+(`reboot`, `info`, `info_ip`, `help`); niente joystick, wireless, OTA, API impostazioni. Il tasto BOOT
+spegne/accende lo schermo come di consueto. Velocità misurata: ~280 KB/s in scrittura, ~235 KB/s in lettura.
+
+Note per Windows:
+
+- serve il servizio **WebClient** (Client Web): se "Connetti unità di rete" dice che la cartella non è
+  valida, avvialo da *Servizi* (`services.msc` → WebClient → Avvia; tipo di avvio *Automatico* per non
+  doverlo rifare). Da PowerShell come amministratore: `Start-Service WebClient`;
+- **non c'è password**: Windows rifiuta di default l'autenticazione semplice su HTTP non cifrato. Finché
+  la modalità SD è attiva tutta la microSD (anche i file con le password) è leggibile da chi è sulla
+  stessa rete: per questo dura solo fino al riavvio.
+
 ## Collegamento con i dispositivi (joystick wireless)
 
 Il collegamento continuo telecomando → dispositivi (ESP-NOW, accoppiamento, heartbeat, sessioni per il
@@ -206,6 +234,7 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `pair` | Riaccoppia tutti i dispositivi (in background) |
 | `prod` | `debug = false` in `main_settings.json` e riavvio: escono solo warning, errori, le risposte ai comandi e la configurazione all'avvio |
 | `debug` | `debug = true` in `main_settings.json` e riavvio: tutti i log |
+| `microsd` | Riavvia in **modalità SD**: microSD come unità di rete (WebDAV). Ignorato se la microSD non c'è |
 | `help` | Lista dei comandi |
 | `t` | `test()`: funzione di prova libera |
 
@@ -216,7 +245,7 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `src/main.cpp` | Avvio (display → SD → config → joystick) e `loop()` |
 | `src/BoardPins.h` | Pin della scheda e default del joystick |
 | `src/display/` | Display ST7789 (Arduino_GFX) sul bus SPI condiviso |
-| `src/storage/` | Montaggio microSD e percorsi in `/config` |
+| `src/storage/` | Montaggio microSD e percorsi in `/config`; `SdWebDav`: server WebDAV della modalità SD |
 | `src/settings/` | `SettingsModel` (main_settings.json), `COMMUNICATION_MODE`, `DEVICE_MODE` |
 | `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE, OTA (ArduinoOTA) |
 | `src/settings/SettingsValidator.*` | Validazione delle richieste all'API impostazioni |
@@ -224,6 +253,7 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `src/devices/` | Dispositivi conosciuti (`espDevices.json`), stato online/offline, client HTTP minimo |
 | `src/wireless/` | Joystick wireless: protocollo condiviso (`WirelessProtocol.h`), accoppiamento, ESP-NOW, heartbeat (`WirelessManager`), `wireless.json` |
 | `src/test/` | Prove: schermata joystick |
+| `src/system/BootMode.*` | Richiesta "una tantum" della modalità SD (NVS) |
 | `src/system/` | `take/freeExclusiveExecution()`: mutex tra i task FreeRTOS (display e SD condividono il bus SPI) |
 | `src/test/` | `testJoystickOnDisplay()`: mostra a schermo la stringa `J_DIRECTION` e i valori grezzi |
 
