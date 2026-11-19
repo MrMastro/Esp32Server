@@ -24,6 +24,7 @@
 
 #include "routes/Routes.h"
 #include "wireless/WirelessReceiver.h"
+#include "fileMode/FileMode.h"
 
 void setup_communication(SettingsModel sm);
 void initServices(HardwareSerial* serialPointer);

@@ -33,6 +33,15 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     // throwError(ERROR_CODE::SERVICE_ERROR, "Attach Serials first (Serial or WebSerial)", "executeCommand");
     return getStatusInfoByHttpCode(HTTP_CODE::InternalServerError);
   }
+  // In modalita' file girano solo WiFi, WebDAV e seriale: gli altri comandi non hanno senso
+  if (fileModeActive() && cmd != CMD::REBOOT && cmd != CMD::INFO && cmd != CMD::INFO_IP && cmd != CMD::HELP &&
+      cmd != CMD::MICROSD && cmd != CMD::FILEREMOTE)
+  {
+    result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+    result.setDescription("non disponibile in modalita' file: riavvia (reboot) per uscire");
+    return result;
+  }
+
   switch (cmd)
   {
   case CMD::LED_ON:
@@ -71,12 +80,13 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
     result = changeCommunicationMode(params);
     break;
   case CMD::INFO_IP:
-    content = ((InfoService *)getServiceByCollector("InfoService"))->getIp();
+    content = fileModeActive() ? fileModeIp() : ((InfoService *)getServiceByCollector("InfoService"))->getIp();
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     result.setDescription(content);
     break;
   case CMD::INFO:
-    content = ((InfoService *)getServiceByCollector("InfoService"))->getInfo();
+    content = fileModeActive() ? "modalita' file attiva: " + fileModeAddress() + " (IP " + fileModeIp() + ")"
+                               : ((InfoService *)getServiceByCollector("InfoService"))->getInfo();
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     result.setDescription(content);
     break;
@@ -89,6 +99,10 @@ StatusInfo CommandService::executeCommand(CMD cmd, std::vector<String> params)
   case CMD::HELP:
     result = getStatusInfoByHttpCode(HTTP_CODE::OK);
     result.setDescription(helpText());
+    break;
+  case CMD::MICROSD:
+  case CMD::FILEREMOTE:
+    result = requestFileMode();
     break;
   default:
     result = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
@@ -182,6 +196,24 @@ StatusInfo CommandService::setDebugAndReboot(bool debug)
   return res;
 }
 
+// microsd / fileremote: riavvia in modalita' file (memoria flash come unita' di rete WebDAV).
+// Il nome "microsd" e' lo stesso del telecomando: qui non c'e' microSD, si espone la flash (LittleFS).
+StatusInfo CommandService::requestFileMode()
+{
+  StatusInfo res;
+  if (fileModeActive())
+  {
+    res = getStatusInfoByHttpCode(HTTP_CODE::BadRequest);
+    res.setDescription("modalita' file gia' attiva: riavvia (reboot) per uscire");
+    return res;
+  }
+  fileModeRequest();
+  res = getStatusInfoByHttpCode(HTTP_CODE::OK);
+  res.setDescription("riavvio in modalita' file (memoria flash come unita' di rete WebDAV); per uscire: reboot o stacca la corrente");
+  insertDelayedCommand(CMD::REBOOT, {}, 1000);
+  return res;
+}
+
 String CommandService::helpText()
 {
   return String("lista dei comandi (parametri separati da virgola):\n") +
@@ -194,6 +226,7 @@ String CommandService::helpText()
          "  info | info_ip                         stato del dispositivo / indirizzo IP\n" +
          "  prod                                   debug = false (solo warning, errori e risposte), salva e riavvia\n" +
          "  debug                                  debug = true (tutti i log), salva e riavvia\n" +
+         "  microsd | fileremote                   modalita' file: memoria flash come unita' di rete (WebDAV), riavvia\n" +
          "  help                                   questa lista\n" +
          "  t                                      funzione di prova test()\n" +
          "  <trigger di un preset>                 avvia il preset LED con quel trigger (es. CENTER, UP, K1)";
@@ -249,8 +282,8 @@ StatusInfo CommandService::recvMsgAndExecute(String data)
 
   StatusInfo result = executeCommand(mapStringToEnum(command), dataArray);
 
-  //Check other command after command enum
-  if (result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
+  //Check other command after command enum (in modalita' file niente preset LED)
+  if (!fileModeActive() && result.getMessage() == getStatusInfoByHttpCode(HTTP_CODE::BadRequest).getMessage())
   {
     //CONTROLLO LED PRESET
     const LedPresetListModel presets = settingService->getPresets();

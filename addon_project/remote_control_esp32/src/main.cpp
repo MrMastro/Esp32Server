@@ -12,7 +12,7 @@
 #include "settings/SettingsValidator.h"
 #include "system/ExclusiveExecution.h"
 #include "devices/EspDevices.h"
-#include "storage/SdWebDav.h"
+#include "storage/FsWebDav.h"
 #include "system/BootMode.h"
 #include "network/MdnsName.h"
 #include <WebServer.h>
@@ -352,7 +352,7 @@ static void printHelp(const String &command)
   Serial.println("  pair                              riaccoppia tutti i dispositivi (in background)");
   Serial.println("  prod                              debug = false (solo warning, errori e risposte), salva e riavvia");
   Serial.println("  debug                             debug = true (tutti i log), salva e riavvia");
-  Serial.println("  microsd                           riavvia in modalita' SD: microSD come unita' di rete (WebDAV)");
+  Serial.println("  microsd | fileremote              riavvia in modalita' SD: microSD come unita' di rete (WebDAV)");
   Serial.println("  help                              questa lista");
   Serial.println("  t                                 funzione di prova test()");
 }
@@ -381,7 +381,7 @@ enum class SERIAL_COMMAND
   PROD,                      // "prod"
   DEBUG,                     // "debug"
   HELP,                      // "help"
-  MICROSD,                   // "microsd"
+  MICROSD,                   // "microsd" (alias "fileremote", come nel progetto generale)
   TEST,                      // "t"
   NONE,
   UNKNOWN
@@ -414,7 +414,7 @@ static SERIAL_COMMAND parseSerialCommand(String command)
     return SERIAL_COMMAND::DEBUG;
   if (command == "help")
     return SERIAL_COMMAND::HELP;
-  if (command == "microsd")
+  if (command == "microsd" || command == "fileremote")
     return SERIAL_COMMAND::MICROSD;
   if (command == "t")
     return SERIAL_COMMAND::TEST;
@@ -431,7 +431,7 @@ static SERIAL_COMMAND parseSerialCommand(String command)
 //   devices                          -> stato dei dispositivi (online, accoppiati) e sessioni wireless
 //   pair                             -> ricontatta e riaccoppia tutti i dispositivi (in background)
 //   prod / debug                     -> debug = false / true in main_settings.json, poi riavvio
-//   microsd                          -> riavvia in modalita' SD (WebDAV); ignorato senza microSD
+//   microsd | fileremote             -> riavvia in modalita' SD (WebDAV); ignorato senza microSD
 //   help                             -> lista dei comandi
 //   t                                -> esegue test() (funzione di prova libera)
 // Raccolta del messaggio seriale come SerialService::getMsgbySerial() del progetto principale
@@ -681,7 +681,8 @@ static void runSdMode()
 {
   sdModeActive = true;
   WiFi.setSleep(false); // trasferimenti più veloci; la modalità dura solo fino al riavvio
-  sdWebDavBegin(server);
+  // WebDAV sulla radice della microSD (stesso modulo FsWebDav del progetto generale, lì su LittleFS)
+  fsWebDavBegin(server, SD, []() { return (uint64_t)SD.totalBytes(); }, []() { return (uint64_t)SD.usedBytes(); });
   server.begin();
   // indirizzo con il nome al posto dell'IP: http://<deviceName adattato>.local/ (es. esp32-remote.local)
   String mdnsHost = mdnsBeginForWebDav(settings.deviceName);

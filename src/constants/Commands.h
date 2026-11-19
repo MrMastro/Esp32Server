@@ -21,6 +21,8 @@ enum class CMD
   PROD,                         //prod  => debug = false in settings.json e riavvio
   DEBUG,                        //debug => debug = true in settings.json e riavvio
   HELP,                         //help  => lista dei comandi
+  MICROSD,                      //microsd    => riavvia in modalita' file (flash come unita' di rete WebDAV)
+  FILEREMOTE,                   //fileremote => come microsd (stesso nome del comando del telecomando)
   NONE,
   UNKNOWN
 };

@@ -15,6 +15,8 @@ const std::pair<CMD, String> CMD_PAIR[] = {
   {CMD::PROD, "prod"},
   {CMD::DEBUG, "debug"},
   {CMD::HELP, "help"},
+  {CMD::MICROSD, "microsd"},
+  {CMD::FILEREMOTE, "fileremote"},
   {CMD::NONE, "none"},
   {CMD::UNKNOWN, "unknown_command"}
   // Add more status codes and information as needed

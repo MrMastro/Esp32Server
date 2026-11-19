@@ -14,6 +14,7 @@
 #include "SettingService.h"
 #include "./validators/validators.h"
 #include <models/LedPresetModel/LedPresetModel.h>
+#include "fileMode/FileMode.h"
 
 
 class CommandService : public Service
@@ -37,6 +38,7 @@ private:
     // Method for command
     StatusInfo changeCommunicationMode(std::vector<String> params);
     StatusInfo setDebugAndReboot(bool debug);
+    StatusInfo requestFileMode();
     String helpText();
     void reboot(std::vector<String> params);
 };

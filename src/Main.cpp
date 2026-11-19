@@ -204,9 +204,22 @@ void initServices(HardwareSerial *serialPointer)
   servicesCollector.getService("LedService")->attachPin({ledPin});
 }
 
+// Modalita' file (comandi microsd / fileremote): solo WiFi + WebDAV sulla flash + seriale + comandi ritardati.
+// Il LED di stato resta acceso fisso per riconoscerla senza seriale.
+static void runFileMode()
+{
+  fileModeRun(s.communicationMode, s.ssidWIFI, s.passwordWIFI, s.ssidAP, s.passwordAP, s.deviceName);
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, HIGH);
+  xTaskCreate(serialCableTask, "SerialCableTaskExecution", STACK_SIZE_SERIAL, NULL, PRIORITY_SERIAL, NULL);
+  xTaskCreate(commandDelayedTask, "commandDelayedTaskExecution", STACK_SIZE_DELAYED_TASK, NULL, PRIORITY_DELAYED_TASK, NULL);
+}
+
 void setup(void)
 {
   Serial.begin(115200);
+  // richiesta di modalita' file (microsd / fileremote): letta e cancellata subito, vale per un solo avvio
+  bool fileModeRequested = fileModeConsumeRequest();
   Serial.println("\n");
   Serial.println("Started");
   delay(10);
@@ -219,6 +232,12 @@ void setup(void)
   Serial.println("");
   Serial.println("Load settings:");
   Serial.println(s.toJson());
+
+  if (fileModeRequested)
+  {
+    runFileMode();
+    return; // niente AsyncWebServer, LED, OTA, joystick, wireless in modalita' file
+  }
 
   // init communication (Server wifi/ap or Bluetooth)
   //xTaskCreate(apiServerTask, "apiServerTaskExecution", STACK_SIZE_SERVER, NULL, PRIORITY_SERVER, NULL);
@@ -314,7 +333,8 @@ void serialCableTask(void *pvParameters)
 {
   serialService.logInfoln("Serial Task execution", "MAIN");
   // With remoteControlWireless the physical joystick is never read: no pinMode/analogRead on its pins
-  const bool physicalJoystick = s.joystickSettings.usePhysicalJoystick();
+  // In modalita' file il joystick non si legge (niente effetti LED)
+  const bool physicalJoystick = s.joystickSettings.usePhysicalJoystick() && !fileModeActive();
   if(physicalJoystick){
     pinMode(s.joystickSettings.pinSwitch, INPUT_PULLUP);
     servicesCollector.wakeUpJoystick();

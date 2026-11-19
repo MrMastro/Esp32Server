@@ -212,7 +212,7 @@ Parametri del joystick wireless (heartbeat, sessioni, riscoperta, modem sleep): 
 L'ESP32-C6 non ha USB OTG, quindi non può comparire come chiavetta USB. In alternativa la microSD si
 può aprire da **Esplora risorse via WiFi** (WebDAV):
 
-1. dal monitor seriale scrivi `microsd` (se la microSD non c'è il comando viene ignorato);
+1. dal monitor seriale scrivi `microsd` o `fileremote` (se la microSD non c'è il comando viene ignorato);
 2. la scheda si riavvia in modalità SD e lo schermo mostra l'indirizzo con il nome del dispositivo,
    es. `http://esp32-remote.local/` (mDNS), più l'IP come riserva e la scritta "Connetti unita' di rete".
    Il nome deriva da `deviceName` di `main_settings.json`: minuscolo, con `_`, spazi e punti sostituiti
@@ -256,7 +256,7 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `pair` | Riaccoppia tutti i dispositivi (in background) |
 | `prod` | `debug = false` in `main_settings.json` e riavvio: escono solo warning, errori, le risposte ai comandi e la configurazione all'avvio |
 | `debug` | `debug = true` in `main_settings.json` e riavvio: tutti i log |
-| `microsd` | Riavvia in **modalità SD**: microSD come unità di rete (WebDAV). Ignorato se la microSD non c'è |
+| `microsd` (alias `fileremote`) | Riavvia in **modalità SD**: microSD come unità di rete (WebDAV). Ignorato se la microSD non c'è |
 | `help` | Lista dei comandi |
 | `t` | `test()`: funzione di prova libera |
 
@@ -267,7 +267,7 @@ I caratteri si scrivono in sequenza (monitor in modalità raw, come il progetto 
 | `src/main.cpp` | Avvio (display → SD → config → joystick) e `loop()` |
 | `src/BoardPins.h` | Pin della scheda e default del joystick |
 | `src/display/` | Display ST7789 (Arduino_GFX) sul bus SPI condiviso |
-| `src/storage/` | Montaggio microSD e percorsi in `/config`; `SdWebDav`: server WebDAV della modalità SD |
+| `src/storage/` | Montaggio microSD e percorsi in `/config`; `FsWebDav`: server WebDAV della modalità SD (stesso file del progetto generale) |
 | `src/settings/` | `SettingsModel` (main_settings.json), `COMMUNICATION_MODE`, `DEVICE_MODE` |
 | `src/network/` | Avvio della rete in AP_MODE / WIFI_MODE, OTA (ArduinoOTA) |
 | `src/settings/SettingsValidator.*` | Validazione delle richieste all'API impostazioni |

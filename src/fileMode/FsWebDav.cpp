@@ -1,11 +1,16 @@
-#include "SdWebDav.h"
+#include "FsWebDav.h"
 
-#include <SD.h>
+#include <esp_arduino_version.h>
 #include <time.h>
 #include <vector>
-#include "system/Log.h"
 
-// Data usata quando la SD non ha un orario valido (niente RTC/NTP: FAT scrive 1980)
+// File system servito e spazio (impostati da fsWebDavBegin)
+static fs::FS *davFs = nullptr;
+static FsWebDavBytesFn davTotalBytes = nullptr;
+static FsWebDavBytesFn davUsedBytes = nullptr;
+#define DAVFS (*davFs)
+
+// Data usata quando il file non ha un orario valido (niente RTC/NTP: FAT scrive 1980)
 static const time_t FALLBACK_TIME = 1735689600; // 2025-01-01 00:00:00 UTC
 
 // ---------------------------------------------------------------------------
@@ -86,7 +91,7 @@ static String xmlEscape(const String &in)
   return out;
 }
 
-// URI della richiesta -> percorso sulla SD ("/config/a.json"; radice "/").
+// URI della richiesta -> percorso sul file system ("/config/a.json"; radice "/").
 // false se il percorso non è accettabile (es. contiene "..").
 static bool uriToPath(const String &uri, String &path)
 {
@@ -98,7 +103,7 @@ static bool uriToPath(const String &uri, String &path)
   return path.indexOf("/../") < 0 && !path.endsWith("/..");
 }
 
-// Header Destination ("http://host/percorso") -> percorso sulla SD
+// Header Destination ("http://host/percorso") -> percorso sul file system
 static bool destinationToPath(const String &destination, String &path)
 {
   String uri = destination;
@@ -125,7 +130,9 @@ static String nameOf(const String &path)
 
 static bool isDirectory(const String &path)
 {
-  File f = SD.open(path);
+  if (path != "/" && !DAVFS.exists(path))
+    return false;
+  File f = DAVFS.open(path);
   if (!f)
     return false;
   bool dir = f.isDirectory();
@@ -172,7 +179,7 @@ static String contentTypeFor(const String &path)
   return "application/octet-stream";
 }
 
-// Cartelle di sistema create da Windows sulle schede inserite nel PC: restano sulla SD ma non
+// Cartelle di sistema create da Windows sulle schede inserite nel PC: restano sul file system ma non
 // compaiono negli elenchi della risorsa di rete
 static bool isHiddenEntry(const String &name)
 {
@@ -186,7 +193,9 @@ static bool isHiddenEntry(const String &name)
 static std::vector<String> listChildren(const String &dirPath)
 {
   std::vector<String> children;
-  File dir = SD.open(dirPath);
+  if (dirPath != "/" && !DAVFS.exists(dirPath))
+    return children;
+  File dir = DAVFS.open(dirPath);
   if (!dir || !dir.isDirectory())
     return children;
   File child = dir.openNextFile();
@@ -204,21 +213,23 @@ static std::vector<String> listChildren(const String &dirPath)
 static bool removeRecursive(const String &path)
 {
   if (!isDirectory(path))
-    return SD.remove(path);
+    return DAVFS.remove(path);
   for (const String &child : listChildren(path))
   {
     if (!removeRecursive(child))
       return false;
   }
-  return SD.rmdir(path);
+  return DAVFS.rmdir(path);
 }
 
 static bool copyFile(const String &from, const String &to)
 {
-  File in = SD.open(from, FILE_READ);
+  if (!DAVFS.exists(from))
+    return false;
+  File in = DAVFS.open(from, FILE_READ);
   if (!in)
     return false;
-  File out = SD.open(to, FILE_WRITE);
+  File out = DAVFS.open(to, FILE_WRITE);
   if (!out)
   {
     in.close();
@@ -244,7 +255,7 @@ static bool copyRecursive(const String &from, const String &to)
 {
   if (!isDirectory(from))
     return copyFile(from, to);
-  if (!SD.exists(to) && !SD.mkdir(to))
+  if (!DAVFS.exists(to) && !DAVFS.mkdir(to))
     return false;
   for (const String &child : listChildren(from))
   {
@@ -289,10 +300,10 @@ static String propfindEntry(File &f, const String &path, bool withQuota)
   if (dir)
   {
     xml += "<D:resourcetype><D:collection/></D:resourcetype>";
-    if (withQuota)
+    if (withQuota && davTotalBytes && davUsedBytes)
     {
-      uint64_t total = SD.totalBytes();
-      uint64_t used = SD.usedBytes();
+      uint64_t total = davTotalBytes();
+      uint64_t used = davUsedBytes();
       xml += "<D:quota-available-bytes>" + String((unsigned long long)(total - used)) + "</D:quota-available-bytes>";
       xml += "<D:quota-used-bytes>" + String((unsigned long long)used) + "</D:quota-used-bytes>";
     }
@@ -309,7 +320,9 @@ static String propfindEntry(File &f, const String &path, bool withQuota)
 
 static void handlePropfind(WebServer &server, const String &path)
 {
-  File f = SD.open(path);
+  File f;
+  if (path == "/" || DAVFS.exists(path))
+    f = DAVFS.open(path);
   if (!f)
   {
     sendEmpty(server, 404);
@@ -344,7 +357,9 @@ static void handlePropfind(WebServer &server, const String &path)
 
 static void handleGet(WebServer &server, const String &path, bool headOnly)
 {
-  File f = SD.open(path, FILE_READ);
+  File f;
+  if (path == "/" || DAVFS.exists(path))
+    f = DAVFS.open(path, FILE_READ);
   if (!f)
   {
     sendEmpty(server, 404);
@@ -391,7 +406,7 @@ static void handleDelete(WebServer &server, const String &path)
     sendEmpty(server, 403);
     return;
   }
-  if (!SD.exists(path))
+  if (!DAVFS.exists(path))
   {
     sendEmpty(server, 404);
     return;
@@ -401,7 +416,7 @@ static void handleDelete(WebServer &server, const String &path)
 
 static void handleMkcol(WebServer &server, const String &path)
 {
-  if (SD.exists(path))
+  if (DAVFS.exists(path))
   {
     sendEmpty(server, 405);
     return;
@@ -411,7 +426,7 @@ static void handleMkcol(WebServer &server, const String &path)
     sendEmpty(server, 409);
     return;
   }
-  sendEmpty(server, SD.mkdir(path) ? 201 : 500);
+  sendEmpty(server, DAVFS.mkdir(path) ? 201 : 500);
 }
 
 static void handleMoveCopy(WebServer &server, const String &path, bool move)
@@ -422,7 +437,7 @@ static void handleMoveCopy(WebServer &server, const String &path, bool move)
     sendEmpty(server, 400);
     return;
   }
-  if (!SD.exists(path))
+  if (!DAVFS.exists(path))
   {
     sendEmpty(server, 404);
     return;
@@ -433,7 +448,7 @@ static void handleMoveCopy(WebServer &server, const String &path, bool move)
     return;
   }
 
-  bool existed = SD.exists(destination);
+  bool existed = DAVFS.exists(destination);
   if (existed)
   {
     if (server.header("Overwrite") == "F")
@@ -448,7 +463,7 @@ static void handleMoveCopy(WebServer &server, const String &path, bool move)
     }
   }
 
-  bool ok = move ? SD.rename(path, destination) : copyRecursive(path, destination);
+  bool ok = move ? DAVFS.rename(path, destination) : copyRecursive(path, destination);
   sendEmpty(server, ok ? (existed ? 204 : 201) : 500);
 }
 
@@ -456,9 +471,9 @@ static void handleMoveCopy(WebServer &server, const String &path, bool move)
 static void handleLock(WebServer &server, const String &uri, const String &path)
 {
   int code = 200;
-  if (!SD.exists(path))
+  if (!DAVFS.exists(path))
   {
-    File f = SD.open(path, FILE_WRITE);
+    File f = DAVFS.open(path, FILE_WRITE);
     if (!f)
     {
       sendEmpty(server, 409);
@@ -485,7 +500,7 @@ static void handleLock(WebServer &server, const String &uri, const String &path)
 // PROPPATCH: Windows prova a impostare le date dei file; si risponde "fatto" senza modificare nulla
 static void handleProppatch(WebServer &server, const String &uri, const String &path)
 {
-  if (!SD.exists(path))
+  if (!DAVFS.exists(path))
   {
     sendEmpty(server, 404);
     return;
@@ -504,18 +519,35 @@ static void handleProppatch(WebServer &server, const String &uri, const String &
 class WebDavHandler : public RequestHandler
 {
 public:
-  bool canHandle(WebServer &server, HTTPMethod method, const String &uri) override
-  {
-    return true; // in modalità SD tutto il server è WebDAV
-  }
+  explicit WebDavHandler(WebServer &server) : server(server) {}
+
+  // Le firme dei metodi virtuali di RequestHandler cambiano tra core 2.x e 3.x
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  bool canHandle(WebServer &, HTTPMethod, const String &) override { return true; }
+  bool canRaw(WebServer &, const String &) override { return doCanRaw(); }
+  void raw(WebServer &, const String &uri, HTTPRaw &raw) override { doRaw(uri, raw); }
+  bool handle(WebServer &, HTTPMethod method, const String &uri) override { return doHandle(method, uri); }
+#else
+  bool canHandle(HTTPMethod, String) override { return true; }
+  bool canRaw(String) override { return doCanRaw(); }
+  void raw(WebServer &, String uri, HTTPRaw &raw) override { doRaw(uri, raw); }
+  bool handle(WebServer &, HTTPMethod method, String uri) override { return doHandle(method, uri); }
+#endif
+
+private:
+  WebServer &server;
+  File putFile;
+  String putPath;
+  bool putOk = false;
+  bool putExisted = false;
 
   // il corpo dei PUT arriva a pezzi in raw(): file grandi senza caricarli in RAM
-  bool canRaw(WebServer &server, const String &uri) override
+  bool doCanRaw()
   {
     return server.method() == HTTP_PUT;
   }
 
-  void raw(WebServer &server, const String &uri, HTTPRaw &raw) override
+  void doRaw(const String &uri, HTTPRaw &raw)
   {
     switch (raw.status)
     {
@@ -525,8 +557,8 @@ public:
       putExisted = false;
       if (!uriToPath(uri, putPath) || putPath == "/" || !isDirectory(parentOf(putPath)) || isDirectory(putPath))
         return;
-      putExisted = SD.exists(putPath);
-      putFile = SD.open(putPath, FILE_WRITE); // crea o svuota
+      putExisted = DAVFS.exists(putPath);
+      putFile = DAVFS.open(putPath, FILE_WRITE); // crea o svuota
       putOk = (bool)putFile;
       break;
     }
@@ -542,13 +574,13 @@ public:
       if (putFile)
         putFile.close();
       if (putOk)
-        SD.remove(putPath); // trasferimento interrotto: niente file a metà
+        DAVFS.remove(putPath); // trasferimento interrotto: niente file a metà
       putOk = false;
       break;
     }
   }
 
-  bool handle(WebServer &server, HTTPMethod method, const String &uri) override
+  bool doHandle(HTTPMethod method, const String &uri)
   {
     String path;
     if (!uriToPath(uri, path))
@@ -581,8 +613,8 @@ public:
         File f;
         if (path != "/" && isDirectory(parentOf(path)) && !isDirectory(path))
         {
-          putExisted = SD.exists(path);
-          f = SD.open(path, FILE_WRITE);
+          putExisted = DAVFS.exists(path);
+          f = DAVFS.open(path, FILE_WRITE);
         }
         putOk = (bool)f;
         if (f)
@@ -618,18 +650,14 @@ public:
     }
     return true;
   }
-
-private:
-  File putFile;
-  String putPath;
-  bool putOk = false;
-  bool putExisted = false;
 };
 
-void sdWebDavBegin(WebServer &server)
+void fsWebDavBegin(WebServer &server, fs::FS &fs, FsWebDavBytesFn totalBytes, FsWebDavBytesFn usedBytes)
 {
+  davFs = &fs;
+  davTotalBytes = totalBytes;
+  davUsedBytes = usedBytes;
   static const char *headers[] = {"Depth", "Destination", "Overwrite"};
   server.collectHeaders(headers, 3);
-  server.addHandler(new WebDavHandler());
-  logInfo("[WebDAV] server attivo sulla radice della microSD");
+  server.addHandler(new WebDavHandler(server));
 }
