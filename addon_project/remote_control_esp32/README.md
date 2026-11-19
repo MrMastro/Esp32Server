@@ -15,9 +15,31 @@ Progetto PlatformIO (piattaforma pioarduino, Arduino core 3.x).
 
 1. In `main_settings.json` impostare `"ota_upload": true` (oppure via API, vedi sotto) e riavviare.
    Lo schermo mostra `OTA ON` accanto all'IP.
-2. Copiare `ota_local.ini.example` in `ota_local.ini` (non versionato) e inserire IP della scheda e `devicePassword`.
-3. Caricare con l'ambiente OTA: `pio run -e esp32-c6-lcd-1_3-ota -t upload`
+2. Copiare `ota_local.ini.example` in `ota_local.ini` (non versionato): una sezione `[ota_<nome>]` per ogni
+   dispositivo, con `ip` e `password` (= `devicePassword` del suo `main_settings.json`).
+3. Scegliere il dispositivo con `target` nella sezione `[ota]`:
+
+   ```ini
+   [ota]
+   target = remote2          ; usa la sezione [ota_remote2]
+
+   [ota_remote1]
+   ip = 172.16.250.100
+   password = ...
+
+   [ota_remote2]
+   ip = 0.0.0.0              ; 0.0.0.0 = non ancora noto: l'upload si ferma con un errore
+   password = ...
+   ```
+
+   oppure al volo senza toccare il file (PowerShell): `$env:OTA_TARGET = "remote2"`.
+4. Caricare con l'ambiente OTA: `pio run -e esp32-c6-lcd-1_3-ota -t upload`
    (o dalla barra di PlatformIO scegliendo l'ambiente `esp32-c6-lcd-1_3-ota`).
+   Il log mostra `[OTA] destinazione: <nome> (<ip>)`. La scelta la fa `scripts/ota_select.py`
+   (PlatformIO non supporta variabili annidate tipo `${ota_${ota.target}.ip}`).
+
+Un dispositivo nuovo va caricato la prima volta via USB (`pio run -e esp32-c6-lcd-1_3 -t upload`): l'OTA
+funziona solo da quando il firmware è sulla scheda e `ota_upload` è `true` nel suo `main_settings.json`.
 
 Il PC deve essere sulla stessa rete della scheda (in AP_MODE: collegarsi al WiFi `ssidAP`).
 Ogni firmware caricato deve contenere l'OTA, altrimenti si torna all'upload via USB.
