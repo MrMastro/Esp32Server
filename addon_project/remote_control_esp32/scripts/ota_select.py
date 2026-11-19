@@ -2,14 +2,14 @@
 #
 # In ota_local.ini (o platformio.ini):
 #   [ota]
-#   target = remote1            ; nome del dispositivo da aggiornare
+#   target = esp32_1            ; nome del dispositivo da aggiornare
 #
-#   [ota_remote1]               ; una sezione [ota_<nome>] per ogni dispositivo
+#   [ota_esp32_1]               ; una sezione [ota_<nome>] per ogni dispositivo
 #   ip = 172.17.252.107
 #   password = ...              ; devicePassword del suo main_settings.json
 #
 # Il target si può anche scegliere al volo senza toccare i file, con la variabile d'ambiente OTA_TARGET:
-#   PowerShell:  $env:OTA_TARGET = "remote2"; pio run -e esp32-c6-lcd-1_3-ota -t upload
+#   PowerShell:  $env:OTA_TARGET = "esp32_2"; pio run -e esp32-c6-lcd-1_3-ota -t upload
 #
 # PlatformIO non supporta variabili annidate tipo ${ota_${ota.target}.ip}: per questo serve lo script.
 

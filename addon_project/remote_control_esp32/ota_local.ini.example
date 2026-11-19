@@ -5,15 +5,15 @@
 ;   ip       = IP della scheda (lo mostra lo schermo; in AP_MODE è 192.168.4.1)
 ;   password = devicePassword del main_settings.json di quella scheda
 ; [ota] target = <nome> sceglie a quale dispositivo fare l'upload
-; (oppure al volo, da PowerShell: $env:OTA_TARGET = "remote2"; pio run -e esp32-c6-lcd-1_3-ota -t upload)
+; (oppure al volo, da PowerShell: $env:OTA_TARGET = "esp32_2"; pio run -e esp32-c6-lcd-1_3-ota -t upload)
 
 [ota]
-target = remote1
+target = esp32_1
 
-[ota_remote1]
+[ota_esp32_1]
 ip = 192.168.1.50
 password = la_tua_devicePassword
 
-[ota_remote2]
+[ota_esp32_2]
 ip = 192.168.1.51
 password = la_devicePassword_del_secondo

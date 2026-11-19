@@ -21,18 +21,18 @@ Progetto PlatformIO (piattaforma pioarduino, Arduino core 3.x).
 
    ```ini
    [ota]
-   target = remote2          ; usa la sezione [ota_remote2]
+   target = esp32_2          ; usa la sezione [ota_esp32_2]
 
-   [ota_remote1]
+   [ota_esp32_1]
    ip = 172.16.250.100
    password = ...
 
-   [ota_remote2]
+   [ota_esp32_2]
    ip = 0.0.0.0              ; 0.0.0.0 = non ancora noto: l'upload si ferma con un errore
    password = ...
    ```
 
-   oppure al volo senza toccare il file (PowerShell): `$env:OTA_TARGET = "remote2"`.
+   oppure al volo senza toccare il file (PowerShell): `$env:OTA_TARGET = "esp32_2"`.
 4. Caricare con l'ambiente OTA: `pio run -e esp32-c6-lcd-1_3-ota -t upload`
    (o dalla barra di PlatformIO scegliendo l'ambiente `esp32-c6-lcd-1_3-ota`).
    Il log mostra `[OTA] destinazione: <nome> (<ip>)`. La scelta la fa `scripts/ota_select.py`
