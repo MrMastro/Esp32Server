@@ -18,6 +18,7 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include <SD.h>
+#include <vector>
 #include "hal/usb_serial_jtag_ll.h" // watchdog ricezione USB, vedi readSerialMessage()
 
 #ifndef BOOT_SERIAL_WAIT_MS
@@ -584,34 +585,94 @@ static void executeSerialMessage(const String &msg)
 static void startTasks();        // definita sotto, insieme ai task
 static void startSdModeTasks();  // idem
 
-// Schermata della modalità SD: indirizzo da usare in "Connetti unità di rete".
-// Con mDNS attivo l'indirizzo principale è http://<deviceName adattato>.local/, con l'IP sotto come riserva.
+// Spezza un indirizzo in righe di al massimo maxChars caratteri, andando a capo dopo i '-' e prima
+// dei '.' (es. "ferdinando-the-second.local/" -> "ferdinando-" / "the-second" / ".local/").
+// I pezzi più lunghi di una riga vengono tagliati.
+static std::vector<String> wrapAddress(const String &text, size_t maxChars)
+{
+  std::vector<String> tokens;
+  String current;
+  for (size_t i = 0; i < text.length(); i++)
+  {
+    char c = text[i];
+    if (c == '.' && current.length() > 0)
+    {
+      tokens.push_back(current);
+      current = "";
+    }
+    current += c;
+    if (c == '-')
+    {
+      tokens.push_back(current);
+      current = "";
+    }
+  }
+  if (current.length() > 0)
+    tokens.push_back(current);
+
+  std::vector<String> lines;
+  String line;
+  for (String token : tokens)
+  {
+    while (token.length() > maxChars) // pezzo troppo lungo: taglio netto
+    {
+      if (line.length() > 0)
+      {
+        lines.push_back(line);
+        line = "";
+      }
+      lines.push_back(token.substring(0, maxChars));
+      token = token.substring(maxChars);
+    }
+    if (line.length() + token.length() > maxChars)
+    {
+      lines.push_back(line);
+      line = "";
+    }
+    line += token;
+  }
+  if (line.length() > 0)
+    lines.push_back(line);
+  return lines;
+}
+
+// Schermata della modalità SD. Con mDNS attivo l'indirizzo principale è http://<deviceName adattato>.local/
+// (va a capo se lungo, carattere più grande possibile in max 3 righe), con l'IP sotto come riserva.
 static void drawSdModeScreen(const String &mdnsHost, const String &ip)
 {
+  const int16_t CHAR_W = 6, CHAR_H = 8; // font del display a dimensione 1
+  const int16_t ADDRESS_TOP = 84, ADDRESS_BOTTOM = 168;
+
   displaySetOn(true);
   gfx->fillScreen(RGB565_BLACK);
-  displayPrintCentered("MODALITA' SD", 22, 2, RGB565_CYAN);
-
-  String host = mdnsHost.length() > 0 ? mdnsHost + ".local/" : ip + "/";
-  String url = "http://" + host;
-  if ((int)url.length() * 12 <= LCD_WIDTH - 8)
-  {
-    displayPrintCentered(url, 80, 2, RGB565_YELLOW);
-  }
-  else
-  {
-    // a dimensione 2 (12 px per carattere) l'indirizzo intero non entra in 240 px: si va a capo
-    displayPrintCentered("http://", 68, 2, RGB565_YELLOW);
-    uint8_t size = (int)host.length() * 12 <= LCD_WIDTH - 8 ? 2 : 1;
-    displayPrintCentered(host, size == 2 ? 90 : 94, size, RGB565_YELLOW);
-  }
 
   // il font del display non ha le lettere accentate
-  displayPrintCentered("Connetti unita'", 135, 2, RGB565_WHITE);
-  displayPrintCentered("di rete", 157, 2, RGB565_WHITE);
+  displayPrintCentered("MICRO SD", 8, 3, RGB565_CYAN);
+  displayPrintCentered("in rete WiFi", 38, 2, RGB565_WHITE);
+  displayPrintCentered("http://", 62, 2, RGB565_YELLOW);
+
+  String host = mdnsHost.length() > 0 ? mdnsHost + ".local/" : ip + "/";
+  uint8_t size = 1;
+  std::vector<String> lines;
+  for (uint8_t s = 3; s >= 1; s--)
+  {
+    size = s;
+    lines = wrapAddress(host, (LCD_WIDTH - 6) / (CHAR_W * s));
+    if (lines.size() <= 3)
+      break;
+  }
+  const int16_t lineHeight = CHAR_H * size + 4;
+  const int16_t blockHeight = lines.size() * lineHeight - 4;
+  int16_t y = ADDRESS_TOP + (ADDRESS_BOTTOM - ADDRESS_TOP - blockHeight) / 2;
+  for (const String &line : lines)
+  {
+    displayPrintCentered(line, y, size, RGB565_YELLOW);
+    y += lineHeight;
+  }
+
   if (mdnsHost.length() > 0)
-    displayPrintCentered("oppure http://" + ip + "/", 195, 1, RGB565_LIGHTGREY);
-  displayPrintCentered("riavvia per uscire", 220, 1, RGB565_DARKGREY);
+    displayPrintCentered("IP " + ip, 182, 2, RGB565_LIGHTGREY);
+  displayPrintCentered("riavvia per uscire", 216, 2, RGB565_DARKGREY);
   displayFlush();
 }
 
@@ -625,7 +686,7 @@ static void runSdMode()
   // indirizzo con il nome al posto dell'IP: http://<deviceName adattato>.local/ (es. esp32-remote.local)
   String mdnsHost = mdnsBeginForWebDav(settings.deviceName);
   String url = mdnsHost.length() > 0 ? "http://" + mdnsHost + ".local/" : "http://" + wifiStatus.ip + "/";
-  Serial.println("[SD] modalita' SD attiva: in Esplora risorse \"Connetti unita' di rete\" -> " + url);
+  Serial.println("[SD] modalita' SD attiva (micro SD in rete WiFi): in Esplora risorse \"Connetti unita' di rete\" -> " + url);
   if (mdnsHost.length() > 0)
     Serial.println("[SD] se il nome non viene trovato usa l'IP: http://" + wifiStatus.ip + "/");
   Serial.println("[SD] per uscire: reboot o stacca la corrente");
