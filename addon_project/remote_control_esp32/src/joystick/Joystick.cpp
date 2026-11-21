@@ -66,8 +66,13 @@ J_DIRECTION Joystick::readBaseDirection()
   _x = analogRead(_cfg.pinAnalogX);
   _y = analogRead(_cfg.pinAnalogY);
 
-  const int dx = _x - _cfg.centerX;
-  const int dy = _y - _cfg.centerY;
+  int dx = _x - _cfg.centerX;
+  int dy = _y - _cfg.centerY;
+  if (_cfg.reverseAnalog)
+  {
+    dx = -dx;
+    dy = -dy;
+  }
   const int dz = _cfg.deadZone;
 
   const bool up = dx > dz;

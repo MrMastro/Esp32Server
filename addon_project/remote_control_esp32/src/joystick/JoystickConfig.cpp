@@ -31,8 +31,9 @@ bool JoystickConfig::loadFromFile(const char *path)
   centerY = doc["centerY"] | centerY;
   deadZone = doc["deadZone"] | deadZone;
   autoCalibrate = doc["autoCalibrate"] | autoCalibrate;
+  reverseAnalog = doc["reverseAnalog"] | reverseAnalog;
 
-  logInfof("[JoystickConfig] caricato %s (SW=%d X=%d Y=%d deadZone=%d)\n",
-                path, pinSwitch, pinAnalogX, pinAnalogY, deadZone);
+  logInfof("[JoystickConfig] caricato %s (SW=%d X=%d Y=%d deadZone=%d reverseAnalog=%d)\n",
+                path, pinSwitch, pinAnalogX, pinAnalogY, deadZone, reverseAnalog);
   return true;
 }

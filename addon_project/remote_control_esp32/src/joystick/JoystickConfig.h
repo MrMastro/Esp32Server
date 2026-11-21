@@ -20,6 +20,8 @@ struct JoystickConfig
   int deadZone = 400;
   // Se true, all'avvio misura il centro (non toccare la levetta durante il boot).
   bool autoCalibrate = true;
+  // Se true, inverte il verso di entrambi gli assi (UP <-> DOWN, LEFT <-> RIGHT).
+  bool reverseAnalog = false;
 
   // Carica i valori dal file; i campi mancanti restano ai default.
   // Ritorna false se il file non esiste o non è un JSON valido.

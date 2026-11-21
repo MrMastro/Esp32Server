@@ -176,6 +176,7 @@ Comportamento della rete (come `MastroServer` del progetto principale):
 | `autoCalibrate` | `true` | Misura il centro all'avvio (non toccare la levetta durante il boot) |
 | `centerX` / `centerY` | `1930` / `1960` | Centro usato se `autoCalibrate` è `false` |
 | `deadZone` | `400` | Scostamento dal centro sotto il quale l'asse è centrato |
+| `reverseAnalog` | `false` | Se `true` inverte gli analogici: UP ↔ DOWN e LEFT ↔ RIGHT |
 
 ### /config/espDevices.json
 

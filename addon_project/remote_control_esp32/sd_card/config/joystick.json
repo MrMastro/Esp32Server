@@ -6,5 +6,6 @@
   "autoCalibrate": true,
   "centerX": 1930,
   "centerY": 1960,
-  "deadZone": 400
+  "deadZone": 400,
+  "reverseAnalog": false
 }
