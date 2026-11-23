@@ -46,13 +46,16 @@ enum class LINK_STATE
 static const uint32_t DISCONNECT_SEND_WINDOW_MS = 400; // ritrasmissione di DISCONNECT (dispositivi forse in modem sleep)
 static const uint32_t DISCONNECT_ACK_WAIT_MS = 500;    // attesa massima degli ACK, poi si va avanti lo stesso
 static const uint32_t RESULT_MESSAGE_MS = 1000;        // conferma breve: "DISCONNESSO" / "CONNESSO" / "NESSUN DISPOSITIVO"
-static const uint32_t CONNECTING_TIMEOUT_MS = 15000;   // slider "CONNESSIONE" al massimo per questo tempo
+// slider "CONNESSIONE": finiti gli accoppiamenti in coda (e dall'ultimo riuscito), al massimo questo tempo
+// di attesa del primo HEARTBEAT_ACK
+static const uint32_t CONNECTING_TIMEOUT_MS = 15000;
 static volatile LINK_STATE linkState = LINK_STATE::CONNECTED;
 static volatile bool connectToggleRequested = false;
 static uint32_t disconnectDeadlineMs = 0;
 // Riscontro a schermo della connessione richiesta con SW: slider "CONNESSIONE" finche' il primo
 // dispositivo risulta collegato (HEARTBEAT_ACK) o nessuno ha accettato l'accoppiamento
 static volatile bool connectingFeedback = false;
+static volatile bool connectingMissingOnly = false; // collegamento dei soli dispositivi scollegati (altri gia' collegati)
 static volatile int connectingPaired = 0;
 static uint32_t connectingStartMs = 0;
 
@@ -63,8 +66,24 @@ static void finishConnectingFeedback(bool connected)
   remoteControlScreenSetBusy(nullptr);
   if (connected)
     remoteControlScreenShowMessage("CONNESSO", "", RGB565_GREEN, RESULT_MESSAGE_MS);
+  else if (connectingMissingOnly)
+    remoteControlScreenShowMessage("NESSUN NUOVO", "DISPOSITIVO", RGB565_ORANGE, RESULT_MESSAGE_MS);
   else
     remoteControlScreenShowMessage("NESSUN", "DISPOSITIVO", RGB565_ORANGE, RESULT_MESSAGE_MS);
+}
+
+// true se almeno un dispositivo con devicePassword non e' collegato (pallino non pieno). DENTRO il lock.
+static bool someDeviceNotConnected()
+{
+  for (const EspDevice &device : espDevicesList())
+  {
+    if (device.devicePassword.length() == 0)
+      continue; // non configurato: non si collegherebbe comunque
+    auto it = espDevicesState().find(device.macAdress);
+    if (it == espDevicesState().end() || it->second.status != ESP_DEVICE_STATUS::CONNECTED)
+      return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -220,6 +239,7 @@ static void pairDevice(int index, const EspDevice &device)
   if (result == PAIR_RESULT::PAIRED)
   {
     connectingPaired = connectingPaired + 1;
+    connectingStartMs = millis(); // lo slider attende il primo HEARTBEAT_ACK da qui
     wirelessSessionSet(session); // sostituisce la sessione precedente; primo heartbeat subito
     resetRetry(index);
   }
@@ -599,6 +619,7 @@ static void startConnect()
   setAllDevicesStatus(ESP_DEVICE_STATUS::OFFLINE, "in connessione", "");
   remoteControlScreenSetDisconnected(false);
   connectingPaired = 0;
+  connectingMissingOnly = false;
   connectingFeedback = true;
   connectingStartMs = millis(); // lo slider "CONNESSIONE" e' gia' a schermo (main.cpp)
   for (int i = 0; i < ESP_DEVICES_MAX; i++)
@@ -615,6 +636,39 @@ static void startConnect()
   }
 }
 
+// Collegamento dei soli dispositivi non collegati (pressione lunga di SW con qualche pallino non pieno):
+// accoppiamento subito, senza attese di riscoperta; quelli gia' collegati non si toccano.
+static void startConnectMissing()
+{
+  const std::vector<EspDevice> &devices = espDevicesList();
+  takeExclusiveExecution();
+  connectingPaired = 0;
+  connectingMissingOnly = true;
+  connectingFeedback = true;
+  connectingStartMs = millis(); // lo slider "CONNESSIONE" e' gia' a schermo (main.cpp)
+  int queued = 0;
+  String names;
+  for (size_t i = 0; i < devices.size() && i < ESP_DEVICES_MAX; i++)
+  {
+    if (devices[i].devicePassword.length() == 0)
+      continue;
+    auto it = espDevicesState().find(devices[i].macAdress);
+    if (it != espDevicesState().end() && it->second.status == ESP_DEVICE_STATUS::CONNECTED)
+      continue; // gia' collegato
+    resetRetry((int)i);
+    if (requestPair((int)i) || pairPending[i])
+    {
+      queued++;
+      names += (names.length() > 0 ? ", " : "") + devices[i].deviceName;
+    }
+  }
+  if (queued == 0)
+    finishConnectingFeedback(false);
+  freeExclusiveExecution();
+  logInfo("[Wireless] t=" + String(millis()) + " collegamento dei dispositivi scollegati: " + String(queued) +
+          (queued > 0 ? " (" + names + ")" : String("")));
+}
+
 static void handleConnectToggleRequest()
 {
   if (!connectToggleRequested)
@@ -622,7 +676,15 @@ static void handleConnectToggleRequest()
   connectToggleRequested = false;
   logInfo("[Wireless] t=" + String(millis()) + " richiesta di disconnessione/connessione presa dal task wireless");
   if (linkState == LINK_STATE::CONNECTED)
-    startDisconnect();
+  {
+    takeExclusiveExecution();
+    bool missing = someDeviceNotConnected();
+    freeExclusiveExecution();
+    if (missing)
+      startConnectMissing(); // qualche pallino non pieno: si collegano quelli che mancano
+    else
+      startDisconnect();     // tutti collegati: disconnessione
+  }
   else if (linkState == LINK_STATE::DISCONNECTED)
     startConnect();
   // DISCONNECTING: si ignora (disconnessione gia' in corso: il suo slider resta a schermo)
@@ -646,7 +708,9 @@ static void wirelessTask(void *pvParameters)
     processPending();
     handleConnectToggleRequest();
     finishDisconnectIfDone();
-    if (connectingFeedback && millis() - connectingStartMs >= CONNECTING_TIMEOUT_MS)
+    // il tempo conta solo a coda di accoppiamento vuota (i tentativi HTTP possono durare piu' di CONNECTING_TIMEOUT_MS)
+    if (connectingFeedback && !pairingInProgress && uxQueueMessagesWaiting(pairQueue) == 0 &&
+        millis() - connectingStartMs >= CONNECTING_TIMEOUT_MS)
     {
       // accoppiati ma nessun HEARTBEAT_ACK entro il tempo massimo
       takeExclusiveExecution();
@@ -699,6 +763,11 @@ void wirelessRequestConnectToggle()
 bool wirelessManagerDisconnected()
 {
   return linkState != LINK_STATE::CONNECTED;
+}
+
+bool wirelessManagerLongPressConnects()
+{
+  return linkState != LINK_STATE::CONNECTED || someDeviceNotConnected();
 }
 
 uint32_t wirelessManagerLongPressMs()

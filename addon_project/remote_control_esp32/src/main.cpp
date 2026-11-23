@@ -909,8 +909,10 @@ static void commandDelayedTask(void *pvParameters)
 }
 
 // Pressione lunga di SW: da LONG_PRESS_SHOW_MS la barra a schermo; a longPressS il toggle BUTTON fatto
-// alla pressione viene annullato (ai dispositivi torna la direzione di prima) e si disconnettono /
-// riconnettono i dispositivi.
+// alla pressione viene annullato (ai dispositivi torna la direzione di prima) e:
+//  - tutti collegati -> disconnessione ("DISCONNESSIONE");
+//  - qualcuno non collegato -> si collegano quelli che mancano ("CONNESSIONE");
+//  - disconnessi -> connessione ("CONNESSIONE").
 static const uint32_t LONG_PRESS_SHOW_MS = 2000;
 
 static void handleLongPress(J_DIRECTION &direction)
@@ -926,8 +928,10 @@ static void handleLongPress(J_DIRECTION &direction)
     direction = joystick.read(); // toggle BUTTON annullato: direzione di prima della pressione
     if (joystick.changed())
       wirelessSendDirection(direction);
-    bool connecting = wirelessManagerDisconnected();
-    logInfo("[Wireless] t=" + String(millis()) + " pressione lunga di SW: " + (connecting ? "connessione" : "disconnessione"));
+    bool connecting = wirelessManagerLongPressConnects();
+    logInfo("[Wireless] t=" + String(millis()) + " pressione lunga di SW: " +
+            (connecting ? (wirelessManagerDisconnected() ? "connessione" : "collegamento dei dispositivi scollegati")
+                        : "disconnessione"));
     // riscontro immediato: la barra diventa subito uno slider animato (stesso punto, stessa scritta) finche'
     // il task wireless non ha finito (DISCONNECT + ACK, oppure accoppiamento); poi conferma breve a schermo
     remoteControlScreenSetHold(-1, nullptr);
@@ -938,7 +942,7 @@ static void handleLongPress(J_DIRECTION &direction)
 
   if (held >= showFrom && !joystick.longPressFired())
     remoteControlScreenSetHold((float)(held - showFrom) / (float)(longPressMs - showFrom),
-                               wirelessManagerDisconnected() ? "CONNESSIONE" : "DISCONNESSIONE");
+                               wirelessManagerLongPressConnects() ? "CONNESSIONE" : "DISCONNESSIONE");
   else
     remoteControlScreenSetHold(-1, nullptr);
 }

@@ -123,8 +123,13 @@ Note:
 
 ## Disconnessione e connessione (pressione lunga di SW)
 
-Tenendo premuto il tasto SW del joystick per più di **5 s** (`longPressS`, configurabile) il telecomando
-**disconnette** tutti i dispositivi; ripetendo la pressione lunga **rifà la connessione**.
+Tenendo premuto il tasto SW del joystick per più di **5 s** (`longPressS`, configurabile) il telecomando:
+
+- se **tutti** i dispositivi sono collegati (pallini pieni) → li **disconnette** tutti;
+- se **qualcuno non è collegato** (pallino vuoto o mezzo pieno) → **collega subito quelli scollegati**
+  (accoppiamento immediato, senza aspettare la riscoperta; quelli già collegati non si toccano). Scritta
+  "CONNESSIONE", conferma "CONNESSO" al primo che si collega, "NESSUN NUOVO DISPOSITIVO" se nessuno risponde;
+- se è **disconnesso** → **rifà la connessione** di tutti (vedi sotto).
 
 Non è una pausa: i dispositivi vengono **disconnessi davvero**. Per loro equivale a **spegnere il
 telecomando** (tornano a funzionare come senza telecomando e lo dimenticano); l'unica differenza è che
@@ -192,7 +197,8 @@ Nuova pressione lunga: **gli stessi passaggi dell'accensione**:
 2. heartbeat e sessioni come al solito; riparte la riscoperta periodica.
 
 I pallini ripartono dagli stati dell'avvio (vuoto → mezzo pieno → pieno) man mano che i dispositivi
-rispondono; lo slider "CONNESSIONE" resta a schermo finché il primo è collegato.
+rispondono; lo slider "CONNESSIONE" resta a schermo finché il primo è collegato (finiti gli accoppiamenti in
+coda, al massimo altri 15 s di attesa del primo `HEARTBEAT_ACK`).
 
 Lo stato "disconnesso" **non** viene salvato: dopo un riavvio il telecomando si connette come sempre.
 
