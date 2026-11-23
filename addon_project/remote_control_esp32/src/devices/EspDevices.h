@@ -66,8 +66,17 @@ const std::map<String, EspDeviceState> &espDevicesState();
 // Aggiorna lo stato condiviso di un dispositivo (chiamare DENTRO takeExclusiveExecution()).
 void espDevicesSetState(const EspDeviceState &state);
 
-// POST http://<ip><path> con body JSON (bloccante, fino a 7s). false + error se non c'e' risposta HTTP.
-bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, int &statusCode, String &responseBody, String &error);
+// POST http://<ip><path> con body JSON (bloccante, fino a timeoutMs). false + error se non c'e' risposta HTTP.
+bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, uint32_t timeoutMs,
+                        int &statusCode, String &responseBody, String &error);
+
+// Prepara l'ARP verso un dispositivo prima della connessione HTTP, senza broadcast (su alcune reti, es.
+// hotspot del telefono, i broadcast non arrivano ai dispositivi in modem sleep):
+//  - voce ARP statica ip -> mac (macAdress di espDevices.json): il telecomando non chiede il MAC del dispositivo;
+//  - richiesta ARP in unicast al dispositivo: il dispositivo impara il MAC del telecomando (dopo un suo riavvio
+//    non lo conosce, e chiederlo in broadcast fallirebbe) e puo' rispondere subito.
+// Va chiamata con il WiFi collegato; ripeterla aggiorna la voce. false + error se qualcosa non riesce.
+bool espDevicesPrepareArp(const String &ip, const String &mac, String &error);
 
 // Diagnosi (comando seriale hello): GET http://<ip><path> verso un IP qualsiasi, restituisce l'esito come testo.
 // getInfoHello non si usa piu' nel funzionamento: il primo contatto e' l'accoppiamento.

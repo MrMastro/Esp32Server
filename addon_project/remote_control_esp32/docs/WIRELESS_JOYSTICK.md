@@ -351,10 +351,25 @@ Il dispositivo converte il codice nella stringa (`"UP_BUTTON"`) e la passa a `re
 - **Heartbeat adattivo**: in sessione ogni `heartbeatActiveMs` (come `SESSION_START`), a riposo ogni
   `heartbeatIdleS` (come `HEARTBEAT`); il primo parte subito dopo ogni accoppiamento. Porta la direzione
   attuale: dopo un (ri)accoppiamento il dispositivo si allinea subito alla direzione del telecomando.
-- **Riscoperta**: ogni `rediscoveryS` il telecomando ritenta l'accoppiamento solo verso i
-  dispositivi non accoppiati (es. accesi dopo il telecomando) e con `devicePassword` configurata.
+- **Riscoperta**: il telecomando ritenta l'accoppiamento solo verso i dispositivi non accoppiati (es. accesi
+  dopo il telecomando o riavviati) e con `devicePassword` configurata, con un'attesa per dispositivo: dopo un
+  accoppiamento **senza risposta** `fastRetryS`, poi il doppio a ogni fallimento consecutivo (10, 20, 40 s...)
+  fino a `rediscoveryS`; dopo un rifiuto (401, 403, ...) o una sessione persa senza risposte ESP-NOW,
+  `rediscoveryS`. Un accoppiamento riuscito azzera l'attesa. Il comando `devices` mostra quando si riprova.
+- **Riaccoppiamento senza risposta con la sessione ancora valida** (es. comando `pair` su una rete lenta): la
+  sessione resta com'è (il dispositivo non ha ricevuto nulla e usa ancora quella chiave). Se la richiesta fosse
+  arrivata e solo la risposta persa, il dispositivo avrebbe la chiave nuova: gli heartbeat ricevono
+  `UNKNOWN_SESSION` e il telecomando si riaccoppia da solo.
 - **Accoppiamento in un task a parte** (coda di dispositivi, uno alla volta): un dispositivo spento (fino a
-  `pairAttempts` × 7 s di attesa HTTP) non blocca gli heartbeat verso gli altri.
+  `pairAttempts` × `pairTimeoutS` di attesa HTTP) non blocca gli heartbeat verso gli altri.
+- **Voce ARP statica**: prima di ogni accoppiamento il telecomando registra in lwIP la coppia `ip` → `macAdress`
+  di `espDevices.json` (`espDevicesPrepareArp`), cosi' non deve chiedere il MAC in broadcast. Su un hotspot
+  del telefono la richiesta ARP in broadcast non arrivava ai dispositivi in modem sleep: l'accoppiamento HTTP
+  falliva sempre (nessuna risposta in 7 o 15 s) mentre l'ESP-NOW funzionava; con la voce statica
+  l'accoppiamento riesce in 0.2-0.5 s. Per questo `macAdress` deve essere quello giusto (MAC della STA).
+- **Tentativi brevi**: dopo il riavvio di un dispositivo il primo tentativo a volte resta bloccato anche se il
+  dispositivo e' gia' raggiungibile, mentre una connessione nuova riesce subito: meglio piu' tentativi brevi
+  (`pairAttempts` × `pairTimeoutS` = 4 × 5 s) che pochi lunghi.
 - **Ricezione sul dispositivo**: la callback ESP-NOW gira nel task WiFi e mette solo il pacchetto in una
   coda; il task wireless verifica, nell'ordine, telecomando accoppiato, mittente, versione, firma e
   `seq > ultimo`, poi applica la direzione. A ogni nuovo accoppiamento (`generation` diversa) `seq` e ultima
@@ -372,8 +387,10 @@ Il dispositivo converte il codice nella stringa (`"UP_BUTTON"`) e la passa a `re
 | `heartbeatActiveMs` | `1000` | intervallo heartbeat durante la sessione |
 | `heartbeatIdleS` | `15` | intervallo heartbeat a riposo |
 | `missedHeartbeats` | `3` | heartbeat senza ACK prima di considerare il dispositivo non collegato |
-| `rediscoveryS` | `60` | intervallo di riscoperta dei dispositivi non collegati |
-| `pairAttempts` | `2` | tentativi HTTP per dispositivo (il primo contatto dopo l'avvio spesso fallisce) |
+| `rediscoveryS` | `60` | attesa massima tra due tentativi verso un dispositivo non collegato |
+| `pairAttempts` | `4` | tentativi HTTP per dispositivo (il primo contatto dopo l'avvio spesso fallisce) |
+| `pairTimeoutS` | `5` | attesa massima di ogni tentativo HTTP di accoppiamento (minimo 2) |
+| `fastRetryS` | `10` | primo nuovo tentativo dopo un accoppiamento senza risposta, poi raddoppia fino a `rediscoveryS` |
 | `longPressS` | `5` | secondi di pressione di SW per disconnettere / riconnettere i dispositivi (fase 5) |
 | `remoteModemSleep` | `true` | modem sleep del telecomando a riposo; `false` = radio sempre accesa |
 

@@ -29,6 +29,8 @@ bool WirelessConfig::loadFromFile(const char *path)
   missedHeartbeats = doc["missedHeartbeats"] | missedHeartbeats;
   rediscoveryS = doc["rediscoveryS"] | rediscoveryS;
   pairAttempts = doc["pairAttempts"] | pairAttempts;
+  pairTimeoutS = doc["pairTimeoutS"] | pairTimeoutS;
+  fastRetryS = doc["fastRetryS"] | fastRetryS;
   longPressS = doc["longPressS"] | longPressS;
   remoteModemSleep = doc["remoteModemSleep"] | remoteModemSleep;
 
@@ -38,9 +40,13 @@ bool WirelessConfig::loadFromFile(const char *path)
   missedHeartbeats = max<uint8_t>(missedHeartbeats, 1);
   rediscoveryS = max<uint16_t>(rediscoveryS, 5);
   pairAttempts = max<uint8_t>(pairAttempts, 1);
+  pairTimeoutS = max<uint8_t>(pairTimeoutS, 2);
+  fastRetryS = max<uint16_t>(fastRetryS, 5);
+  fastRetryS = min<uint16_t>(fastRetryS, rediscoveryS);
 
-  logInfof("[WirelessConfig] caricato %s (sessione %u s, heartbeat %lu ms / %u s, missed %u, riscoperta %u s, modem sleep %s)\n",
+  logInfof("[WirelessConfig] caricato %s (sessione %u s, heartbeat %lu ms / %u s, missed %u, riscoperta %u s, "
+           "accoppiamento %u x %u s, nuovo tentativo da %u s, modem sleep %s)\n",
                 path, sessionTimeoutS, (unsigned long)heartbeatActiveMs, heartbeatIdleS, missedHeartbeats, rediscoveryS,
-                remoteModemSleep ? "si" : "no");
+                pairAttempts, pairTimeoutS, fastRetryS, remoteModemSleep ? "si" : "no");
   return true;
 }

@@ -3,9 +3,12 @@
 #include <ArduinoJson.h>
 #include <SD.h>
 #include <WiFi.h>
+#include <lwip/etharp.h>
+#include <lwip/tcpip.h>
+#include <lwip/priv/tcpip_priv.h> // tcpip_api_call
 
 static const uint16_t ESP_DEVICES_HTTP_PORT = 80;
-static const uint32_t ESP_DEVICES_HTTP_TIMEOUT_MS = 7000; // l'Esp32Server può impiegare ~5s a rispondere
+static const uint32_t ESP_DEVICES_HTTP_TIMEOUT_MS = 7000; // default (hello): l'Esp32Server può impiegare ~5s a rispondere
 static const size_t ESP_DEVICES_MAX_RESPONSE = 2048;
 
 static std::vector<EspDevice> devices;
@@ -147,7 +150,7 @@ const std::map<String, EspDeviceState> &espDevicesState()
 // appesantirebbe il firmware, che deve restare sotto lo slot OTA).
 // method "GET" (requestBody ignorato) o "POST" (requestBody JSON).
 static bool httpRequest(const char *method, const String &ip, const char *path, const String &requestBody,
-                        int &statusCode, String &body, String &error)
+                        uint32_t timeoutMs, int &statusCode, String &body, String &error)
 {
   IPAddress address;
   if (!address.fromString(ip))
@@ -158,11 +161,11 @@ static bool httpRequest(const char *method, const String &ip, const char *path, 
 
   WiFiClient client;
   uint32_t connectStart = millis();
-  if (!client.connect(address, ESP_DEVICES_HTTP_PORT, ESP_DEVICES_HTTP_TIMEOUT_MS))
+  if (!client.connect(address, ESP_DEVICES_HTTP_PORT, timeoutMs))
   {
     // errno qui non è affidabile (resta EINPROGRESS): conta il tempo trascorso
     uint32_t elapsed = millis() - connectStart;
-    if (elapsed + 50 >= ESP_DEVICES_HTTP_TIMEOUT_MS)
+    if (elapsed + 50 >= timeoutMs)
       error = "nessuna risposta in " + String(elapsed) + "ms (pacchetti non arrivano o non tornano)";
     else
       error = "connessione rifiutata in " + String(elapsed) + "ms (raggiungibile, porta chiusa)";
@@ -186,7 +189,7 @@ static bool httpRequest(const char *method, const String &ip, const char *path, 
   int headerEnd = -1;
   long contentLength = -1;
   uint32_t start = millis();
-  while (millis() - start < ESP_DEVICES_HTTP_TIMEOUT_MS)
+  while (millis() - start < timeoutMs)
   {
     while (client.available() && response.length() < ESP_DEVICES_MAX_RESPONSE)
     {
@@ -230,12 +233,99 @@ static bool httpRequest(const char *method, const String &ip, const char *path, 
 
 static bool httpGet(const String &ip, const char *path, int &statusCode, String &body, String &error)
 {
-  return httpRequest("GET", ip, path, "", statusCode, body, error);
+  return httpRequest("GET", ip, path, "", ESP_DEVICES_HTTP_TIMEOUT_MS, statusCode, body, error);
 }
 
-bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, int &statusCode, String &responseBody, String &error)
+// ARP verso un dispositivo (eseguito nel thread di lwIP con tcpip_api_call)
+struct ArpCall
 {
-  return httpRequest("POST", ip, path, jsonBody, statusCode, responseBody, error);
+  struct tcpip_api_call_data base; // deve essere il primo campo
+  ip4_addr_t ip;
+  struct eth_addr mac;
+  bool unicastSent;
+};
+
+// Richiesta ARP "chi ha <ip>?" inviata in unicast al MAC del dispositivo invece che in broadcast:
+// il dispositivo la riceve come un pacchetto normale anche in modem sleep, impara il MAC del telecomando
+// (una richiesta indirizzata a lui aggiorna la sua tabella ARP) e risponde in unicast.
+static bool sendUnicastArpRequest(struct netif *netif, const ip4_addr_t *ip, const struct eth_addr *mac)
+{
+  const uint16_t frameLen = 14 + 28; // header Ethernet + pacchetto ARP
+  struct pbuf *p = pbuf_alloc(PBUF_RAW, frameLen, PBUF_RAM);
+  if (p == nullptr)
+    return false;
+  uint8_t *f = (uint8_t *)p->payload;
+  const uint8_t *ownMac = netif->hwaddr;
+  const ip4_addr_t *ownIp = netif_ip4_addr(netif);
+  // Ethernet: destinazione = dispositivo, sorgente = telecomando, tipo ARP
+  memcpy(f + 0, mac->addr, 6);
+  memcpy(f + 6, ownMac, 6);
+  f[12] = 0x08;
+  f[13] = 0x06;
+  // ARP: Ethernet/IPv4, richiesta
+  uint8_t *a = f + 14;
+  a[0] = 0x00; a[1] = 0x01; // hardware type: Ethernet
+  a[2] = 0x08; a[3] = 0x00; // protocol type: IPv4
+  a[4] = 6;                 // hardware size
+  a[5] = 4;                 // protocol size
+  a[6] = 0x00; a[7] = 0x01; // opcode: request
+  memcpy(a + 8, ownMac, 6);
+  memcpy(a + 14, &ownIp->addr, 4);
+  memcpy(a + 18, mac->addr, 6);
+  memcpy(a + 24, &ip->addr, 4);
+  err_t err = netif->linkoutput(netif, p);
+  pbuf_free(p);
+  return err == ERR_OK;
+}
+
+static err_t prepareArpInTcpip(struct tcpip_api_call_data *data)
+{
+  ArpCall *call = (ArpCall *)data;
+  err_t err = etharp_add_static_entry(&call->ip, &call->mac);
+  if (err != ERR_OK)
+    return err;
+  struct netif *netif = netif_default;
+  call->unicastSent = netif != nullptr && netif_is_up(netif) && netif->linkoutput != nullptr &&
+                      sendUnicastArpRequest(netif, &call->ip, &call->mac);
+  return ERR_OK;
+}
+
+bool espDevicesPrepareArp(const String &ip, const String &mac, String &error)
+{
+  IPAddress address;
+  if (!address.fromString(ip))
+  {
+    error = "ip non valido";
+    return false;
+  }
+  unsigned int b[6];
+  if (sscanf(mac.c_str(), "%x:%x:%x:%x:%x:%x", &b[0], &b[1], &b[2], &b[3], &b[4], &b[5]) != 6)
+  {
+    error = "macAdress non valido";
+    return false;
+  }
+  ArpCall call = {};
+  IP4_ADDR(&call.ip, address[0], address[1], address[2], address[3]);
+  for (int i = 0; i < 6; i++)
+    call.mac.addr[i] = (uint8_t)b[i];
+  err_t err = tcpip_api_call(prepareArpInTcpip, &call.base);
+  if (err != ERR_OK)
+  {
+    error = "etharp_add_static_entry: errore " + String(err);
+    return false;
+  }
+  if (!call.unicastSent)
+  {
+    error = "voce statica impostata, richiesta ARP unicast non inviata";
+    return false;
+  }
+  return true;
+}
+
+bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, uint32_t timeoutMs,
+                        int &statusCode, String &responseBody, String &error)
+{
+  return httpRequest("POST", ip, path, jsonBody, timeoutMs, statusCode, responseBody, error);
 }
 
 void espDevicesSetState(const EspDeviceState &state)

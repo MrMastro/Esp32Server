@@ -1,11 +1,12 @@
 #include "WirelessPairing.h"
 #include "WirelessLink.h"
+#include "system/Log.h"
 #include <ArduinoJson.h>
 #include <WiFi.h>
 
 static std::map<String, WirelessSession> sessions;
 
-PAIR_RESULT wirelessPair(const EspDevice &device, WirelessSession &session, String &error)
+PAIR_RESULT wirelessPair(const EspDevice &device, uint32_t timeoutMs, WirelessSession &session, String &error)
 {
   if (device.devicePassword.length() == 0)
   {
@@ -27,9 +28,14 @@ PAIR_RESULT wirelessPair(const EspDevice &device, WirelessSession &session, Stri
   String body;
   serializeJson(req, body);
 
+  // ARP senza broadcast: voce statica per il dispositivo + richiesta unicast perche' impari il nostro MAC
+  String arpError;
+  if (!espDevicesPrepareArp(device.ip, device.macAdress, arpError))
+    logWarning("[Wireless] " + device.deviceName + ": ARP: " + arpError);
+
   int statusCode = 0;
   String response;
-  if (!espDevicesHttpPost(device.ip, WIRELESS_PAIR_PATH, body, statusCode, response, error))
+  if (!espDevicesHttpPost(device.ip, WIRELESS_PAIR_PATH, body, timeoutMs, statusCode, response, error))
     return PAIR_RESULT::UNREACHABLE;
 
   if (statusCode != 200)

@@ -28,7 +28,12 @@ static QueueHandle_t pairQueue = nullptr;          // indici in espDevicesList()
 static volatile bool pairPending[ESP_DEVICES_MAX]; // gia' in coda o in corso
 static volatile bool pairingInProgress = false;    // accoppiamento HTTP in corso: radio del telecomando accesa
 static uint32_t lastRediscoveryMs = 0;
-static uint32_t radioHoldUntilMs = 0;              // radio accesa almeno fino a qui (attesa di ACK)
+// Nuovi tentativi verso i dispositivi non collegati, uno per dispositivo (indici in espDevicesList()):
+// dopo un accoppiamento senza risposta fastRetryS, poi il doppio a ogni fallimento, fino a rediscoveryS
+static uint32_t retryAtMs[ESP_DEVICES_MAX];       // 0 = nessuna attesa (si tenta alla prossima verifica)
+static uint8_t retryFails[ESP_DEVICES_MAX];       // accoppiamenti consecutivi senza risposta
+static const uint32_t RETRY_CHECK_MS = 1000;      // ogni quanto si controlla chi va ritentato
+static uint32_t radioHoldUntilMs = 0;             // radio accesa almeno fino a qui (attesa di ACK)
 static bool radioSleeping = false;                 // stato del modem sleep del telecomando applicato
 
 // Disconnessione / connessione con la pressione lunga di SW (fase 5)
@@ -93,6 +98,34 @@ static void setDeviceStatus(const String &mac, ESP_DEVICE_STATUS status, bool pa
   espDevicesSetState(state);
 }
 
+// Prossimo tentativo verso un dispositivo (DENTRO il lock). unreachable = nessuna risposta HTTP:
+// attesa crescente da fastRetryS a rediscoveryS; altrimenti (rifiutato, sessione persa) rediscoveryS.
+static void scheduleRetry(int index, bool unreachable)
+{
+  if (index < 0 || index >= ESP_DEVICES_MAX)
+    return;
+  uint32_t maxMs = (uint32_t)cfg.rediscoveryS * 1000;
+  uint32_t delayMs = maxMs;
+  if (unreachable)
+  {
+    uint8_t shift = min<uint8_t>(retryFails[index], 8);
+    delayMs = min<uint32_t>(((uint32_t)cfg.fastRetryS * 1000) << shift, maxMs);
+    if (retryFails[index] < 255)
+      retryFails[index]++;
+  }
+  retryAtMs[index] = millis() + delayMs;
+  if (retryAtMs[index] == 0)
+    retryAtMs[index] = 1; // 0 vuol dire "nessuna attesa"
+}
+
+static void resetRetry(int index)
+{
+  if (index < 0 || index >= ESP_DEVICES_MAX)
+    return;
+  retryAtMs[index] = 0;
+  retryFails[index] = 0;
+}
+
 // Accoda l'accoppiamento di un dispositivo (se non e' gia' in coda). Chiamabile ovunque.
 static bool requestPair(int index)
 {
@@ -116,7 +149,11 @@ static bool requestPair(int index)
 // Accoppia un dispositivo e restituisce il suo nuovo stato:
 // accoppiato -> ONLINE + paired (CONNECTED al primo HEARTBEAT_ACK); risposta di errore -> ONLINE + pairError;
 // nessuna risposta -> OFFLINE; devicePassword mancante -> OFFLINE, non contattato.
-static void pairDevice(const EspDevice &device)
+// Eccezione: nessuna risposta HTTP ma la sessione attuale funziona ancora (heartbeat confermati, es. comando
+// "pair" con una rete lenta) -> la sessione resta: il dispositivo non ha ricevuto nulla e usa ancora quella chiave.
+// Se invece la richiesta fosse arrivata e solo la risposta persa, il dispositivo avrebbe la chiave nuova:
+// gli heartbeat ricevono UNKNOWN_SESSION e si riaccoppia da solo.
+static void pairDevice(int index, const EspDevice &device)
 {
   EspDeviceState state;
   state.deviceName = device.deviceName;
@@ -130,7 +167,7 @@ static void pairDevice(const EspDevice &device)
   PAIR_RESULT result = PAIR_RESULT::UNREACHABLE;
   for (uint8_t i = 0; i < cfg.pairAttempts; i++)
   {
-    result = wirelessPair(device, session, error);
+    result = wirelessPair(device, (uint32_t)cfg.pairTimeoutS * 1000, session, error);
     if (result != PAIR_RESULT::UNREACHABLE)
       break; // si ritenta solo se non ha risposto
   }
@@ -165,20 +202,42 @@ static void pairDevice(const EspDevice &device)
     freeExclusiveExecution();
     return;
   }
+
+  if (result == PAIR_RESULT::UNREACHABLE)
+  {
+    auto it = wirelessSessions().find(device.macAdress);
+    if (it != wirelessSessions().end() && !it->second.lost)
+    {
+      // sessione ancora valida: niente da cambiare (ne' sessione ne' pallino)
+      resetRetry(index);
+      freeExclusiveExecution();
+      logInfo("[Wireless] " + device.deviceName + ": riaccoppiamento senza risposta (" + error +
+              "), resta la sessione attuale");
+      return;
+    }
+  }
+
   if (result == PAIR_RESULT::PAIRED)
+  {
     connectingPaired = connectingPaired + 1;
-  if (result == PAIR_RESULT::PAIRED)
     wirelessSessionSet(session); // sostituisce la sessione precedente; primo heartbeat subito
+    resetRetry(index);
+  }
   else
+  {
     wirelessSessionRemove(device.macAdress);
+    scheduleRetry(index, result == PAIR_RESULT::UNREACHABLE);
+  }
   espDevicesSetState(state);
+  uint32_t retryInS = result == PAIR_RESULT::PAIRED ? 0 : (retryAtMs[index] - millis() + 500) / 1000;
   freeExclusiveExecution();
 
   if (result == PAIR_RESULT::PAIRED)
     logInfo("[Wireless] " + device.deviceName + " accoppiato: canale " + String(session.channel) +
                    ", impronta chiave " + wirelessKeyFingerprint(session.sessionKey));
   else
-    logInfo("[Wireless] " + device.deviceName + " non accoppiato: " + (state.pairError.length() > 0 ? state.pairError : error));
+    logInfo("[Wireless] " + device.deviceName + " non accoppiato: " + (state.pairError.length() > 0 ? state.pairError : error) +
+            ", nuovo tentativo tra " + String(retryInS) + " s");
 }
 
 static void pairingTask(void *pvParameters)
@@ -199,7 +258,7 @@ static void pairingTask(void *pvParameters)
         WiFi.setSleep(false);
         radioSleeping = false;
       }
-      pairDevice(devices[index]);
+      pairDevice(index, devices[index]);
       pairingInProgress = false;
     }
     pairPending[index] = false;
@@ -235,8 +294,8 @@ static void markLost(WirelessSession &s, const String &mac, const String &reason
   }
   else
   {
-    logInfo("[Wireless] " + s.deviceName + ": " + reason + ", riprovo alla prossima riscoperta (" +
-                   String(cfg.rediscoveryS) + " s)");
+    scheduleRetry(deviceIndexByMac(mac), false);
+    logInfo("[Wireless] " + s.deviceName + ": " + reason + ", riprovo tra " + String(cfg.rediscoveryS) + " s");
   }
 }
 
@@ -426,24 +485,28 @@ static void updateRadioSleep()
   WiFi.setSleep(radioSleeping);
 }
 
-// Ogni rediscoveryS: riaccoppia i dispositivi non accoppiati (es. accesi dopo il telecomando)
+// Riaccoppia i dispositivi non accoppiati (es. accesi dopo il telecomando, riavviati, rete lenta) quando
+// scade la loro attesa (scheduleRetry): pochi secondi dopo un fallimento, poi sempre piu' di rado.
 static void rediscovery()
 {
   uint32_t now = millis();
-  if (now - lastRediscoveryMs < (uint32_t)cfg.rediscoveryS * 1000)
+  if (now - lastRediscoveryMs < RETRY_CHECK_MS)
     return;
   lastRediscoveryMs = now;
 
   const std::vector<EspDevice> &devices = espDevicesList();
   takeExclusiveExecution();
-  for (size_t i = 0; i < devices.size(); i++)
+  for (size_t i = 0; i < devices.size() && i < ESP_DEVICES_MAX; i++)
   {
     if (devices[i].devicePassword.length() == 0)
       continue; // non configurato: inutile riprovare
     auto it = espDevicesState().find(devices[i].macAdress);
     bool paired = it != espDevicesState().end() && it->second.paired;
-    if (!paired)
-      requestPair((int)i);
+    if (paired || pairPending[i])
+      continue;
+    if (retryAtMs[i] != 0 && (int32_t)(now - retryAtMs[i]) < 0)
+      continue; // non ancora
+    requestPair((int)i);
   }
   freeExclusiveExecution();
 }
@@ -538,6 +601,8 @@ static void startConnect()
   connectingPaired = 0;
   connectingFeedback = true;
   connectingStartMs = millis(); // lo slider "CONNESSIONE" e' gia' a schermo (main.cpp)
+  for (int i = 0; i < ESP_DEVICES_MAX; i++)
+    resetRetry(i);
   freeExclusiveExecution();
   lastRediscoveryMs = millis();
   int queued = wirelessRequestPairAll();
@@ -605,7 +670,11 @@ void wirelessManagerBegin(const WirelessConfig &config)
 {
   cfg = config;
   for (int i = 0; i < ESP_DEVICES_MAX; i++)
+  {
     pairPending[i] = false;
+    retryAtMs[i] = 0;
+    retryFails[i] = 0;
+  }
   pairQueue = xQueueCreate(ESP_DEVICES_MAX, sizeof(uint8_t));
   xTaskCreate(pairingTask, "PairingTaskExecution", STACK_SIZE_PAIRING, NULL, PRIORITY_PAIRING, NULL);
   xTaskCreate(wirelessTask, "WirelessTaskExecution", STACK_SIZE_WIRELESS, NULL, PRIORITY_WIRELESS, NULL);
@@ -655,5 +724,22 @@ String wirelessManagerStatus()
   }
   if (wirelessSessions().empty())
     out += "[Wireless] nessun dispositivo accoppiato\n";
+  // dispositivi non accoppiati: quando si riprova
+  const std::vector<EspDevice> &devices = espDevicesList();
+  for (size_t i = 0; i < devices.size() && i < ESP_DEVICES_MAX; i++)
+  {
+    if (wirelessSessions().count(devices[i].macAdress) > 0 || devices[i].devicePassword.length() == 0 ||
+        linkState != LINK_STATE::CONNECTED)
+      continue;
+    String when;
+    if (pairPending[i])
+      when = "accoppiamento in corso o in coda";
+    else if (retryAtMs[i] == 0 || (int32_t)(now - retryAtMs[i]) >= 0)
+      when = "nuovo tentativo a breve";
+    else
+      when = "nuovo tentativo tra " + String((retryAtMs[i] - now + 500) / 1000) + " s";
+    out += "[Wireless] " + devices[i].deviceName + " non accoppiato: " + when +
+           (retryFails[i] > 0 ? " (tentativi senza risposta di fila: " + String(retryFails[i]) + ")" : String("")) + "\n";
+  }
   return out;
 }

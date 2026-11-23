@@ -50,8 +50,8 @@ enum class PAIR_RESULT
 };
 
 // Accoppia il dispositivo (POST /api/v1/remote/pair). Solo rete: si chiama FUORI dal lock.
-// Bloccante: fino a 7s. error descrive l'esito se diverso da PAIRED.
-PAIR_RESULT wirelessPair(const EspDevice &device, WirelessSession &session, String &error);
+// Bloccante: fino a timeoutMs. error descrive l'esito se diverso da PAIRED.
+PAIR_RESULT wirelessPair(const EspDevice &device, uint32_t timeoutMs, WirelessSession &session, String &error);
 
 // Sessioni attive, con chiave il MAC del dispositivo (maiuscolo). Da usare DENTRO takeExclusiveExecution().
 // wirelessSessionSet registra anche il dispositivo come peer ESP-NOW.

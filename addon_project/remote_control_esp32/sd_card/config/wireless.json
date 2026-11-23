@@ -4,7 +4,9 @@
   "heartbeatIdleS": 15,
   "missedHeartbeats": 3,
   "rediscoveryS": 60,
-  "pairAttempts": 2,
+  "pairAttempts": 4,
+  "pairTimeoutS": 5,
+  "fastRetryS": 10,
   "longPressS": 5,
   "remoteModemSleep": true
 }
