@@ -28,6 +28,8 @@ public:
     String getWifiCommunicationMode();
     void setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest);
     void setCustomApi(const char *uri, WebRequestMethodComposite method, ArBodyHandlerFunction onRequest);
+    // onBody riceve il body (se c'e'), onRequest viene chiamata sempre a richiesta completa e invia la risposta
+    void setCustomApi(const char *uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest, ArBodyHandlerFunction onBody);
     boolean isAvaible();
     AsyncWebServer* getWebServer();
 private:

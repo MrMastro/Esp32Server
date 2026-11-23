@@ -11,6 +11,8 @@
 
 //CommandController
 void commandController(AsyncWebServerRequest *request);
+// body di /api/v1/sendCommand (JSON {"command": "..."}): lo conserva per commandController
+void commandControllerBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 
 //InfoController
 void getOk(AsyncWebServerRequest *request);

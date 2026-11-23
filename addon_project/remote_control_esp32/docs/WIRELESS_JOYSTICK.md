@@ -44,6 +44,36 @@ Requisiti:
 | Joystick fisico sui dispositivi | Nuovo `joystickSettings.remoteControlWireless`: se `true` i pin vengono ignorati e si ascolta solo il telecomando |
 | Disconnettere / connettere | Tenere premuto **SW per più di 5 s** **disconnette** tutti i dispositivi (per loro è **come spegnere il telecomando**, ma vengono avvisati subito); un'altra pressione lunga **rifà la connessione** come all'accensione (vedi sotto). Non è una pausa: i dispositivi dimenticano il telecomando |
 
+## Modalità: ESP-NOW o API-CALL (`commandTransportMode`)
+
+`commandTransportMode` in `main_settings.json` del telecomando (`"ESP_NOW"` o `"API_CALL"`, default `"ESP_NOW"`;
+un valore non valido vale `ESP_NOW`; modificabile anche con `POST /api/settings`) sceglie come le direzioni
+arrivano ai dispositivi. In basso al centro dello schermo
+compare **ESP-NOW** (ciano) o **API-CALL** (magenta).
+
+- `"ESP_NOW"` → **ESP-NOW**: tutto quello che descrive questo documento (accoppiamento, heartbeat, sessioni,
+  pressione lunga di SW per connettere / disconnettere).
+- `"API_CALL"` → **API-CALL**: niente ESP-NOW (non viene nemmeno avviato), niente accoppiamenti né heartbeat.
+  A ogni **cambio** di direzione il telecomando invia a ogni dispositivo di `espDevices.json` una sola chiamata
+  ```
+  POST http://<ip>/api/v1/sendCommand
+  {"command": "DOWN_BUTTON"}
+  ```
+  - `CENTER` e `CENTER_BUTTON` non inviano nulla: tenendo giù a lungo parte una sola chiamata (`DOWN`), il
+    ritorno al centro non chiama nulla, uno spostamento successivo chiama la nuova direzione;
+  - il dispositivo la tratta come il suo joystick fisico (preset LED con quel `trigger`);
+  - un task e una coda (8 comandi, piena → si scarta il più vecchio) per dispositivo: uno spento non ritarda
+    gli altri; attesa 5 s se l'ultima chiamata ha avuto risposta, 2 s se no; prima di ogni chiamata la stessa
+    preparazione ARP dell'accoppiamento (voce statica + richiesta unicast);
+  - pallini: pieno se l'ultima chiamata ha avuto risposta HTTP, vuoto se no (all'avvio una `getInfoHello`);
+  - la pressione lunga di SW non fa nulla (SW resta il tasto BUTTON); `pair` è rifiutato; `devices` mostra
+    inviati / con risposta / senza risposta / scartati e l'ultimo esito per dispositivo;
+  - radio del telecomando sempre accesa (niente modem sleep) per non ritardare le chiamate.
+  - Prova (hotspot del telefono, 2 dispositivi): ~130 chiamate, tutte HTTP 200 in 60-390 ms.
+
+`/api/v1/sendCommand` (progetto generale) accetta il comando sia come body JSON `{"command": "..."}` sia, come
+prima, come parametro (`?command=...` o form).
+
 ## Architettura
 
 ```

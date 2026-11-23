@@ -322,6 +322,11 @@ bool espDevicesPrepareArp(const String &ip, const String &mac, String &error)
   return true;
 }
 
+bool espDevicesHttpGet(const String &ip, const char *path, uint32_t timeoutMs, int &statusCode, String &responseBody, String &error)
+{
+  return httpRequest("GET", ip, path, "", timeoutMs, statusCode, responseBody, error);
+}
+
 bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, uint32_t timeoutMs,
                         int &statusCode, String &responseBody, String &error)
 {

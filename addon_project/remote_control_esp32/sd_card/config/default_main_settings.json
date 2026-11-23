@@ -8,5 +8,6 @@
   "passwordAP": "ap_password",
   "ssidWIFI": "Home_Network",
   "passwordWIFI": "wifi_password",
-  "ota_upload": false
+  "ota_upload": false,
+  "commandTransportMode": "ESP_NOW"
 }

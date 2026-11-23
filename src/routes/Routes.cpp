@@ -2,7 +2,8 @@
 
 void initRoutes(MastroServer &srv)
 {
-  srv.setCustomApi("/api/v1/sendCommand", HTTP_POST, commandController);
+  // comando come parametro (?command=... o form) oppure body JSON {"command": "..."}
+  srv.setCustomApi("/api/v1/sendCommand", HTTP_POST, commandController, commandControllerBody);
   srv.setCustomApi("/api/v1/checkOk", HTTP_GET, getOk);
   srv.setCustomApi("/api/v1/ws2811SetEffect", HTTP_POST, setEffectWs2811);
   srv.setCustomApi("/api/v1/ws2811StopEffect", HTTP_POST, stopEffectWs2811);

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include "CommandTransportMode.h"
 
 // Impostazioni generali, lette da /config/main_settings.json sulla microSD.
 // Stessi nomi dei campi di SettingsModel del progetto principale (solo quelli utili al telecomando),
@@ -20,6 +21,14 @@ public:
   String ssidWIFI;
   String passwordWIFI;
   bool otaUpload; // JSON: "ota_upload". true = OTA via WiFi (upload da PlatformIO) attivo
+  // Come le direzioni arrivano ai dispositivi (vedi CommandTransportMode.h):
+  //   "ESP_NOW"  = collegamento continuo ESP-NOW (accoppiamento, heartbeat, sessioni);
+  //   "API_CALL" = niente ESP-NOW: a ogni direzione (tranne CENTER / CENTER_BUTTON) una POST /api/v1/sendCommand
+  //                a ogni dispositivo di espDevices.json (vedi apicall/ApiCommandSender.h)
+  String commandTransportMode;
+
+  // true se commandTransportMode e' ESP_NOW (anche se il valore non e' valido: ESP_NOW e' il default)
+  bool usesEspNow() const { return commandTransportModeStringToEnum(commandTransportMode) != COMMAND_TRANSPORT_MODE::API_CALL; }
 
   // Come SettingsModel::getDefault() del progetto principale
   static SettingsModel getDefault();

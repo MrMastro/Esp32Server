@@ -70,6 +70,9 @@ void espDevicesSetState(const EspDeviceState &state);
 bool espDevicesHttpPost(const String &ip, const char *path, const String &jsonBody, uint32_t timeoutMs,
                         int &statusCode, String &responseBody, String &error);
 
+// GET http://<ip><path> (bloccante, fino a timeoutMs). false + error se non c'e' risposta HTTP.
+bool espDevicesHttpGet(const String &ip, const char *path, uint32_t timeoutMs, int &statusCode, String &responseBody, String &error);
+
 // Prepara l'ARP verso un dispositivo prima della connessione HTTP, senza broadcast (su alcune reti, es.
 // hotspot del telefono, i broadcast non arrivano ai dispositivi in modem sleep):
 //  - voce ARP statica ip -> mac (macAdress di espDevices.json): il telecomando non chiede il MAC del dispositivo;

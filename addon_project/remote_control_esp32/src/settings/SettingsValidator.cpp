@@ -17,6 +17,7 @@ static const char *EDITABLE_KEYS[] = {
   "ssidWIFI",
   "passwordWIFI",
   "ota_upload",
+  "commandTransportMode",
 };
 
 static SettingsValidation fail(int code, const String &error)
@@ -55,6 +56,12 @@ static String validateValue(const String &key, JsonVariantConst value)
   if (key == "mode")
   {
     return deviceModeStringToEnum(s) != DEVICE_MODE::UNKNOWN ? "" : "mode non valida (valori: remote_control)";
+  }
+  if (key == "commandTransportMode")
+  {
+    return commandTransportModeStringToEnum(s) != COMMAND_TRANSPORT_MODE::UNKNOWN_MODE
+               ? ""
+               : "commandTransportMode non valida (valori: ESP_NOW, API_CALL)";
   }
   if (key == "communicationMode")
   {

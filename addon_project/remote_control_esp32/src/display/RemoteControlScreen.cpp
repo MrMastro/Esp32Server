@@ -18,6 +18,8 @@ static bool shownSwitch = false;
 static int shownX = -1000;
 static int shownY = -1000;
 static String networkInfo = "";
+static const char *modeLabel = nullptr; // in basso a destra: "ESP-NOW" / "API-CALL"
+static uint16_t modeLabelColor = RGB565_CYAN;
 
 // Joystick wireless: disconnessione, barra della pressione lunga, messaggio temporaneo
 static bool disconnected = false;
@@ -40,6 +42,13 @@ static const int SLIDER_STEPS = 40;
 void remoteControlScreenSetNetworkInfo(const String &info)
 {
   networkInfo = info;
+  firstFrame = true;
+}
+
+void remoteControlScreenSetModeLabel(const char *label, uint16_t color)
+{
+  modeLabel = label;
+  modeLabelColor = color;
   firstFrame = true;
 }
 
@@ -172,6 +181,10 @@ static void drawFrame(Joystick &joystick, J_DIRECTION direction, const RemoteCon
   {
     displayPrintCentered(options.bottomLabel, 222, 2, RGB565_CYAN);
   }
+
+  // modalita' di comunicazione in basso al centro (coperta dalla barra / dallo slider della pressione lunga)
+  if (modeLabel != nullptr)
+    displayPrintCentered(modeLabel, 222, 2, modeLabelColor);
 
   // pressione lunga di SW in corso: scritta e barra che si riempie fino alla disconnessione / connessione
   int step = holdStep();

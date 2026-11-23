@@ -23,6 +23,9 @@ void remoteControlScreenUpdate(Joystick &joystick, J_DIRECTION direction, const 
 // Testo della riga sotto l'intestazione (es. "IP 172.17.252.107  OTA ON").
 void remoteControlScreenSetNetworkInfo(const String &info);
 
+// Modalita' di comunicazione in basso al centro ("ESP-NOW" / "API-CALL"); nullptr = nessuna scritta.
+void remoteControlScreenSetModeLabel(const char *label, uint16_t color);
+
 // Dispositivi disconnessi (pressione lunga di SW): scritta "DISCONNESSO" sotto la direzione
 void remoteControlScreenSetDisconnected(bool disconnected);
 

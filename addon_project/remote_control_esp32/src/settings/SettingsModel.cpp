@@ -17,6 +17,7 @@ SettingsModel SettingsModel::getDefault()
   defaultSettings.ssidWIFI = "Home_Network";
   defaultSettings.passwordWIFI = "wifi_password";
   defaultSettings.otaUpload = false;
+  defaultSettings.commandTransportMode = "ESP_NOW";
 
   return defaultSettings;
 }
@@ -33,6 +34,7 @@ void SettingsModel::fromJson(const JsonDocument &doc)
   ssidWIFI = doc["ssidWIFI"] | ssidWIFI;
   passwordWIFI = doc["passwordWIFI"] | passwordWIFI;
   otaUpload = doc["ota_upload"] | otaUpload;
+  commandTransportMode = doc["commandTransportMode"] | commandTransportMode;
 }
 
 void SettingsModel::toJson(JsonDocument &doc) const
@@ -47,6 +49,7 @@ void SettingsModel::toJson(JsonDocument &doc) const
   doc["ssidWIFI"] = ssidWIFI;
   doc["passwordWIFI"] = passwordWIFI;
   doc["ota_upload"] = otaUpload;
+  doc["commandTransportMode"] = commandTransportMode;
 }
 
 SettingsModel SettingsModel::load(const char *path, bool sdAvailable, bool *loadedFromFile, String *loadInfo)

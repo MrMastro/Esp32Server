@@ -31,6 +31,7 @@
 #include "wireless/WirelessLink.h"
 #include "wireless/WirelessManager.h"
 #include "wireless/WirelessConfig.h"
+#include "apicall/ApiCommandSender.h"
 #include "display/RemoteControlScreen.h"
 
 static SettingsModel settings;
@@ -362,8 +363,22 @@ static void printDevices(const String &command)
 {
   printCommandSuccess(command, "dispositivi:");
   Serial.println(espDevicesStateToJson());
+  if (!settings.usesEspNow())
+  {
+    Serial.print(apiCommandSenderStatus());
+    return;
+  }
   Serial.println("[Wireless] " + wirelessLinkStats());
   Serial.print(wirelessManagerStatus());
+}
+
+// Direzione del joystick ai dispositivi: ESP-NOW (collegamento continuo) oppure POST /api/v1/sendCommand
+static void sendDirectionToDevices(J_DIRECTION direction)
+{
+  if (settings.usesEspNow())
+    wirelessSendDirection(direction);
+  else
+    apiCommandSend(direction); // CENTER / CENTER_BUTTON: nessuna chiamata
 }
 
 // Comandi riconosciuti (in C++ lo switch non accetta String: si mappa su un enum).
@@ -546,6 +561,11 @@ static void executeSerialMessage(const String &msg)
     break;
   case SERIAL_COMMAND::PAIR:
   {
+    if (!settings.usesEspNow())
+    {
+      printCommandError(command, "modalita' API-CALL (commandTransportMode = API_CALL): niente accoppiamento");
+      break;
+    }
     if (wirelessManagerDisconnected())
     {
       printCommandError(command, "dispositivi disconnessi: riconnettili con la pressione lunga di SW");
@@ -739,6 +759,9 @@ void setup()
   printSettings();
   logInfo(settingsInfo);
   logInfo(sdInfo);
+  if (commandTransportModeStringToEnum(settings.commandTransportMode) == COMMAND_TRANSPORT_MODE::UNKNOWN_MODE)
+    logWarning("[Settings] commandTransportMode non valida (" + settings.commandTransportMode +
+               "): uso ESP_NOW (valori: ESP_NOW, API_CALL)");
 
   // Dispositivi conosciuti (lista vuota se SD o file mancano)
   String devicesInfo;
@@ -768,11 +791,15 @@ void setup()
     logWarning("[SD] modalita' SD richiesta ma microSD assente: avvio normale");
   }
 
-  // ESP-NOW per il joystick wireless (serve il WiFi gia' attivo)
-  String linkError;
-  bool linkReady = wirelessLinkBegin(linkError);
-  if (!linkReady)
-    logWarning("[Wireless] ESP-NOW non avviato: " + linkError);
+  // ESP-NOW per il joystick wireless (serve il WiFi gia' attivo), solo con il collegamento continuo
+  bool linkReady = false;
+  if (settings.usesEspNow())
+  {
+    String linkError;
+    linkReady = wirelessLinkBegin(linkError);
+    if (!linkReady)
+      logWarning("[Wireless] ESP-NOW non avviato: " + linkError);
+  }
 
   // 4) OTA (solo se ota_upload = true) e API impostazioni
   otaBegin(settings);
@@ -799,13 +826,19 @@ void setup()
 
   statusBarBegin(&wifiStatus);
   remoteControlScreenSetNetworkInfo("IP " + wifiStatus.ip + (otaIsEnabled() ? "  OTA ON" : ""));
+  if (settings.usesEspNow())
+    remoteControlScreenSetModeLabel("ESP-NOW", RGB565_CYAN);
+  else
+    remoteControlScreenSetModeLabel("API-CALL", RGB565_MAGENTA);
 
   // 6) Task (serial, API/OTA, comandi ritardati, joystick)
   startTasks();
 
   // 7) Ultima cosa: joystick wireless (heartbeat, riaccoppiamento, riscoperta) e accoppiamento
-  //    dei dispositivi conosciuti, in background
-  if (linkReady)
+  //    dei dispositivi conosciuti, in background; in modalita' API-CALL i task delle chiamate HTTP
+  if (!settings.usesEspNow())
+    apiCommandSenderBegin();
+  else if (linkReady)
   {
     WirelessConfig wirelessConfig;
     if (sdAvailable)
@@ -917,6 +950,8 @@ static const uint32_t LONG_PRESS_SHOW_MS = 2000;
 
 static void handleLongPress(J_DIRECTION &direction)
 {
+  if (!settings.usesEspNow())
+    return; // modalita' API-CALL: niente da connettere / disconnettere, SW e' solo il tasto BUTTON
   uint32_t longPressMs = wirelessManagerLongPressMs();
   if (longPressMs == 0)
     return; // joystick wireless non avviato
@@ -964,9 +999,10 @@ static void joystickTask(void *pvParameters)
       {
         // la lettura avviene a ogni giro, così nessuna pressione viene persa
         direction = joystick.read();
-        // joystick wireless: al cambio di direzione, pacchetto firmato a tutti i dispositivi accoppiati
+        // al cambio di direzione: pacchetto ESP-NOW firmato a tutti i dispositivi accoppiati, oppure
+        // (modalita' API-CALL) una POST /api/v1/sendCommand a ogni dispositivo
         if (joystick.changed())
-          wirelessSendDirection(direction);
+          sendDirectionToDevices(direction);
 
         // pressione lunga di SW: disconnette / riconnette i dispositivi (WIRELESS_JOYSTICK.md, fase 5)
         handleLongPress(direction);
